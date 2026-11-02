@@ -536,8 +536,12 @@
 								<Label for="offerClosingText">Closing text</Label><textarea
 									id="offerClosingText"
 									bind:value={closingTextDraft}
-									rows="3"
+									rows="4"
 									class="w-full rounded-md border bg-background px-3 py-2 text-sm"></textarea>
+								<p class="text-xs text-muted-foreground">
+									{'{rentalTermsDate}'} and {'{rentalTermsUrl}'} are filled in from the rental terms when
+									the document is finalized. Without rental terms, their line is left out.
+								</p>
 							</div>
 							<div class="max-w-48 space-y-2">
 								<Label for="offerTerms">Payment term (days)</Label><Input

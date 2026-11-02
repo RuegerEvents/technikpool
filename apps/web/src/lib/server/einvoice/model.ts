@@ -12,6 +12,7 @@
 import { billingTotals } from '../../billing-totals.ts';
 import { groupBillingItems, lineSubtitle, type GroupableItem } from '../../billing-lines.ts';
 import type { SnapshotOrganization } from '../../org-snapshot.ts';
+import { rentalTermsNote, type RentalTermsCitation } from '../../rental-terms-text.ts';
 
 export type EInvoiceSource = {
 	number: string;
@@ -35,6 +36,8 @@ export type EInvoiceSource = {
 	isKleinunternehmerSnapshot: boolean;
 	organization: SnapshotOrganization;
 	items: GroupableItem[];
+	/** The issuer's rental terms, cited in a note as on the PDF. */
+	rentalTerms?: RentalTermsCitation | null;
 };
 
 export type PostalAddress = {
@@ -77,6 +80,8 @@ export type EInvoice = {
 	dueDate: Date;
 	/** BT-20. */
 	paymentTerms: string;
+	/** BT-22, free-text notes on the invoice as a whole. */
+	notes: string[];
 	seller: {
 		name: string;
 		address: PostalAddress;
@@ -219,6 +224,7 @@ export function buildEInvoice(source: EInvoiceSource): EInvoice {
 			source.paymentTermsDays === 0
 				? 'Zahlbar sofort ohne Abzug'
 				: `Zahlbar innerhalb von ${source.paymentTermsDays} Tagen ohne Abzug`,
+		notes: source.rentalTerms ? [rentalTermsNote('invoice', source.rentalTerms)] : [],
 		seller: {
 			name: org.name,
 			address: { ...org.address, country: 'DE' },

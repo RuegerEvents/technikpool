@@ -43,6 +43,7 @@
 	import { bankAccountProblem } from '#lib/bank-account.svelte.js';
 	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
 	import OrgLogoCard from './org-logo-card.svelte';
+	import RentalTermsCard from './rental-terms-card.svelte';
 	import {
 		DEFAULT_INVOICE_CLOSING,
 		DEFAULT_INVOICE_INTRO,
@@ -665,6 +666,10 @@
 													Placeholders: {'{production}'}, {'{startDate}'}, {'{endDate}'}, {'{servicePeriod}'},
 													{'{customer}'}, {'{documentNumber}'}, {'{paymentTermsDays}'}
 												</p>
+												<p class="text-sm text-muted-foreground">
+													{'{rentalTermsDate}'} and {'{rentalTermsUrl}'} cite your rental terms. Without
+													rental terms, a line holding one of them is left out.
+												</p>
 											</div>
 											<div class="space-y-2">
 												<Label for="offerIntro">Offer introduction</Label><textarea
@@ -773,6 +778,10 @@
 								</Button>
 							</Card.Content>
 						</Card.Root>
+					{/if}
+					{#if canNumber}
+						<!-- Billing setup, so ADMIN+ like offers and invoices. -->
+						<RentalTermsCard {orgId} />
 					{/if}
 				</div>
 			{/if}

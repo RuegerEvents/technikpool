@@ -426,6 +426,8 @@ export const ModelName = {
   Customer: 'Customer',
   ProductionItem: 'ProductionItem',
   LoanRequest: 'LoanRequest',
+  RentalTermsVersion: 'RentalTermsVersion',
+  RentalTermsAcceptance: 'RentalTermsAcceptance',
   ProductionCheck: 'ProductionCheck',
   ProductionCheckTick: 'ProductionCheckTick',
   ProductionCrew: 'ProductionCrew',
@@ -462,7 +464,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "session" | "account" | "verification" | "deviceCode" | "organization" | "orgMembership" | "systemSettings" | "legalDocument" | "dpaAcceptance" | "invitation" | "manufacturer" | "connector" | "productPort" | "cableWay" | "category" | "product" | "orgProductPrice" | "address" | "location" | "userDefaultLocation" | "asset" | "licenseCredential" | "bundleTemplate" | "assetBundle" | "production" | "customer" | "productionItem" | "loanRequest" | "productionCheck" | "productionCheckTick" | "productionCrew" | "assetTransaction" | "inspection" | "orgCategoryRate" | "serviceCategory" | "orgService" | "offerSequence" | "offer" | "offerItem" | "invoice" | "catalogTransaction" | "invoiceItem" | "stocktake" | "stocktakeItem" | "stocktakeLine" | "stocktakeCount" | "stocktakeEvent" | "productDocument" | "billingDismissal"
+    modelProps: "user" | "session" | "account" | "verification" | "deviceCode" | "organization" | "orgMembership" | "systemSettings" | "legalDocument" | "dpaAcceptance" | "invitation" | "manufacturer" | "connector" | "productPort" | "cableWay" | "category" | "product" | "orgProductPrice" | "address" | "location" | "userDefaultLocation" | "asset" | "licenseCredential" | "bundleTemplate" | "assetBundle" | "production" | "customer" | "productionItem" | "loanRequest" | "rentalTermsVersion" | "rentalTermsAcceptance" | "productionCheck" | "productionCheckTick" | "productionCrew" | "assetTransaction" | "inspection" | "orgCategoryRate" | "serviceCategory" | "orgService" | "offerSequence" | "offer" | "offerItem" | "invoice" | "catalogTransaction" | "invoiceItem" | "stocktake" | "stocktakeItem" | "stocktakeLine" | "stocktakeCount" | "stocktakeEvent" | "productDocument" | "billingDismissal"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -2612,6 +2614,154 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    RentalTermsVersion: {
+      payload: Prisma.$RentalTermsVersionPayload<ExtArgs>
+      fields: Prisma.RentalTermsVersionFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.RentalTermsVersionFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RentalTermsVersionPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.RentalTermsVersionFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RentalTermsVersionPayload>
+        }
+        findFirst: {
+          args: Prisma.RentalTermsVersionFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RentalTermsVersionPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.RentalTermsVersionFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RentalTermsVersionPayload>
+        }
+        findMany: {
+          args: Prisma.RentalTermsVersionFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RentalTermsVersionPayload>[]
+        }
+        create: {
+          args: Prisma.RentalTermsVersionCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RentalTermsVersionPayload>
+        }
+        createMany: {
+          args: Prisma.RentalTermsVersionCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.RentalTermsVersionCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RentalTermsVersionPayload>[]
+        }
+        delete: {
+          args: Prisma.RentalTermsVersionDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RentalTermsVersionPayload>
+        }
+        update: {
+          args: Prisma.RentalTermsVersionUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RentalTermsVersionPayload>
+        }
+        deleteMany: {
+          args: Prisma.RentalTermsVersionDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.RentalTermsVersionUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.RentalTermsVersionUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RentalTermsVersionPayload>[]
+        }
+        upsert: {
+          args: Prisma.RentalTermsVersionUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RentalTermsVersionPayload>
+        }
+        aggregate: {
+          args: Prisma.RentalTermsVersionAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRentalTermsVersion>
+        }
+        groupBy: {
+          args: Prisma.RentalTermsVersionGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RentalTermsVersionGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.RentalTermsVersionCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RentalTermsVersionCountAggregateOutputType> | number
+        }
+      }
+    }
+    RentalTermsAcceptance: {
+      payload: Prisma.$RentalTermsAcceptancePayload<ExtArgs>
+      fields: Prisma.RentalTermsAcceptanceFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.RentalTermsAcceptanceFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RentalTermsAcceptancePayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.RentalTermsAcceptanceFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RentalTermsAcceptancePayload>
+        }
+        findFirst: {
+          args: Prisma.RentalTermsAcceptanceFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RentalTermsAcceptancePayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.RentalTermsAcceptanceFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RentalTermsAcceptancePayload>
+        }
+        findMany: {
+          args: Prisma.RentalTermsAcceptanceFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RentalTermsAcceptancePayload>[]
+        }
+        create: {
+          args: Prisma.RentalTermsAcceptanceCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RentalTermsAcceptancePayload>
+        }
+        createMany: {
+          args: Prisma.RentalTermsAcceptanceCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.RentalTermsAcceptanceCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RentalTermsAcceptancePayload>[]
+        }
+        delete: {
+          args: Prisma.RentalTermsAcceptanceDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RentalTermsAcceptancePayload>
+        }
+        update: {
+          args: Prisma.RentalTermsAcceptanceUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RentalTermsAcceptancePayload>
+        }
+        deleteMany: {
+          args: Prisma.RentalTermsAcceptanceDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.RentalTermsAcceptanceUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.RentalTermsAcceptanceUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RentalTermsAcceptancePayload>[]
+        }
+        upsert: {
+          args: Prisma.RentalTermsAcceptanceUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$RentalTermsAcceptancePayload>
+        }
+        aggregate: {
+          args: Prisma.RentalTermsAcceptanceAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregateRentalTermsAcceptance>
+        }
+        groupBy: {
+          args: Prisma.RentalTermsAcceptanceGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RentalTermsAcceptanceGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.RentalTermsAcceptanceCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.RentalTermsAcceptanceCountAggregateOutputType> | number
+        }
+      }
+    }
     ProductionCheck: {
       payload: Prisma.$ProductionCheckPayload<ExtArgs>
       fields: Prisma.ProductionCheckFieldRefs
@@ -4288,6 +4438,7 @@ export const OrganizationScalarFieldEnum = {
   name: 'name',
   shortName: 'shortName',
   assetIdPrefix: 'assetIdPrefix',
+  slug: 'slug',
   autoAssetTags: 'autoAssetTags',
   nextAssetTagNumber: 'nextAssetTagNumber',
   nextAssetIndex: 'nextAssetIndex',
@@ -4312,7 +4463,8 @@ export const OrganizationScalarFieldEnum = {
   offerIntroTemplate: 'offerIntroTemplate',
   offerClosingTemplate: 'offerClosingTemplate',
   invoiceIntroTemplate: 'invoiceIntroTemplate',
-  invoiceClosingTemplate: 'invoiceClosingTemplate'
+  invoiceClosingTemplate: 'invoiceClosingTemplate',
+  rentalTermsVersionId: 'rentalTermsVersionId'
 } as const
 
 export type OrganizationScalarFieldEnum = (typeof OrganizationScalarFieldEnum)[keyof typeof OrganizationScalarFieldEnum]
@@ -4653,10 +4805,40 @@ export const LoanRequestScalarFieldEnum = {
   unpaid: 'unpaid',
   note: 'note',
   requestedById: 'requestedById',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  rentalTermsAcceptanceId: 'rentalTermsAcceptanceId'
 } as const
 
 export type LoanRequestScalarFieldEnum = (typeof LoanRequestScalarFieldEnum)[keyof typeof LoanRequestScalarFieldEnum]
+
+
+export const RentalTermsVersionScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  source: 'source',
+  body: 'body',
+  hash: 'hash',
+  number: 'number',
+  createdById: 'createdById',
+  createdAt: 'createdAt'
+} as const
+
+export type RentalTermsVersionScalarFieldEnum = (typeof RentalTermsVersionScalarFieldEnum)[keyof typeof RentalTermsVersionScalarFieldEnum]
+
+
+export const RentalTermsAcceptanceScalarFieldEnum = {
+  id: 'id',
+  versionId: 'versionId',
+  organizationId: 'organizationId',
+  orgName: 'orgName',
+  lenderName: 'lenderName',
+  userId: 'userId',
+  userName: 'userName',
+  userEmail: 'userEmail',
+  acceptedAt: 'acceptedAt'
+} as const
+
+export type RentalTermsAcceptanceScalarFieldEnum = (typeof RentalTermsAcceptanceScalarFieldEnum)[keyof typeof RentalTermsAcceptanceScalarFieldEnum]
 
 
 export const ProductionCheckScalarFieldEnum = {
@@ -4794,6 +4976,7 @@ export const OfferScalarFieldEnum = {
   paymentTermsDays: 'paymentTermsDays',
   finalizedAt: 'finalizedAt',
   pdfPath: 'pdfPath',
+  rentalTermsVersionId: 'rentalTermsVersionId',
   dayCount: 'dayCount',
   discountType: 'discountType',
   discountValue: 'discountValue',
@@ -4887,6 +5070,7 @@ export const InvoiceScalarFieldEnum = {
   recipientOrganizationId: 'recipientOrganizationId',
   sentAt: 'sentAt',
   pdfPath: 'pdfPath',
+  rentalTermsVersionId: 'rentalTermsVersionId',
   eInvoiceProfile: 'eInvoiceProfile',
   isKleinunternehmerSnapshot: 'isKleinunternehmerSnapshot',
   vatRatePercent: 'vatRatePercent',
@@ -5426,6 +5610,8 @@ export type GlobalOmitConfig = {
   customer?: Prisma.CustomerOmit
   productionItem?: Prisma.ProductionItemOmit
   loanRequest?: Prisma.LoanRequestOmit
+  rentalTermsVersion?: Prisma.RentalTermsVersionOmit
+  rentalTermsAcceptance?: Prisma.RentalTermsAcceptanceOmit
   productionCheck?: Prisma.ProductionCheckOmit
   productionCheckTick?: Prisma.ProductionCheckTickOmit
   productionCrew?: Prisma.ProductionCrewOmit

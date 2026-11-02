@@ -73,6 +73,8 @@ const prefixes: Partial<Record<ModelName, string>> = {
 	ProductionCheck: 'prck',
 	ProductionCheckTick: 'prct',
 	LoanRequest: 'lnrq',
+	RentalTermsVersion: 'rtrm',
+	RentalTermsAcceptance: 'rtac',
 	BillingDismissal: 'bdis',
 	UserDefaultLocation: 'udl'
 };

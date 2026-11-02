@@ -217,6 +217,20 @@ export type ProductionItem = Prisma.ProductionItemModel
  */
 export type LoanRequest = Prisma.LoanRequestModel
 /**
+ * Model RentalTermsVersion
+ * One wording of an org's rental terms (Miet-AGB). Append-only: saving the
+ * terms writes a new row, so a document or acceptance that points at one
+ * still points at the text it was given. See src/lib/server/services/rental-terms.ts.
+ */
+export type RentalTermsVersion = Prisma.RentalTermsVersionModel
+/**
+ * Model RentalTermsAcceptance
+ * An org agreeing to a lender's rental terms before it asks to borrow from
+ * it, once per version. Append-only, like DpaAcceptance, and kept with the
+ * names as they were, so it still says who agreed to what after a deletion.
+ */
+export type RentalTermsAcceptance = Prisma.RentalTermsAcceptanceModel
+/**
  * Model ProductionCheck
  * 
  */

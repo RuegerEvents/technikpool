@@ -5,6 +5,7 @@ import { imageSrc } from '#lib/images.js';
 import { nestAccessories } from '#lib/production-items.js';
 import { naturalCompare } from '#lib/sort.js';
 import type { ShareUnit, ShareView } from '#lib/production-share.js';
+import { productionRentalTerms } from './rental-terms';
 
 // A production's info link for its customer: what is booked for the job, to
 // tick off while packing (in the customer's own browser, nothing is stored
@@ -51,6 +52,11 @@ export function shareExpiry(production: { endDate: Date | null }): Date | null {
  * unknown production, wrong or outdated signature, revoked, or expired. All
  * the same to the visitor, so none of it is told apart.
  */
+async function shareRentalTerms(production: { id: string; organizationId: string }) {
+	const terms = await productionRentalTerms(production);
+	return terms ? { orgSlug: terms.orgSlug, number: terms.number, date: terms.date } : null;
+}
+
 export async function resolveShare(productionId: string, signature: string) {
 	const production = await prisma.production.findUnique({
 		where: { id: productionId },
@@ -182,7 +188,8 @@ export async function resolveShare(productionId: string, signature: string) {
 			.sort((a, b) => naturalCompare(a.name, b.name) || naturalCompare(a.tag ?? '', b.tag ?? '')),
 		units: units.sort(byUnit),
 		documents,
-		expiresAt: expiresAt?.toISOString() ?? null
+		expiresAt: expiresAt?.toISOString() ?? null,
+		rentalTerms: await shareRentalTerms(production)
 	};
 	return view;
 }

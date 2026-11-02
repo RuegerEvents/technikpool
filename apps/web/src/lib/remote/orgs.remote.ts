@@ -1,5 +1,6 @@
 import { query, command } from '$app/server';
 import { prisma } from '#lib/server/auth.js';
+import { slugSource, uniqueSlug } from '#lib/org-slug.js';
 import { sendMail } from '#lib/server/mail.js';
 import { appBaseUrl } from '#lib/server/app-url.js';
 import { addedToOrgEmail } from '#lib/server/emails/added-to-org.js';
@@ -359,6 +360,10 @@ export const createOrg = command(
 			return await tx.organization.create({
 				data: {
 					name,
+					slug: await uniqueSlug(
+						slugSource({ name, shortName }),
+						async (slug) => !!(await tx.organization.findUnique({ where: { slug } }))
+					),
 					shortName: shortName?.trim() || null,
 					assetIdPrefix: prefix,
 					color: normalizedColor,

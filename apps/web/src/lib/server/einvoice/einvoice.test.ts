@@ -191,11 +191,32 @@ describe('buildEInvoice', () => {
 		const xml = toCii(buildEInvoice(invoice({ customerName: 'Müller & Söhne <GmbH>' })));
 		expect(xml).toContain('Müller &amp; Söhne &lt;GmbH&gt;');
 	});
+
+	it('cites the rental terms in a document note, where the schema wants it', () => {
+		const xml = toCii(
+			buildEInvoice(
+				invoice({ rentalTerms: { date: '02.11.2026', url: 'https://example.org/rental-terms/x' } })
+			)
+		);
+		const note =
+			'<ram:IncludedNote><ram:Content>Es gelten unsere Allgemeinen Mietbedingungen (Stand 02.11.2026), abrufbar unter https://example.org/rental-terms/x.</ram:Content></ram:IncludedNote>';
+		// After the issue date, inside the document header (the XSD's order).
+		const header = xml.slice(
+			xml.indexOf('</ram:IssueDateTime>'),
+			xml.indexOf('</rsm:ExchangedDocument>')
+		);
+		expect(header).toContain(note);
+		expect(toCii(buildEInvoice(invoice()))).not.toContain('IncludedNote');
+	});
 });
 
 describe.skipIf(!MUSTANG_JAR)('ZUGFeRD PDF, validated by Mustang', () => {
 	const cases: [string, Partial<EInvoiceSource>][] = [
 		['standard rate, percentage discount', {}],
+		[
+			'citing rental terms',
+			{ rentalTerms: { date: '02.11.2026', url: 'https://example.org/rental-terms/x' } }
+		],
 		['amount discount', { discountType: 'AMOUNT', discountValue: 50 }],
 		['discount down to a fixed gross price', { discountType: 'TARGET_GROSS', discountValue: 1000 }],
 		[

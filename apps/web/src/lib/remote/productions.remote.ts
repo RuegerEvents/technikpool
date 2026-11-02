@@ -36,6 +36,8 @@ import { requireOpenProduction } from '#lib/server/services/production-state.js'
 import { shareExpiry, shareUrl } from '#lib/server/services/production-share.js';
 import { orgLabel } from '#lib/utils.js';
 import { getKnownAddresses } from './addresses.remote';
+import { getLoanRentalTerms } from './rental-terms.remote';
+import { acceptLenderTerms } from '#lib/server/services/rental-terms.js';
 import type {
 	AddedToProductionData,
 	BookingCancelledData,
@@ -977,7 +979,10 @@ export const addAssetToProduction = command(addAssetSchema, async (data) => {
 const sendLoanRequestsSchema = v.object({
 	productionId: v.string(),
 	unpaid: v.boolean(),
-	note: v.optional(v.string())
+	note: v.optional(v.string()),
+	// The lenders' rental-terms versions ticked in the dialog. Each lender with
+	// terms needs one, unless the production's org agreed to it before.
+	acceptedRentalTerms: v.optional(v.array(v.string()))
 });
 
 /**
@@ -1046,6 +1051,13 @@ export const sendLoanRequests = command(sendLoanRequestsSchema, async (data) => 
 			if (list) list.push(item);
 			else byOrg.set(item.asset.organizationId, [item]);
 		}
+		const acceptances = await acceptLenderTerms(
+			tx,
+			production.organization,
+			[...byOrg.keys()],
+			data.acceptedRentalTerms ?? [],
+			user
+		);
 		for (const [organizationId, items] of byOrg) {
 			const request = await tx.loanRequest.create({
 				data: {
@@ -1053,7 +1065,8 @@ export const sendLoanRequests = command(sendLoanRequestsSchema, async (data) => 
 					organizationId,
 					unpaid: data.unpaid,
 					note,
-					requestedById: user.id
+					requestedById: user.id,
+					rentalTermsAcceptanceId: acceptances.get(organizationId) ?? null
 				}
 			});
 			await tx.productionItem.updateMany({
@@ -1089,7 +1102,11 @@ export const sendLoanRequests = command(sendLoanRequestsSchema, async (data) => 
 		);
 	}
 
-	await Promise.all([refreshProduction(production.id), getAwaitingApprovals().refresh()]);
+	await Promise.all([
+		refreshProduction(production.id),
+		getAwaitingApprovals().refresh(),
+		getLoanRentalTerms(production.id).refresh()
+	]);
 	// Units as the list counts them: an accessory travels inside its parent.
 	const units = (items: typeof sent) =>
 		items.filter(
@@ -1224,7 +1241,27 @@ export const getPendingApprovals = query(v.string(), async (organizationId: stri
 		include: {
 			asset: { include: { product: true } },
 			production: { include: { organization: true } },
-			loanRequest: { select: { id: true, unpaid: true, note: true } },
+			loanRequest: {
+				select: {
+					id: true,
+					unpaid: true,
+					note: true,
+					rentalTermsAcceptance: {
+						select: {
+							userName: true,
+							acceptedAt: true,
+							version: {
+								select: {
+									id: true,
+									number: true,
+									createdAt: true,
+									organization: { select: { slug: true } }
+								}
+							}
+						}
+					}
+				}
+			},
 			sourceBundle: {
 				select: {
 					id: true,

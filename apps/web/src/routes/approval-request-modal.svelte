@@ -165,6 +165,22 @@
 				</p>
 			{/if}
 
+			{#if request.rentalTerms}
+				<p class="text-sm text-muted-foreground">
+					{request.requesterOrg} agreed to your
+					<a
+						href={resolve(
+							`rental-terms/${request.rentalTerms.orgSlug}/${request.rentalTerms.number}`
+						)}
+						target="_blank"
+						rel="noopener"
+						class="underline underline-offset-2">rental terms</a
+					>
+					(version of {new Date(request.rentalTerms.versionDate).toLocaleDateString()}), accepted by
+					{request.rentalTerms.acceptedBy}.
+				</p>
+			{/if}
+
 			{#each request.notes as note, i (i)}
 				<blockquote class="border-l-2 pl-3 text-sm whitespace-pre-wrap text-muted-foreground">
 					{note}

@@ -111,6 +111,9 @@ export function toCii(invoice: EInvoice): string {
 		element('ID', invoice.number),
 		'<ram:TypeCode>380</ram:TypeCode>',
 		dateTime('IssueDateTime', invoice.issueDate),
+		...invoice.notes.map(
+			(note) => `<ram:IncludedNote><ram:Content>${esc(note)}</ram:Content></ram:IncludedNote>`
+		),
 		'</rsm:ExchangedDocument>',
 		'<rsm:SupplyChainTradeTransaction>',
 		...invoice.lines.map((item) => line(invoice, item)),

@@ -83,6 +83,7 @@ async function requireAuth() {
 | `src/lib/remote/production-handout.remote.ts` | `getProductionHandout`, `getHandoutSummary`, `scanProductionHandout`, `setProductionHandoutDone`, `setProductionHandoutLine` — handing out / taking back against the list, see "Loans: handover and checks"                               |
 | `src/lib/remote/equipment-sheets.remote.ts`   | `streamEquipmentSheet` — a `query.live` that yields progress, then the delivery note or packing list PDF; see "Delivery note and packing list"                                                                                            |
 | `src/lib/remote/product-documents.remote.ts`  | `getProductDocuments`, `addProductDocument`, `updateProductDocument`, `removeProductDocument` — a product's PDFs, public by design (see `services/product-documents.ts`)                                                                  |
+| `src/lib/remote/rental-terms.remote.ts`       | `getRentalTerms`, `saveRentalTerms`, `setRentalTermsEnabled`, `getLoanRentalTerms` — an org's rental terms (Miet-AGB), see "Rental terms"                                                                                                 |
 | `src/lib/remote/inspections.remote.ts`        | `getOverdueAssets`, `getAssetInspections`, `logInspection`, `deleteInspection`, `setInspectionInterval` — see "DGUV inspections"                                                                                                          |
 
 ## External API (`/api/v1`)
@@ -299,6 +300,39 @@ change. Its `category*` columns snapshot a per-org `ServiceCategory`, not a `Cat
 `categorySortOrder`/`position` decide where it prints: `groupBillingItems` puts service sections
 after the equipment and never merges two service lines. Every copy of a document (revision,
 copy to customer, invoice) goes through `copyItem`, so a new item column has to be added there.
+
+## Rental terms (Miet-AGB)
+
+Each org may keep its own rental terms. Rules in `src/lib/server/services/rental-terms.ts`; the
+pure citation sentence is `rentalTermsNote` in `src/lib/rental-terms-text.ts`.
+
+- **Off until an ADMIN+ switches them on** (card on `/orgs/[id]`). The first switch-on copies
+  `src/lib/server/rental-terms-default.md` into the org, so a release that rewords the default
+  never changes an org's terms. The default is written for business and private customers alike
+  and carries no "this is a template" disclaimer.
+- **Versions are append-only.** Every save is a `RentalTermsVersion`;
+  `Organization.rentalTermsVersionId` points at the one in force (null = off).
+  `{org}`, `{orgAddress}`, `{paymentTermsDays}` are filled in **when a version is saved**, so a
+  version's text never moves; the card says when the org's details changed since and a save
+  would pick them up. Versions are numbered 1, 2, 3 … per org, and
+  `/rental-terms/<org slug>/<number>` shows any of them signed out (public path).
+- **Where they show.** The offer is where they become part of the contract, so the offer PDF
+  attaches them in full (`pdf-markdown.ts`, shared with the DPA PDF). Offers and invoices cite
+  them in their **closing text**: the default presets end in a sentence with `{rentalTermsDate}`
+  and `{rentalTermsUrl}`, which an org can reword like the rest of the preset. Those two stay in
+  a draft's text and are filled in on the PDF and, for good, on finalizing (`applyRentalTerms`);
+  without terms the line holding them is dropped. The ZUGFeRD `IncludedNote` (BT-22), the
+  delivery note (above the signatures, replacing the generic liability sentence) and the
+  customer link cite them with fixed wording.
+- **Which version a document names** (`documentRentalTermsVersionId`): fixed on the offer/invoice
+  when it is finalized. An offer takes the version in force; an invoice its offer's, else the
+  production's latest finalized offer's, else the one in force. Delivery note and `/share`
+  follow the same rule as an invoice. Drafts follow live, like their previews.
+- **Lending between orgs.** Before `sendLoanRequests` asks a lender with terms, the borrowing
+  org has to agree to that version once (`RentalTermsAcceptance`, append-only, names kept as
+  text). The request dialog lists the open ones; `LoanRequest.rentalTermsAcceptanceId` records
+  which agreement each send went under, and the lender's approval dialog shows it. Requests sent
+  before a lender had terms, and reopened cancellations, are never held back.
 
 ## E-invoices (ZUGFeRD)
 
@@ -612,7 +646,9 @@ Located in `src/lib/components/ui/`: `button`, `card`, `input`, `label`, `creata
 ## Database Schema Key Points
 
 - `User` — `isAdmin Boolean @default(false)` for system-level admin
-- `Organization` — multi-tenant root; has `defaultAssetVisibility`
+- `Organization` — multi-tenant root; has `defaultAssetVisibility`. `slug` is its name in public
+  URLs, made once at creation from its short name, else its name (`#lib/org-slug.ts`), and **never changed**, because those URLs are
+  printed on offers and invoices
 - `OrgMembership` — `userId + organizationId` unique; role enum `OWNER|ADMIN|MEMBER|VIEWER|DEVICE_VIEWER`
 - `Asset` — belongs to an org; can be in a `AssetBundle`
 - `Asset.orgIndex` — the unit's number in its org ("#123"), assigned by a Postgres `BEFORE INSERT`

@@ -62,6 +62,7 @@ export type OfferMinAggregateOutputType = {
   paymentTermsDays: number | null
   finalizedAt: Date | null
   pdfPath: string | null
+  rentalTermsVersionId: string | null
   dayCount: number | null
   discountType: string | null
   discountValue: runtime.Decimal | null
@@ -109,6 +110,7 @@ export type OfferMaxAggregateOutputType = {
   paymentTermsDays: number | null
   finalizedAt: Date | null
   pdfPath: string | null
+  rentalTermsVersionId: string | null
   dayCount: number | null
   discountType: string | null
   discountValue: runtime.Decimal | null
@@ -156,6 +158,7 @@ export type OfferCountAggregateOutputType = {
   paymentTermsDays: number
   finalizedAt: number
   pdfPath: number
+  rentalTermsVersionId: number
   dayCount: number
   discountType: number
   discountValue: number
@@ -221,6 +224,7 @@ export type OfferMinAggregateInputType = {
   paymentTermsDays?: true
   finalizedAt?: true
   pdfPath?: true
+  rentalTermsVersionId?: true
   dayCount?: true
   discountType?: true
   discountValue?: true
@@ -268,6 +272,7 @@ export type OfferMaxAggregateInputType = {
   paymentTermsDays?: true
   finalizedAt?: true
   pdfPath?: true
+  rentalTermsVersionId?: true
   dayCount?: true
   discountType?: true
   discountValue?: true
@@ -315,6 +320,7 @@ export type OfferCountAggregateInputType = {
   paymentTermsDays?: true
   finalizedAt?: true
   pdfPath?: true
+  rentalTermsVersionId?: true
   dayCount?: true
   discountType?: true
   discountValue?: true
@@ -449,6 +455,7 @@ export type OfferGroupByOutputType = {
   paymentTermsDays: number
   finalizedAt: Date | null
   pdfPath: string | null
+  rentalTermsVersionId: string | null
   dayCount: number
   discountType: string | null
   discountValue: runtime.Decimal | null
@@ -519,6 +526,7 @@ export type OfferWhereInput = {
   paymentTermsDays?: Prisma.IntFilter<"Offer"> | number
   finalizedAt?: Prisma.DateTimeNullableFilter<"Offer"> | Date | string | null
   pdfPath?: Prisma.StringNullableFilter<"Offer"> | string | null
+  rentalTermsVersionId?: Prisma.StringNullableFilter<"Offer"> | string | null
   dayCount?: Prisma.IntFilter<"Offer"> | number
   discountType?: Prisma.StringNullableFilter<"Offer"> | string | null
   discountValue?: Prisma.DecimalNullableFilter<"Offer"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -546,6 +554,7 @@ export type OfferWhereInput = {
   updatedAt?: Prisma.DateTimeFilter<"Offer"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
   production?: Prisma.XOR<Prisma.ProductionNullableScalarRelationFilter, Prisma.ProductionWhereInput> | null
+  rentalTermsVersion?: Prisma.XOR<Prisma.RentalTermsVersionNullableScalarRelationFilter, Prisma.RentalTermsVersionWhereInput> | null
   recipientOrganization?: Prisma.XOR<Prisma.OrganizationNullableScalarRelationFilter, Prisma.OrganizationWhereInput> | null
   originalOffer?: Prisma.XOR<Prisma.OfferNullableScalarRelationFilter, Prisma.OfferWhereInput> | null
   revisions?: Prisma.OfferListRelationFilter
@@ -573,6 +582,7 @@ export type OfferOrderByWithRelationInput = {
   paymentTermsDays?: Prisma.SortOrder
   finalizedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   pdfPath?: Prisma.SortOrderInput | Prisma.SortOrder
+  rentalTermsVersionId?: Prisma.SortOrderInput | Prisma.SortOrder
   dayCount?: Prisma.SortOrder
   discountType?: Prisma.SortOrderInput | Prisma.SortOrder
   discountValue?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -600,6 +610,7 @@ export type OfferOrderByWithRelationInput = {
   updatedAt?: Prisma.SortOrder
   organization?: Prisma.OrganizationOrderByWithRelationInput
   production?: Prisma.ProductionOrderByWithRelationInput
+  rentalTermsVersion?: Prisma.RentalTermsVersionOrderByWithRelationInput
   recipientOrganization?: Prisma.OrganizationOrderByWithRelationInput
   originalOffer?: Prisma.OfferOrderByWithRelationInput
   revisions?: Prisma.OfferOrderByRelationAggregateInput
@@ -632,6 +643,7 @@ export type OfferWhereUniqueInput = Prisma.AtLeast<{
   paymentTermsDays?: Prisma.IntFilter<"Offer"> | number
   finalizedAt?: Prisma.DateTimeNullableFilter<"Offer"> | Date | string | null
   pdfPath?: Prisma.StringNullableFilter<"Offer"> | string | null
+  rentalTermsVersionId?: Prisma.StringNullableFilter<"Offer"> | string | null
   dayCount?: Prisma.IntFilter<"Offer"> | number
   discountType?: Prisma.StringNullableFilter<"Offer"> | string | null
   discountValue?: Prisma.DecimalNullableFilter<"Offer"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -659,6 +671,7 @@ export type OfferWhereUniqueInput = Prisma.AtLeast<{
   updatedAt?: Prisma.DateTimeFilter<"Offer"> | Date | string
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
   production?: Prisma.XOR<Prisma.ProductionNullableScalarRelationFilter, Prisma.ProductionWhereInput> | null
+  rentalTermsVersion?: Prisma.XOR<Prisma.RentalTermsVersionNullableScalarRelationFilter, Prisma.RentalTermsVersionWhereInput> | null
   recipientOrganization?: Prisma.XOR<Prisma.OrganizationNullableScalarRelationFilter, Prisma.OrganizationWhereInput> | null
   originalOffer?: Prisma.XOR<Prisma.OfferNullableScalarRelationFilter, Prisma.OfferWhereInput> | null
   revisions?: Prisma.OfferListRelationFilter
@@ -686,6 +699,7 @@ export type OfferOrderByWithAggregationInput = {
   paymentTermsDays?: Prisma.SortOrder
   finalizedAt?: Prisma.SortOrderInput | Prisma.SortOrder
   pdfPath?: Prisma.SortOrderInput | Prisma.SortOrder
+  rentalTermsVersionId?: Prisma.SortOrderInput | Prisma.SortOrder
   dayCount?: Prisma.SortOrder
   discountType?: Prisma.SortOrderInput | Prisma.SortOrder
   discountValue?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -741,6 +755,7 @@ export type OfferScalarWhereWithAggregatesInput = {
   paymentTermsDays?: Prisma.IntWithAggregatesFilter<"Offer"> | number
   finalizedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Offer"> | Date | string | null
   pdfPath?: Prisma.StringNullableWithAggregatesFilter<"Offer"> | string | null
+  rentalTermsVersionId?: Prisma.StringNullableWithAggregatesFilter<"Offer"> | string | null
   dayCount?: Prisma.IntWithAggregatesFilter<"Offer"> | number
   discountType?: Prisma.StringNullableWithAggregatesFilter<"Offer"> | string | null
   discountValue?: Prisma.DecimalNullableWithAggregatesFilter<"Offer"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -811,6 +826,7 @@ export type OfferCreateInput = {
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutOffersInput
   production?: Prisma.ProductionCreateNestedOneWithoutOffersInput
+  rentalTermsVersion?: Prisma.RentalTermsVersionCreateNestedOneWithoutOffersInput
   recipientOrganization?: Prisma.OrganizationCreateNestedOneWithoutOffersReceivedInput
   originalOffer?: Prisma.OfferCreateNestedOneWithoutRevisionsInput
   revisions?: Prisma.OfferCreateNestedManyWithoutOriginalOfferInput
@@ -838,6 +854,7 @@ export type OfferUncheckedCreateInput = {
   paymentTermsDays?: number
   finalizedAt?: Date | string | null
   pdfPath?: string | null
+  rentalTermsVersionId?: string | null
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -911,6 +928,7 @@ export type OfferUpdateInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutOffersNestedInput
   production?: Prisma.ProductionUpdateOneWithoutOffersNestedInput
+  rentalTermsVersion?: Prisma.RentalTermsVersionUpdateOneWithoutOffersNestedInput
   recipientOrganization?: Prisma.OrganizationUpdateOneWithoutOffersReceivedNestedInput
   originalOffer?: Prisma.OfferUpdateOneWithoutRevisionsNestedInput
   revisions?: Prisma.OfferUpdateManyWithoutOriginalOfferNestedInput
@@ -938,6 +956,7 @@ export type OfferUncheckedUpdateInput = {
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   finalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rentalTermsVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -988,6 +1007,7 @@ export type OfferCreateManyInput = {
   paymentTermsDays?: number
   finalizedAt?: Date | string | null
   pdfPath?: string | null
+  rentalTermsVersionId?: string | null
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1078,6 +1098,7 @@ export type OfferUncheckedUpdateManyInput = {
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   finalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rentalTermsVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1150,6 +1171,7 @@ export type OfferCountOrderByAggregateInput = {
   paymentTermsDays?: Prisma.SortOrder
   finalizedAt?: Prisma.SortOrder
   pdfPath?: Prisma.SortOrder
+  rentalTermsVersionId?: Prisma.SortOrder
   dayCount?: Prisma.SortOrder
   discountType?: Prisma.SortOrder
   discountValue?: Prisma.SortOrder
@@ -1205,6 +1227,7 @@ export type OfferMaxOrderByAggregateInput = {
   paymentTermsDays?: Prisma.SortOrder
   finalizedAt?: Prisma.SortOrder
   pdfPath?: Prisma.SortOrder
+  rentalTermsVersionId?: Prisma.SortOrder
   dayCount?: Prisma.SortOrder
   discountType?: Prisma.SortOrder
   discountValue?: Prisma.SortOrder
@@ -1252,6 +1275,7 @@ export type OfferMinOrderByAggregateInput = {
   paymentTermsDays?: Prisma.SortOrder
   finalizedAt?: Prisma.SortOrder
   pdfPath?: Prisma.SortOrder
+  rentalTermsVersionId?: Prisma.SortOrder
   dayCount?: Prisma.SortOrder
   discountType?: Prisma.SortOrder
   discountValue?: Prisma.SortOrder
@@ -1418,6 +1442,48 @@ export type OfferUncheckedUpdateManyWithoutProductionNestedInput = {
   deleteMany?: Prisma.OfferScalarWhereInput | Prisma.OfferScalarWhereInput[]
 }
 
+export type OfferCreateNestedManyWithoutRentalTermsVersionInput = {
+  create?: Prisma.XOR<Prisma.OfferCreateWithoutRentalTermsVersionInput, Prisma.OfferUncheckedCreateWithoutRentalTermsVersionInput> | Prisma.OfferCreateWithoutRentalTermsVersionInput[] | Prisma.OfferUncheckedCreateWithoutRentalTermsVersionInput[]
+  connectOrCreate?: Prisma.OfferCreateOrConnectWithoutRentalTermsVersionInput | Prisma.OfferCreateOrConnectWithoutRentalTermsVersionInput[]
+  createMany?: Prisma.OfferCreateManyRentalTermsVersionInputEnvelope
+  connect?: Prisma.OfferWhereUniqueInput | Prisma.OfferWhereUniqueInput[]
+}
+
+export type OfferUncheckedCreateNestedManyWithoutRentalTermsVersionInput = {
+  create?: Prisma.XOR<Prisma.OfferCreateWithoutRentalTermsVersionInput, Prisma.OfferUncheckedCreateWithoutRentalTermsVersionInput> | Prisma.OfferCreateWithoutRentalTermsVersionInput[] | Prisma.OfferUncheckedCreateWithoutRentalTermsVersionInput[]
+  connectOrCreate?: Prisma.OfferCreateOrConnectWithoutRentalTermsVersionInput | Prisma.OfferCreateOrConnectWithoutRentalTermsVersionInput[]
+  createMany?: Prisma.OfferCreateManyRentalTermsVersionInputEnvelope
+  connect?: Prisma.OfferWhereUniqueInput | Prisma.OfferWhereUniqueInput[]
+}
+
+export type OfferUpdateManyWithoutRentalTermsVersionNestedInput = {
+  create?: Prisma.XOR<Prisma.OfferCreateWithoutRentalTermsVersionInput, Prisma.OfferUncheckedCreateWithoutRentalTermsVersionInput> | Prisma.OfferCreateWithoutRentalTermsVersionInput[] | Prisma.OfferUncheckedCreateWithoutRentalTermsVersionInput[]
+  connectOrCreate?: Prisma.OfferCreateOrConnectWithoutRentalTermsVersionInput | Prisma.OfferCreateOrConnectWithoutRentalTermsVersionInput[]
+  upsert?: Prisma.OfferUpsertWithWhereUniqueWithoutRentalTermsVersionInput | Prisma.OfferUpsertWithWhereUniqueWithoutRentalTermsVersionInput[]
+  createMany?: Prisma.OfferCreateManyRentalTermsVersionInputEnvelope
+  set?: Prisma.OfferWhereUniqueInput | Prisma.OfferWhereUniqueInput[]
+  disconnect?: Prisma.OfferWhereUniqueInput | Prisma.OfferWhereUniqueInput[]
+  delete?: Prisma.OfferWhereUniqueInput | Prisma.OfferWhereUniqueInput[]
+  connect?: Prisma.OfferWhereUniqueInput | Prisma.OfferWhereUniqueInput[]
+  update?: Prisma.OfferUpdateWithWhereUniqueWithoutRentalTermsVersionInput | Prisma.OfferUpdateWithWhereUniqueWithoutRentalTermsVersionInput[]
+  updateMany?: Prisma.OfferUpdateManyWithWhereWithoutRentalTermsVersionInput | Prisma.OfferUpdateManyWithWhereWithoutRentalTermsVersionInput[]
+  deleteMany?: Prisma.OfferScalarWhereInput | Prisma.OfferScalarWhereInput[]
+}
+
+export type OfferUncheckedUpdateManyWithoutRentalTermsVersionNestedInput = {
+  create?: Prisma.XOR<Prisma.OfferCreateWithoutRentalTermsVersionInput, Prisma.OfferUncheckedCreateWithoutRentalTermsVersionInput> | Prisma.OfferCreateWithoutRentalTermsVersionInput[] | Prisma.OfferUncheckedCreateWithoutRentalTermsVersionInput[]
+  connectOrCreate?: Prisma.OfferCreateOrConnectWithoutRentalTermsVersionInput | Prisma.OfferCreateOrConnectWithoutRentalTermsVersionInput[]
+  upsert?: Prisma.OfferUpsertWithWhereUniqueWithoutRentalTermsVersionInput | Prisma.OfferUpsertWithWhereUniqueWithoutRentalTermsVersionInput[]
+  createMany?: Prisma.OfferCreateManyRentalTermsVersionInputEnvelope
+  set?: Prisma.OfferWhereUniqueInput | Prisma.OfferWhereUniqueInput[]
+  disconnect?: Prisma.OfferWhereUniqueInput | Prisma.OfferWhereUniqueInput[]
+  delete?: Prisma.OfferWhereUniqueInput | Prisma.OfferWhereUniqueInput[]
+  connect?: Prisma.OfferWhereUniqueInput | Prisma.OfferWhereUniqueInput[]
+  update?: Prisma.OfferUpdateWithWhereUniqueWithoutRentalTermsVersionInput | Prisma.OfferUpdateWithWhereUniqueWithoutRentalTermsVersionInput[]
+  updateMany?: Prisma.OfferUpdateManyWithWhereWithoutRentalTermsVersionInput | Prisma.OfferUpdateManyWithWhereWithoutRentalTermsVersionInput[]
+  deleteMany?: Prisma.OfferScalarWhereInput | Prisma.OfferScalarWhereInput[]
+}
+
 export type OfferCreateNestedOneWithoutRevisionsInput = {
   create?: Prisma.XOR<Prisma.OfferCreateWithoutRevisionsInput, Prisma.OfferUncheckedCreateWithoutRevisionsInput>
   connectOrCreate?: Prisma.OfferCreateOrConnectWithoutRevisionsInput
@@ -1548,6 +1614,7 @@ export type OfferCreateWithoutOrganizationInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   production?: Prisma.ProductionCreateNestedOneWithoutOffersInput
+  rentalTermsVersion?: Prisma.RentalTermsVersionCreateNestedOneWithoutOffersInput
   recipientOrganization?: Prisma.OrganizationCreateNestedOneWithoutOffersReceivedInput
   originalOffer?: Prisma.OfferCreateNestedOneWithoutRevisionsInput
   revisions?: Prisma.OfferCreateNestedManyWithoutOriginalOfferInput
@@ -1574,6 +1641,7 @@ export type OfferUncheckedCreateWithoutOrganizationInput = {
   paymentTermsDays?: number
   finalizedAt?: Date | string | null
   pdfPath?: string | null
+  rentalTermsVersionId?: string | null
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1657,6 +1725,7 @@ export type OfferCreateWithoutRecipientOrganizationInput = {
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutOffersInput
   production?: Prisma.ProductionCreateNestedOneWithoutOffersInput
+  rentalTermsVersion?: Prisma.RentalTermsVersionCreateNestedOneWithoutOffersInput
   originalOffer?: Prisma.OfferCreateNestedOneWithoutRevisionsInput
   revisions?: Prisma.OfferCreateNestedManyWithoutOriginalOfferInput
   items?: Prisma.OfferItemCreateNestedManyWithoutOfferInput
@@ -1683,6 +1752,7 @@ export type OfferUncheckedCreateWithoutRecipientOrganizationInput = {
   paymentTermsDays?: number
   finalizedAt?: Date | string | null
   pdfPath?: string | null
+  rentalTermsVersionId?: string | null
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1761,6 +1831,7 @@ export type OfferScalarWhereInput = {
   paymentTermsDays?: Prisma.IntFilter<"Offer"> | number
   finalizedAt?: Prisma.DateTimeNullableFilter<"Offer"> | Date | string | null
   pdfPath?: Prisma.StringNullableFilter<"Offer"> | string | null
+  rentalTermsVersionId?: Prisma.StringNullableFilter<"Offer"> | string | null
   dayCount?: Prisma.IntFilter<"Offer"> | number
   discountType?: Prisma.StringNullableFilter<"Offer"> | string | null
   discountValue?: Prisma.DecimalNullableFilter<"Offer"> | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1846,6 +1917,7 @@ export type OfferCreateWithoutProductionInput = {
   createdAt?: Date | string
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutOffersInput
+  rentalTermsVersion?: Prisma.RentalTermsVersionCreateNestedOneWithoutOffersInput
   recipientOrganization?: Prisma.OrganizationCreateNestedOneWithoutOffersReceivedInput
   originalOffer?: Prisma.OfferCreateNestedOneWithoutRevisionsInput
   revisions?: Prisma.OfferCreateNestedManyWithoutOriginalOfferInput
@@ -1872,6 +1944,7 @@ export type OfferUncheckedCreateWithoutProductionInput = {
   paymentTermsDays?: number
   finalizedAt?: Date | string | null
   pdfPath?: string | null
+  rentalTermsVersionId?: string | null
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -1928,7 +2001,7 @@ export type OfferUpdateManyWithWhereWithoutProductionInput = {
   data: Prisma.XOR<Prisma.OfferUpdateManyMutationInput, Prisma.OfferUncheckedUpdateManyWithoutProductionInput>
 }
 
-export type OfferCreateWithoutRevisionsInput = {
+export type OfferCreateWithoutRentalTermsVersionInput = {
   id?: string
   number: string
   customerId?: string | null
@@ -1973,6 +2046,133 @@ export type OfferCreateWithoutRevisionsInput = {
   production?: Prisma.ProductionCreateNestedOneWithoutOffersInput
   recipientOrganization?: Prisma.OrganizationCreateNestedOneWithoutOffersReceivedInput
   originalOffer?: Prisma.OfferCreateNestedOneWithoutRevisionsInput
+  revisions?: Prisma.OfferCreateNestedManyWithoutOriginalOfferInput
+  items?: Prisma.OfferItemCreateNestedManyWithoutOfferInput
+  invoices?: Prisma.InvoiceCreateNestedManyWithoutOfferInput
+}
+
+export type OfferUncheckedCreateWithoutRentalTermsVersionInput = {
+  id?: string
+  number: string
+  organizationId: string
+  productionId?: string | null
+  customerId?: string | null
+  customerName: string
+  customerAddress?: string | null
+  customerContactPerson?: string | null
+  customerEmail?: string | null
+  customerNumber?: string | null
+  customerPhone?: string | null
+  customerVatId?: string | null
+  serviceStartDate?: Date | string | null
+  serviceEndDate?: Date | string | null
+  introText?: string | null
+  closingText?: string | null
+  paymentTermsDays?: number
+  finalizedAt?: Date | string | null
+  pdfPath?: string | null
+  dayCount: number
+  discountType?: string | null
+  discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  assetScope?: string
+  recipientOrganizationId?: string | null
+  vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  isKleinunternehmerSnapshot?: boolean
+  orgName: string
+  orgAddressLine1?: string | null
+  orgAddressLine2?: string | null
+  orgPostalCode?: string | null
+  orgCity?: string | null
+  orgTaxNumber?: string | null
+  orgVatId?: string | null
+  orgBillingEmail?: string | null
+  orgBillingWebsite?: string | null
+  orgBankAccountHolder?: string | null
+  orgBankName?: string | null
+  orgIban?: string | null
+  orgBic?: string | null
+  orgLogoPath?: string | null
+  originalOfferId?: string | null
+  revision?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  revisions?: Prisma.OfferUncheckedCreateNestedManyWithoutOriginalOfferInput
+  items?: Prisma.OfferItemUncheckedCreateNestedManyWithoutOfferInput
+  invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutOfferInput
+}
+
+export type OfferCreateOrConnectWithoutRentalTermsVersionInput = {
+  where: Prisma.OfferWhereUniqueInput
+  create: Prisma.XOR<Prisma.OfferCreateWithoutRentalTermsVersionInput, Prisma.OfferUncheckedCreateWithoutRentalTermsVersionInput>
+}
+
+export type OfferCreateManyRentalTermsVersionInputEnvelope = {
+  data: Prisma.OfferCreateManyRentalTermsVersionInput | Prisma.OfferCreateManyRentalTermsVersionInput[]
+  skipDuplicates?: boolean
+}
+
+export type OfferUpsertWithWhereUniqueWithoutRentalTermsVersionInput = {
+  where: Prisma.OfferWhereUniqueInput
+  update: Prisma.XOR<Prisma.OfferUpdateWithoutRentalTermsVersionInput, Prisma.OfferUncheckedUpdateWithoutRentalTermsVersionInput>
+  create: Prisma.XOR<Prisma.OfferCreateWithoutRentalTermsVersionInput, Prisma.OfferUncheckedCreateWithoutRentalTermsVersionInput>
+}
+
+export type OfferUpdateWithWhereUniqueWithoutRentalTermsVersionInput = {
+  where: Prisma.OfferWhereUniqueInput
+  data: Prisma.XOR<Prisma.OfferUpdateWithoutRentalTermsVersionInput, Prisma.OfferUncheckedUpdateWithoutRentalTermsVersionInput>
+}
+
+export type OfferUpdateManyWithWhereWithoutRentalTermsVersionInput = {
+  where: Prisma.OfferScalarWhereInput
+  data: Prisma.XOR<Prisma.OfferUpdateManyMutationInput, Prisma.OfferUncheckedUpdateManyWithoutRentalTermsVersionInput>
+}
+
+export type OfferCreateWithoutRevisionsInput = {
+  id?: string
+  number: string
+  customerId?: string | null
+  customerName: string
+  customerAddress?: string | null
+  customerContactPerson?: string | null
+  customerEmail?: string | null
+  customerNumber?: string | null
+  customerPhone?: string | null
+  customerVatId?: string | null
+  serviceStartDate?: Date | string | null
+  serviceEndDate?: Date | string | null
+  introText?: string | null
+  closingText?: string | null
+  paymentTermsDays?: number
+  finalizedAt?: Date | string | null
+  pdfPath?: string | null
+  dayCount: number
+  discountType?: string | null
+  discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  assetScope?: string
+  vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  isKleinunternehmerSnapshot?: boolean
+  orgName: string
+  orgAddressLine1?: string | null
+  orgAddressLine2?: string | null
+  orgPostalCode?: string | null
+  orgCity?: string | null
+  orgTaxNumber?: string | null
+  orgVatId?: string | null
+  orgBillingEmail?: string | null
+  orgBillingWebsite?: string | null
+  orgBankAccountHolder?: string | null
+  orgBankName?: string | null
+  orgIban?: string | null
+  orgBic?: string | null
+  orgLogoPath?: string | null
+  revision?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  organization: Prisma.OrganizationCreateNestedOneWithoutOffersInput
+  production?: Prisma.ProductionCreateNestedOneWithoutOffersInput
+  rentalTermsVersion?: Prisma.RentalTermsVersionCreateNestedOneWithoutOffersInput
+  recipientOrganization?: Prisma.OrganizationCreateNestedOneWithoutOffersReceivedInput
+  originalOffer?: Prisma.OfferCreateNestedOneWithoutRevisionsInput
   items?: Prisma.OfferItemCreateNestedManyWithoutOfferInput
   invoices?: Prisma.InvoiceCreateNestedManyWithoutOfferInput
 }
@@ -1997,6 +2197,7 @@ export type OfferUncheckedCreateWithoutRevisionsInput = {
   paymentTermsDays?: number
   finalizedAt?: Date | string | null
   pdfPath?: string | null
+  rentalTermsVersionId?: string | null
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2074,6 +2275,7 @@ export type OfferCreateWithoutOriginalOfferInput = {
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutOffersInput
   production?: Prisma.ProductionCreateNestedOneWithoutOffersInput
+  rentalTermsVersion?: Prisma.RentalTermsVersionCreateNestedOneWithoutOffersInput
   recipientOrganization?: Prisma.OrganizationCreateNestedOneWithoutOffersReceivedInput
   revisions?: Prisma.OfferCreateNestedManyWithoutOriginalOfferInput
   items?: Prisma.OfferItemCreateNestedManyWithoutOfferInput
@@ -2100,6 +2302,7 @@ export type OfferUncheckedCreateWithoutOriginalOfferInput = {
   paymentTermsDays?: number
   finalizedAt?: Date | string | null
   pdfPath?: string | null
+  rentalTermsVersionId?: string | null
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2193,6 +2396,7 @@ export type OfferUpdateWithoutRevisionsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutOffersNestedInput
   production?: Prisma.ProductionUpdateOneWithoutOffersNestedInput
+  rentalTermsVersion?: Prisma.RentalTermsVersionUpdateOneWithoutOffersNestedInput
   recipientOrganization?: Prisma.OrganizationUpdateOneWithoutOffersReceivedNestedInput
   originalOffer?: Prisma.OfferUpdateOneWithoutRevisionsNestedInput
   items?: Prisma.OfferItemUpdateManyWithoutOfferNestedInput
@@ -2219,6 +2423,7 @@ export type OfferUncheckedUpdateWithoutRevisionsInput = {
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   finalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rentalTermsVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2307,6 +2512,7 @@ export type OfferCreateWithoutItemsInput = {
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutOffersInput
   production?: Prisma.ProductionCreateNestedOneWithoutOffersInput
+  rentalTermsVersion?: Prisma.RentalTermsVersionCreateNestedOneWithoutOffersInput
   recipientOrganization?: Prisma.OrganizationCreateNestedOneWithoutOffersReceivedInput
   originalOffer?: Prisma.OfferCreateNestedOneWithoutRevisionsInput
   revisions?: Prisma.OfferCreateNestedManyWithoutOriginalOfferInput
@@ -2333,6 +2539,7 @@ export type OfferUncheckedCreateWithoutItemsInput = {
   paymentTermsDays?: number
   finalizedAt?: Date | string | null
   pdfPath?: string | null
+  rentalTermsVersionId?: string | null
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2421,6 +2628,7 @@ export type OfferUpdateWithoutItemsInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutOffersNestedInput
   production?: Prisma.ProductionUpdateOneWithoutOffersNestedInput
+  rentalTermsVersion?: Prisma.RentalTermsVersionUpdateOneWithoutOffersNestedInput
   recipientOrganization?: Prisma.OrganizationUpdateOneWithoutOffersReceivedNestedInput
   originalOffer?: Prisma.OfferUpdateOneWithoutRevisionsNestedInput
   revisions?: Prisma.OfferUpdateManyWithoutOriginalOfferNestedInput
@@ -2447,6 +2655,7 @@ export type OfferUncheckedUpdateWithoutItemsInput = {
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   finalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rentalTermsVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2519,6 +2728,7 @@ export type OfferCreateWithoutInvoicesInput = {
   updatedAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutOffersInput
   production?: Prisma.ProductionCreateNestedOneWithoutOffersInput
+  rentalTermsVersion?: Prisma.RentalTermsVersionCreateNestedOneWithoutOffersInput
   recipientOrganization?: Prisma.OrganizationCreateNestedOneWithoutOffersReceivedInput
   originalOffer?: Prisma.OfferCreateNestedOneWithoutRevisionsInput
   revisions?: Prisma.OfferCreateNestedManyWithoutOriginalOfferInput
@@ -2545,6 +2755,7 @@ export type OfferUncheckedCreateWithoutInvoicesInput = {
   paymentTermsDays?: number
   finalizedAt?: Date | string | null
   pdfPath?: string | null
+  rentalTermsVersionId?: string | null
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2633,6 +2844,7 @@ export type OfferUpdateWithoutInvoicesInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutOffersNestedInput
   production?: Prisma.ProductionUpdateOneWithoutOffersNestedInput
+  rentalTermsVersion?: Prisma.RentalTermsVersionUpdateOneWithoutOffersNestedInput
   recipientOrganization?: Prisma.OrganizationUpdateOneWithoutOffersReceivedNestedInput
   originalOffer?: Prisma.OfferUpdateOneWithoutRevisionsNestedInput
   revisions?: Prisma.OfferUpdateManyWithoutOriginalOfferNestedInput
@@ -2659,6 +2871,7 @@ export type OfferUncheckedUpdateWithoutInvoicesInput = {
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   finalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rentalTermsVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2707,6 +2920,7 @@ export type OfferCreateManyOrganizationInput = {
   paymentTermsDays?: number
   finalizedAt?: Date | string | null
   pdfPath?: string | null
+  rentalTermsVersionId?: string | null
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2754,6 +2968,7 @@ export type OfferCreateManyRecipientOrganizationInput = {
   paymentTermsDays?: number
   finalizedAt?: Date | string | null
   pdfPath?: string | null
+  rentalTermsVersionId?: string | null
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2822,6 +3037,7 @@ export type OfferUpdateWithoutOrganizationInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   production?: Prisma.ProductionUpdateOneWithoutOffersNestedInput
+  rentalTermsVersion?: Prisma.RentalTermsVersionUpdateOneWithoutOffersNestedInput
   recipientOrganization?: Prisma.OrganizationUpdateOneWithoutOffersReceivedNestedInput
   originalOffer?: Prisma.OfferUpdateOneWithoutRevisionsNestedInput
   revisions?: Prisma.OfferUpdateManyWithoutOriginalOfferNestedInput
@@ -2848,6 +3064,7 @@ export type OfferUncheckedUpdateWithoutOrganizationInput = {
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   finalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rentalTermsVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2897,6 +3114,7 @@ export type OfferUncheckedUpdateManyWithoutOrganizationInput = {
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   finalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rentalTermsVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -2967,6 +3185,7 @@ export type OfferUpdateWithoutRecipientOrganizationInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutOffersNestedInput
   production?: Prisma.ProductionUpdateOneWithoutOffersNestedInput
+  rentalTermsVersion?: Prisma.RentalTermsVersionUpdateOneWithoutOffersNestedInput
   originalOffer?: Prisma.OfferUpdateOneWithoutRevisionsNestedInput
   revisions?: Prisma.OfferUpdateManyWithoutOriginalOfferNestedInput
   items?: Prisma.OfferItemUpdateManyWithoutOfferNestedInput
@@ -2993,6 +3212,7 @@ export type OfferUncheckedUpdateWithoutRecipientOrganizationInput = {
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   finalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rentalTermsVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3042,6 +3262,7 @@ export type OfferUncheckedUpdateManyWithoutRecipientOrganizationInput = {
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   finalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rentalTermsVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3087,6 +3308,7 @@ export type OfferCreateManyProductionInput = {
   paymentTermsDays?: number
   finalizedAt?: Date | string | null
   pdfPath?: string | null
+  rentalTermsVersionId?: string | null
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3156,6 +3378,7 @@ export type OfferUpdateWithoutProductionInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutOffersNestedInput
+  rentalTermsVersion?: Prisma.RentalTermsVersionUpdateOneWithoutOffersNestedInput
   recipientOrganization?: Prisma.OrganizationUpdateOneWithoutOffersReceivedNestedInput
   originalOffer?: Prisma.OfferUpdateOneWithoutRevisionsNestedInput
   revisions?: Prisma.OfferUpdateManyWithoutOriginalOfferNestedInput
@@ -3167,6 +3390,201 @@ export type OfferUncheckedUpdateWithoutProductionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   number?: Prisma.StringFieldUpdateOperationsInput | string
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerName?: Prisma.StringFieldUpdateOperationsInput | string
+  customerAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerContactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  finalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rentalTermsVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dayCount?: Prisma.IntFieldUpdateOperationsInput | number
+  discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  assetScope?: Prisma.StringFieldUpdateOperationsInput | string
+  recipientOrganizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  orgName?: Prisma.StringFieldUpdateOperationsInput | string
+  orgAddressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgTaxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBillingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBillingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgLogoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalOfferId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  revisions?: Prisma.OfferUncheckedUpdateManyWithoutOriginalOfferNestedInput
+  items?: Prisma.OfferItemUncheckedUpdateManyWithoutOfferNestedInput
+  invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutOfferNestedInput
+}
+
+export type OfferUncheckedUpdateManyWithoutProductionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  number?: Prisma.StringFieldUpdateOperationsInput | string
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerName?: Prisma.StringFieldUpdateOperationsInput | string
+  customerAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerContactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  finalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rentalTermsVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dayCount?: Prisma.IntFieldUpdateOperationsInput | number
+  discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  assetScope?: Prisma.StringFieldUpdateOperationsInput | string
+  recipientOrganizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  orgName?: Prisma.StringFieldUpdateOperationsInput | string
+  orgAddressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgTaxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBillingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBillingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgLogoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  originalOfferId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+}
+
+export type OfferCreateManyRentalTermsVersionInput = {
+  id?: string
+  number: string
+  organizationId: string
+  productionId?: string | null
+  customerId?: string | null
+  customerName: string
+  customerAddress?: string | null
+  customerContactPerson?: string | null
+  customerEmail?: string | null
+  customerNumber?: string | null
+  customerPhone?: string | null
+  customerVatId?: string | null
+  serviceStartDate?: Date | string | null
+  serviceEndDate?: Date | string | null
+  introText?: string | null
+  closingText?: string | null
+  paymentTermsDays?: number
+  finalizedAt?: Date | string | null
+  pdfPath?: string | null
+  dayCount: number
+  discountType?: string | null
+  discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  assetScope?: string
+  recipientOrganizationId?: string | null
+  vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string
+  isKleinunternehmerSnapshot?: boolean
+  orgName: string
+  orgAddressLine1?: string | null
+  orgAddressLine2?: string | null
+  orgPostalCode?: string | null
+  orgCity?: string | null
+  orgTaxNumber?: string | null
+  orgVatId?: string | null
+  orgBillingEmail?: string | null
+  orgBillingWebsite?: string | null
+  orgBankAccountHolder?: string | null
+  orgBankName?: string | null
+  orgIban?: string | null
+  orgBic?: string | null
+  orgLogoPath?: string | null
+  originalOfferId?: string | null
+  revision?: number
+  createdAt?: Date | string
+  updatedAt?: Date | string
+}
+
+export type OfferUpdateWithoutRentalTermsVersionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  number?: Prisma.StringFieldUpdateOperationsInput | string
+  customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerName?: Prisma.StringFieldUpdateOperationsInput | string
+  customerAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerContactPerson?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerPhone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  customerVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  serviceStartDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  serviceEndDate?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  introText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  closingText?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
+  finalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  dayCount?: Prisma.IntFieldUpdateOperationsInput | number
+  discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
+  assetScope?: Prisma.StringFieldUpdateOperationsInput | string
+  vatRatePercent?: Prisma.DecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string
+  isKleinunternehmerSnapshot?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  orgName?: Prisma.StringFieldUpdateOperationsInput | string
+  orgAddressLine1?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgAddressLine2?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgPostalCode?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgCity?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgTaxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgVatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBillingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBillingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgIban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgBic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  orgLogoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  revision?: Prisma.IntFieldUpdateOperationsInput | number
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutOffersNestedInput
+  production?: Prisma.ProductionUpdateOneWithoutOffersNestedInput
+  recipientOrganization?: Prisma.OrganizationUpdateOneWithoutOffersReceivedNestedInput
+  originalOffer?: Prisma.OfferUpdateOneWithoutRevisionsNestedInput
+  revisions?: Prisma.OfferUpdateManyWithoutOriginalOfferNestedInput
+  items?: Prisma.OfferItemUpdateManyWithoutOfferNestedInput
+  invoices?: Prisma.InvoiceUpdateManyWithoutOfferNestedInput
+}
+
+export type OfferUncheckedUpdateWithoutRentalTermsVersionInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  number?: Prisma.StringFieldUpdateOperationsInput | string
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  productionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerName?: Prisma.StringFieldUpdateOperationsInput | string
   customerAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3212,10 +3630,11 @@ export type OfferUncheckedUpdateWithoutProductionInput = {
   invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutOfferNestedInput
 }
 
-export type OfferUncheckedUpdateManyWithoutProductionInput = {
+export type OfferUncheckedUpdateManyWithoutRentalTermsVersionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
   number?: Prisma.StringFieldUpdateOperationsInput | string
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  productionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   customerName?: Prisma.StringFieldUpdateOperationsInput | string
   customerAddress?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -3278,6 +3697,7 @@ export type OfferCreateManyOriginalOfferInput = {
   paymentTermsDays?: number
   finalizedAt?: Date | string | null
   pdfPath?: string | null
+  rentalTermsVersionId?: string | null
   dayCount: number
   discountType?: string | null
   discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3347,6 +3767,7 @@ export type OfferUpdateWithoutOriginalOfferInput = {
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutOffersNestedInput
   production?: Prisma.ProductionUpdateOneWithoutOffersNestedInput
+  rentalTermsVersion?: Prisma.RentalTermsVersionUpdateOneWithoutOffersNestedInput
   recipientOrganization?: Prisma.OrganizationUpdateOneWithoutOffersReceivedNestedInput
   revisions?: Prisma.OfferUpdateManyWithoutOriginalOfferNestedInput
   items?: Prisma.OfferItemUpdateManyWithoutOfferNestedInput
@@ -3373,6 +3794,7 @@ export type OfferUncheckedUpdateWithoutOriginalOfferInput = {
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   finalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rentalTermsVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3422,6 +3844,7 @@ export type OfferUncheckedUpdateManyWithoutOriginalOfferInput = {
   paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number
   finalizedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
   pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  rentalTermsVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   dayCount?: Prisma.IntFieldUpdateOperationsInput | number
   discountType?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   discountValue?: Prisma.NullableDecimalFieldUpdateOperationsInput | runtime.Decimal | runtime.DecimalJsLike | number | string | null
@@ -3517,6 +3940,7 @@ export type OfferSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   paymentTermsDays?: boolean
   finalizedAt?: boolean
   pdfPath?: boolean
+  rentalTermsVersionId?: boolean
   dayCount?: boolean
   discountType?: boolean
   discountValue?: boolean
@@ -3544,6 +3968,7 @@ export type OfferSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = 
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   production?: boolean | Prisma.Offer$productionArgs<ExtArgs>
+  rentalTermsVersion?: boolean | Prisma.Offer$rentalTermsVersionArgs<ExtArgs>
   recipientOrganization?: boolean | Prisma.Offer$recipientOrganizationArgs<ExtArgs>
   originalOffer?: boolean | Prisma.Offer$originalOfferArgs<ExtArgs>
   revisions?: boolean | Prisma.Offer$revisionsArgs<ExtArgs>
@@ -3572,6 +3997,7 @@ export type OfferSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   paymentTermsDays?: boolean
   finalizedAt?: boolean
   pdfPath?: boolean
+  rentalTermsVersionId?: boolean
   dayCount?: boolean
   discountType?: boolean
   discountValue?: boolean
@@ -3599,6 +4025,7 @@ export type OfferSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   production?: boolean | Prisma.Offer$productionArgs<ExtArgs>
+  rentalTermsVersion?: boolean | Prisma.Offer$rentalTermsVersionArgs<ExtArgs>
   recipientOrganization?: boolean | Prisma.Offer$recipientOrganizationArgs<ExtArgs>
   originalOffer?: boolean | Prisma.Offer$originalOfferArgs<ExtArgs>
 }, ExtArgs["result"]["offer"]>
@@ -3623,6 +4050,7 @@ export type OfferSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   paymentTermsDays?: boolean
   finalizedAt?: boolean
   pdfPath?: boolean
+  rentalTermsVersionId?: boolean
   dayCount?: boolean
   discountType?: boolean
   discountValue?: boolean
@@ -3650,6 +4078,7 @@ export type OfferSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensi
   updatedAt?: boolean
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   production?: boolean | Prisma.Offer$productionArgs<ExtArgs>
+  rentalTermsVersion?: boolean | Prisma.Offer$rentalTermsVersionArgs<ExtArgs>
   recipientOrganization?: boolean | Prisma.Offer$recipientOrganizationArgs<ExtArgs>
   originalOffer?: boolean | Prisma.Offer$originalOfferArgs<ExtArgs>
 }, ExtArgs["result"]["offer"]>
@@ -3674,6 +4103,7 @@ export type OfferSelectScalar = {
   paymentTermsDays?: boolean
   finalizedAt?: boolean
   pdfPath?: boolean
+  rentalTermsVersionId?: boolean
   dayCount?: boolean
   discountType?: boolean
   discountValue?: boolean
@@ -3701,10 +4131,11 @@ export type OfferSelectScalar = {
   updatedAt?: boolean
 }
 
-export type OfferOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "number" | "organizationId" | "productionId" | "customerId" | "customerName" | "customerAddress" | "customerContactPerson" | "customerEmail" | "customerNumber" | "customerPhone" | "customerVatId" | "serviceStartDate" | "serviceEndDate" | "introText" | "closingText" | "paymentTermsDays" | "finalizedAt" | "pdfPath" | "dayCount" | "discountType" | "discountValue" | "assetScope" | "recipientOrganizationId" | "vatRatePercent" | "isKleinunternehmerSnapshot" | "orgName" | "orgAddressLine1" | "orgAddressLine2" | "orgPostalCode" | "orgCity" | "orgTaxNumber" | "orgVatId" | "orgBillingEmail" | "orgBillingWebsite" | "orgBankAccountHolder" | "orgBankName" | "orgIban" | "orgBic" | "orgLogoPath" | "originalOfferId" | "revision" | "createdAt" | "updatedAt", ExtArgs["result"]["offer"]>
+export type OfferOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "number" | "organizationId" | "productionId" | "customerId" | "customerName" | "customerAddress" | "customerContactPerson" | "customerEmail" | "customerNumber" | "customerPhone" | "customerVatId" | "serviceStartDate" | "serviceEndDate" | "introText" | "closingText" | "paymentTermsDays" | "finalizedAt" | "pdfPath" | "rentalTermsVersionId" | "dayCount" | "discountType" | "discountValue" | "assetScope" | "recipientOrganizationId" | "vatRatePercent" | "isKleinunternehmerSnapshot" | "orgName" | "orgAddressLine1" | "orgAddressLine2" | "orgPostalCode" | "orgCity" | "orgTaxNumber" | "orgVatId" | "orgBillingEmail" | "orgBillingWebsite" | "orgBankAccountHolder" | "orgBankName" | "orgIban" | "orgBic" | "orgLogoPath" | "originalOfferId" | "revision" | "createdAt" | "updatedAt", ExtArgs["result"]["offer"]>
 export type OfferInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   production?: boolean | Prisma.Offer$productionArgs<ExtArgs>
+  rentalTermsVersion?: boolean | Prisma.Offer$rentalTermsVersionArgs<ExtArgs>
   recipientOrganization?: boolean | Prisma.Offer$recipientOrganizationArgs<ExtArgs>
   originalOffer?: boolean | Prisma.Offer$originalOfferArgs<ExtArgs>
   revisions?: boolean | Prisma.Offer$revisionsArgs<ExtArgs>
@@ -3715,12 +4146,14 @@ export type OfferInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs =
 export type OfferIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   production?: boolean | Prisma.Offer$productionArgs<ExtArgs>
+  rentalTermsVersion?: boolean | Prisma.Offer$rentalTermsVersionArgs<ExtArgs>
   recipientOrganization?: boolean | Prisma.Offer$recipientOrganizationArgs<ExtArgs>
   originalOffer?: boolean | Prisma.Offer$originalOfferArgs<ExtArgs>
 }
 export type OfferIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   production?: boolean | Prisma.Offer$productionArgs<ExtArgs>
+  rentalTermsVersion?: boolean | Prisma.Offer$rentalTermsVersionArgs<ExtArgs>
   recipientOrganization?: boolean | Prisma.Offer$recipientOrganizationArgs<ExtArgs>
   originalOffer?: boolean | Prisma.Offer$originalOfferArgs<ExtArgs>
 }
@@ -3730,6 +4163,7 @@ export type $OfferPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   objects: {
     organization: Prisma.$OrganizationPayload<ExtArgs>
     production: Prisma.$ProductionPayload<ExtArgs> | null
+    rentalTermsVersion: Prisma.$RentalTermsVersionPayload<ExtArgs> | null
     recipientOrganization: Prisma.$OrganizationPayload<ExtArgs> | null
     originalOffer: Prisma.$OfferPayload<ExtArgs> | null
     revisions: Prisma.$OfferPayload<ExtArgs>[]
@@ -3756,6 +4190,7 @@ export type $OfferPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs 
     paymentTermsDays: number
     finalizedAt: Date | null
     pdfPath: string | null
+    rentalTermsVersionId: string | null
     dayCount: number
     discountType: string | null
     discountValue: runtime.Decimal | null
@@ -4177,6 +4612,7 @@ export interface Prisma__OfferClient<T, Null = never, ExtArgs extends runtime.Ty
   readonly [Symbol.toStringTag]: "PrismaPromise"
   organization<T extends Prisma.OrganizationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.OrganizationDefaultArgs<ExtArgs>>): Prisma.Prisma__OrganizationClient<runtime.Types.Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   production<T extends Prisma.Offer$productionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Offer$productionArgs<ExtArgs>>): Prisma.Prisma__ProductionClient<runtime.Types.Result.GetResult<Prisma.$ProductionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  rentalTermsVersion<T extends Prisma.Offer$rentalTermsVersionArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Offer$rentalTermsVersionArgs<ExtArgs>>): Prisma.Prisma__RentalTermsVersionClient<runtime.Types.Result.GetResult<Prisma.$RentalTermsVersionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   recipientOrganization<T extends Prisma.Offer$recipientOrganizationArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Offer$recipientOrganizationArgs<ExtArgs>>): Prisma.Prisma__OrganizationClient<runtime.Types.Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   originalOffer<T extends Prisma.Offer$originalOfferArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Offer$originalOfferArgs<ExtArgs>>): Prisma.Prisma__OfferClient<runtime.Types.Result.GetResult<Prisma.$OfferPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   revisions<T extends Prisma.Offer$revisionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Offer$revisionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$OfferPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
@@ -4230,6 +4666,7 @@ export interface OfferFieldRefs {
   readonly paymentTermsDays: Prisma.FieldRef<"Offer", 'Int'>
   readonly finalizedAt: Prisma.FieldRef<"Offer", 'DateTime'>
   readonly pdfPath: Prisma.FieldRef<"Offer", 'String'>
+  readonly rentalTermsVersionId: Prisma.FieldRef<"Offer", 'String'>
   readonly dayCount: Prisma.FieldRef<"Offer", 'Int'>
   readonly discountType: Prisma.FieldRef<"Offer", 'String'>
   readonly discountValue: Prisma.FieldRef<"Offer", 'Decimal'>
@@ -4672,6 +5109,25 @@ export type Offer$productionArgs<ExtArgs extends runtime.Types.Extensions.Intern
    */
   include?: Prisma.ProductionInclude<ExtArgs> | null
   where?: Prisma.ProductionWhereInput
+}
+
+/**
+ * Offer.rentalTermsVersion
+ */
+export type Offer$rentalTermsVersionArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the RentalTermsVersion
+   */
+  select?: Prisma.RentalTermsVersionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the RentalTermsVersion
+   */
+  omit?: Prisma.RentalTermsVersionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RentalTermsVersionInclude<ExtArgs> | null
+  where?: Prisma.RentalTermsVersionWhereInput
 }
 
 /**

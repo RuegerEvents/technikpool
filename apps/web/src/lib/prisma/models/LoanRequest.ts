@@ -32,6 +32,7 @@ export type LoanRequestMinAggregateOutputType = {
   note: string | null
   requestedById: string | null
   createdAt: Date | null
+  rentalTermsAcceptanceId: string | null
 }
 
 export type LoanRequestMaxAggregateOutputType = {
@@ -42,6 +43,7 @@ export type LoanRequestMaxAggregateOutputType = {
   note: string | null
   requestedById: string | null
   createdAt: Date | null
+  rentalTermsAcceptanceId: string | null
 }
 
 export type LoanRequestCountAggregateOutputType = {
@@ -52,6 +54,7 @@ export type LoanRequestCountAggregateOutputType = {
   note: number
   requestedById: number
   createdAt: number
+  rentalTermsAcceptanceId: number
   _all: number
 }
 
@@ -64,6 +67,7 @@ export type LoanRequestMinAggregateInputType = {
   note?: true
   requestedById?: true
   createdAt?: true
+  rentalTermsAcceptanceId?: true
 }
 
 export type LoanRequestMaxAggregateInputType = {
@@ -74,6 +78,7 @@ export type LoanRequestMaxAggregateInputType = {
   note?: true
   requestedById?: true
   createdAt?: true
+  rentalTermsAcceptanceId?: true
 }
 
 export type LoanRequestCountAggregateInputType = {
@@ -84,6 +89,7 @@ export type LoanRequestCountAggregateInputType = {
   note?: true
   requestedById?: true
   createdAt?: true
+  rentalTermsAcceptanceId?: true
   _all?: true
 }
 
@@ -167,6 +173,7 @@ export type LoanRequestGroupByOutputType = {
   note: string | null
   requestedById: string | null
   createdAt: Date
+  rentalTermsAcceptanceId: string | null
   _count: LoanRequestCountAggregateOutputType | null
   _min: LoanRequestMinAggregateOutputType | null
   _max: LoanRequestMaxAggregateOutputType | null
@@ -198,9 +205,11 @@ export type LoanRequestWhereInput = {
   note?: Prisma.StringNullableFilter<"LoanRequest"> | string | null
   requestedById?: Prisma.StringNullableFilter<"LoanRequest"> | string | null
   createdAt?: Prisma.DateTimeFilter<"LoanRequest"> | Date | string
+  rentalTermsAcceptanceId?: Prisma.StringNullableFilter<"LoanRequest"> | string | null
   production?: Prisma.XOR<Prisma.ProductionScalarRelationFilter, Prisma.ProductionWhereInput>
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
   requestedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  rentalTermsAcceptance?: Prisma.XOR<Prisma.RentalTermsAcceptanceNullableScalarRelationFilter, Prisma.RentalTermsAcceptanceWhereInput> | null
   items?: Prisma.ProductionItemListRelationFilter
 }
 
@@ -212,9 +221,11 @@ export type LoanRequestOrderByWithRelationInput = {
   note?: Prisma.SortOrderInput | Prisma.SortOrder
   requestedById?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  rentalTermsAcceptanceId?: Prisma.SortOrderInput | Prisma.SortOrder
   production?: Prisma.ProductionOrderByWithRelationInput
   organization?: Prisma.OrganizationOrderByWithRelationInput
   requestedBy?: Prisma.UserOrderByWithRelationInput
+  rentalTermsAcceptance?: Prisma.RentalTermsAcceptanceOrderByWithRelationInput
   items?: Prisma.ProductionItemOrderByRelationAggregateInput
 }
 
@@ -229,9 +240,11 @@ export type LoanRequestWhereUniqueInput = Prisma.AtLeast<{
   note?: Prisma.StringNullableFilter<"LoanRequest"> | string | null
   requestedById?: Prisma.StringNullableFilter<"LoanRequest"> | string | null
   createdAt?: Prisma.DateTimeFilter<"LoanRequest"> | Date | string
+  rentalTermsAcceptanceId?: Prisma.StringNullableFilter<"LoanRequest"> | string | null
   production?: Prisma.XOR<Prisma.ProductionScalarRelationFilter, Prisma.ProductionWhereInput>
   organization?: Prisma.XOR<Prisma.OrganizationScalarRelationFilter, Prisma.OrganizationWhereInput>
   requestedBy?: Prisma.XOR<Prisma.UserNullableScalarRelationFilter, Prisma.UserWhereInput> | null
+  rentalTermsAcceptance?: Prisma.XOR<Prisma.RentalTermsAcceptanceNullableScalarRelationFilter, Prisma.RentalTermsAcceptanceWhereInput> | null
   items?: Prisma.ProductionItemListRelationFilter
 }, "id">
 
@@ -243,6 +256,7 @@ export type LoanRequestOrderByWithAggregationInput = {
   note?: Prisma.SortOrderInput | Prisma.SortOrder
   requestedById?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  rentalTermsAcceptanceId?: Prisma.SortOrderInput | Prisma.SortOrder
   _count?: Prisma.LoanRequestCountOrderByAggregateInput
   _max?: Prisma.LoanRequestMaxOrderByAggregateInput
   _min?: Prisma.LoanRequestMinOrderByAggregateInput
@@ -259,6 +273,7 @@ export type LoanRequestScalarWhereWithAggregatesInput = {
   note?: Prisma.StringNullableWithAggregatesFilter<"LoanRequest"> | string | null
   requestedById?: Prisma.StringNullableWithAggregatesFilter<"LoanRequest"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"LoanRequest"> | Date | string
+  rentalTermsAcceptanceId?: Prisma.StringNullableWithAggregatesFilter<"LoanRequest"> | string | null
 }
 
 export type LoanRequestCreateInput = {
@@ -269,6 +284,7 @@ export type LoanRequestCreateInput = {
   production: Prisma.ProductionCreateNestedOneWithoutLoanRequestsInput
   organization: Prisma.OrganizationCreateNestedOneWithoutLoanRequestsInput
   requestedBy?: Prisma.UserCreateNestedOneWithoutLoanRequestsInput
+  rentalTermsAcceptance?: Prisma.RentalTermsAcceptanceCreateNestedOneWithoutLoanRequestsInput
   items?: Prisma.ProductionItemCreateNestedManyWithoutLoanRequestInput
 }
 
@@ -280,6 +296,7 @@ export type LoanRequestUncheckedCreateInput = {
   note?: string | null
   requestedById?: string | null
   createdAt?: Date | string
+  rentalTermsAcceptanceId?: string | null
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutLoanRequestInput
 }
 
@@ -291,6 +308,7 @@ export type LoanRequestUpdateInput = {
   production?: Prisma.ProductionUpdateOneRequiredWithoutLoanRequestsNestedInput
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutLoanRequestsNestedInput
   requestedBy?: Prisma.UserUpdateOneWithoutLoanRequestsNestedInput
+  rentalTermsAcceptance?: Prisma.RentalTermsAcceptanceUpdateOneWithoutLoanRequestsNestedInput
   items?: Prisma.ProductionItemUpdateManyWithoutLoanRequestNestedInput
 }
 
@@ -302,6 +320,7 @@ export type LoanRequestUncheckedUpdateInput = {
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requestedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rentalTermsAcceptanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutLoanRequestNestedInput
 }
 
@@ -313,6 +332,7 @@ export type LoanRequestCreateManyInput = {
   note?: string | null
   requestedById?: string | null
   createdAt?: Date | string
+  rentalTermsAcceptanceId?: string | null
 }
 
 export type LoanRequestUpdateManyMutationInput = {
@@ -330,6 +350,7 @@ export type LoanRequestUncheckedUpdateManyInput = {
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requestedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rentalTermsAcceptanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type LoanRequestListRelationFilter = {
@@ -355,6 +376,7 @@ export type LoanRequestCountOrderByAggregateInput = {
   note?: Prisma.SortOrder
   requestedById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  rentalTermsAcceptanceId?: Prisma.SortOrder
 }
 
 export type LoanRequestMaxOrderByAggregateInput = {
@@ -365,6 +387,7 @@ export type LoanRequestMaxOrderByAggregateInput = {
   note?: Prisma.SortOrder
   requestedById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  rentalTermsAcceptanceId?: Prisma.SortOrder
 }
 
 export type LoanRequestMinOrderByAggregateInput = {
@@ -375,6 +398,7 @@ export type LoanRequestMinOrderByAggregateInput = {
   note?: Prisma.SortOrder
   requestedById?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
+  rentalTermsAcceptanceId?: Prisma.SortOrder
 }
 
 export type LoanRequestCreateNestedManyWithoutRequestedByInput = {
@@ -519,6 +543,48 @@ export type LoanRequestUpdateOneWithoutItemsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.LoanRequestUpdateToOneWithWhereWithoutItemsInput, Prisma.LoanRequestUpdateWithoutItemsInput>, Prisma.LoanRequestUncheckedUpdateWithoutItemsInput>
 }
 
+export type LoanRequestCreateNestedManyWithoutRentalTermsAcceptanceInput = {
+  create?: Prisma.XOR<Prisma.LoanRequestCreateWithoutRentalTermsAcceptanceInput, Prisma.LoanRequestUncheckedCreateWithoutRentalTermsAcceptanceInput> | Prisma.LoanRequestCreateWithoutRentalTermsAcceptanceInput[] | Prisma.LoanRequestUncheckedCreateWithoutRentalTermsAcceptanceInput[]
+  connectOrCreate?: Prisma.LoanRequestCreateOrConnectWithoutRentalTermsAcceptanceInput | Prisma.LoanRequestCreateOrConnectWithoutRentalTermsAcceptanceInput[]
+  createMany?: Prisma.LoanRequestCreateManyRentalTermsAcceptanceInputEnvelope
+  connect?: Prisma.LoanRequestWhereUniqueInput | Prisma.LoanRequestWhereUniqueInput[]
+}
+
+export type LoanRequestUncheckedCreateNestedManyWithoutRentalTermsAcceptanceInput = {
+  create?: Prisma.XOR<Prisma.LoanRequestCreateWithoutRentalTermsAcceptanceInput, Prisma.LoanRequestUncheckedCreateWithoutRentalTermsAcceptanceInput> | Prisma.LoanRequestCreateWithoutRentalTermsAcceptanceInput[] | Prisma.LoanRequestUncheckedCreateWithoutRentalTermsAcceptanceInput[]
+  connectOrCreate?: Prisma.LoanRequestCreateOrConnectWithoutRentalTermsAcceptanceInput | Prisma.LoanRequestCreateOrConnectWithoutRentalTermsAcceptanceInput[]
+  createMany?: Prisma.LoanRequestCreateManyRentalTermsAcceptanceInputEnvelope
+  connect?: Prisma.LoanRequestWhereUniqueInput | Prisma.LoanRequestWhereUniqueInput[]
+}
+
+export type LoanRequestUpdateManyWithoutRentalTermsAcceptanceNestedInput = {
+  create?: Prisma.XOR<Prisma.LoanRequestCreateWithoutRentalTermsAcceptanceInput, Prisma.LoanRequestUncheckedCreateWithoutRentalTermsAcceptanceInput> | Prisma.LoanRequestCreateWithoutRentalTermsAcceptanceInput[] | Prisma.LoanRequestUncheckedCreateWithoutRentalTermsAcceptanceInput[]
+  connectOrCreate?: Prisma.LoanRequestCreateOrConnectWithoutRentalTermsAcceptanceInput | Prisma.LoanRequestCreateOrConnectWithoutRentalTermsAcceptanceInput[]
+  upsert?: Prisma.LoanRequestUpsertWithWhereUniqueWithoutRentalTermsAcceptanceInput | Prisma.LoanRequestUpsertWithWhereUniqueWithoutRentalTermsAcceptanceInput[]
+  createMany?: Prisma.LoanRequestCreateManyRentalTermsAcceptanceInputEnvelope
+  set?: Prisma.LoanRequestWhereUniqueInput | Prisma.LoanRequestWhereUniqueInput[]
+  disconnect?: Prisma.LoanRequestWhereUniqueInput | Prisma.LoanRequestWhereUniqueInput[]
+  delete?: Prisma.LoanRequestWhereUniqueInput | Prisma.LoanRequestWhereUniqueInput[]
+  connect?: Prisma.LoanRequestWhereUniqueInput | Prisma.LoanRequestWhereUniqueInput[]
+  update?: Prisma.LoanRequestUpdateWithWhereUniqueWithoutRentalTermsAcceptanceInput | Prisma.LoanRequestUpdateWithWhereUniqueWithoutRentalTermsAcceptanceInput[]
+  updateMany?: Prisma.LoanRequestUpdateManyWithWhereWithoutRentalTermsAcceptanceInput | Prisma.LoanRequestUpdateManyWithWhereWithoutRentalTermsAcceptanceInput[]
+  deleteMany?: Prisma.LoanRequestScalarWhereInput | Prisma.LoanRequestScalarWhereInput[]
+}
+
+export type LoanRequestUncheckedUpdateManyWithoutRentalTermsAcceptanceNestedInput = {
+  create?: Prisma.XOR<Prisma.LoanRequestCreateWithoutRentalTermsAcceptanceInput, Prisma.LoanRequestUncheckedCreateWithoutRentalTermsAcceptanceInput> | Prisma.LoanRequestCreateWithoutRentalTermsAcceptanceInput[] | Prisma.LoanRequestUncheckedCreateWithoutRentalTermsAcceptanceInput[]
+  connectOrCreate?: Prisma.LoanRequestCreateOrConnectWithoutRentalTermsAcceptanceInput | Prisma.LoanRequestCreateOrConnectWithoutRentalTermsAcceptanceInput[]
+  upsert?: Prisma.LoanRequestUpsertWithWhereUniqueWithoutRentalTermsAcceptanceInput | Prisma.LoanRequestUpsertWithWhereUniqueWithoutRentalTermsAcceptanceInput[]
+  createMany?: Prisma.LoanRequestCreateManyRentalTermsAcceptanceInputEnvelope
+  set?: Prisma.LoanRequestWhereUniqueInput | Prisma.LoanRequestWhereUniqueInput[]
+  disconnect?: Prisma.LoanRequestWhereUniqueInput | Prisma.LoanRequestWhereUniqueInput[]
+  delete?: Prisma.LoanRequestWhereUniqueInput | Prisma.LoanRequestWhereUniqueInput[]
+  connect?: Prisma.LoanRequestWhereUniqueInput | Prisma.LoanRequestWhereUniqueInput[]
+  update?: Prisma.LoanRequestUpdateWithWhereUniqueWithoutRentalTermsAcceptanceInput | Prisma.LoanRequestUpdateWithWhereUniqueWithoutRentalTermsAcceptanceInput[]
+  updateMany?: Prisma.LoanRequestUpdateManyWithWhereWithoutRentalTermsAcceptanceInput | Prisma.LoanRequestUpdateManyWithWhereWithoutRentalTermsAcceptanceInput[]
+  deleteMany?: Prisma.LoanRequestScalarWhereInput | Prisma.LoanRequestScalarWhereInput[]
+}
+
 export type LoanRequestCreateWithoutRequestedByInput = {
   id?: string
   unpaid?: boolean
@@ -526,6 +592,7 @@ export type LoanRequestCreateWithoutRequestedByInput = {
   createdAt?: Date | string
   production: Prisma.ProductionCreateNestedOneWithoutLoanRequestsInput
   organization: Prisma.OrganizationCreateNestedOneWithoutLoanRequestsInput
+  rentalTermsAcceptance?: Prisma.RentalTermsAcceptanceCreateNestedOneWithoutLoanRequestsInput
   items?: Prisma.ProductionItemCreateNestedManyWithoutLoanRequestInput
 }
 
@@ -536,6 +603,7 @@ export type LoanRequestUncheckedCreateWithoutRequestedByInput = {
   unpaid?: boolean
   note?: string | null
   createdAt?: Date | string
+  rentalTermsAcceptanceId?: string | null
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutLoanRequestInput
 }
 
@@ -576,6 +644,7 @@ export type LoanRequestScalarWhereInput = {
   note?: Prisma.StringNullableFilter<"LoanRequest"> | string | null
   requestedById?: Prisma.StringNullableFilter<"LoanRequest"> | string | null
   createdAt?: Prisma.DateTimeFilter<"LoanRequest"> | Date | string
+  rentalTermsAcceptanceId?: Prisma.StringNullableFilter<"LoanRequest"> | string | null
 }
 
 export type LoanRequestCreateWithoutOrganizationInput = {
@@ -585,6 +654,7 @@ export type LoanRequestCreateWithoutOrganizationInput = {
   createdAt?: Date | string
   production: Prisma.ProductionCreateNestedOneWithoutLoanRequestsInput
   requestedBy?: Prisma.UserCreateNestedOneWithoutLoanRequestsInput
+  rentalTermsAcceptance?: Prisma.RentalTermsAcceptanceCreateNestedOneWithoutLoanRequestsInput
   items?: Prisma.ProductionItemCreateNestedManyWithoutLoanRequestInput
 }
 
@@ -595,6 +665,7 @@ export type LoanRequestUncheckedCreateWithoutOrganizationInput = {
   note?: string | null
   requestedById?: string | null
   createdAt?: Date | string
+  rentalTermsAcceptanceId?: string | null
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutLoanRequestInput
 }
 
@@ -631,6 +702,7 @@ export type LoanRequestCreateWithoutProductionInput = {
   createdAt?: Date | string
   organization: Prisma.OrganizationCreateNestedOneWithoutLoanRequestsInput
   requestedBy?: Prisma.UserCreateNestedOneWithoutLoanRequestsInput
+  rentalTermsAcceptance?: Prisma.RentalTermsAcceptanceCreateNestedOneWithoutLoanRequestsInput
   items?: Prisma.ProductionItemCreateNestedManyWithoutLoanRequestInput
 }
 
@@ -641,6 +713,7 @@ export type LoanRequestUncheckedCreateWithoutProductionInput = {
   note?: string | null
   requestedById?: string | null
   createdAt?: Date | string
+  rentalTermsAcceptanceId?: string | null
   items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutLoanRequestInput
 }
 
@@ -678,6 +751,7 @@ export type LoanRequestCreateWithoutItemsInput = {
   production: Prisma.ProductionCreateNestedOneWithoutLoanRequestsInput
   organization: Prisma.OrganizationCreateNestedOneWithoutLoanRequestsInput
   requestedBy?: Prisma.UserCreateNestedOneWithoutLoanRequestsInput
+  rentalTermsAcceptance?: Prisma.RentalTermsAcceptanceCreateNestedOneWithoutLoanRequestsInput
 }
 
 export type LoanRequestUncheckedCreateWithoutItemsInput = {
@@ -688,6 +762,7 @@ export type LoanRequestUncheckedCreateWithoutItemsInput = {
   note?: string | null
   requestedById?: string | null
   createdAt?: Date | string
+  rentalTermsAcceptanceId?: string | null
 }
 
 export type LoanRequestCreateOrConnectWithoutItemsInput = {
@@ -714,6 +789,7 @@ export type LoanRequestUpdateWithoutItemsInput = {
   production?: Prisma.ProductionUpdateOneRequiredWithoutLoanRequestsNestedInput
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutLoanRequestsNestedInput
   requestedBy?: Prisma.UserUpdateOneWithoutLoanRequestsNestedInput
+  rentalTermsAcceptance?: Prisma.RentalTermsAcceptanceUpdateOneWithoutLoanRequestsNestedInput
 }
 
 export type LoanRequestUncheckedUpdateWithoutItemsInput = {
@@ -724,6 +800,55 @@ export type LoanRequestUncheckedUpdateWithoutItemsInput = {
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requestedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rentalTermsAcceptanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type LoanRequestCreateWithoutRentalTermsAcceptanceInput = {
+  id?: string
+  unpaid?: boolean
+  note?: string | null
+  createdAt?: Date | string
+  production: Prisma.ProductionCreateNestedOneWithoutLoanRequestsInput
+  organization: Prisma.OrganizationCreateNestedOneWithoutLoanRequestsInput
+  requestedBy?: Prisma.UserCreateNestedOneWithoutLoanRequestsInput
+  items?: Prisma.ProductionItemCreateNestedManyWithoutLoanRequestInput
+}
+
+export type LoanRequestUncheckedCreateWithoutRentalTermsAcceptanceInput = {
+  id?: string
+  productionId: string
+  organizationId: string
+  unpaid?: boolean
+  note?: string | null
+  requestedById?: string | null
+  createdAt?: Date | string
+  items?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutLoanRequestInput
+}
+
+export type LoanRequestCreateOrConnectWithoutRentalTermsAcceptanceInput = {
+  where: Prisma.LoanRequestWhereUniqueInput
+  create: Prisma.XOR<Prisma.LoanRequestCreateWithoutRentalTermsAcceptanceInput, Prisma.LoanRequestUncheckedCreateWithoutRentalTermsAcceptanceInput>
+}
+
+export type LoanRequestCreateManyRentalTermsAcceptanceInputEnvelope = {
+  data: Prisma.LoanRequestCreateManyRentalTermsAcceptanceInput | Prisma.LoanRequestCreateManyRentalTermsAcceptanceInput[]
+  skipDuplicates?: boolean
+}
+
+export type LoanRequestUpsertWithWhereUniqueWithoutRentalTermsAcceptanceInput = {
+  where: Prisma.LoanRequestWhereUniqueInput
+  update: Prisma.XOR<Prisma.LoanRequestUpdateWithoutRentalTermsAcceptanceInput, Prisma.LoanRequestUncheckedUpdateWithoutRentalTermsAcceptanceInput>
+  create: Prisma.XOR<Prisma.LoanRequestCreateWithoutRentalTermsAcceptanceInput, Prisma.LoanRequestUncheckedCreateWithoutRentalTermsAcceptanceInput>
+}
+
+export type LoanRequestUpdateWithWhereUniqueWithoutRentalTermsAcceptanceInput = {
+  where: Prisma.LoanRequestWhereUniqueInput
+  data: Prisma.XOR<Prisma.LoanRequestUpdateWithoutRentalTermsAcceptanceInput, Prisma.LoanRequestUncheckedUpdateWithoutRentalTermsAcceptanceInput>
+}
+
+export type LoanRequestUpdateManyWithWhereWithoutRentalTermsAcceptanceInput = {
+  where: Prisma.LoanRequestScalarWhereInput
+  data: Prisma.XOR<Prisma.LoanRequestUpdateManyMutationInput, Prisma.LoanRequestUncheckedUpdateManyWithoutRentalTermsAcceptanceInput>
 }
 
 export type LoanRequestCreateManyRequestedByInput = {
@@ -733,6 +858,7 @@ export type LoanRequestCreateManyRequestedByInput = {
   unpaid?: boolean
   note?: string | null
   createdAt?: Date | string
+  rentalTermsAcceptanceId?: string | null
 }
 
 export type LoanRequestUpdateWithoutRequestedByInput = {
@@ -742,6 +868,7 @@ export type LoanRequestUpdateWithoutRequestedByInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   production?: Prisma.ProductionUpdateOneRequiredWithoutLoanRequestsNestedInput
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutLoanRequestsNestedInput
+  rentalTermsAcceptance?: Prisma.RentalTermsAcceptanceUpdateOneWithoutLoanRequestsNestedInput
   items?: Prisma.ProductionItemUpdateManyWithoutLoanRequestNestedInput
 }
 
@@ -752,6 +879,7 @@ export type LoanRequestUncheckedUpdateWithoutRequestedByInput = {
   unpaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rentalTermsAcceptanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutLoanRequestNestedInput
 }
 
@@ -762,6 +890,7 @@ export type LoanRequestUncheckedUpdateManyWithoutRequestedByInput = {
   unpaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rentalTermsAcceptanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type LoanRequestCreateManyOrganizationInput = {
@@ -771,6 +900,7 @@ export type LoanRequestCreateManyOrganizationInput = {
   note?: string | null
   requestedById?: string | null
   createdAt?: Date | string
+  rentalTermsAcceptanceId?: string | null
 }
 
 export type LoanRequestUpdateWithoutOrganizationInput = {
@@ -780,6 +910,7 @@ export type LoanRequestUpdateWithoutOrganizationInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   production?: Prisma.ProductionUpdateOneRequiredWithoutLoanRequestsNestedInput
   requestedBy?: Prisma.UserUpdateOneWithoutLoanRequestsNestedInput
+  rentalTermsAcceptance?: Prisma.RentalTermsAcceptanceUpdateOneWithoutLoanRequestsNestedInput
   items?: Prisma.ProductionItemUpdateManyWithoutLoanRequestNestedInput
 }
 
@@ -790,6 +921,7 @@ export type LoanRequestUncheckedUpdateWithoutOrganizationInput = {
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requestedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rentalTermsAcceptanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutLoanRequestNestedInput
 }
 
@@ -800,6 +932,7 @@ export type LoanRequestUncheckedUpdateManyWithoutOrganizationInput = {
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requestedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rentalTermsAcceptanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
 }
 
 export type LoanRequestCreateManyProductionInput = {
@@ -809,6 +942,7 @@ export type LoanRequestCreateManyProductionInput = {
   note?: string | null
   requestedById?: string | null
   createdAt?: Date | string
+  rentalTermsAcceptanceId?: string | null
 }
 
 export type LoanRequestUpdateWithoutProductionInput = {
@@ -818,6 +952,7 @@ export type LoanRequestUpdateWithoutProductionInput = {
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   organization?: Prisma.OrganizationUpdateOneRequiredWithoutLoanRequestsNestedInput
   requestedBy?: Prisma.UserUpdateOneWithoutLoanRequestsNestedInput
+  rentalTermsAcceptance?: Prisma.RentalTermsAcceptanceUpdateOneWithoutLoanRequestsNestedInput
   items?: Prisma.ProductionItemUpdateManyWithoutLoanRequestNestedInput
 }
 
@@ -828,11 +963,55 @@ export type LoanRequestUncheckedUpdateWithoutProductionInput = {
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   requestedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rentalTermsAcceptanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   items?: Prisma.ProductionItemUncheckedUpdateManyWithoutLoanRequestNestedInput
 }
 
 export type LoanRequestUncheckedUpdateManyWithoutProductionInput = {
   id?: Prisma.StringFieldUpdateOperationsInput | string
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  unpaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  requestedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  rentalTermsAcceptanceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+}
+
+export type LoanRequestCreateManyRentalTermsAcceptanceInput = {
+  id?: string
+  productionId: string
+  organizationId: string
+  unpaid?: boolean
+  note?: string | null
+  requestedById?: string | null
+  createdAt?: Date | string
+}
+
+export type LoanRequestUpdateWithoutRentalTermsAcceptanceInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  unpaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  production?: Prisma.ProductionUpdateOneRequiredWithoutLoanRequestsNestedInput
+  organization?: Prisma.OrganizationUpdateOneRequiredWithoutLoanRequestsNestedInput
+  requestedBy?: Prisma.UserUpdateOneWithoutLoanRequestsNestedInput
+  items?: Prisma.ProductionItemUpdateManyWithoutLoanRequestNestedInput
+}
+
+export type LoanRequestUncheckedUpdateWithoutRentalTermsAcceptanceInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  productionId?: Prisma.StringFieldUpdateOperationsInput | string
+  organizationId?: Prisma.StringFieldUpdateOperationsInput | string
+  unpaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  requestedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  items?: Prisma.ProductionItemUncheckedUpdateManyWithoutLoanRequestNestedInput
+}
+
+export type LoanRequestUncheckedUpdateManyWithoutRentalTermsAcceptanceInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  productionId?: Prisma.StringFieldUpdateOperationsInput | string
   organizationId?: Prisma.StringFieldUpdateOperationsInput | string
   unpaid?: Prisma.BoolFieldUpdateOperationsInput | boolean
   note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
@@ -879,9 +1058,11 @@ export type LoanRequestSelect<ExtArgs extends runtime.Types.Extensions.InternalA
   note?: boolean
   requestedById?: boolean
   createdAt?: boolean
+  rentalTermsAcceptanceId?: boolean
   production?: boolean | Prisma.ProductionDefaultArgs<ExtArgs>
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   requestedBy?: boolean | Prisma.LoanRequest$requestedByArgs<ExtArgs>
+  rentalTermsAcceptance?: boolean | Prisma.LoanRequest$rentalTermsAcceptanceArgs<ExtArgs>
   items?: boolean | Prisma.LoanRequest$itemsArgs<ExtArgs>
   _count?: boolean | Prisma.LoanRequestCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["loanRequest"]>
@@ -894,9 +1075,11 @@ export type LoanRequestSelectCreateManyAndReturn<ExtArgs extends runtime.Types.E
   note?: boolean
   requestedById?: boolean
   createdAt?: boolean
+  rentalTermsAcceptanceId?: boolean
   production?: boolean | Prisma.ProductionDefaultArgs<ExtArgs>
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   requestedBy?: boolean | Prisma.LoanRequest$requestedByArgs<ExtArgs>
+  rentalTermsAcceptance?: boolean | Prisma.LoanRequest$rentalTermsAcceptanceArgs<ExtArgs>
 }, ExtArgs["result"]["loanRequest"]>
 
 export type LoanRequestSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
@@ -907,9 +1090,11 @@ export type LoanRequestSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.E
   note?: boolean
   requestedById?: boolean
   createdAt?: boolean
+  rentalTermsAcceptanceId?: boolean
   production?: boolean | Prisma.ProductionDefaultArgs<ExtArgs>
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   requestedBy?: boolean | Prisma.LoanRequest$requestedByArgs<ExtArgs>
+  rentalTermsAcceptance?: boolean | Prisma.LoanRequest$rentalTermsAcceptanceArgs<ExtArgs>
 }, ExtArgs["result"]["loanRequest"]>
 
 export type LoanRequestSelectScalar = {
@@ -920,13 +1105,15 @@ export type LoanRequestSelectScalar = {
   note?: boolean
   requestedById?: boolean
   createdAt?: boolean
+  rentalTermsAcceptanceId?: boolean
 }
 
-export type LoanRequestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "productionId" | "organizationId" | "unpaid" | "note" | "requestedById" | "createdAt", ExtArgs["result"]["loanRequest"]>
+export type LoanRequestOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "productionId" | "organizationId" | "unpaid" | "note" | "requestedById" | "createdAt" | "rentalTermsAcceptanceId", ExtArgs["result"]["loanRequest"]>
 export type LoanRequestInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   production?: boolean | Prisma.ProductionDefaultArgs<ExtArgs>
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   requestedBy?: boolean | Prisma.LoanRequest$requestedByArgs<ExtArgs>
+  rentalTermsAcceptance?: boolean | Prisma.LoanRequest$rentalTermsAcceptanceArgs<ExtArgs>
   items?: boolean | Prisma.LoanRequest$itemsArgs<ExtArgs>
   _count?: boolean | Prisma.LoanRequestCountOutputTypeDefaultArgs<ExtArgs>
 }
@@ -934,11 +1121,13 @@ export type LoanRequestIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.
   production?: boolean | Prisma.ProductionDefaultArgs<ExtArgs>
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   requestedBy?: boolean | Prisma.LoanRequest$requestedByArgs<ExtArgs>
+  rentalTermsAcceptance?: boolean | Prisma.LoanRequest$rentalTermsAcceptanceArgs<ExtArgs>
 }
 export type LoanRequestIncludeUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   production?: boolean | Prisma.ProductionDefaultArgs<ExtArgs>
   organization?: boolean | Prisma.OrganizationDefaultArgs<ExtArgs>
   requestedBy?: boolean | Prisma.LoanRequest$requestedByArgs<ExtArgs>
+  rentalTermsAcceptance?: boolean | Prisma.LoanRequest$rentalTermsAcceptanceArgs<ExtArgs>
 }
 
 export type $LoanRequestPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -947,6 +1136,7 @@ export type $LoanRequestPayload<ExtArgs extends runtime.Types.Extensions.Interna
     production: Prisma.$ProductionPayload<ExtArgs>
     organization: Prisma.$OrganizationPayload<ExtArgs>
     requestedBy: Prisma.$UserPayload<ExtArgs> | null
+    rentalTermsAcceptance: Prisma.$RentalTermsAcceptancePayload<ExtArgs> | null
     items: Prisma.$ProductionItemPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
@@ -957,6 +1147,7 @@ export type $LoanRequestPayload<ExtArgs extends runtime.Types.Extensions.Interna
     note: string | null
     requestedById: string | null
     createdAt: Date
+    rentalTermsAcceptanceId: string | null
   }, ExtArgs["result"]["loanRequest"]>
   composites: {}
 }
@@ -1354,6 +1545,7 @@ export interface Prisma__LoanRequestClient<T, Null = never, ExtArgs extends runt
   production<T extends Prisma.ProductionDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.ProductionDefaultArgs<ExtArgs>>): Prisma.Prisma__ProductionClient<runtime.Types.Result.GetResult<Prisma.$ProductionPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   organization<T extends Prisma.OrganizationDefaultArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.OrganizationDefaultArgs<ExtArgs>>): Prisma.Prisma__OrganizationClient<runtime.Types.Result.GetResult<Prisma.$OrganizationPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | Null, Null, ExtArgs, GlobalOmitOptions>
   requestedBy<T extends Prisma.LoanRequest$requestedByArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LoanRequest$requestedByArgs<ExtArgs>>): Prisma.Prisma__UserClient<runtime.Types.Result.GetResult<Prisma.$UserPayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
+  rentalTermsAcceptance<T extends Prisma.LoanRequest$rentalTermsAcceptanceArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LoanRequest$rentalTermsAcceptanceArgs<ExtArgs>>): Prisma.Prisma__RentalTermsAcceptanceClient<runtime.Types.Result.GetResult<Prisma.$RentalTermsAcceptancePayload<ExtArgs>, T, "findUniqueOrThrow", GlobalOmitOptions> | null, null, ExtArgs, GlobalOmitOptions>
   items<T extends Prisma.LoanRequest$itemsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.LoanRequest$itemsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$ProductionItemPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
@@ -1391,6 +1583,7 @@ export interface LoanRequestFieldRefs {
   readonly note: Prisma.FieldRef<"LoanRequest", 'String'>
   readonly requestedById: Prisma.FieldRef<"LoanRequest", 'String'>
   readonly createdAt: Prisma.FieldRef<"LoanRequest", 'DateTime'>
+  readonly rentalTermsAcceptanceId: Prisma.FieldRef<"LoanRequest", 'String'>
 }
     
 
@@ -1808,6 +2001,25 @@ export type LoanRequest$requestedByArgs<ExtArgs extends runtime.Types.Extensions
    */
   include?: Prisma.UserInclude<ExtArgs> | null
   where?: Prisma.UserWhereInput
+}
+
+/**
+ * LoanRequest.rentalTermsAcceptance
+ */
+export type LoanRequest$rentalTermsAcceptanceArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the RentalTermsAcceptance
+   */
+  select?: Prisma.RentalTermsAcceptanceSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the RentalTermsAcceptance
+   */
+  omit?: Prisma.RentalTermsAcceptanceOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.RentalTermsAcceptanceInclude<ExtArgs> | null
+  where?: Prisma.RentalTermsAcceptanceWhereInput
 }
 
 /**

@@ -34,7 +34,22 @@ export type RequestItem = {
 		imagePath: string | null;
 		template: { name: string; caption: string | null };
 	} | null;
-	loanRequest: { id: string; unpaid: boolean; note: string | null } | null;
+	loanRequest: {
+		id: string;
+		unpaid: boolean;
+		note: string | null;
+		/** The lender's rental terms the borrower agreed to before sending. */
+		rentalTermsAcceptance: {
+			userName: string;
+			acceptedAt: Date;
+			version: {
+				id: string;
+				number: number;
+				createdAt: Date;
+				organization: { slug: string };
+			};
+		} | null;
+	} | null;
 };
 
 export type RequestUnit<T extends RequestItem> = Nested<T>;
@@ -66,6 +81,16 @@ export type ApprovalRequest<T extends RequestItem> = {
 	unpaid: boolean;
 	/** The borrower's notes, one per send that is still open here. */
 	notes: string[];
+	/**
+	 * The rental terms the latest send was made under, if this lender has any.
+	 * Null for sends from before the lender had terms.
+	 */
+	rentalTerms: {
+		orgSlug: string;
+		number: number;
+		versionDate: Date;
+		acceptedBy: string;
+	} | null;
 	/** Every item, accessories included — what "approve all" sends. */
 	items: T[];
 	/** Units as the production page counts them: an accessory is not one. */
@@ -77,6 +102,20 @@ export type ApprovalRequest<T extends RequestItem> = {
 /** A unit and everything that travels with it — what deciding on it decides. */
 export function itemsOf<T extends RequestItem>(units: RequestUnit<T>[]): T[] {
 	return units.flatMap((unit) => [unit, ...unit.accessories]);
+}
+
+function rentalTermsOf(sends: NonNullable<RequestItem['loanRequest']>[]) {
+	const latest = sends
+		.flatMap((send) => (send.rentalTermsAcceptance ? [send.rentalTermsAcceptance] : []))
+		.sort((a, b) => new Date(b.acceptedAt).getTime() - new Date(a.acceptedAt).getTime())[0];
+	return latest
+		? {
+				orgSlug: latest.version.organization.slug,
+				number: latest.version.number,
+				versionDate: latest.version.createdAt,
+				acceptedBy: latest.userName
+			}
+		: null;
 }
 
 /**
@@ -145,6 +184,7 @@ export function groupApprovalRequests<T extends RequestItem>(items: T[]): Approv
 			endDate: first.production.endDate,
 			unpaid: sends.some((send) => send.unpaid),
 			notes: sends.flatMap((send) => (send.note ? [send.note] : [])),
+			rentalTerms: rentalTermsOf(sends),
 			items: list,
 			unitCount: units.length,
 			bundles: [...bundles.values()],

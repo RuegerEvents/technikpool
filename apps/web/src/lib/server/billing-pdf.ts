@@ -12,6 +12,8 @@ import { billingTotals } from '../billing-totals.ts';
 import { buildEInvoice, type EInvoiceSource } from './einvoice/model.ts';
 import { toCii } from './einvoice/cii.ts';
 import { makeZugferd } from './einvoice/pdfa3.ts';
+import { drawMarkdown, Layout } from './pdf-markdown.ts';
+import { applyRentalTerms, type RentalTermsCitation } from '../rental-terms-text.ts';
 
 type PdfOrganization = SnapshotOrganization;
 
@@ -34,6 +36,12 @@ type PdfDocumentData = {
 	vatRatePercent: unknown;
 	organization: PdfOrganization;
 	items: GroupableItem[];
+	/**
+	 * The issuer's rental terms: filled into the texts' {rentalTermsDate} and
+	 * {rentalTermsUrl}, and on an offer also attached in full, since the offer is
+	 * where they become part of the contract (rental-terms.ts decides which version).
+	 */
+	rentalTerms?: (RentalTermsCitation & { body?: string }) | null;
 };
 
 const W = 595.28;
@@ -85,6 +93,8 @@ export async function generateBillingPdf(
 	} = {}
 ) {
 	validateDocument(kind, data);
+	const introText = data.introText && applyRentalTerms(data.introText, data.rentalTerms);
+	const closingText = data.closingText && applyRentalTerms(data.closingText, data.rentalTerms);
 	const eInvoiceXml = options.eInvoice ? toCii(buildEInvoice(options.eInvoice)) : null;
 	const pdf = await PDFDocument.create();
 	const { regular, bold } = await embedInter(pdf);
@@ -226,7 +236,7 @@ export async function generateBillingPdf(
 	draw(title, LEFT, y, 19, regular);
 	y -= 30;
 	// paragraph() leaves `y` at the next baseline; the table starts from there.
-	if (data.introText) paragraph(data.introText, 10, 3);
+	if (introText) paragraph(introText, 10, 3);
 	tableHeader();
 
 	for (const group of groups) {
@@ -326,10 +336,10 @@ export async function generateBillingPdf(
 		right(money(value), W - RIGHT - 4, baseline, 9, font);
 		y -= height;
 	}
-	if (data.closingText) {
+	if (closingText) {
 		// Back from a top edge to the baseline paragraph() expects.
 		y -= 14 + capHeight(regular, 9);
-		paragraph(data.closingText, 9, 0);
+		paragraph(closingText, 9, 0);
 	}
 	const giroCode =
 		kind === 'invoice' && data.number && data.organization.iban
@@ -378,6 +388,28 @@ export async function generateBillingPdf(
 			textY -= 9.5;
 		}
 		y -= GIRO_SIZE;
+	}
+
+	if (kind === 'offer' && data.rentalTerms?.body) {
+		// The terms in full, on pages of their own after the offer. They get the
+		// footer, page count and draft mark below like every other page.
+		const header = `Anlage zu ${title}: Allgemeine Mietbedingungen (Stand ${data.rentalTerms.date})`;
+		const layout = new Layout(
+			pdf,
+			{ regular, bold },
+			{ left: LEFT, right: RIGHT, top: 64, bottom: FOOTER_TOP + 10 },
+			(annexPage) => {
+				annexPage.drawText(safe(header, regular), {
+					x: LEFT,
+					y: H - 44,
+					size: 8,
+					font: regular,
+					color: muted
+				});
+				return H - 64;
+			}
+		);
+		drawMarkdown(layout, { regular, bold }, data.rentalTerms.body);
 	}
 
 	// Stable three-column footer and real page counters on every page.

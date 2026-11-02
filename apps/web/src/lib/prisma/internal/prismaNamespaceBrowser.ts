@@ -80,6 +80,8 @@ export const ModelName = {
   Customer: 'Customer',
   ProductionItem: 'ProductionItem',
   LoanRequest: 'LoanRequest',
+  RentalTermsVersion: 'RentalTermsVersion',
+  RentalTermsAcceptance: 'RentalTermsAcceptance',
   ProductionCheck: 'ProductionCheck',
   ProductionCheckTick: 'ProductionCheckTick',
   ProductionCrew: 'ProductionCrew',
@@ -202,6 +204,7 @@ export const OrganizationScalarFieldEnum = {
   name: 'name',
   shortName: 'shortName',
   assetIdPrefix: 'assetIdPrefix',
+  slug: 'slug',
   autoAssetTags: 'autoAssetTags',
   nextAssetTagNumber: 'nextAssetTagNumber',
   nextAssetIndex: 'nextAssetIndex',
@@ -226,7 +229,8 @@ export const OrganizationScalarFieldEnum = {
   offerIntroTemplate: 'offerIntroTemplate',
   offerClosingTemplate: 'offerClosingTemplate',
   invoiceIntroTemplate: 'invoiceIntroTemplate',
-  invoiceClosingTemplate: 'invoiceClosingTemplate'
+  invoiceClosingTemplate: 'invoiceClosingTemplate',
+  rentalTermsVersionId: 'rentalTermsVersionId'
 } as const
 
 export type OrganizationScalarFieldEnum = (typeof OrganizationScalarFieldEnum)[keyof typeof OrganizationScalarFieldEnum]
@@ -567,10 +571,40 @@ export const LoanRequestScalarFieldEnum = {
   unpaid: 'unpaid',
   note: 'note',
   requestedById: 'requestedById',
-  createdAt: 'createdAt'
+  createdAt: 'createdAt',
+  rentalTermsAcceptanceId: 'rentalTermsAcceptanceId'
 } as const
 
 export type LoanRequestScalarFieldEnum = (typeof LoanRequestScalarFieldEnum)[keyof typeof LoanRequestScalarFieldEnum]
+
+
+export const RentalTermsVersionScalarFieldEnum = {
+  id: 'id',
+  organizationId: 'organizationId',
+  source: 'source',
+  body: 'body',
+  hash: 'hash',
+  number: 'number',
+  createdById: 'createdById',
+  createdAt: 'createdAt'
+} as const
+
+export type RentalTermsVersionScalarFieldEnum = (typeof RentalTermsVersionScalarFieldEnum)[keyof typeof RentalTermsVersionScalarFieldEnum]
+
+
+export const RentalTermsAcceptanceScalarFieldEnum = {
+  id: 'id',
+  versionId: 'versionId',
+  organizationId: 'organizationId',
+  orgName: 'orgName',
+  lenderName: 'lenderName',
+  userId: 'userId',
+  userName: 'userName',
+  userEmail: 'userEmail',
+  acceptedAt: 'acceptedAt'
+} as const
+
+export type RentalTermsAcceptanceScalarFieldEnum = (typeof RentalTermsAcceptanceScalarFieldEnum)[keyof typeof RentalTermsAcceptanceScalarFieldEnum]
 
 
 export const ProductionCheckScalarFieldEnum = {
@@ -708,6 +742,7 @@ export const OfferScalarFieldEnum = {
   paymentTermsDays: 'paymentTermsDays',
   finalizedAt: 'finalizedAt',
   pdfPath: 'pdfPath',
+  rentalTermsVersionId: 'rentalTermsVersionId',
   dayCount: 'dayCount',
   discountType: 'discountType',
   discountValue: 'discountValue',
@@ -801,6 +836,7 @@ export const InvoiceScalarFieldEnum = {
   recipientOrganizationId: 'recipientOrganizationId',
   sentAt: 'sentAt',
   pdfPath: 'pdfPath',
+  rentalTermsVersionId: 'rentalTermsVersionId',
   eInvoiceProfile: 'eInvoiceProfile',
   isKleinunternehmerSnapshot: 'isKleinunternehmerSnapshot',
   vatRatePercent: 'vatRatePercent',

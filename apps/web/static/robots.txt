@@ -1,3 +1,7 @@
-# allow crawling everything by default
+# A Technikpool instance is a working tool, not a website: nothing here belongs
+# in search results. The public pages (rental terms, legal texts, customer
+# links) are reached through links on documents, and also answer with
+# `x-robots-tag: noindex` (hooks.server.ts), since a URL that is only blocked
+# here can still be listed from a link elsewhere.
 User-agent: *
-Disallow:
+Disallow: /

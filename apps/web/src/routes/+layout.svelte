@@ -53,8 +53,11 @@
 	let isAuthRoute = $derived(page.url.pathname.startsWith('/auth'));
 	let isPrintRoute = $derived(/\/(crew-passes|inventory-list|print)$/.test(page.url.pathname));
 	// A customer's info link is the operator's page, not the app: no navigation
-	// into places the visitor has no account for.
-	let isShareRoute = $derived(page.url.pathname.startsWith('/share/'));
+	// into places the visitor has no account for. Same for an org's rental terms,
+	// which its customers open from a printed offer.
+	let isShareRoute = $derived(
+		page.url.pathname.startsWith('/share/') || page.url.pathname.startsWith('/rental-terms/')
+	);
 	let isCalendarRoute = $derived(page.url.pathname.startsWith('/calendar'));
 	let isEquipmentRoute = $derived(/\/equipment$/.test(page.url.pathname));
 

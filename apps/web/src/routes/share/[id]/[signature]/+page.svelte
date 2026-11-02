@@ -7,6 +7,7 @@
 	import { onDestroy, tick } from 'svelte';
 	import { browser } from '$app/env';
 	import { page } from '$app/state';
+	import { resolve } from '$app/paths';
 	import { SvelteSet } from 'svelte/reactivity';
 	import { BookOpen, FileText, Info, LayoutList, PackageCheck, ScanLine, X } from '@lucide/svelte';
 	import type { Html5Qrcode } from 'html5-qrcode';
@@ -548,6 +549,14 @@
 					{#if done > 0 && tab === 'pack'}
 						<button type="button" class="underline underline-offset-2" onclick={resetTicks}
 							>Clear all ticks</button
+						>
+					{/if}
+					{#if view.rentalTerms}
+						<a
+							href={resolve(`rental-terms/${view.rentalTerms.orgSlug}/${view.rentalTerms.number}`)}
+							target="_blank"
+							rel="noopener"
+							class="underline underline-offset-2">Rental terms ({view.rentalTerms.date})</a
 						>
 					{/if}
 					<span class="ml-auto flex gap-2">

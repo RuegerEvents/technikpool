@@ -284,6 +284,10 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return 'Give a reason for the cancellation.';
 		case 'no_draft_loans':
 			return 'There is nothing left to request — the list was already sent.';
+		case 'rental_terms_not_accepted':
+			return `Agree to the rental terms of ${p0} before you ask to borrow from them.`;
+		case 'rental_terms_empty':
+			return 'The rental terms cannot be empty. Switch them off instead.';
 		case 'booking_not_pending':
 			return 'This request is no longer open — it was withdrawn or has already been answered.';
 		case 'booking_not_approved':

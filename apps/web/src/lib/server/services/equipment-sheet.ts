@@ -20,6 +20,8 @@ import {
 	requireProductionRead
 } from '#lib/server/services/access.js';
 import { fmtDate } from '../pdf-text';
+import { productionRentalTerms } from './rental-terms';
+import { rentalTermsNote } from '#lib/rental-terms-text.js';
 import type { OrgListLayout, SheetKind } from '#lib/equipment-sheet.js';
 import {
 	generateEquipmentSheetPdf,
@@ -383,6 +385,7 @@ async function deliveryNoteSheet(
 	const production = await loadProduction(productionId, ['APPROVED', 'CHECKED_OUT', 'RETURNED']);
 	const { customer } = production;
 	const venue = venueOf(production);
+	const rentalTerms = await productionRentalTerms(production);
 	return {
 		title: 'Lieferschein',
 		organization: letterhead(production.organization),
@@ -414,12 +417,16 @@ async function deliveryNoteSheet(
 		empty: 'Dieser Produktion ist noch keine Ausrüstung zugeordnet.',
 		groups: await sheetGroups(production.items, byCategory, report),
 		// Hand-over: the note travels with the goods and is signed on both sides.
+		// With rental terms, the signature confirms receipt under them (their
+		// § 4); without, the note says in a sentence what they would have.
 		closing: [
 			'Bitte prüfen Sie die Lieferung bei Übernahme auf Vollständigkeit und sichtbare Schäden. ' +
 				'Fehlende oder beschädigte Teile vermerken Sie bitte auf diesem Lieferschein.',
-			'Die Ware wird dem Empfänger vorübergehend zur Nutzung überlassen, für sämtliche Schäden ' +
-				'während der Nutzungsdauer haftet der Empfänger.\n' +
-				'Wir freuen uns auf Ihre Rückmeldung und stehen für Fragen gerne zur Verfügung.'
+			rentalTerms
+				? rentalTermsNote('delivery-note', rentalTerms)
+				: 'Die Ware wird dem Empfänger vorübergehend zur Nutzung überlassen, für sämtliche Schäden ' +
+					'während der Nutzungsdauer haftet der Empfänger.\n' +
+					'Wir freuen uns auf Ihre Rückmeldung und stehen für Fragen gerne zur Verfügung.'
 		],
 		signatures: ['Übergeben', 'Übernommen']
 	};

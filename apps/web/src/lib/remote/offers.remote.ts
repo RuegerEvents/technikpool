@@ -25,6 +25,26 @@ import {
 	type BillingTextVariables
 } from '#lib/billing-text.js';
 import { generateBillingPdf } from '#lib/server/billing-pdf.js';
+import {
+	citedRentalTerms,
+	documentRentalTermsVersionId
+} from '#lib/server/services/rental-terms.js';
+import { applyRentalTerms } from '#lib/rental-terms-text.js';
+
+/**
+ * A document's texts as sent: the rental-terms placeholders filled in with the
+ * version it is finalized with (or their lines dropped), so the stored text
+ * reads like the archived PDF.
+ */
+function textsAsSent(
+	doc: { introText: string | null; closingText: string | null },
+	terms: Awaited<ReturnType<typeof citedRentalTerms>>
+) {
+	return {
+		introText: doc.introText && applyRentalTerms(doc.introText, terms),
+		closingText: doc.closingText && applyRentalTerms(doc.closingText, terms)
+	};
+}
 import { putObject } from '#lib/server/storage.js';
 import { organizationFromSnapshot, orgSnapshotColumns } from '#lib/org-snapshot.js';
 import { summarizeContents } from '#lib/billing-lines.js';
@@ -1467,16 +1487,25 @@ export const finalizeOffer = command(v.string(), async (offerId: string) => {
 	// The PDF renders from the offer's own org snapshot, never the live org —
 	// what is archived is what the document said, not what the org looks like
 	// on the day someone pressed the button.
+	// The rental terms in force now are the ones it is sent with, and stay its.
+	const rentalTermsVersionId = await documentRentalTermsVersionId('offer', {
+		...offer,
+		issued: false
+	});
+	const rentalTerms = await citedRentalTerms(rentalTermsVersionId);
+	const texts = textsAsSent(offer, rentalTerms);
 	const pdf = await generateBillingPdf('offer', {
 		...offer,
-		organization: organizationFromSnapshot(offer)
+		...texts,
+		organization: organizationFromSnapshot(offer),
+		rentalTerms
 	});
 	await putObject(pdfPath, pdf, 'application/pdf');
 	// Conditional on still being a draft, so two concurrent finalizes can't
 	// both pass the check above and each archive their own PDF.
 	const { count } = await prisma.offer.updateMany({
 		where: { id: offerId, finalizedAt: null },
-		data: { finalizedAt: new Date(), pdfPath }
+		data: { finalizedAt: new Date(), pdfPath, rentalTermsVersionId, ...texts }
 	});
 	if (count === 0) appError(409, 'offer_already_finalized');
 	await getOffer(offerId).refresh();
@@ -1890,8 +1919,20 @@ export const finalizeInvoice = command(v.string(), async (invoiceId: string) => 
 		appError(409, 'invoice_already_finalized');
 	}
 	const pdfPath = `billing-documents/${invoice.organizationId}/invoices/${invoice.id}.pdf`;
+	// The rental terms its offer was sent with, else the ones in force now.
+	const rentalTermsVersionId = await documentRentalTermsVersionId('invoice', {
+		...invoice,
+		issued: false
+	});
 	// Renders from the invoice's own org snapshot — see finalizeOffer.
-	const document = { ...invoice, organization: organizationFromSnapshot(invoice) };
+	const rentalTerms = await citedRentalTerms(rentalTermsVersionId);
+	const texts = textsAsSent(invoice, rentalTerms);
+	const document = {
+		...invoice,
+		...texts,
+		organization: organizationFromSnapshot(invoice),
+		rentalTerms
+	};
 	// Issued as a ZUGFeRD e-invoice: the archived PDF carries its XML.
 	const pdf = await generateBillingPdf('invoice', document, { eInvoice: document });
 	await putObject(pdfPath, pdf, 'application/pdf');
@@ -1899,7 +1940,13 @@ export const finalizeInvoice = command(v.string(), async (invoiceId: string) => 
 	// both slip past the check above.
 	const { count } = await prisma.invoice.updateMany({
 		where: { id: invoiceId, pdfPath: null },
-		data: { sentAt: invoice.sentAt ?? new Date(), pdfPath, eInvoiceProfile: 'ZUGFERD_EN16931' }
+		data: {
+			sentAt: invoice.sentAt ?? new Date(),
+			pdfPath,
+			eInvoiceProfile: 'ZUGFERD_EN16931',
+			rentalTermsVersionId,
+			...texts
+		}
 	});
 	if (count === 0) appError(409, 'invoice_already_finalized');
 

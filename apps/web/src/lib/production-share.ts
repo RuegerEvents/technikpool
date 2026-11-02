@@ -37,4 +37,6 @@ export type ShareView = {
 		{ id: string; kind: 'MANUAL' | 'DATASHEET' | 'OTHER'; title: string; url: string }[]
 	>;
 	expiresAt: string | null;
+	/** The production org's rental terms the job is booked under, if it has any. */
+	rentalTerms: { orgSlug: string; number: number; date: string } | null;
 };

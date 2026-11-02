@@ -5,6 +5,10 @@ import { getObject } from '#lib/server/storage.js';
 import { requireOrgInventory } from '#lib/server/services/access.js';
 import { generateBillingPdf } from '#lib/server/billing-pdf.js';
 import { organizationFromSnapshot } from '#lib/org-snapshot.js';
+import {
+	citedRentalTerms,
+	documentRentalTermsVersionId
+} from '#lib/server/services/rental-terms.js';
 
 export const GET: RequestHandler = async ({ params, locals }) => {
 	if (!locals.user) error(401, 'Unauthorized');
@@ -40,9 +44,18 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 		try {
 			// Draft previews render from the document's org snapshot too — the
 			// preview must show exactly what finalizing would archive.
+			const kind = params.kind === 'offers' ? 'offer' : 'invoice';
+			const rentalTermsVersionId = await documentRentalTermsVersionId(kind, {
+				...document,
+				issued: false
+			});
 			bytes = await generateBillingPdf(
-				params.kind === 'offers' ? 'offer' : 'invoice',
-				{ ...document, organization: organizationFromSnapshot(document) },
+				kind,
+				{
+					...document,
+					organization: organizationFromSnapshot(document),
+					rentalTerms: await citedRentalTerms(rentalTermsVersionId)
+				},
 				{ draft: true }
 			);
 		} catch (cause) {

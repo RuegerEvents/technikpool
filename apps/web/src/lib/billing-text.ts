@@ -1,11 +1,15 @@
 export const DEFAULT_OFFER_INTRO =
 	'Gerne bieten wir Ihnen für die Produktion „{production}“ im Zeitraum {servicePeriod} die folgenden Leistungen an.';
+// The last line of each closing text cites the org's rental terms; it is left
+// out of a document whose org has none (applyRentalTerms in rental-terms-text.ts).
 export const DEFAULT_OFFER_CLOSING =
-	'Wir freuen uns auf Ihre Rückmeldung und stehen für Fragen gerne zur Verfügung.';
+	'Wir freuen uns auf Ihre Rückmeldung und stehen für Fragen gerne zur Verfügung.\n\n' +
+	'Es gelten unsere Allgemeinen Mietbedingungen (Stand {rentalTermsDate}). Sie sind diesem Angebot als Anlage beigefügt und abrufbar unter {rentalTermsUrl}.';
 export const DEFAULT_INVOICE_INTRO =
 	'Wie vereinbart, stellen wir Ihnen die folgenden Leistungen für die Produktion „{production}“ in Rechnung.';
 export const DEFAULT_INVOICE_CLOSING =
-	'Bitte überweisen Sie den Gesamtbetrag innerhalb von {paymentTermsDays} Tagen unter Angabe des Verwendungszwecks „{documentNumber}“ auf das unten angegebene Konto.';
+	'Bitte überweisen Sie den Gesamtbetrag innerhalb von {paymentTermsDays} Tagen unter Angabe des Verwendungszwecks „{documentNumber}“ auf das unten angegebene Konto.\n\n' +
+	'Es gelten unsere Allgemeinen Mietbedingungen (Stand {rentalTermsDate}), abrufbar unter {rentalTermsUrl}.';
 
 export type BillingTextVariables = {
 	production: string;

@@ -226,6 +226,7 @@ msgstr "Crew"
 #: src/routes/orgs/[id]/locations/+page.svelte
 #: src/routes/orgs/[id]/rates/service-catalog.svelte
 #: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/rental-terms-card.svelte
 #: src/routes/productions/[id]/copy-equipment-modal.svelte
 #: src/routes/productions/[id]/loan-request-modal.svelte
 #: src/routes/productions/[id]/production-detail.svelte
@@ -755,6 +756,7 @@ msgstr "<0/> Nach dem Speichern weiteres erstellen"
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/rental-terms-card.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
@@ -1317,6 +1319,7 @@ msgstr "Gerät"
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/rental-terms-card.svelte
 msgid "Edit"
 msgstr "Bearbeiten"
 
@@ -1373,6 +1376,7 @@ msgstr "Standort"
 #: src/routes/orgs/[id]/rates/+page.svelte
 #: src/routes/orgs/[id]/rates/service-catalog.svelte
 #: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/rental-terms-card.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
@@ -2438,12 +2442,8 @@ msgstr "Geräte"
 msgid "<0/> Devices"
 msgstr "<0/> Geräte"
 
-#: src/routes/assets/[id]/asset-detail.svelte
-#: src/routes/assets/[id]/asset-detail.svelte
-#: src/routes/assets/bundles/[id]/bundle-detail.svelte
-#: src/routes/assets/bundles/[id]/bundle-detail.svelte
-msgid "Back to Devices"
-msgstr "Zurück zu Geräte"
+#~ msgid "Back to Devices"
+#~ msgstr "Zurück zu Geräte"
 
 #~ msgid "Stickers"
 #~ msgstr "Sticker"
@@ -3250,6 +3250,7 @@ msgstr "Wird hochgeladen…"
 
 #: src/lib/components/ui/image-upload/image-upload.svelte
 #: src/routes/orgs/[id]/org-logo-card.svelte
+#: src/routes/orgs/[id]/rental-terms-card.svelte
 msgid "Replace"
 msgstr "Ersetzen"
 
@@ -5300,9 +5301,8 @@ msgstr "Benutzer löschen"
 #~ msgid "The account, sessions, and organization memberships are permanently removed. Users recorded in asset history cannot be deleted."
 #~ msgstr "Das Konto, die Sitzungen und die Organisationsmitgliedschaften werden dauerhaft entfernt. Benutzer, die im Geräteverlauf erfasst sind, können nicht gelöscht werden."
 
-#: src/routes/offers/[id]/offer-detail.svelte
-msgid "Back to equipment"
-msgstr "Zurück zum Equipment"
+#~ msgid "Back to equipment"
+#~ msgstr "Zurück zum Equipment"
 
 #: src/lib/components/ui/billing-document/billing-document.svelte
 msgid "Category rate applied"
@@ -13281,3 +13281,158 @@ msgstr[1] "# Produkte ausgewählt"
 #: src/routes/products/dguv-quick.svelte
 msgid "Like category"
 msgstr "Wie Kategorie"
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "Agree to the rental terms of {0} before you ask to borrow from them."
+msgstr "Stimmen Sie den Mietbedingungen von {0} zu, bevor Sie dort etwas anfragen."
+
+#: src/lib/error-messages.svelte.ts
+msgid "The rental terms cannot be empty. Switch them off instead."
+msgstr "Die Mietbedingungen dürfen nicht leer sein. Schalten Sie sie stattdessen ab."
+
+#. 0: request.requesterOrg; 1: new Date(request.rentalTerms.versionDate).toLocaleDateString(); 2: request.rentalTerms.acceptedBy
+#: src/routes/approval-request-modal.svelte
+msgid "{0} agreed to your <0>rental terms</0> (version of {1}), accepted by {2}."
+msgstr "{0} hat Ihren <0>Mietbedingungen</0> (Fassung vom {1}) zugestimmt, angenommen von {2}."
+
+#: src/routes/orgs/[id]/rental-terms-card.svelte
+msgid "Rental terms saved"
+msgstr "Mietbedingungen gespeichert"
+
+#: src/routes/orgs/[id]/rental-terms-card.svelte
+msgid "Rental terms switched on"
+msgstr "Mietbedingungen eingeschaltet"
+
+#: src/routes/orgs/[id]/rental-terms-card.svelte
+msgid "Switch off the rental terms?"
+msgstr "Mietbedingungen abschalten?"
+
+#: src/routes/orgs/[id]/rental-terms-card.svelte
+msgid "New offers, invoices and delivery notes no longer mention them, and borrowing organizations are no longer asked to agree. Documents already sent keep their link, and switching on again brings back the last version."
+msgstr "Neue Angebote, Rechnungen und Lieferscheine nennen sie nicht mehr, und Organisationen, die bei Ihnen leihen, werden nicht mehr um Zustimmung gebeten. Bereits verschickte Dokumente behalten ihren Link, und beim Wiedereinschalten gilt die letzte Fassung."
+
+#: src/routes/orgs/[id]/rental-terms-card.svelte
+#: src/routes/orgs/[id]/rental-terms-card.svelte
+msgid "Switch off"
+msgstr "Abschalten"
+
+#: src/routes/orgs/[id]/rental-terms-card.svelte
+msgid "Rental terms switched off"
+msgstr "Mietbedingungen abgeschaltet"
+
+#: src/routes/orgs/[id]/rental-terms-card.svelte
+msgid "Replace the text with the template?"
+msgstr "Text durch die Vorlage ersetzen?"
+
+#: src/routes/orgs/[id]/rental-terms-card.svelte
+msgid "The editor is filled with the current template. Nothing is saved until you press Save."
+msgstr "Der Editor wird mit der aktuellen Vorlage gefüllt. Gespeichert wird erst, wenn Sie auf Speichern klicken."
+
+#: src/routes/orgs/[id]/rental-terms-card.svelte
+#: src/routes/productions/[id]/loan-request-modal.svelte
+msgid "Rental terms"
+msgstr "Mietbedingungen"
+
+#: src/routes/orgs/[id]/rental-terms-card.svelte
+msgid "Your terms for renting out equipment. Attached to every offer, cited on invoices and delivery notes, and agreed to by organizations that borrow from you."
+msgstr "Ihre Bedingungen für die Vermietung von Technik. Sie werden jedem Angebot angehängt, auf Rechnungen und Lieferscheinen genannt, und Organisationen, die bei Ihnen leihen, stimmen ihnen zu."
+
+#: src/routes/orgs/[id]/rental-terms-card.svelte
+msgid "Switched off. Switching on brings back your last version."
+msgstr "Abgeschaltet. Beim Einschalten gilt wieder Ihre letzte Fassung."
+
+#: src/routes/orgs/[id]/rental-terms-card.svelte
+msgid "Not set up. Switching on starts from a template written for renting out event equipment, which you can then adapt."
+msgstr "Nicht eingerichtet. Beim Einschalten starten Sie mit einer Vorlage für die Vermietung von Veranstaltungstechnik, die Sie anschließend anpassen können."
+
+#: src/routes/orgs/[id]/rental-terms-card.svelte
+msgid "Switch on"
+msgstr "Einschalten"
+
+#: src/routes/orgs/[id]/rental-terms-card.svelte
+msgid "Your name, address or payment term changed since this version was saved. Save the terms again to put the current details in."
+msgstr "Name, Anschrift oder Zahlungsziel haben sich seit dieser Fassung geändert. Speichern Sie die Mietbedingungen erneut, um die aktuellen Angaben zu übernehmen."
+
+#. 0: terms.versions.length - 1
+#: src/routes/orgs/[id]/rental-terms-card.svelte
+msgid "Earlier versions ({0})"
+msgstr "Frühere Fassungen ({0})"
+
+#. 0: day(active.createdAt)
+#: src/routes/orgs/[id]/rental-terms-card.svelte
+msgid "In force since {0}. <0>Public page</0>"
+msgstr "Gültig seit {0}. <0>Öffentliche Seite</0>"
+
+#: src/routes/orgs/[id]/rental-terms-card.svelte
+msgid "Edit rental terms"
+msgstr "Mietbedingungen bearbeiten"
+
+#. 0: '{org}'; 1: '{orgAddress}'; 2: '{paymentTermsDays}'
+#: src/routes/orgs/[id]/rental-terms-card.svelte
+msgid "Markdown. {0}, {1} and {2} are filled in with your organization's details when you save. Saving makes a new version: documents already sent keep linking the version they were sent with."
+msgstr "Markdown. {0}, {1} und {2} werden beim Speichern mit den Angaben Ihrer Organisation gefüllt. Jedes Speichern legt eine neue Fassung an: Bereits verschickte Dokumente verlinken weiter die Fassung, mit der sie verschickt wurden."
+
+#: src/routes/orgs/[id]/rental-terms-card.svelte
+msgid "Use template"
+msgstr "Vorlage verwenden"
+
+#. 0: orgLabel(terms); 1: terms.date
+#: src/routes/productions/[id]/loan-request-modal.svelte
+msgid "I agree to the <0>rental terms</0> of {0} (version of {1})."
+msgstr "Ich stimme den <0>Mietbedingungen</0> von {0} (Fassung vom {1}) zu."
+
+#: src/routes/productions/[id]/loan-request-modal.svelte
+msgid "These lenders lend on their own rental terms. Your organization agrees to them once per version; the agreement is recorded with your name."
+msgstr "Diese Verleiher verleihen zu eigenen Mietbedingungen. Ihre Organisation stimmt jeder Fassung einmal zu, die Zustimmung wird mit Ihrem Namen gespeichert."
+
+#. 0: data.orgName
+#: src/routes/rental-terms/[org]/[number]/+page.svelte
+msgid "{0} | Rental terms"
+msgstr "{0} | Mietbedingungen"
+
+#. 0: view.rentalTerms.date
+#: src/routes/share/[id]/[signature]/+page.svelte
+msgid "Rental terms ({0})"
+msgstr "Mietbedingungen ({0})"
+
+#. 0: data.orgName
+#: src/routes/rental-terms/[org]/[number]/+page.svelte
+msgid "{0} has published newer terms since this version. Documents that link here were issued under this one. <0>Current version</0>"
+msgstr "{0} hat seit dieser Fassung neuere Mietbedingungen veröffentlicht. Dokumente, die hierher verlinken, wurden unter dieser Fassung ausgestellt. <0>Aktuelle Fassung</0>"
+
+#. 0: data.number; 1: data.date
+#: src/routes/rental-terms/[org]/[number]/+page.svelte
+msgid "Version {0} of {1}"
+msgstr "Fassung {0} vom {1}"
+
+#. 0: '{rentalTermsDate}'; 1: '{rentalTermsUrl}'
+#. 0: '{rentalTermsDate}'; 1: '{rentalTermsUrl}'
+#. 0: '{rentalTermsDate}'; 1: '{rentalTermsUrl}'
+#: src/routes/invoices/[id]/invoice-detail.svelte
+#: src/routes/offers/[id]/offer-detail.svelte
+#: src/routes/offers/new/+page.svelte
+msgid "{0} and {1} are filled in from the rental terms when the document is finalized. Without rental terms, their line is left out."
+msgstr "{0} und {1} werden beim Finalisieren aus den Mietbedingungen eingesetzt. Ohne Mietbedingungen entfällt ihre Zeile."
+
+#. 0: '{rentalTermsDate}'; 1: '{rentalTermsUrl}'
+#: src/routes/orgs/[id]/+page.svelte
+msgid "{0} and {1} cite your rental terms. Without rental terms, a line holding one of them is left out."
+msgstr "{0} und {1} verweisen auf Ihre Mietbedingungen. Ohne Mietbedingungen entfällt eine Zeile, die einen davon enthält."
+
+#: src/routes/orgs/[id]/rental-terms-card.svelte
+msgid "Your closing texts for offers and invoices don't mention the rental terms."
+msgstr "Ihre Schlusstexte für Angebote und Rechnungen erwähnen die Mietbedingungen nicht."
+
+#: src/routes/orgs/[id]/rental-terms-card.svelte
+msgid "Your closing text for offers doesn't mention the rental terms."
+msgstr "Ihr Schlusstext für Angebote erwähnt die Mietbedingungen nicht."
+
+#: src/routes/orgs/[id]/rental-terms-card.svelte
+msgid "Your closing text for invoices doesn't mention the rental terms."
+msgstr "Ihr Schlusstext für Rechnungen erwähnt die Mietbedingungen nicht."
+
+#. 0: '{rentalTermsDate}'; 1: '{rentalTermsUrl}'
+#: src/routes/orgs/[id]/rental-terms-card.svelte
+msgid "<0/> Add a sentence with {0} and {1} under <1>Billing Details</1>. The offer is where the terms become part of the contract."
+msgstr "<0/> Ergänzen Sie unter <1>Rechnungsdaten</1> einen Satz mit {0} und {1}. Erst über das Angebot werden die Bedingungen Vertragsbestandteil."

@@ -34,26 +34,28 @@ model User {
   sentInvitations     Invitation[]
 
   // App-specific relations
-  homeOrgId            String?
-  homeOrg              Organization?         @relation("HomeOrg", fields: [homeOrgId], references: [id])
-  memberships          OrgMembership[]
-  transactions         AssetTransaction[]
-  crewAssignments      ProductionCrew[]
-  cancelledProductions Production[]          @relation("ProductionCanceller")
-  stocktakesStarted    Stocktake[]           @relation("StocktakeStarter")
-  stocktakesClosed     Stocktake[]           @relation("StocktakeCloser")
-  stocktakeFinds       StocktakeItem[]
-  stocktakeCounts      StocktakeCount[]
-  stocktakeEvents      StocktakeEvent[]
-  dpaAcceptances       DpaAcceptance[]
-  itemsReceived        ProductionItem[]      @relation("ProductionItemReceiver")
-  returnsReported      ProductionItem[]      @relation("ProductionItemReturnReporter")
-  checksStarted        ProductionCheck[]     @relation("ProductionCheckStarter")
-  checksClosed         ProductionCheck[]     @relation("ProductionCheckCloser")
-  checkTicks           ProductionCheckTick[]
-  loanRequests         LoanRequest[]
-  billingDismissals    BillingDismissal[]
-  defaultLocations     UserDefaultLocation[]
+  homeOrgId              String?
+  homeOrg                Organization?           @relation("HomeOrg", fields: [homeOrgId], references: [id])
+  memberships            OrgMembership[]
+  transactions           AssetTransaction[]
+  crewAssignments        ProductionCrew[]
+  cancelledProductions   Production[]            @relation("ProductionCanceller")
+  stocktakesStarted      Stocktake[]             @relation("StocktakeStarter")
+  stocktakesClosed       Stocktake[]             @relation("StocktakeCloser")
+  stocktakeFinds         StocktakeItem[]
+  stocktakeCounts        StocktakeCount[]
+  stocktakeEvents        StocktakeEvent[]
+  dpaAcceptances         DpaAcceptance[]
+  rentalTermsVersions    RentalTermsVersion[]
+  rentalTermsAcceptances RentalTermsAcceptance[]
+  itemsReceived          ProductionItem[]        @relation("ProductionItemReceiver")
+  returnsReported        ProductionItem[]        @relation("ProductionItemReturnReporter")
+  checksStarted          ProductionCheck[]       @relation("ProductionCheckStarter")
+  checksClosed           ProductionCheck[]       @relation("ProductionCheckCloser")
+  checkTicks             ProductionCheckTick[]
+  loanRequests           LoanRequest[]
+  billingDismissals      BillingDismissal[]
+  defaultLocations       UserDefaultLocation[]
 
   @@map("user")
 }
@@ -142,6 +144,11 @@ model Organization {
 
   assetIdPrefix String @unique
 
+  // The org's name in public URLs (its rental terms: /rental-terms/<slug>/<n>).
+  // Made from the name once, at creation, and never changed: those URLs are
+  // printed on offers and invoices (#lib/org-slug.ts).
+  slug String @unique
+
   // Whether a unit created without a tag is given the next number: prefix plus
   // five digits. Off by default — a number nobody printed is on no sticker.
   // `nextAssetTagNumber` only ever grows, so a number handed out once is never
@@ -188,6 +195,12 @@ model Organization {
   invoiceIntroTemplate   String? @db.Text
   invoiceClosingTemplate String? @db.Text
 
+  // The rental terms (Miet-AGB) in force: null while the org has none switched
+  // on. Points at one of its own versions, which are never edited, so an
+  // offer that names a version names that wording for good (rental-terms.ts).
+  rentalTermsVersionId String?             @unique
+  rentalTermsVersion   RentalTermsVersion? @relation("ActiveRentalTerms", fields: [rentalTermsVersionId], references: [id], onDelete: SetNull)
+
   homeUsers      User[]          @relation("HomeOrg")
   members        OrgMembership[]
   dpaAcceptances DpaAcceptance[]
@@ -205,13 +218,16 @@ model Organization {
   offerSequences    OfferSequence[]
   offers            Offer[]
   invoices          Invoice[]
-  offersReceived    Offer[]            @relation("OfferRecipientOrg")
-  invoicesReceived  Invoice[]          @relation("InvoiceRecipientOrg")
+  offersReceived    Offer[]               @relation("OfferRecipientOrg")
+  invoicesReceived  Invoice[]             @relation("InvoiceRecipientOrg")
   billingDismissals BillingDismissal[]
   customers         Customer[]
   stocktakes        Stocktake[]
   productionChecks  ProductionCheck[]
   loanRequests      LoanRequest[]
+
+  rentalTermsVersions    RentalTermsVersion[]    @relation("RentalTermsVersions")
+  rentalTermsAcceptances RentalTermsAcceptance[]
 }
 
 // Declared highest first, so `orderBy: { role: 'asc' }` lists owners at the
@@ -429,7 +445,7 @@ model ProductPort {
   productId   String
   product     Product   @relation(fields: [productId], references: [id], onDelete: Cascade)
   connectorId String
-  connector   Connector @relation(fields: [connectorId], references: [id], onDelete: Restrict)
+  connector   Connector @relation(fields: [connectorId], references: [id], onDelete: SetNull)
   count       Int       @default(1)
   /// What the panel calls it — "DMX In", "Mic 1–16", "Power Thru". Free text:
   /// direction, channel range and purpose are all things a person writes
@@ -467,9 +483,9 @@ model CableWay {
   /// Identical ways are one row: "6× Schuko M→F" is a count, not six rows.
   count         Int        @default(1)
   connectorAId  String?
-  connectorARef Connector? @relation("CableWayConnectorA", fields: [connectorAId], references: [id], onDelete: Restrict)
+  connectorARef Connector? @relation("CableWayConnectorA", fields: [connectorAId], references: [id], onDelete: SetNull)
   connectorBId  String?
-  connectorBRef Connector? @relation("CableWayConnectorB", fields: [connectorBId], references: [id], onDelete: Restrict)
+  connectorBRef Connector? @relation("CableWayConnectorB", fields: [connectorBId], references: [id], onDelete: SetNull)
   /// This way's wire, where the ways differ — a hybrid's power way is 2,5 mm²
   /// and its data way is CAT7, which no single field on the product could say.
   cableType     String?
@@ -558,9 +574,9 @@ model Product {
   /// `ensureConnectors`.
   cableType     String?
   connectorAId  String?
-  connectorARef Connector? @relation("ProductConnectorA", fields: [connectorAId], references: [id], onDelete: Restrict)
+  connectorARef Connector? @relation("ProductConnectorA", fields: [connectorAId], references: [id], onDelete: SetNull)
   connectorBId  String?
-  connectorBRef Connector? @relation("ProductConnectorB", fields: [connectorBId], references: [id], onDelete: Restrict)
+  connectorBRef Connector? @relation("ProductConnectorB", fields: [connectorBId], references: [id], onDelete: SetNull)
   /// Whole centimetres; the UI reads and writes metres.
   lengthCm      Int?
   ways          CableWay[]
@@ -647,14 +663,14 @@ model Location {
   organizationId String
   organization   Organization  @relation(fields: [organizationId], references: [id], onDelete: Cascade)
   addressId      String
-  address        Address       @relation(fields: [addressId], references: [id], onDelete: Restrict)
+  address        Address       @relation(fields: [addressId], references: [id], onDelete: SetNull)
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt
   assets         Asset[]
   assetBundles   AssetBundle[]
 
-  stocktakeExpected StocktakeItem[]  @relation("StocktakeExpectedAt")
-  stocktakeFound    StocktakeItem[]  @relation("StocktakeFoundAt")
+  stocktakeExpected StocktakeItem[]       @relation("StocktakeExpectedAt")
+  stocktakeFound    StocktakeItem[]       @relation("StocktakeFoundAt")
   stocktakeLines    StocktakeLine[]
   stocktakeCounts   StocktakeCount[]
   defaultFor        UserDefaultLocation[]
@@ -686,7 +702,7 @@ model Asset {
   productId      String
   product        Product      @relation(fields: [productId], references: [id])
   locationId     String
-  location       Location     @relation(fields: [locationId], references: [id], onDelete: Restrict)
+  location       Location     @relation(fields: [locationId], references: [id], onDelete: SetNull)
 
   serialNumber String?
   assetTag     String? @unique
@@ -969,9 +985,71 @@ model LoanRequest {
   requestedBy   User?    @relation(fields: [requestedById], references: [id], onDelete: SetNull)
   createdAt     DateTime @default(now())
 
+  // The lender's rental terms the request was sent under. Null for a lender
+  // without terms, and for requests older than them.
+  rentalTermsAcceptanceId String?
+  rentalTermsAcceptance   RentalTermsAcceptance? @relation(fields: [rentalTermsAcceptanceId], references: [id], onDelete: SetNull)
+
   items ProductionItem[]
 
   @@index([productionId, organizationId])
+}
+
+/// One wording of an org's rental terms (Miet-AGB). Append-only: saving the
+/// terms writes a new row, so a document or acceptance that points at one
+/// still points at the text it was given. See src/lib/server/services/rental-terms.ts.
+model RentalTermsVersion {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation("RentalTermsVersions", fields: [organizationId], references: [id], onDelete: Cascade)
+
+  /// As typed, with its placeholders ({org}, {orgAddress}, {paymentTermsDays}).
+  source String @db.Text
+  /// What it says: `source` with the org's details filled in when it was saved.
+  body   String @db.Text
+  /// SHA-256 of `body`.
+  hash   String
+  /// 1, 2, 3 … per org, never reused: "Fassung 3", and /rental-terms/<org slug>/3.
+  number Int
+
+  createdById String?
+  createdBy   User?    @relation(fields: [createdById], references: [id], onDelete: SetNull)
+  createdAt   DateTime @default(now())
+
+  activeFor   Organization?           @relation("ActiveRentalTerms")
+  offers      Offer[]                 @relation("OfferRentalTerms")
+  invoices    Invoice[]               @relation("InvoiceRentalTerms")
+  acceptances RentalTermsAcceptance[]
+
+  @@unique([organizationId, number])
+  @@index([organizationId, createdAt])
+}
+
+/// An org agreeing to a lender's rental terms before it asks to borrow from
+/// it, once per version. Append-only, like DpaAcceptance, and kept with the
+/// names as they were, so it still says who agreed to what after a deletion.
+model RentalTermsAcceptance {
+  id String @id @default(cuid())
+
+  versionId String
+  version   RentalTermsVersion @relation(fields: [versionId], references: [id], onDelete: Cascade)
+
+  /// The borrowing org.
+  organizationId String?
+  organization   Organization? @relation(fields: [organizationId], references: [id], onDelete: SetNull)
+  orgName        String
+  /// The lender, whose terms these are.
+  lenderName     String
+
+  userId     String?
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+  userName   String
+  userEmail  String
+  acceptedAt DateTime @default(now())
+
+  loanRequests LoanRequest[]
+
+  @@index([organizationId, versionId])
 }
 
 // Checking a production's equipment against its list (Prüfen): scanned or
@@ -1159,13 +1237,17 @@ model Offer {
   customerPhone         String?
   customerVatId         String?
 
-  serviceStartDate DateTime?
-  serviceEndDate   DateTime?
-  introText        String?   @db.Text
-  closingText      String?   @db.Text
-  paymentTermsDays Int       @default(14)
-  finalizedAt      DateTime?
-  pdfPath          String?
+  serviceStartDate     DateTime?
+  serviceEndDate       DateTime?
+  introText            String?             @db.Text
+  closingText          String?             @db.Text
+  paymentTermsDays     Int                 @default(14)
+  finalizedAt          DateTime?
+  pdfPath              String?
+  // The rental terms the offer was sent with, fixed when it is finalized. A
+  // draft follows the org's version in force (rental-terms.ts).
+  rentalTermsVersionId String?
+  rentalTermsVersion   RentalTermsVersion? @relation("OfferRentalTerms", fields: [rentalTermsVersionId], references: [id], onDelete: SetNull)
 
   dayCount      Int
   discountType  String? // "PERCENT" | "AMOUNT"
@@ -1346,12 +1428,16 @@ model Invoice {
   // Null while the invoice is still a draft — items can be corrected and
   // re-synced from the production. Once set, the invoice is immutable
   // (GoBD/§14 UStG): no more item updates, no more field edits.
-  sentAt          DateTime?
-  pdfPath         String?
+  sentAt               DateTime?
+  pdfPath              String?
+  // The rental terms the invoice cites, fixed when it is sent: its offer's,
+  // where there is one (rental-terms.ts).
+  rentalTermsVersionId String?
+  rentalTermsVersion   RentalTermsVersion? @relation("InvoiceRentalTerms", fields: [rentalTermsVersionId], references: [id], onDelete: SetNull)
   // What the archived PDF carries: 'ZUGFERD_EN16931' (PDF/A-3 with the CII
   // XML attached, see src/lib/server/einvoice). Null on a draft and on an
   // invoice archived as a plain PDF before e-invoicing existed.
-  eInvoiceProfile String?
+  eInvoiceProfile      String?
 
   // Snapshot of the org's Kleinunternehmer status at issuance — GoBD requires
   // the issued document's content to stay fixed even if the org flag changes later.

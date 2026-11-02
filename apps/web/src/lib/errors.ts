@@ -150,6 +150,8 @@ export type AppErrorCode =
 	| 'cancellation_reason_required'
 	| 'booking_not_pending'
 	| 'no_draft_loans'
+	| 'rental_terms_not_accepted'
+	| 'rental_terms_empty'
 	| 'booking_not_approved'
 	// Offers and invoices
 	| 'offer_immutable'

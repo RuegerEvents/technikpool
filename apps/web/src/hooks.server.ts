@@ -43,7 +43,10 @@ const publicPaths = [
 	'/legal',
 	// A production's info link for its customer, who has no account — the signed
 	// URL is the credential (production-share.ts).
-	'/share'
+	'/share',
+	// An org's rental terms, linked from offers, invoices and delivery notes
+	// its customers receive (rental-terms.ts).
+	'/rental-terms'
 ];
 
 const guardHandle: Handle = async ({ event, resolve }) => {
@@ -69,4 +72,20 @@ const guardHandle: Handle = async ({ event, resolve }) => {
 	return await resolve(event);
 };
 
-export const handle = sequence(localeHandle, authHandle, guardHandle);
+// Nothing an instance serves belongs in a search index (see static/robots.txt).
+// Set on every response, because robots.txt only stops crawling: a public URL
+// linked from elsewhere — a rental-terms link on an invoice — can still be
+// listed unless the page itself says noindex.
+const noindexHandle: Handle = async ({ event, resolve }) => {
+	const response = await resolve(event);
+	if (!response.headers.has('x-robots-tag')) {
+		try {
+			response.headers.set('x-robots-tag', 'noindex, nofollow');
+		} catch {
+			// A response with immutable headers (a fetched one passed through) keeps its own.
+		}
+	}
+	return response;
+};
+
+export const handle = sequence(noindexHandle, localeHandle, authHandle, guardHandle);
