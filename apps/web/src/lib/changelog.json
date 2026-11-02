@@ -1,5 +1,15 @@
 [
 	{
+		"version": "0.34.1",
+		"date": "2026-11-03",
+		"en": [
+			"An organization's name can now be changed in its settings. Offers and invoices already issued keep the old name; drafts offer to take the new one. Links to rental terms stay the same."
+		],
+		"de": [
+			"Der Name einer Organisation lässt sich jetzt in ihren Einstellungen ändern. Bereits ausgestellte Angebote und Rechnungen behalten den alten Namen; Entwürfe bieten an, den neuen zu übernehmen. Links zu den Mietbedingungen bleiben gleich."
+		]
+	},
+	{
 		"version": "0.34.0",
 		"date": "2026-11-02",
 		"en": [
