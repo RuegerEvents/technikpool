@@ -3,10 +3,12 @@
 		"version": "0.34.1",
 		"date": "2026-11-03",
 		"en": [
-			"An organization's name can now be changed in its settings. Offers and invoices already issued keep the old name; drafts offer to take the new one. Links to rental terms stay the same."
+			"An organization's name can now be changed in its settings. Offers and invoices already issued keep the old name; drafts offer to take the new one. Links to rental terms stay the same.",
+			"The rental terms template now says what follows when the renter proves a smaller loss: they owe correspondingly less. Organizations that already use rental terms keep their own text."
 		],
 		"de": [
-			"Der Name einer Organisation lässt sich jetzt in ihren Einstellungen ändern. Bereits ausgestellte Angebote und Rechnungen behalten den alten Namen; Entwürfe bieten an, den neuen zu übernehmen. Links zu den Mietbedingungen bleiben gleich."
+			"Der Name einer Organisation lässt sich jetzt in ihren Einstellungen ändern. Bereits ausgestellte Angebote und Rechnungen behalten den alten Namen; Entwürfe bieten an, den neuen zu übernehmen. Links zu den Mietbedingungen bleiben gleich.",
+			"Die Vorlage für Mietbedingungen sagt jetzt, was folgt, wenn der Mieter einen geringeren Schaden nachweist: Er schuldet entsprechend weniger. Organisationen, die bereits Mietbedingungen nutzen, behalten ihren eigenen Text."
 		]
 	},
 	{
