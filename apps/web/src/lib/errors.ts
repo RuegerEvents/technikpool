@@ -183,6 +183,7 @@ export type AppErrorCode =
 	// Organisations and users
 	| 'org_prefix_invalid'
 	| 'org_avatar_label_invalid'
+	| 'org_name_required'
 	| 'org_color_invalid'
 	| 'org_iban_invalid'
 	| 'org_bic_invalid'

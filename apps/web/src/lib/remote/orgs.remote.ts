@@ -21,6 +21,7 @@ import { issueInvitation } from '#lib/server/services/invitations.js';
 import { accountDeletionBlocker } from '#lib/server/services/account-deletion.js';
 import { getInvitations } from './invitations.remote';
 import { getKnownAddresses } from './addresses.remote';
+import { getRentalTerms } from './rental-terms.remote';
 
 export const getMyOrgs = query(async () => {
 	const user = await requireAuth();
@@ -395,6 +396,7 @@ const billingAddressSchema = v.object({
 
 const updateOrgSchema = v.object({
 	orgId: v.string(),
+	name: v.optional(v.string()),
 	shortName: v.optional(v.nullable(v.string())),
 	assetIdPrefix: v.string(),
 	color: v.string(),
@@ -421,6 +423,7 @@ export const updateOrg = command(
 	updateOrgSchema,
 	async ({
 		orgId,
+		name,
 		shortName,
 		assetIdPrefix,
 		color,
@@ -442,7 +445,11 @@ export const updateOrg = command(
 		invoiceIntroTemplate,
 		invoiceClosingTemplate
 	}) => {
-		await requireOrgOwner(orgId);
+		const caller = await requireOrgOwner(orgId);
+		// The slug stays as it is: it was made once from the name and is printed in
+		// public URLs (see `org-slug.ts`), so renaming never moves a link.
+		const trimmedName = name?.trim();
+		if (name !== undefined && !trimmedName) appError(400, 'org_name_required');
 		// The form checks both while they are typed; this is the backstop.
 		if (iban?.trim() && !isValidIban(iban)) appError(400, 'org_iban_invalid');
 		if (bic?.trim() && !isValidBic(bic)) appError(400, 'org_bic_invalid');
@@ -483,6 +490,7 @@ export const updateOrg = command(
 			return await tx.organization.update({
 				where: { id: orgId },
 				data: {
+					...(trimmedName ? { name: trimmedName } : {}),
 					...(shortName !== undefined ? { shortName: shortName?.trim() || null } : {}),
 					assetIdPrefix: prefix,
 					color: normalizedColor,
@@ -526,6 +534,9 @@ export const updateOrg = command(
 		await getOrgOverview().refresh();
 		await getOrgIdentityInUse().refresh();
 		await getKnownAddresses().refresh();
+		// The terms in force carry the name and address; the card says when they moved.
+		await getRentalTerms(orgId).refresh();
+		if (await isSystemAdmin(caller.id)) await getAllOrgs().refresh();
 		return org;
 	}
 );

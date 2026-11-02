@@ -289,6 +289,8 @@ msgstr "No crew members added yet."
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/auth/register/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
 #: src/routes/orgs/[id]/rates/service-catalog.svelte
 #: src/routes/orgs/[id]/rates/service-catalog.svelte
@@ -3144,9 +3146,8 @@ msgstr "Rental Rates"
 msgid "Organization Settings"
 msgstr "Organization Settings"
 
-#: src/routes/orgs/[id]/+page.svelte
-msgid "Asset ID prefix, visual identity, DGUV default interval, and Kleinunternehmer status."
-msgstr "Asset ID prefix, visual identity, DGUV default interval, and Kleinunternehmer status."
+#~ msgid "Asset ID prefix, visual identity, DGUV default interval, and Kleinunternehmer status."
+#~ msgstr "Asset ID prefix, visual identity, DGUV default interval, and Kleinunternehmer status."
 
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
@@ -13436,3 +13437,15 @@ msgstr "Your closing text for invoices doesn't mention the rental terms."
 #: src/routes/orgs/[id]/rental-terms-card.svelte
 msgid "<0/> Add a sentence with {0} and {1} under <1>Billing Details</1>. The offer is where the terms become part of the contract."
 msgstr "<0/> Add a sentence with {0} and {1} under <1>Billing Details</1>. The offer is where the terms become part of the contract."
+
+#: src/lib/error-messages.svelte.ts
+msgid "The organization needs a name."
+msgstr "The organization needs a name."
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Name, asset ID prefix, visual identity, DGUV default interval, and Kleinunternehmer status."
+msgstr "Name, asset ID prefix, visual identity, DGUV default interval, and Kleinunternehmer status."
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "The full name, printed on offers, invoices and delivery notes. Documents already issued keep the old one; drafts offer to take the new one."
+msgstr "The full name, printed on offers, invoices and delivery notes. Documents already issued keep the old one; drafts offer to take the new one."

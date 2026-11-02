@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { getErrorMessage, orgLabel } from '#lib/utils.js';
+	import { messageForErrorCode } from '#lib/error-messages.svelte.js';
 	import {
 		DEFAULT_ORG_ROLE,
 		ORG_ROLES,
@@ -173,6 +174,7 @@
 	}
 
 	let editingSettings = $state(false);
+	let nameDraft = $state('');
 	let shortNameDraft = $state('');
 	let prefixDraft = $state('');
 	let colorDraft = $state('');
@@ -183,6 +185,7 @@
 
 	$effect(() => {
 		if (!editingSettings && org) {
+			nameDraft = org.name;
 			shortNameDraft = org.shortName ?? '';
 			prefixDraft = org.assetIdPrefix;
 			colorDraft = org.color;
@@ -194,6 +197,10 @@
 
 	async function handleSettingsSave(e: Event) {
 		e.preventDefault();
+		if (!nameDraft.trim()) {
+			toast.error(messageForErrorCode('org_name_required'));
+			return;
+		}
 		const problem = orgIdentityProblem(
 			{ color: colorDraft, avatarLabel: avatarLabelDraft, assetIdPrefix: prefixDraft },
 			identityInUse
@@ -206,6 +213,7 @@
 		try {
 			await updateOrg({
 				orgId,
+				name: nameDraft,
 				shortName: shortNameDraft || null,
 				assetIdPrefix: prefixDraft,
 				color: colorDraft,
@@ -412,13 +420,21 @@
 							<Card.Header>
 								<Card.Title>Organization Settings</Card.Title>
 								<Card.Description>
-									Asset ID prefix, visual identity, DGUV default interval, and Kleinunternehmer
-									status.
+									Name, asset ID prefix, visual identity, DGUV default interval, and
+									Kleinunternehmer status.
 								</Card.Description>
 							</Card.Header>
 							<Card.Content>
 								{#if editingSettings}
 									<form onsubmit={handleSettingsSave} class="space-y-4">
+										<div class="space-y-2">
+											<Label for="nameInput">Name</Label>
+											<Input id="nameInput" bind:value={nameDraft} required maxlength={120} />
+											<p class="text-xs text-muted-foreground">
+												The full name, printed on offers, invoices and delivery notes. Documents
+												already issued keep the old one; drafts offer to take the new one.
+											</p>
+										</div>
 										<div class="space-y-2">
 											<Label for="shortNameInput"
 												>Short name <span class="text-muted-foreground">(optional)</span></Label
@@ -512,6 +528,10 @@
 									</form>
 								{:else}
 									<div class="space-y-3">
+										<div class="flex items-center justify-between gap-4">
+											<span class="text-sm text-muted-foreground">Name</span>
+											<span class="text-right break-words">{org.name}</span>
+										</div>
 										<div class="flex items-center justify-between">
 											<span class="text-sm text-muted-foreground">Short name</span>
 											<span>{org.shortName || '—'}</span>

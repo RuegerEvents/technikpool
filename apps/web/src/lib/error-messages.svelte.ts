@@ -352,6 +352,8 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return 'The asset ID prefix has to be exactly 3 digits.';
 		case 'org_avatar_label_invalid':
 			return 'The avatar label has to be exactly 2 letters.';
+		case 'org_name_required':
+			return 'The organization needs a name.';
 		case 'org_color_invalid':
 			return 'Pick a color as #RRGGBB.';
 		case 'org_iban_invalid':
