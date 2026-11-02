@@ -1,5 +1,21 @@
 [
 	{
+		"version": "0.34.0",
+		"date": "2026-11-02",
+		"en": [
+			"Rental terms: each organization can keep its own terms for renting out equipment (Settings › Rental terms), starting from a template written for event equipment. Every saved version keeps its own public link.",
+			"Offers attach the rental terms in full, and the closing texts of offers and invoices cite them with their date and link. Invoices, delivery notes and the customer link refer to them too.",
+			"Before borrowing from an organization with rental terms, you agree to them once per version. The lender sees who agreed when approving.",
+			"Search engines no longer index any page of the server."
+		],
+		"de": [
+			"Mietbedingungen: Jede Organisation kann eigene Bedingungen für die Vermietung von Technik hinterlegen (Einstellungen › Mietbedingungen), ausgehend von einer Vorlage für Veranstaltungstechnik. Jede gespeicherte Fassung behält ihren eigenen öffentlichen Link.",
+			"Angebote enthalten die Mietbedingungen vollständig als Anlage, und die Schlusstexte von Angeboten und Rechnungen verweisen mit Stand und Link darauf. Auch Rechnungen, Lieferscheine und der Kundenlink nennen sie.",
+			"Bevor du bei einer Organisation mit Mietbedingungen etwas leihst, stimmst du ihnen einmal pro Fassung zu. Der Verleiher sieht bei der Freigabe, wer zugestimmt hat.",
+			"Suchmaschinen nehmen keine Seite des Servers mehr in ihren Index auf."
+		]
+	},
+	{
 		"version": "0.33.4",
 		"date": "2026-10-23",
 		"en": ["The server now runs on Node.js 24.22.1, which closes a security vulnerability."],
