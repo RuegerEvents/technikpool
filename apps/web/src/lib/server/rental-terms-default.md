@@ -44,7 +44,7 @@
 3. Einen Diebstahl hat der Mieter insbesondere dann zu vertreten, wenn er die Mietsache entgegen § 5 Abs. 3 unbeaufsichtigt gelassen oder nicht ausreichend gesichert hat.
 4. Bei Verlust oder Totalschaden ersetzt der Mieter den Zeitwert, bei einer Beschädigung die Reparaturkosten bis höchstens zum Zeitwert. Für die Dauer der Reparatur oder Wiederbeschaffung schuldet er außerdem den Tagesmietpreis, höchstens für 14 Tage.
 5. Für Abnutzung durch vertragsgemäßen Gebrauch haftet der Mieter nicht.
-6. Der Mieter kann nachweisen, dass dem Vermieter kein oder ein geringerer Schaden entstanden ist.
+6. Weist der Mieter nach, dass dem Vermieter kein oder ein geringerer Schaden entstanden ist, schuldet er keinen oder nur den entsprechend geringeren Ersatz.
 
 ## 8. Versicherung
 
@@ -69,7 +69,7 @@ Der Vermieter empfiehlt dem Mieter, die Mietsache für die Mietzeit gegen Verlus
    - 14 bis 8 Tage vor Mietbeginn: 50 %
    - 7 Tage oder weniger vor Mietbeginn: 80 %
 3. Für die Frist zählt der Tag, an dem der Rücktritt dem Vermieter zugeht.
-4. Der Mieter kann nachweisen, dass dem Vermieter kein oder ein wesentlich geringerer Schaden entstanden ist.
+4. Weist der Mieter nach, dass dem Vermieter kein oder ein wesentlich geringerer Schaden entstanden ist, schuldet er keine oder nur die entsprechend geringere Entschädigung.
 5. Für bereits eingeplantes Personal und beauftragte Fremdleistungen kann der Vermieter statt der Pauschale die tatsächlich angefallenen, nicht mehr vermeidbaren Kosten verlangen.
 
 ## 12. Transport
