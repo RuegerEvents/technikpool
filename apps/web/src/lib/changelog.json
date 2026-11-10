@@ -1,5 +1,17 @@
 [
 	{
+		"version": "0.35.0",
+		"date": "2026-11-10",
+		"en": [
+			"New organizations get a default inspection interval of 12 months. If an organization has none, the Inspections page now says so: its new units that need inspecting would otherwise never become due.",
+			"The API can now list the catalog with filters (needs inspection, mains connector, overdue units) and edit products and categories: name, category, whether they need inspection, cable ends and panel connectors. This lets an assistant like Claude tidy up the catalog in one pass, under the same rights as in the app."
+		],
+		"de": [
+			"Neue Organisationen bekommen ein Standard-Prüfintervall von 12 Monaten. Hat eine Organisation keins, weist die Prüfungsseite jetzt darauf hin, denn ihre neuen prüfpflichtigen Geräte würden sonst nie fällig.",
+			"Über die API lässt sich der Katalog jetzt gefiltert abrufen (prüfpflichtig, Netzstecker, überfällige Geräte) und Produkte und Kategorien bearbeiten: Name, Kategorie, Prüfpflicht, Kabelenden und Anschlüsse am Gerät. So kann ein Assistent wie Claude den Katalog in einem Durchgang aufräumen, mit denselben Rechten wie in der App."
+		]
+	},
+	{
 		"version": "0.34.1",
 		"date": "2026-11-03",
 		"en": [
