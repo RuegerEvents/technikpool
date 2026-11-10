@@ -1,5 +1,15 @@
 [
 	{
+		"version": "0.36.0",
+		"date": "2026-11-10",
+		"en": [
+			"Case labels: the server now lays out a label for a kit or a unit with accessories (name, contents, logo and scannable code) for a ZPL label printer such as the Honeywell PC42E-T, in 4×6″ and 80×55 mm. Printing comes with the next version of the scanner app."
+		],
+		"de": [
+			"Kistenetiketten: Der Server setzt jetzt für ein Kit oder ein Gerät mit Zubehör ein Etikett (Name, Inhalt, Logo und scannbarer Code) für einen ZPL-Etikettendrucker wie den Honeywell PC42E-T, in 4×6″ und 80×55 mm. Gedruckt wird mit der nächsten Version der Scanner-App."
+		]
+	},
+	{
 		"version": "0.35.2",
 		"date": "2026-11-10",
 		"en": [
