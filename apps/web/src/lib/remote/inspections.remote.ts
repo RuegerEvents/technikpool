@@ -34,7 +34,10 @@ import {
 } from '#lib/remote/assets.remote.js';
 import { getDashboardStats } from '#lib/remote/productions.remote.js';
 
-const UPCOMING_WINDOW_DAYS = 30;
+// How far ahead the list reaches. The page narrows it to 30, 90 or 180 days
+// on the client, so changing the window is not a round trip and every
+// `getOverdueAssets().refresh()` keeps covering what is on screen.
+const UPCOMING_WINDOW_DAYS = 365;
 
 export const getOverdueAssets = query(async () => {
 	const user = await requireAuth();
@@ -51,11 +54,16 @@ export const getOverdueAssets = query(async () => {
 			nextInspectionDue: { not: null, lte: upcomingCutoff }
 		},
 		include: {
-			product: { include: { manufacturer: true } },
+			product: {
+				include: {
+					manufacturer: true,
+					category: { select: { id: true, name: true, nameDe: true, sortOrder: true } }
+				}
+			},
 			organization: {
 				select: { id: true, name: true, shortName: true, color: true, avatarLabel: true }
 			},
-			location: { select: { name: true } },
+			location: { select: { id: true, name: true } },
 			// The latest one, to tell "never inspected" and "failed" from "due again".
 			inspections: {
 				select: { performedAt: true, result: true },

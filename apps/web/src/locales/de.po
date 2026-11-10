@@ -135,7 +135,6 @@ msgstr "S/N"
 
 #: src/routes/admin/catalog-log/+page.svelte
 #: src/routes/inspections/+page.svelte
-#: src/routes/inspections/+page.svelte
 #: src/routes/invoices/+page.svelte
 #: src/routes/offers/+page.svelte
 #: src/routes/stocktakes/+page.svelte
@@ -149,6 +148,7 @@ msgstr "Org"
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/license-list.svelte
 #: src/routes/checkout/+page.svelte
+#: src/routes/inspections/+page.svelte
 #: src/routes/invoices/+page.svelte
 #: src/routes/offers/+page.svelte
 #: src/routes/products/[id]/product-detail.svelte
@@ -1304,7 +1304,6 @@ msgstr "Gerät aktualisiert"
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/calendar/+page.svelte
 #: src/routes/inspections/+page.svelte
-#: src/routes/inspections/+page.svelte
 msgid "Asset"
 msgstr "Gerät"
 
@@ -1913,6 +1912,7 @@ msgstr "Alle Kategorien"
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
+#: src/routes/inspections/+page.svelte
 #: src/routes/orgs/[id]/rates/service-catalog.svelte
 #: src/routes/orgs/[id]/rates/service-catalog.svelte
 #: src/routes/products/dguv-quick.svelte
@@ -2790,7 +2790,6 @@ msgstr "Bestanden"
 #: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
 #: src/lib/inspection-ui.svelte.ts
 #: src/routes/inspections/+page.svelte
-#: src/routes/inspections/+page.svelte
 msgid "Failed"
 msgstr "Nicht bestanden"
 
@@ -2818,7 +2817,7 @@ msgstr "DGUV-Prüfungen"
 #~ msgid "Overdue and upcoming asset inspections across your orgs."
 #~ msgstr "Überfällige und anstehende Geräteinspektionen über alle deine Organisationen."
 
-#. 0: data.overdue.length
+#. 0: overdue.length
 #: src/routes/inspections/+page.svelte
 msgid "Overdue ({0})"
 msgstr "Überfällig ({0})"
@@ -2828,18 +2827,16 @@ msgid "Nothing overdue."
 msgstr "Nichts überfällig."
 
 #: src/routes/inspections/+page.svelte
-#: src/routes/inspections/+page.svelte
 msgid "Due"
 msgstr "Fällig"
 
-#. 0: data.upcoming.length
+#. 0: upcoming.length
 #: src/routes/inspections/+page.svelte
 msgid "Due soon ({0})"
 msgstr "Bald fällig ({0})"
 
-#: src/routes/inspections/+page.svelte
-msgid "Nothing due in the next 30 days."
-msgstr "In den nächsten 30 Tagen nichts fällig."
+#~ msgid "Nothing due in the next 30 days."
+#~ msgstr "In den nächsten 30 Tagen nichts fällig."
 
 #: src/routes/offers/+page.svelte
 msgid "Offers | Technikpool"
@@ -3285,6 +3282,7 @@ msgstr "{0} Geräte gebucht"
 msgid "Categories"
 msgstr "Kategorien"
 
+#: src/routes/inspections/+page.svelte
 #: src/routes/productions/[id]/equipment/equipment-planner.svelte
 #: src/routes/products/dguv-quick.svelte
 #: src/routes/stocktakes/[id]/print/+page.svelte
@@ -9701,6 +9699,7 @@ msgstr "Gestartet {0} von {1}"
 msgid "Recount of <0/>"
 msgstr "Nachzählung von <0/>"
 
+#: src/routes/inspections/+page.svelte
 #: src/routes/stocktakes/[id]/print/+page.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
@@ -12925,7 +12924,6 @@ msgid "Overdue and upcoming asset inspections across your orgs. A unit that was 
 msgstr "Überfällige und anstehende Prüfungen in deinen Organisationen. Ein Gerät, das noch nie geprüft wurde oder dessen letzte Prüfung nicht bestanden ist, ist sofort fällig."
 
 #: src/routes/inspections/+page.svelte
-#: src/routes/inspections/+page.svelte
 msgid "Last inspection"
 msgstr "Letzte Prüfung"
 
@@ -12940,7 +12938,6 @@ msgstr "Nie geprüft"
 #: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
-#: src/routes/inspections/+page.svelte
 #: src/routes/inspections/+page.svelte
 msgid "Record inspection"
 msgstr "Prüfung erfassen"
@@ -13461,3 +13458,55 @@ msgstr "Der Inhaber der Organisation kann es in ihren Einstellungen festlegen."
 #: src/routes/inspections/+page.svelte
 msgid "<0/> has no default inspection interval. Its new units that need inspecting get none, so they are never due and never listed here."
 msgstr "<0/> hat kein Standard-Prüfintervall. Neue prüfpflichtige Geräte bekommen dann keins, werden also nie fällig und tauchen hier nie auf."
+
+#: src/routes/inspections/+page.svelte
+msgid "Search product, tag, serial number…"
+msgstr "Produkt, Tag, Seriennummer suchen …"
+
+#: src/routes/inspections/+page.svelte
+msgid "Any status"
+msgstr "Jeder Status"
+
+#: src/routes/inspections/+page.svelte
+msgid "Last inspection failed"
+msgstr "Letzte Prüfung nicht bestanden"
+
+#: src/routes/inspections/+page.svelte
+msgid "Due again"
+msgstr "Wieder fällig"
+
+#: src/routes/inspections/+page.svelte
+msgid "Due soon within"
+msgstr "Bald fällig innerhalb"
+
+#: src/routes/inspections/+page.svelte
+msgid "Due soon: 30 days"
+msgstr "Bald fällig: 30 Tage"
+
+#: src/routes/inspections/+page.svelte
+msgid "Due soon: 90 days"
+msgstr "Bald fällig: 90 Tage"
+
+#: src/routes/inspections/+page.svelte
+msgid "Due soon: 6 months"
+msgstr "Bald fällig: 6 Monate"
+
+#: src/routes/inspections/+page.svelte
+msgid "Due soon: 1 year"
+msgstr "Bald fällig: 1 Jahr"
+
+#: src/routes/inspections/+page.svelte
+msgid "Reset filters"
+msgstr "Filter zurücksetzen"
+
+#: src/routes/inspections/+page.svelte
+msgid "Nothing overdue matches the filters."
+msgstr "Nichts Überfälliges passt zu den Filtern."
+
+#: src/routes/inspections/+page.svelte
+msgid "Nothing due in this period matches the filters."
+msgstr "In diesem Zeitraum ist nichts fällig, das zu den Filtern passt."
+
+#: src/routes/inspections/+page.svelte
+msgid "Nothing due in this period."
+msgstr "In diesem Zeitraum ist nichts fällig."

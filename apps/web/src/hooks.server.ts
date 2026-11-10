@@ -8,6 +8,7 @@ import { runWithLocale, loadLocales } from 'wuchale/load-utils/server';
 import { locales } from './locales/data.js';
 import { ensureBucket } from '#lib/server/storage.js';
 import { schedulePurge } from '#lib/server/cleanup.js';
+import { isCsrfForbidden } from '#lib/server/csrf.js';
 
 loadLocales(main.key, main.loadCount, main.loadCatalog, locales);
 
@@ -15,6 +16,15 @@ if (!building) {
 	ensureBucket();
 	schedulePurge();
 }
+
+// Stands in for SvelteKit's CSRF check, which is switched off — see csrf.ts.
+const csrfHandle: Handle = async ({ event, resolve }) => {
+	if (isCsrfForbidden(event.request, event.url.origin)) {
+		const message = `Cross-site ${event.request.method} form submissions are forbidden`;
+		return new Response(message, { status: 403 });
+	}
+	return await resolve(event);
+};
 
 const localeHandle: Handle = async ({ event, resolve }) => {
 	const locale = event.cookies.get('locale') ?? 'de';
@@ -88,4 +98,4 @@ const noindexHandle: Handle = async ({ event, resolve }) => {
 	return response;
 };
 
-export const handle = sequence(noindexHandle, localeHandle, authHandle, guardHandle);
+export const handle = sequence(csrfHandle, noindexHandle, localeHandle, authHandle, guardHandle);

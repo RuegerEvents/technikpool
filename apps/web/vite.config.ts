@@ -52,6 +52,11 @@ export default defineConfig({
 			inspector: true,
 			// Node adapter is suitable for Docker deployments.
 			adapter: adapter(),
+			// Kit's check also refuses a bodyless POST/DELETE that carries a bearer
+			// token; `csrfHandle` in hooks.server.ts does the same check without
+			// that gap (see src/lib/server/csrf.ts). Remote functions keep Kit's
+			// own, stricter check, which this does not touch.
+			csrf: { trustedOrigins: ['*'] },
 			experimental: { remoteFunctions: true }
 		})
 	]

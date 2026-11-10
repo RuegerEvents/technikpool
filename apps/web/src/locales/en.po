@@ -135,7 +135,6 @@ msgstr "S/N"
 
 #: src/routes/admin/catalog-log/+page.svelte
 #: src/routes/inspections/+page.svelte
-#: src/routes/inspections/+page.svelte
 #: src/routes/invoices/+page.svelte
 #: src/routes/offers/+page.svelte
 #: src/routes/stocktakes/+page.svelte
@@ -149,6 +148,7 @@ msgstr "Org"
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/license-list.svelte
 #: src/routes/checkout/+page.svelte
+#: src/routes/inspections/+page.svelte
 #: src/routes/invoices/+page.svelte
 #: src/routes/offers/+page.svelte
 #: src/routes/products/[id]/product-detail.svelte
@@ -1304,7 +1304,6 @@ msgstr "Asset updated"
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/calendar/+page.svelte
 #: src/routes/inspections/+page.svelte
-#: src/routes/inspections/+page.svelte
 msgid "Asset"
 msgstr "Asset"
 
@@ -1913,6 +1912,7 @@ msgstr "All Categories"
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
+#: src/routes/inspections/+page.svelte
 #: src/routes/orgs/[id]/rates/service-catalog.svelte
 #: src/routes/orgs/[id]/rates/service-catalog.svelte
 #: src/routes/products/dguv-quick.svelte
@@ -2790,7 +2790,6 @@ msgstr "Passed"
 #: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
 #: src/lib/inspection-ui.svelte.ts
 #: src/routes/inspections/+page.svelte
-#: src/routes/inspections/+page.svelte
 msgid "Failed"
 msgstr "Failed"
 
@@ -2818,7 +2817,7 @@ msgstr "DGUV Inspections"
 #~ msgid "Overdue and upcoming asset inspections across your orgs."
 #~ msgstr "Overdue and upcoming asset inspections across your orgs."
 
-#. 0: data.overdue.length
+#. 0: overdue.length
 #: src/routes/inspections/+page.svelte
 msgid "Overdue ({0})"
 msgstr "Overdue ({0})"
@@ -2828,18 +2827,16 @@ msgid "Nothing overdue."
 msgstr "Nothing overdue."
 
 #: src/routes/inspections/+page.svelte
-#: src/routes/inspections/+page.svelte
 msgid "Due"
 msgstr "Due"
 
-#. 0: data.upcoming.length
+#. 0: upcoming.length
 #: src/routes/inspections/+page.svelte
 msgid "Due soon ({0})"
 msgstr "Due soon ({0})"
 
-#: src/routes/inspections/+page.svelte
-msgid "Nothing due in the next 30 days."
-msgstr "Nothing due in the next 30 days."
+#~ msgid "Nothing due in the next 30 days."
+#~ msgstr "Nothing due in the next 30 days."
 
 #: src/routes/offers/+page.svelte
 msgid "Offers | Technikpool"
@@ -3285,6 +3282,7 @@ msgstr "{0} device{1} booked"
 msgid "Categories"
 msgstr "Categories"
 
+#: src/routes/inspections/+page.svelte
 #: src/routes/productions/[id]/equipment/equipment-planner.svelte
 #: src/routes/products/dguv-quick.svelte
 #: src/routes/stocktakes/[id]/print/+page.svelte
@@ -9701,6 +9699,7 @@ msgstr "Started {0} by {1}"
 msgid "Recount of <0/>"
 msgstr "Recount of <0/>"
 
+#: src/routes/inspections/+page.svelte
 #: src/routes/stocktakes/[id]/print/+page.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
@@ -12925,7 +12924,6 @@ msgid "Overdue and upcoming asset inspections across your orgs. A unit that was 
 msgstr "Overdue and upcoming asset inspections across your orgs. A unit that was never inspected, or whose last inspection failed, is due at once."
 
 #: src/routes/inspections/+page.svelte
-#: src/routes/inspections/+page.svelte
 msgid "Last inspection"
 msgstr "Last inspection"
 
@@ -12940,7 +12938,6 @@ msgstr "Never inspected"
 #: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
-#: src/routes/inspections/+page.svelte
 #: src/routes/inspections/+page.svelte
 msgid "Record inspection"
 msgstr "Record inspection"
@@ -13461,3 +13458,55 @@ msgstr "The org's owner can set one in its settings."
 #: src/routes/inspections/+page.svelte
 msgid "<0/> has no default inspection interval. Its new units that need inspecting get none, so they are never due and never listed here."
 msgstr "<0/> has no default inspection interval. Its new units that need inspecting get none, so they are never due and never listed here."
+
+#: src/routes/inspections/+page.svelte
+msgid "Search product, tag, serial number…"
+msgstr "Search product, tag, serial number…"
+
+#: src/routes/inspections/+page.svelte
+msgid "Any status"
+msgstr "Any status"
+
+#: src/routes/inspections/+page.svelte
+msgid "Last inspection failed"
+msgstr "Last inspection failed"
+
+#: src/routes/inspections/+page.svelte
+msgid "Due again"
+msgstr "Due again"
+
+#: src/routes/inspections/+page.svelte
+msgid "Due soon within"
+msgstr "Due soon within"
+
+#: src/routes/inspections/+page.svelte
+msgid "Due soon: 30 days"
+msgstr "Due soon: 30 days"
+
+#: src/routes/inspections/+page.svelte
+msgid "Due soon: 90 days"
+msgstr "Due soon: 90 days"
+
+#: src/routes/inspections/+page.svelte
+msgid "Due soon: 6 months"
+msgstr "Due soon: 6 months"
+
+#: src/routes/inspections/+page.svelte
+msgid "Due soon: 1 year"
+msgstr "Due soon: 1 year"
+
+#: src/routes/inspections/+page.svelte
+msgid "Reset filters"
+msgstr "Reset filters"
+
+#: src/routes/inspections/+page.svelte
+msgid "Nothing overdue matches the filters."
+msgstr "Nothing overdue matches the filters."
+
+#: src/routes/inspections/+page.svelte
+msgid "Nothing due in this period matches the filters."
+msgstr "Nothing due in this period matches the filters."
+
+#: src/routes/inspections/+page.svelte
+msgid "Nothing due in this period."
+msgstr "Nothing due in this period."
