@@ -11,6 +11,7 @@ import '../scan/camera_scan_screen.dart';
 import '../scan/scan_tones.dart';
 import '../state/providers.dart';
 import '../theme.dart';
+import 'case_label_screen.dart';
 
 /// Checking one case (Kiste checken): scan the case — a kit's tag, or any unit
 /// in it — then scan what is inside and see what is missing.
@@ -233,6 +234,17 @@ class _CaseCheckScreenState extends ConsumerState<CaseCheckScreen> {
       appBar: AppBar(
         title: Text(check?.name ?? l10n.caseCheck),
         actions: [
+          if (check != null)
+            IconButton(
+              tooltip: l10n.caseLabel,
+              onPressed: () => Navigator.of(context).push<void>(
+                MaterialPageRoute(
+                  builder: (_) =>
+                      CaseLabelScreen(kind: check.kind, id: check.id, name: check.name),
+                ),
+              ),
+              icon: const Icon(Icons.print_outlined),
+            ),
           if (ref.watch(scanSettingsProvider).cameraEnabled)
             IconButton(
               tooltip: l10n.scanWithCamera,

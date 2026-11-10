@@ -462,6 +462,27 @@ void main() {
       expect(again.lastCheck?.found, 2);
       expect(again.lastCheck?.expected, 3);
     });
+
+    test('a case label carries its tag in either size', () async {
+      final large = await api.caseCheck.getCaseLabel(
+        kind: CaseKind.bundle,
+        id: DemoData.cableKit.id,
+      );
+      expect(large.size, CaseLabelSize.large);
+      expect(large.zpl, startsWith('^XA'));
+      expect(large.zpl, endsWith('^XZ'));
+      expect(large.zpl, contains('^BXN,14,200^FD${DemoData.cableKit.tag}^FS'));
+      expect(Uri.parse(large.previewUrl).queryParameters['zpl'], large.zpl);
+
+      final small = await api.caseCheck.getCaseLabel(
+        kind: CaseKind.bundle,
+        id: DemoData.cableKit.id,
+        size: CaseLabelSize.small,
+      );
+      expect(small.size, CaseLabelSize.small);
+      expect(small.widthMm, 80);
+      expect(small.zpl, contains('^PW640'));
+    });
   });
 
   test('a production check ticks what is out on it and closes', () async {

@@ -281,6 +281,30 @@ withdrawing it bumps the version and kills every older link. It stops opening 30
 production's end. The page gets `ShareView` (`src/lib/production-share.ts`) and nothing else — no
 prices, no customer record. Created from the "Customer link" menu on the production page (MEMBER+).
 
+## Case labels (Kistenetikett)
+
+A kit, or a unit with its accessories (the same "case" as Kiste checken), gets a label for its
+outside: the name centred on top as large as it fits (`fitTitle`, two lines broken evenly), the contents
+on the large label, and a footer with the logo (else the org name) left, centred on the band, and
+the DataMatrix right with its tag turned upright beside it. Identical units are one line;
+accessories under them read "je 1× … insg. 4×" where every unit carries the same
+(`caseLabelLines`). A list too long for one label continues on the next (one `^XA…^XZ` each,
+`labelCount` in the response): the title only on the first, the footer only on the last, and
+never tearing a unit from its accessories
+when the block fits on a label of its own. Rendered as **ZPL** for a 203 dpi printer (a Honeywell PC42E-T in
+its ZPL emulation, ZSim) by `src/lib/server/case-label-zpl.ts`; the logo becomes a 1-bit `^GFA`
+in `case-label-logo.ts`. Two rolls: `large` 4×6″ and `small` 80×55 mm (`LABEL_SIZES`).
+
+**Only the scanner prints**, because the server runs where the warehouse network cannot be
+reached. `GET /api/v1/case-checks/{kind}/{id}/label` hands over the ZPL, and the app writes it
+to the printer's raw port 9100 (`lib/print/label_printer.dart`, printer address under
+Settings, per device). The preview is Labelary: the app posts the ZPL to `api.labelary.com`
+for a PNG, and `previewUrl` opens `labelary.com/viewer.html` with the ZPL in the query string.
+Both send the label's text to Labelary, which is why the screen says so. Text widths are
+estimated from per-glyph widths measured off Labelary's ^A0 (`GLYPH`, plus 8% `SLACK`), since
+nothing on the printer reports them; long contents names wrap to a second row rather than being cut. Label text is German, like
+the PDFs.
+
 ## Delivery note and packing list
 
 Both are PDFs from one renderer (`src/lib/server/equipment-sheet-pdf.ts`, data in

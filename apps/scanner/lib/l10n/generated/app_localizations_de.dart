@@ -1293,4 +1293,73 @@ class SDe extends S {
 
   @override
   String get inspectionRecent => 'Letzte Prüfungen';
+
+  @override
+  String get caseLabel => 'Etikett drucken';
+
+  @override
+  String get caseLabelLarge => 'Groß · 4×6″';
+
+  @override
+  String get caseLabelSmall => 'Klein · 80×55 mm';
+
+  @override
+  String get caseLabelPrint => 'Drucken';
+
+  @override
+  String caseLabelSent(String printer) {
+    return 'An $printer gesendet';
+  }
+
+  @override
+  String get caseLabelOpenLabelary => 'In Labelary öffnen';
+
+  @override
+  String caseLabelPreviewFailed(String detail) {
+    return 'Keine Vorschau: $detail';
+  }
+
+  @override
+  String get caseLabelPreviewHint =>
+      'Vorschau gerendert von labelary.com, das dafür den Text des Etiketts erhält. Der Drucker zeichnet Schriften womöglich etwas anders.';
+
+  @override
+  String get labelPrinter => 'Etikettendrucker';
+
+  @override
+  String get labelPrinterNone => 'Nicht eingerichtet';
+
+  @override
+  String get labelPrinterAddress => 'Druckeradresse';
+
+  @override
+  String get labelPrinterHelp =>
+      'Die IP-Adresse des Druckers in diesem Netzwerk, wahlweise mit Port (Standard 9100). Er muss ZPL verstehen – bei Honeywell-Druckern die Befehlssprache auf ZSim stellen.';
+
+  @override
+  String get labelPrinterInvalid => 'Keine gültige Adresse';
+
+  @override
+  String get labelPrinterTest => 'Testdruck';
+
+  @override
+  String get labelPrinterSetUp => 'Drucker einrichten';
+
+  @override
+  String get labelPrinterRemove => 'Drucker entfernen';
+
+  @override
+  String labelPrinterUnreachable(String printer, String detail) {
+    return 'Drucker unter $printer nicht erreichbar: $detail';
+  }
+
+  @override
+  String labelPrinterTimeout(String printer) {
+    return 'Der Drucker unter $printer antwortet nicht';
+  }
+
+  @override
+  String caseLabelPage(int page, int count) {
+    return 'Etikett $page von $count';
+  }
 }

@@ -8,6 +8,7 @@ import '../api/auth_service.dart';
 import '../api/client.dart';
 import '../api/generated/export.dart';
 import '../demo/demo_api.dart';
+import '../print/label_printer.dart';
 import '../scan/scan_bus.dart';
 import '../scan/scan_channel.dart';
 import '../scan/scan_settings.dart';
@@ -22,6 +23,8 @@ const _kLocale = 'locale';
 const _kSeenVersion = 'seen_version';
 const _kScanTones = 'scan_tones';
 const _kInspectorName = 'inspector_name';
+const _kLabelPrinter = 'label_printer';
+const _kLabelSize = 'label_size';
 
 final storageProvider = Provider((_) => const FlutterSecureStorage());
 
@@ -244,6 +247,52 @@ class InspectorNameNotifier extends AsyncNotifier<String> {
 
 final inspectorNameProvider = AsyncNotifierProvider<InspectorNameNotifier, String>(
   InspectorNameNotifier.new,
+);
+
+/// The label printer this device prints case labels on, or null when none is
+/// set up. Per device: a handheld lives in one warehouse, next to one printer.
+class LabelPrinterNotifier extends AsyncNotifier<LabelPrinterConfig?> {
+  FlutterSecureStorage get _storage => ref.read(storageProvider);
+
+  @override
+  Future<LabelPrinterConfig?> build() async =>
+      LabelPrinterConfig.parse(await _storage.read(key: _kLabelPrinter) ?? '');
+
+  Future<void> save(LabelPrinterConfig? printer) async {
+    state = AsyncData(printer);
+    if (printer == null) {
+      await _storage.delete(key: _kLabelPrinter);
+    } else {
+      await _storage.write(key: _kLabelPrinter, value: printer.toString());
+    }
+  }
+}
+
+final labelPrinterProvider =
+    AsyncNotifierProvider<LabelPrinterNotifier, LabelPrinterConfig?>(
+      LabelPrinterNotifier.new,
+    );
+
+/// The label size last printed, so the roll that is loaded is the one offered.
+class LabelSizeNotifier extends AsyncNotifier<CaseLabelSize> {
+  FlutterSecureStorage get _storage => ref.read(storageProvider);
+
+  @override
+  Future<CaseLabelSize> build() async {
+    final stored = await _storage.read(key: _kLabelSize);
+    final size = stored == null ? CaseLabelSize.large : CaseLabelSize.fromJson(stored);
+    return size == CaseLabelSize.$unknown ? CaseLabelSize.large : size;
+  }
+
+  Future<void> save(CaseLabelSize size) async {
+    if (state.value == size) return;
+    state = AsyncData(size);
+    await _storage.write(key: _kLabelSize, value: size.toJson());
+  }
+}
+
+final labelSizeProvider = AsyncNotifierProvider<LabelSizeNotifier, CaseLabelSize>(
+  LabelSizeNotifier.new,
 );
 
 /// The language the app is pinned to, or null to follow the device.

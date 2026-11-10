@@ -1457,6 +1457,55 @@ paths:
         '409':
           $ref: '#/components/responses/Conflict'
 
+  /api/v1/case-checks/{kind}/{id}/label:
+    get:
+      operationId: getCaseLabel
+      tags: [caseCheck]
+      summary: A case's label as ZPL, for a thermal label printer
+      description: |
+        The label for the outside of a case (Kistenetikett): the org's logo or
+        name, the case's name, a DataMatrix of its tag, and — on the large
+        label — what it holds, identical units as one line, continued on
+        further labels when it is long. Rendered for a
+        203 dpi printer speaking ZPL (a Honeywell PC42E-T in ZSim mode). The
+        client sends `zpl` unchanged to the printer's raw port, usually 9100;
+        the server never talks to a printer.
+
+        `large` is a 4×6″ shipping label, `small` an 80×55 mm one with no
+        contents list. A case without a tag prints without a code. Anyone who
+        sees the equipment may print one.
+      parameters:
+        - name: kind
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/CaseKind'
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: size
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/CaseLabelSize'
+      responses:
+        '200':
+          description: The label, ready to send
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseLabel'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
   /api/v1/productions/{productionId}/checks:
     post:
       operationId: startProductionCheck
@@ -3784,6 +3833,42 @@ components:
         away:
           type: integer
           description: Not found, but checked out to another production.
+
+    CaseLabelSize:
+      type: string
+      enum: [large, small]
+      default: large
+      description: '`large` is 4×6″ (101.6 × 152.4 mm), `small` 80 × 55 mm.'
+
+    CaseLabel:
+      type: object
+      required: [size, zpl, labelCount, widthMm, heightMm, dpmm, previewUrl]
+      properties:
+        size:
+          $ref: '#/components/schemas/CaseLabelSize'
+        zpl:
+          type: string
+          description: |
+            One `^XA` … `^XZ` per label, UTF-8 (`^CI28`). A contents list too
+            long for one large label continues on the next; the title is only
+            on the first, the footer with the code only on the last.
+        labelCount:
+          type: integer
+          minimum: 1
+          description: How many labels `zpl` prints — what a preview has to render.
+        widthMm:
+          type: number
+          description: Across the print head.
+        heightMm:
+          type: number
+        dpmm:
+          type: integer
+          description: Dots per millimetre the label was laid out for (8 = 203 dpi).
+        previewUrl:
+          type: string
+          description: |
+            The same label in Labelary's online viewer. The ZPL is in the URL,
+            so opening it sends the label's text to labelary.com.
 
     ProductionCheckStartRequest:
       type: object

@@ -822,6 +822,36 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/case-checks/{kind}/{id}/label": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * A case's label as ZPL, for a thermal label printer
+         * @description The label for the outside of a case (Kistenetikett): the org's logo or
+         *     name, the case's name, a DataMatrix of its tag, and — on the large
+         *     label — what it holds, identical units as one line, continued on
+         *     further labels when it is long. Rendered for a
+         *     203 dpi printer speaking ZPL (a Honeywell PC42E-T in ZSim mode). The
+         *     client sends `zpl` unchanged to the printer's raw port, usually 9100;
+         *     the server never talks to a printer.
+         *
+         *     `large` is a 4×6″ shipping label, `small` an 80×55 mm one with no
+         *     contents list. A case without a tag prints without a code. Anyone who
+         *     sees the equipment may print one.
+         */
+        get: operations["getCaseLabel"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/productions/{productionId}/checks": {
         parameters: {
             query?: never;
@@ -2154,6 +2184,33 @@ export interface components {
             missing: number;
             /** @description Not found, but checked out to another production. */
             away: number;
+        };
+        /**
+         * @description `large` is 4×6″ (101.6 × 152.4 mm), `small` 80 × 55 mm.
+         * @default large
+         * @enum {string}
+         */
+        CaseLabelSize: "large" | "small";
+        CaseLabel: {
+            size: components["schemas"]["CaseLabelSize"];
+            /**
+             * @description One `^XA` … `^XZ` per label, UTF-8 (`^CI28`). A contents list too
+             *     long for one large label continues on the next; the title is only
+             *     on the first, the footer with the code only on the last.
+             */
+            zpl: string;
+            /** @description How many labels `zpl` prints — what a preview has to render. */
+            labelCount: number;
+            /** @description Across the print head. */
+            widthMm: number;
+            heightMm: number;
+            /** @description Dots per millimetre the label was laid out for (8 = 203 dpi). */
+            dpmm: number;
+            /**
+             * @description The same label in Labelary's online viewer. The ZPL is in the URL,
+             *     so opening it sends the label's text to labelary.com.
+             */
+            previewUrl: string;
         };
         ProductionCheckStartRequest: {
             /** @description Which side to check as, for a caller on both. */
@@ -3626,6 +3683,35 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CaseCheckResult"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    getCaseLabel: {
+        parameters: {
+            query?: {
+                size?: components["schemas"]["CaseLabelSize"];
+            };
+            header?: never;
+            path: {
+                kind: components["schemas"]["CaseKind"];
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The label, ready to send */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CaseLabel"];
                 };
             };
             400: components["responses"]["BadRequest"];

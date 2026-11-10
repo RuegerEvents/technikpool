@@ -106,6 +106,8 @@ export 'models/case_check.dart';
 export 'models/case_check_last.dart';
 export 'models/case_check_request.dart';
 export 'models/case_check_result.dart';
+export 'models/case_label_size.dart';
+export 'models/case_label.dart';
 export 'models/production_check_start_request.dart';
 export 'models/production_check_side.dart';
 export 'models/production_check_tick.dart';

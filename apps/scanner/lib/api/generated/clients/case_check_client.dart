@@ -8,6 +8,9 @@ import 'package:retrofit/retrofit.dart';
 import '../models/case_check.dart';
 import '../models/case_check_request.dart';
 import '../models/case_check_result.dart';
+import '../models/case_kind.dart';
+import '../models/case_label.dart';
+import '../models/case_label_size.dart';
 
 part 'case_check_client.g.dart';
 
@@ -35,5 +38,25 @@ abstract class CaseCheckClient {
   @POST('/api/v1/case-checks')
   Future<CaseCheckResult> recordCaseCheck({
     @Body() required CaseCheckRequest body,
+  });
+
+  /// A case's label as ZPL, for a thermal label printer.
+  ///
+  /// The label for the outside of a case (Kistenetikett): the org's logo or.
+  /// name, the case's name, a DataMatrix of its tag, and — on the large.
+  /// label — what it holds, identical units as one line, continued on.
+  /// further labels when it is long. Rendered for a.
+  /// 203 dpi printer speaking ZPL (a Honeywell PC42E-T in ZSim mode). The.
+  /// client sends `zpl` unchanged to the printer's raw port, usually 9100;.
+  /// the server never talks to a printer.
+  ///
+  /// `large` is a 4×6″ shipping label, `small` an 80×55 mm one with no.
+  /// contents list. A case without a tag prints without a code. Anyone who.
+  /// sees the equipment may print one.
+  @GET('/api/v1/case-checks/{kind}/{id}/label')
+  Future<CaseLabel> getCaseLabel({
+    @Path('kind') required CaseKind kind,
+    @Path('id') required String id,
+    @Query('size') CaseLabelSize? size,
   });
 }

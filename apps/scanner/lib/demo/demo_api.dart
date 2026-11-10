@@ -103,6 +103,11 @@ class DemoBackend {
     if (method == 'GET' && path.startsWith('/api/v1/case-checks/by-code/')) {
       return _openCase(options, Uri.decodeComponent(path.split('/').last));
     }
+    // ['', 'api', 'v1', 'case-checks', kind, id, 'label']
+    if (method == 'GET' && path.startsWith('/api/v1/case-checks/') && path.endsWith('/label')) {
+      final segments = path.split('/');
+      return _caseLabel(options, CaseKind.fromJson(segments[4]), segments[5]);
+    }
     if (method == 'POST' && path == '/api/v1/case-checks') {
       return _recordCase(options);
     }
@@ -1180,6 +1185,49 @@ class DemoBackend {
       lastCheck: _lastCaseCheck[id],
       canRecord: true,
       scannedAssetId: scannedAssetId,
+    );
+  }
+
+  /// A plain stand-in for the server's label: the case's name, its tag as a
+  /// DataMatrix, its contents. The layout itself is the server's
+  /// (case-label-zpl.ts); the demo only needs something real to preview and
+  /// print.
+  Response<dynamic> _caseLabel(RequestOptions options, CaseKind kind, String id) {
+    final small = options.queryParameters['size'] == 'small';
+    final check = _case(kind, id, null);
+    final tag = check.tag ?? check.items.firstOrNull?.assetTag;
+    String field(String text) => text.replaceAll(RegExp(r'[\^~]'), ' ');
+    final (width, height) = small ? (80.0, 55.0) : (101.6, 152.4);
+    final zpl = StringBuffer('^XA^CI28^PW${(width * 8).round()}^LL${(height * 8).round()}^LH0,0')
+      ..write('^FO32,32^A0N,36,36^FDTechnikpool Demo^FS')
+      ..write('^FO32,90^A0N,52,52^FD${field(check.name)}^FS');
+    if (tag != null) zpl.write('^FO32,170^BXN,14,200^FD${field(tag)}^FS');
+    if (!small) {
+      var y = 400;
+      for (final item in check.items.take(16)) {
+        zpl.write('^FO${item.accessoryOf == null ? 32 : 68},$y^A0N,30,30^FD${field(item.name)}^FS');
+        y += 40;
+      }
+    }
+    zpl.write('^XZ');
+    final text = zpl.toString();
+    return _ok(
+      options,
+      CaseLabel(
+        size: small ? CaseLabelSize.small : CaseLabelSize.large,
+        zpl: text,
+        labelCount: 1,
+        widthMm: width,
+        heightMm: height,
+        dpmm: 8,
+        previewUrl: Uri.https('labelary.com', '/viewer.html', {
+          'density': '8',
+          'width': '$width',
+          'height': '$height',
+          'units': 'mm',
+          'zpl': text,
+        }).toString(),
+      ),
     );
   }
 

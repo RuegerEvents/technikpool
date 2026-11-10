@@ -3,4 +3,4 @@
    fallback for a locale we do not ship. */
 
 "NSCameraUsageDescription" = "Used to scan equipment labels and barcodes with the camera.";
-"NSLocalNetworkUsageDescription" = "Used to reach a Technikpool server on the same network.";
+"NSLocalNetworkUsageDescription" = "Used to reach a Technikpool server or a label printer on the same network.";

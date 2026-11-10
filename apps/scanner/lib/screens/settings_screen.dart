@@ -5,6 +5,7 @@ import '../api/generated/export.dart';
 import '../changelog.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../legal.dart';
+import '../print/label_printer_dialog.dart';
 import '../scan/scan_channel.dart';
 import '../scan/scan_settings.dart';
 import '../scan/scan_tones.dart';
@@ -129,6 +130,16 @@ class SettingsScreen extends ConsumerWidget {
               // listen for.
               if (on) ref.read(scanTonesProvider).play(ScanTone.ok);
             },
+          ),
+          const Divider(),
+          ListTile(
+            leading: const Icon(Icons.print_outlined),
+            title: Text(l10n.labelPrinter),
+            subtitle: Text(
+              ref.watch(labelPrinterProvider).value?.toString() ?? l10n.labelPrinterNone,
+            ),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => editLabelPrinter(context, ref),
           ),
           // Both of these configure the Android broadcast bridge, which does
           // not exist on a device that scans with its camera.

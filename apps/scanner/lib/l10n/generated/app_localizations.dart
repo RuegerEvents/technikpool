@@ -2202,6 +2202,120 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Latest inspections'**
   String get inspectionRecent;
+
+  /// No description provided for @caseLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Print label'**
+  String get caseLabel;
+
+  /// No description provided for @caseLabelLarge.
+  ///
+  /// In en, this message translates to:
+  /// **'Large · 4×6″'**
+  String get caseLabelLarge;
+
+  /// No description provided for @caseLabelSmall.
+  ///
+  /// In en, this message translates to:
+  /// **'Small · 80×55 mm'**
+  String get caseLabelSmall;
+
+  /// No description provided for @caseLabelPrint.
+  ///
+  /// In en, this message translates to:
+  /// **'Print'**
+  String get caseLabelPrint;
+
+  /// No description provided for @caseLabelSent.
+  ///
+  /// In en, this message translates to:
+  /// **'Sent to {printer}'**
+  String caseLabelSent(String printer);
+
+  /// No description provided for @caseLabelOpenLabelary.
+  ///
+  /// In en, this message translates to:
+  /// **'Open in Labelary'**
+  String get caseLabelOpenLabelary;
+
+  /// No description provided for @caseLabelPreviewFailed.
+  ///
+  /// In en, this message translates to:
+  /// **'No preview: {detail}'**
+  String caseLabelPreviewFailed(String detail);
+
+  /// No description provided for @caseLabelPreviewHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview rendered by labelary.com, which receives the label\'s text. The printer may draw fonts slightly differently.'**
+  String get caseLabelPreviewHint;
+
+  /// No description provided for @labelPrinter.
+  ///
+  /// In en, this message translates to:
+  /// **'Label printer'**
+  String get labelPrinter;
+
+  /// No description provided for @labelPrinterNone.
+  ///
+  /// In en, this message translates to:
+  /// **'Not set up'**
+  String get labelPrinterNone;
+
+  /// No description provided for @labelPrinterAddress.
+  ///
+  /// In en, this message translates to:
+  /// **'Printer address'**
+  String get labelPrinterAddress;
+
+  /// No description provided for @labelPrinterHelp.
+  ///
+  /// In en, this message translates to:
+  /// **'The printer\'s IP address on this network, optionally with a port (default 9100). It has to understand ZPL — on a Honeywell printer, switch the command language to ZSim.'**
+  String get labelPrinterHelp;
+
+  /// No description provided for @labelPrinterInvalid.
+  ///
+  /// In en, this message translates to:
+  /// **'Not a valid address'**
+  String get labelPrinterInvalid;
+
+  /// No description provided for @labelPrinterTest.
+  ///
+  /// In en, this message translates to:
+  /// **'Test print'**
+  String get labelPrinterTest;
+
+  /// No description provided for @labelPrinterSetUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Set up printer'**
+  String get labelPrinterSetUp;
+
+  /// No description provided for @labelPrinterRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove printer'**
+  String get labelPrinterRemove;
+
+  /// No description provided for @labelPrinterUnreachable.
+  ///
+  /// In en, this message translates to:
+  /// **'Cannot reach the printer at {printer}: {detail}'**
+  String labelPrinterUnreachable(String printer, String detail);
+
+  /// No description provided for @labelPrinterTimeout.
+  ///
+  /// In en, this message translates to:
+  /// **'The printer at {printer} did not respond'**
+  String labelPrinterTimeout(String printer);
+
+  /// No description provided for @caseLabelPage.
+  ///
+  /// In en, this message translates to:
+  /// **'Label {page} of {count}'**
+  String caseLabelPage(int page, int count);
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

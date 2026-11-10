@@ -1287,4 +1287,73 @@ class SEn extends S {
 
   @override
   String get inspectionRecent => 'Latest inspections';
+
+  @override
+  String get caseLabel => 'Print label';
+
+  @override
+  String get caseLabelLarge => 'Large · 4×6″';
+
+  @override
+  String get caseLabelSmall => 'Small · 80×55 mm';
+
+  @override
+  String get caseLabelPrint => 'Print';
+
+  @override
+  String caseLabelSent(String printer) {
+    return 'Sent to $printer';
+  }
+
+  @override
+  String get caseLabelOpenLabelary => 'Open in Labelary';
+
+  @override
+  String caseLabelPreviewFailed(String detail) {
+    return 'No preview: $detail';
+  }
+
+  @override
+  String get caseLabelPreviewHint =>
+      'Preview rendered by labelary.com, which receives the label\'s text. The printer may draw fonts slightly differently.';
+
+  @override
+  String get labelPrinter => 'Label printer';
+
+  @override
+  String get labelPrinterNone => 'Not set up';
+
+  @override
+  String get labelPrinterAddress => 'Printer address';
+
+  @override
+  String get labelPrinterHelp =>
+      'The printer\'s IP address on this network, optionally with a port (default 9100). It has to understand ZPL — on a Honeywell printer, switch the command language to ZSim.';
+
+  @override
+  String get labelPrinterInvalid => 'Not a valid address';
+
+  @override
+  String get labelPrinterTest => 'Test print';
+
+  @override
+  String get labelPrinterSetUp => 'Set up printer';
+
+  @override
+  String get labelPrinterRemove => 'Remove printer';
+
+  @override
+  String labelPrinterUnreachable(String printer, String detail) {
+    return 'Cannot reach the printer at $printer: $detail';
+  }
+
+  @override
+  String labelPrinterTimeout(String printer) {
+    return 'The printer at $printer did not respond';
+  }
+
+  @override
+  String caseLabelPage(int page, int count) {
+    return 'Label $page of $count';
+  }
 }

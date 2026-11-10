@@ -14,6 +14,7 @@ import {
 import { resolveScannedCode } from './asset-lookup';
 import { bundleTypeSpec } from './bundle-spec';
 import type { CaseCheckedData } from '#lib/types/asset-transaction.js';
+import { caseLabelLines, type CaseLabelData } from '#lib/server/case-label-zpl.js';
 
 // Checking a case (Kiste checken): open one kit, or one unit with its
 // accessories, and tick off what is in it. A stocktake for one box — but
@@ -199,6 +200,9 @@ async function loadCaseRows(ref: CaseRef) {
 			ref,
 			tag: bundle.tag,
 			name: bundleLabel(bundle),
+			title: bundle.template.name,
+			caption: bundle.template.caption,
+			code: bundle.tag,
 			organizationId: bundle.template.organizationId,
 			templateId: bundle.templateId,
 			rows
@@ -219,6 +223,9 @@ async function loadCaseRows(ref: CaseRef) {
 		ref,
 		tag: null,
 		name: head.assetTag ? `${label} (${head.assetTag})` : label,
+		title: label,
+		caption: head.product.caption,
+		code: head.assetTag,
 		organizationId: head.organizationId,
 		templateId: null,
 		rows: [head, ...accessories]
@@ -410,4 +417,29 @@ export async function describeCode(userId: string, code: string): Promise<string
 	});
 	if (!(await canSeeEquipment(userId, asset.organizationId))) return null;
 	return makerAndName(asset.product.manufacturer?.name, asset.product.name);
+}
+
+/**
+ * What a case's label shows: its name, its code, whose it is, and what is in
+ * it (see `caseLabelLines`). Anyone
+ * who sees the equipment may print one, as anyone may check the case.
+ */
+export async function caseLabelData(
+	userId: string,
+	ref: CaseRef
+): Promise<CaseLabelData & { logoPath: string | null }> {
+	const { loaded, items } = await readCase(userId, ref);
+	const org = await prisma.organization.findUniqueOrThrow({
+		where: { id: loaded.organizationId },
+		select: { name: true, shortName: true, logoPath: true }
+	});
+
+	return {
+		title: loaded.title,
+		caption: loaded.caption,
+		code: loaded.code,
+		orgName: org.shortName ?? org.name,
+		logoPath: org.logoPath,
+		lines: caseLabelLines(items)
+	};
 }
