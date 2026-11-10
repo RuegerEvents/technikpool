@@ -1,5 +1,17 @@
 [
 	{
+		"version": "0.35.1",
+		"date": "2026-11-10",
+		"en": [
+			"System admins without an organization can now pair a scanner on the Scanners page.",
+			"The API can now also delete products, merge duplicates, set a product's manufacturer, create, rename and merge manufacturers, register connectors and mark whether they carry mains voltage, and read the catalog log and undo a product change from it."
+		],
+		"de": [
+			"Systemadmins ohne eigene Organisation können jetzt auf der Scanner-Seite ein Gerät koppeln.",
+			"Über die API lassen sich jetzt auch Produkte löschen und Duplikate zusammenführen, der Hersteller eines Produkts setzen, Hersteller anlegen, umbenennen und zusammenführen, Stecker anlegen und als netzspannungsführend markieren sowie das Katalog-Log lesen und Produktänderungen daraus rückgängig machen."
+		]
+	},
+	{
 		"version": "0.35.0",
 		"date": "2026-11-10",
 		"en": [
