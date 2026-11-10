@@ -1,5 +1,17 @@
 [
 	{
+		"version": "0.35.2",
+		"date": "2026-11-10",
+		"en": [
+			"The Inspections page can be filtered by organization, location, category and status, searched, and shows what is due in the next 30, 90 or 180 days or the next year.",
+			"Requests that send no body, such as deleting an inspection or closing a stocktake from the scanner, are no longer refused by the server."
+		],
+		"de": [
+			"Die Prüfungsseite lässt sich nach Organisation, Standort, Kategorie und Status filtern und durchsuchen und zeigt, was in den nächsten 30, 90 oder 180 Tagen oder im nächsten Jahr fällig wird.",
+			"Anfragen ohne Inhalt, etwa eine Prüfung löschen oder eine Inventur abschließen am Scanner, lehnt der Server nicht mehr ab."
+		]
+	},
+	{
 		"version": "0.35.1",
 		"date": "2026-11-10",
 		"en": [
