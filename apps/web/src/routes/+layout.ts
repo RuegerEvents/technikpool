@@ -8,9 +8,10 @@ import type { LayoutLoad } from './$types';
 
 // What an account without an organization can still use: the dashboard, which
 // tells it what to do next, its own profile, the org list (where a system admin
-// creates the first one), the operator's legal pages and, for that admin, the
-// admin pages.
-const orglessPaths = ['/profile', '/orgs', '/auth', '/legal'];
+// creates the first one), the operator's legal pages, pairing a device (a
+// system admin's token reaches the catalogue over /api/v1 without any org) and,
+// for that admin, the admin pages.
+const orglessPaths = ['/profile', '/orgs', '/auth', '/legal', '/devices'];
 
 // The catalogue is shared, not any org's, so a system admin edits it without
 // belonging to one.

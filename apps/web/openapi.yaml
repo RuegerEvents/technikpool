@@ -86,8 +86,11 @@ tags:
       identity (name, category, caption, details, licence) or whether it needs
       DGUV inspections answers to the same rule as on the web: a system admin,
       or an ADMIN/OWNER of every organization holding units of it — and, for a
-      product nobody holds units of, whoever created it. Categories are system
-      admin only. Every change is written to the catalog log.
+      product nobody holds units of, whoever created it. Merging a product
+      away needs that right over the duplicate. Categories, renaming or
+      merging manufacturers, a connector's mains flag and the catalog log are
+      system admin only. Every change is written to the catalog log, and a
+      product update can be reverted from it.
   - name: inspection
     description: |
       DGUV inspections. Recording an inspection, or deleting one recorded by
@@ -386,6 +389,35 @@ paths:
                   $ref: '#/components/schemas/Connector'
         '401':
           $ref: '#/components/responses/Unauthorized'
+    post:
+      operationId: createConnector
+      tags: [catalog]
+      summary: Register a connector
+      description: |
+        Returns the connector of that name if the catalog has one (ignoring
+        case), else registers it, so a panel can name it. Its family is the
+        name's first word unless given, and it carries mains voltage when that
+        family already does. Needs ADMIN or OWNER of an organization, as on
+        the web.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConnectorCreateRequest'
+      responses:
+        '200':
+          description: The connector
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Connector'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
 
   /api/v1/products:
     get:
@@ -454,6 +486,56 @@ paths:
           $ref: '#/components/responses/Unauthorized'
 
   /api/v1/products/{productId}:
+    get:
+      operationId: getProduct
+      tags: [catalog]
+      summary: One product of the catalog
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The product
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogProduct'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    delete:
+      operationId: deleteProduct
+      tags: [catalog]
+      summary: Delete a product nobody holds units of
+      description: |
+        Only a product without units, retired ones included (`409` otherwise —
+        merge it into the right product instead). Without units it answers to
+        its creator or a system admin. Cannot be reverted.
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Deleted
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductDeleted'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
     patch:
       operationId: updateProduct
       tags: [catalog]
@@ -493,6 +575,280 @@ paths:
                 $ref: '#/components/schemas/ProductUpdated'
         '400':
           $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/products/{productId}/merge:
+    post:
+      operationId: mergeProduct
+      tags: [catalog]
+      summary: Merge a duplicate into this product
+      description: |
+        Every unit of `sourceProductId` — retired ones too — becomes a unit of
+        this product, and the source row is deleted. This product keeps its
+        name, manufacturer and category; it takes the source's picture, cable
+        and panel only where it has none of its own, and an organization's
+        price for the source moves over unless that organization priced this
+        one itself. The moved units follow this product's inspection
+        requirement. Offers and invoices already written keep naming the
+        source. Needs the identity right over the *source* product. Cannot be
+        reverted.
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          description: The product that remains.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductMergeRequest'
+      responses:
+        '200':
+          description: Merged
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductMerged'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/manufacturers:
+    get:
+      operationId: listManufacturers
+      tags: [catalog]
+      summary: Manufacturers in the catalog
+      responses:
+        '200':
+          description: Manufacturers, by name
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Manufacturer'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      operationId: createManufacturer
+      tags: [catalog]
+      summary: Find or register a manufacturer
+      description: |
+        Returns the manufacturer of that name if the catalog has one (ignoring
+        case), else registers it. Open to anyone who works in an organization,
+        as on the web.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManufacturerCreateRequest'
+      responses:
+        '200':
+          description: The manufacturer, and whether it was created now
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManufacturerCreated'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/v1/manufacturers/{manufacturerId}:
+    patch:
+      operationId: updateManufacturer
+      tags: [catalog]
+      summary: Rename a manufacturer
+      description: System admins only. A name another manufacturer has is refused (`409`).
+      parameters:
+        - name: manufacturerId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManufacturerUpdateRequest'
+      responses:
+        '200':
+          description: The manufacturer as it is now
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Manufacturer'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/manufacturers/{manufacturerId}/merge:
+    post:
+      operationId: mergeManufacturer
+      tags: [catalog]
+      summary: Merge a duplicate manufacturer into this one
+      description: |
+        System admins only. Every product of `sourceManufacturerId` moves to
+        this manufacturer and the source is deleted. Refused (`409`) while both
+        have a product of the same name — merge those products first.
+      parameters:
+        - name: manufacturerId
+          in: path
+          required: true
+          description: The manufacturer that remains.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ManufacturerMergeRequest'
+      responses:
+        '200':
+          description: Merged
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ManufacturerMerged'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/connectors/{connector}:
+    patch:
+      operationId: updateConnector
+      tags: [catalog]
+      summary: Say whether a connector carries mains voltage
+      description: |
+        System admins only. Products are not re-flagged by this; a product with
+        a mains connector that does not need inspecting shows up under
+        `listProducts?mains=true&inspectionRequired=false`.
+      parameters:
+        - name: connector
+          in: path
+          required: true
+          description: The connector's name, URL-encoded, matched without case.
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConnectorUpdateRequest'
+      responses:
+        '200':
+          description: The connector as it is now
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Connector'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/catalog-log:
+    get:
+      operationId: listCatalogLog
+      tags: [catalog]
+      summary: The catalog log
+      description: |
+        Every change to a product, manufacturer or category, newest first.
+        System admins only, since it spans every organization.
+      parameters:
+        - name: productId
+          in: query
+          description: Only entries about this product (merges name the product that remained).
+          schema:
+            type: string
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 100
+      responses:
+        '200':
+          description: Entries, newest first
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CatalogLogEntry'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+
+  /api/v1/catalog-log/{entryId}/revert:
+    post:
+      operationId: revertCatalogChange
+      tags: [catalog]
+      summary: Undo a product change
+      description: |
+        System admins only. Puts back what one `PRODUCT_UPDATED` entry changed,
+        field by field, and only where the product still holds the value that
+        entry wrote. The revert is logged as a new entry with `revertOf`, so it
+        can be undone the same way. Merges and deletions cannot be reverted
+        (`409`), nor an entry every field of which has been changed again since.
+      parameters:
+        - name: entryId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The product as it is now
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductUpdated'
         '401':
           $ref: '#/components/responses/Unauthorized'
         '403':
@@ -2193,6 +2549,9 @@ components:
         details:
           type: string
           description: '`""` clears it.'
+        manufacturerId:
+          type: [string, 'null']
+          description: From listManufacturers or createManufacturer. Null says nobody in particular makes it.
         categoryId:
           type: string
         isLicense:
@@ -2290,8 +2649,11 @@ components:
 
     Connector:
       type: object
-      required: [name, family, mains]
+      required: [name, family, mains, productCount]
       properties:
+        productCount:
+          type: integer
+          description: Products naming it at a cable end, on a loom's way or on their panel.
         name:
           type: string
         family:
@@ -2310,6 +2672,152 @@ components:
         unitsChanged:
           type: integer
           description: Units whose inspection interval this change set or cleared.
+
+    ProductDeleted:
+      type: object
+      required: [id]
+      properties:
+        id:
+          type: string
+
+    ProductMergeRequest:
+      type: object
+      additionalProperties: false
+      required: [sourceProductId]
+      properties:
+        sourceProductId:
+          type: string
+          description: The duplicate. Its units move, then it is deleted.
+
+    ProductMerged:
+      type: object
+      required: [product, movedUnits, inheritedImage, inheritedCable, inheritedLicense]
+      properties:
+        product:
+          $ref: '#/components/schemas/CatalogProduct'
+        movedUnits:
+          type: integer
+          description: Units moved over, retired ones included.
+        inheritedImage:
+          type: boolean
+        inheritedCable:
+          type: boolean
+        inheritedLicense:
+          type: boolean
+
+    Manufacturer:
+      type: object
+      required: [id, name, productCount]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        productCount:
+          type: integer
+
+    ManufacturerCreateRequest:
+      type: object
+      additionalProperties: false
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+
+    ManufacturerCreated:
+      type: object
+      required: [manufacturer, created]
+      properties:
+        manufacturer:
+          $ref: '#/components/schemas/Manufacturer'
+        created:
+          type: boolean
+          description: False when the catalog already had a manufacturer of that name.
+
+    ManufacturerUpdateRequest:
+      type: object
+      additionalProperties: false
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+
+    ManufacturerMergeRequest:
+      type: object
+      additionalProperties: false
+      required: [sourceManufacturerId]
+      properties:
+        sourceManufacturerId:
+          type: string
+
+    ManufacturerMerged:
+      type: object
+      required: [manufacturer, movedProducts]
+      properties:
+        manufacturer:
+          $ref: '#/components/schemas/Manufacturer'
+        movedProducts:
+          type: integer
+
+    ConnectorCreateRequest:
+      type: object
+      additionalProperties: false
+      required: [name]
+      properties:
+        name:
+          type: string
+          minLength: 1
+        family:
+          type: [string, 'null']
+          description: What it mates with. Defaults to the name's first word.
+
+    ConnectorUpdateRequest:
+      type: object
+      additionalProperties: false
+      required: [mains]
+      properties:
+        mains:
+          type: boolean
+
+    CatalogLogEntry:
+      type: object
+      required: [id, action, createdAt, userName, productId, manufacturerId, categoryId, data]
+      properties:
+        id:
+          type: string
+        action:
+          type: string
+          description: |
+            `PRODUCT_UPDATED`, `PRODUCT_DELETED`, `PRODUCT_MERGED`,
+            `PRODUCT_PRICE_SET`, `PRODUCT_DOCUMENT_ADDED`,
+            `PRODUCT_DOCUMENT_REMOVED`, `MANUFACTURER_UPDATED`,
+            `MANUFACTURER_MERGED` or `CATEGORY_UPDATED`. Only a
+            `PRODUCT_UPDATED` entry can be reverted.
+        createdAt:
+          type: string
+          format: date-time
+        userName:
+          type: [string, 'null']
+          description: Null once the account has been deleted.
+        productId:
+          type: [string, 'null']
+          description: May name a product that no longer exists.
+        productName:
+          type: [string, 'null']
+          description: The product's label now, while it still exists.
+        manufacturerId:
+          type: [string, 'null']
+        categoryId:
+          type: [string, 'null']
+        data:
+          description: |
+            What the entry recorded. For an update, `changes` lists
+            `{ field, from, to }` per field that moved, and `revertOf` names
+            the entry a revert undid.
+          type: [object, 'null']
+          additionalProperties: true
 
     AssetDetail:
       allOf:

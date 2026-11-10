@@ -7,7 +7,12 @@ import {
 	requireAuth,
 	requireSystemAdmin
 } from '#lib/server/services/access.js';
-import { connectorSlug, familyIsMains } from '#lib/server/services/connectors.js';
+import {
+	connectorProductCounts,
+	connectorSlug,
+	familyIsMains,
+	setConnectorMains as setConnectorMainsRecord
+} from '#lib/server/services/connectors.js';
 import { appError } from '#lib/errors.js';
 import { connectorFamily } from '#lib/cable.js';
 
@@ -175,32 +180,7 @@ function usedBy(connectorId: string) {
  */
 export const getConnectorUsage = query(async () => {
 	await requireAuth();
-	const products = await prisma.product.findMany({
-		where: {
-			OR: [
-				{ connectorAId: { not: null } },
-				{ connectorBId: { not: null } },
-				{ ways: { some: {} } },
-				{ ports: { some: {} } }
-			]
-		},
-		select: {
-			connectorAId: true,
-			connectorBId: true,
-			ways: { select: { connectorAId: true, connectorBId: true } },
-			ports: { select: { connectorId: true } }
-		}
-	});
-	const byId = new Map<string, number>();
-	for (const product of products) {
-		const ids = new Set([
-			product.connectorAId,
-			product.connectorBId,
-			...product.ways.flatMap((w) => [w.connectorAId, w.connectorBId]),
-			...product.ports.map((p) => p.connectorId)
-		]);
-		for (const id of ids) if (id) byId.set(id, (byId.get(id) ?? 0) + 1);
-	}
+	const byId = await connectorProductCounts();
 	const connectors = await prisma.connector.findMany({ select: { id: true, slug: true } });
 	const counts: Record<string, number> = {};
 	for (const c of connectors) {
@@ -229,15 +209,9 @@ export const deleteConnector = command(v.string(), async (connectorId: string) =
 
 const connectorMainsSchema = v.object({ connectorId: v.string(), mains: v.boolean() });
 
-/**
- * Whether a connector carries mains voltage, which is what makes a device or
- * cable with it need DGUV inspections. Shared vocabulary, so system admin.
- */
+/** Whether a connector carries mains voltage — see `setConnectorMains` in services/connectors.ts. */
 export const setConnectorMains = command(connectorMainsSchema, async (input) => {
-	await requireSystemAdmin();
-	await prisma.connector.update({
-		where: { id: input.connectorId },
-		data: { mains: input.mains }
-	});
+	const user = await requireAuth();
+	await setConnectorMainsRecord(user.id, input.connectorId, input.mains);
 	await getConnectors().refresh();
 });

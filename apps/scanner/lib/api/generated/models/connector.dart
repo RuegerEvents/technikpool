@@ -9,6 +9,7 @@ part 'connector.g.dart';
 @JsonSerializable()
 class Connector {
   const Connector({
+    required this.productCount,
     required this.name,
     required this.family,
     required this.mains,
@@ -16,6 +17,8 @@ class Connector {
   
   factory Connector.fromJson(Map<String, Object?> json) => _$ConnectorFromJson(json);
   
+  /// Products naming it at a cable end, on a loom's way or on their panel.
+  final int productCount;
   final String name;
 
   /// What it mates with — `Schuko M` and `Schuko F` are both `Schuko`.

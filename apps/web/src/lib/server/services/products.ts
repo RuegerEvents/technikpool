@@ -1,21 +1,32 @@
 import { prisma } from '#lib/server/auth.js';
+import type { Prisma } from '#lib/prisma/client.js';
+import type { FieldChange } from '#lib/types/asset-transaction.js';
+import { productLabel } from '#lib/product-label.js';
+import { redrawPreviewsOf } from '#lib/server/services/bundle-image.js';
 import { appError } from '#lib/errors.js';
 import { isSystemAdmin, managedOrgIds, writableOrgIds } from '#lib/server/services/access.js';
 import { productControl } from '#lib/server/services/product-control.js';
 import { assertProductNameFree } from '#lib/server/services/product-name.js';
 import { fieldChanges, logCatalogChange } from '#lib/server/services/catalog-log.js';
 import { ensureConnectors, sameConnectorName } from '#lib/server/services/connectors.js';
-import { waySnapshot, writeWays } from '#lib/server/services/cable-ways.js';
+import { waySnapshot, writeWays, type WayInput } from '#lib/server/services/cable-ways.js';
 import { CABLE_ENDS, withCableNames, withEndNames } from '#lib/server/services/cable-ends.js';
 import { applyInspectionRequirement } from '#lib/server/services/inspections.js';
-import { normalizeCable, normalizeWays, sameWays, type CableWayAttrs } from '#lib/cable.js';
+import {
+	isCable,
+	normalizeCable,
+	normalizeWays,
+	sameWays,
+	type CableWayAttrs
+} from '#lib/cable.js';
 import { ACTIVE_ASSET_WHERE } from '#lib/asset-status.js';
 import {
 	normalizePorts,
 	portSnapshot,
 	samePorts,
 	writePorts,
-	type PortInput
+	type PortInput,
+	type PortSnapshot
 } from '#lib/server/services/product-ports.js';
 
 // Changing a product or a category, shared by the web's remote functions and
@@ -461,4 +472,420 @@ export async function catalogUnitCounts(
 		tracked: t.get(productId) ?? 0,
 		overdue: o.get(productId) ?? 0
 	});
+}
+
+// ── Deleting, merging, reverting ─────────────────────────────────────────────
+
+/** Delete a catalogue row only when no unit, including a retired one, refers to it. */
+export async function deleteProduct(userId: string, productId: string) {
+	const systemAdmin = await isSystemAdmin(userId);
+	const managed = systemAdmin ? [] : await managedOrgIds(userId);
+	if (!systemAdmin && managed.length === 0) {
+		appError(403, 'product_delete_forbidden');
+	}
+
+	const product = await prisma.product.findUniqueOrThrow({
+		where: { id: productId },
+		include: { manufacturer: true, _count: { select: { assets: true } } }
+	});
+	if (product._count.assets > 0) {
+		appError(409, 'product_has_units');
+	}
+	// Without units there is no owning org, so this is the creator's call or a
+	// system admin's — see `productControl`.
+	const control = await productControl({ id: userId, systemAdmin, managed }, product);
+	if (!control.allowed) appError(403, 'product_unowned_not_creator', [product.name]);
+
+	await prisma.product.delete({ where: { id: productId } });
+	await logCatalogChange({
+		userId,
+		action: 'PRODUCT_DELETED',
+		productId: product.id,
+		manufacturerId: product.manufacturerId,
+		data: { name: product.name, manufacturerName: product.manufacturer?.name ?? null }
+	});
+	return { id: product.id, manufacturerId: product.manufacturerId };
+}
+
+// Nothing stops two rows describing the same device: the create-a-product path
+// is a free text field by design, because the pool has to be able to register a
+// thing nobody has catalogued yet. So "Robin 600" and "Robe Robin 600" both
+// exist, each holding half the units, and every count, every catalogue page and
+// every offer line built from them is wrong in a way that adds up.
+//
+// A merge is unusually cheap here because `Asset.productId` is the only foreign
+// key pointing at a product. OfferItem and InvoiceItem carry a productId too,
+// but as a *snapshot* with no relation (see the schema): an issued document
+// says what it said, and the id there is only ever used to collapse identical
+// lines on that one document. They are deliberately left alone — rewriting them
+// would be editing a sent invoice to make a catalogue tidier.
+
+export type ProductMergeInput = {
+	/** Survives. Its name, manufacturer and category are the ones that remain. */
+	targetProductId: string;
+	/** The duplicate: its units move to the target, then the row is deleted. */
+	sourceProductId: string;
+};
+
+export async function mergeProducts(
+	userId: string,
+	{ targetProductId, sourceProductId }: ProductMergeInput
+) {
+	if (targetProductId === sourceProductId) appError(409, 'product_merge_self');
+
+	const include = {
+		manufacturer: true,
+		ways: { select: { id: true } },
+		connectorARef: { select: { name: true } },
+		connectorBRef: { select: { name: true } }
+	} as const;
+	const [target, source] = await Promise.all([
+		prisma.product.findUniqueOrThrow({ where: { id: targetProductId }, include }),
+		prisma.product.findUniqueOrThrow({ where: { id: sourceProductId }, include })
+	]);
+
+	// Retired and decommissioned units come too. They are not in
+	// ACTIVE_ASSET_WHERE and no page lists them next to the rest, but they are
+	// rows with a foreign key: leaving them behind would make the delete fail
+	// on exactly the old, half-abandoned product a merge is aimed at.
+	const moving = await prisma.asset.findMany({
+		where: { productId: sourceProductId },
+		select: {
+			id: true,
+			organizationId: true,
+			bundleId: true,
+			parent: { select: { productId: true } }
+		}
+	});
+
+	const systemAdmin = await isSystemAdmin(userId);
+	if (!systemAdmin) {
+		const managed = await managedOrgIds(userId);
+		if (managed.length === 0) {
+			appError(403, 'product_merge_forbidden');
+		}
+		// A merge moves *units*, and those belong to someone. The check is on the
+		// source alone because it is the only side that loses records: the
+		// target's units are not touched, and what it is called does not change.
+		// A duplicate nobody holds units of is its creator's to clean up.
+		const control = await productControl({ id: userId, systemAdmin, managed }, source);
+		if (!control.allowed) {
+			if (control.reason === 'foreign_units') {
+				appError(403, 'product_merge_units_other_orgs', [source.name, control.orgNames]);
+			}
+			appError(403, 'product_unowned_not_creator', [source.name]);
+		}
+	}
+
+	// The two identities the merge picks between. Name, manufacturer and
+	// category are the target's, always — that is what choosing a target
+	// means. An image is not identity, it is work someone did, so an empty
+	// one on the target takes the source's rather than throwing it away over
+	// which card the merge happened to be started from. Per-org prices are
+	// each org's own work for the same reason: a source row moves to the
+	// target unless that org already priced the target itself.
+	//
+	// What a cable is (type, ends, length, a loom's ways) goes the same way as
+	// the panel below: a target that is no cable takes the source's whole, one
+	// that is keeps its own, and two are never mixed. Otherwise merging a
+	// cable into a plain entry silently turned every unit into a non-cable
+	// and deleted the loom's ways with the source row. A license is a license
+	// whichever side said so — its units' credentials only show on one.
+	const inheritsCable = !isCable(withEndNames(target)) && isCable(withEndNames(source));
+	const inherited = {
+		...(!target.imagePath && source.imagePath ? { imagePath: source.imagePath } : {}),
+		...(inheritsCable
+			? {
+					cableType: source.cableType,
+					connectorAId: source.connectorAId,
+					connectorBId: source.connectorBId,
+					lengthCm: source.lengthCm
+				}
+			: {}),
+		...(source.isLicense && !target.isLicense ? { isLicense: true } : {})
+	};
+
+	await prisma.$transaction(async (tx) => {
+		await tx.asset.updateMany({
+			where: { productId: sourceProductId },
+			data: { productId: targetProductId }
+		});
+		// What a unit *is* changed, which is the kind of thing the history exists
+		// to explain: a tag that has sat on a shelf for two years now reporting a
+		// different product is otherwise indistinguishable from someone having
+		// mislabelled it.
+		await tx.assetTransaction.createMany({
+			data: moving.map((asset) => ({
+				assetId: asset.id,
+				userId,
+				action: 'UPDATED',
+				data: {
+					type: 'UPDATED',
+					changes: [{ field: 'product', from: productLabel(source), to: productLabel(target) }]
+				}
+			}))
+		});
+		if (Object.keys(inherited).length > 0) {
+			await tx.product.update({ where: { id: targetProductId }, data: inherited });
+		}
+		if (inheritsCable) {
+			await tx.cableWay.updateMany({
+				where: { productId: sourceProductId },
+				data: { productId: targetProductId }
+			});
+		}
+		// A device's panel is the same kind of work as its picture: the target
+		// takes the source's where it has none of its own, and keeps its own
+		// otherwise — two panels are never mixed into one.
+		const targetPorts = await tx.productPort.count({ where: { productId: targetProductId } });
+		if (targetPorts === 0) {
+			await tx.productPort.updateMany({
+				where: { productId: sourceProductId },
+				data: { productId: targetProductId }
+			});
+		}
+		const pricedOrgs = await tx.orgProductPrice.findMany({
+			where: { productId: targetProductId },
+			select: { organizationId: true }
+		});
+		await tx.orgProductPrice.updateMany({
+			where: {
+				productId: sourceProductId,
+				organizationId: { notIn: pricedOrgs.map((p) => p.organizationId) }
+			},
+			data: { productId: targetProductId }
+		});
+		await tx.orgProductPrice.deleteMany({ where: { productId: sourceProductId } });
+		await tx.product.delete({ where: { id: sourceProductId } });
+		// The merged units are the target's now, and follow its DGUV requirement.
+		await applyInspectionRequirement(tx, userId, [targetProductId]);
+	});
+
+	await logCatalogChange({
+		userId,
+		action: 'PRODUCT_MERGED',
+		productId: targetProductId,
+		manufacturerId: target.manufacturerId,
+		data: {
+			source: { id: source.id, name: productLabel(source) },
+			target: { id: target.id, name: productLabel(target) },
+			movedAssets: moving.length
+		}
+	});
+
+	// The moved units are a different product in every picture they are in,
+	// and the target may just have inherited the source's photo.
+	redrawPreviewsOf(targetProductId);
+
+	return {
+		target,
+		source,
+		moving,
+		inheritedImage: 'imagePath' in inherited,
+		inheritedCable: inheritsCable,
+		inheritedLicense: 'isLicense' in inherited
+	};
+}
+
+/** The product columns a `PRODUCT_UPDATED` entry can carry, and so the ones a revert may write. */
+const REVERTIBLE_PRODUCT_FIELDS = [
+	'name',
+	'manufacturerId',
+	'categoryId',
+	'imagePath',
+	'cableType',
+	'connectorA',
+	'connectorB',
+	'lengthCm',
+	'isLicense',
+	'caption',
+	'details',
+	'requiresInspection'
+] as const;
+type RevertibleProductField = (typeof REVERTIBLE_PRODUCT_FIELDS)[number];
+
+/** A logged value as the column holds it: `requiresInspection` is logged as text. */
+function revertValue(field: RevertibleProductField, value: unknown) {
+	if (field !== 'requiresInspection') return (value ?? null) as string | number | boolean | null;
+	return value === 'true' || value === true
+		? true
+		: value === 'false' || value === false
+			? false
+			: null;
+}
+
+/**
+ * Put a product back the way one log entry found it. System admin only.
+ *
+ * Field by field, and only where the product still holds the value that entry
+ * wrote: a field somebody has edited again since is theirs now, and rolling it
+ * back would undo a change this entry knows nothing about. The revert is itself
+ * logged as an update (`revertOf` names the entry), so it can be undone the
+ * same way and the log never has to be rewritten.
+ */
+export async function revertCatalogChange(userId: string, entryId: string) {
+	if (!(await isSystemAdmin(userId))) appError(403, 'admin_required');
+	const entry = await prisma.catalogTransaction.findUniqueOrThrow({ where: { id: entryId } });
+	const logged = (entry.data as { changes?: FieldChange[] } | null)?.changes ?? [];
+	if (entry.action !== 'PRODUCT_UPDATED' || !entry.productId || logged.length === 0) {
+		appError(409, 'catalog_revert_unavailable');
+	}
+
+	const found = await prisma.product.findUnique({
+		where: { id: entry.productId },
+		include: {
+			connectorARef: { select: { name: true } },
+			connectorBRef: { select: { name: true } }
+		}
+	});
+	if (!found) appError(409, 'catalog_revert_unavailable');
+	const product = withEndNames(found);
+
+	const data: Partial<Record<RevertibleProductField, string | number | boolean | null>> = {};
+	for (const change of logged) {
+		const field = REVERTIBLE_PRODUCT_FIELDS.find((f) => f === change.field);
+		if (!field) continue;
+		const stillHolds =
+			field === 'connectorA' || field === 'connectorB'
+				? // An entry older than the connector ids may spell the end differently
+					// from the row the migration settled on.
+					sameConnectorName(product[field], (change.to ?? null) as string | null)
+				: String(product[field] ?? null) === String(change.to ?? null);
+		if (!stillHolds) continue;
+		data[field] = revertValue(field, change.from);
+	}
+
+	// A loom's ways are logged as the whole list on both sides, like the panel
+	// below, and reverted on the same terms: only while the product still has
+	// exactly the list this entry wrote.
+	const waysChange = logged.find((change) => change.field === 'ways');
+	const waysBefore = waysChange ? await waySnapshot(product.id) : [];
+	let waysRevert: WayInput[] | null = null;
+	if (waysChange) {
+		const wrote = (waysChange.to ?? []) as unknown as WayInput[];
+		if (sameWays(waysBefore, wrote)) waysRevert = (waysChange.from ?? []) as unknown as WayInput[];
+	}
+
+	// A device's panel is logged as the whole list on both sides, so it is
+	// reverted the same way: only while the product still has exactly the list
+	// this entry wrote. `FieldChange` types from/to as strings; for this field
+	// they are the snapshots `setProductPorts` logged.
+	const portsChange = logged.find((change) => change.field === 'ports');
+	const portsBefore = portsChange ? await portSnapshot(product.id) : [];
+	let portsRevert: PortSnapshot[] | null = null;
+	if (portsChange) {
+		const wrote = (portsChange.to ?? []) as unknown as PortSnapshot[];
+		if (samePorts(portsBefore, wrote)) {
+			const from = (portsChange.from ?? []) as unknown as PortSnapshot[];
+			// A connector nobody uses any more can have been deleted since.
+			const alive = new Set(
+				(
+					await prisma.connector.findMany({
+						where: { id: { in: from.map((p) => p.connectorId) } },
+						select: { id: true }
+					})
+				).map((c) => c.id)
+			);
+			portsRevert = from.filter((p) => alive.has(p.connectorId));
+		}
+	}
+	if (Object.keys(data).length === 0 && !portsRevert && !waysRevert) {
+		appError(409, 'catalog_revert_stale');
+	}
+
+	// The rows an old value points at can be gone — merges delete them.
+	if (typeof data.manufacturerId === 'string') {
+		const exists = await prisma.manufacturer.findUnique({ where: { id: data.manufacturerId } });
+		if (!exists) delete data.manufacturerId;
+	}
+	if (typeof data.categoryId === 'string') {
+		const exists = await prisma.category.findUnique({ where: { id: data.categoryId } });
+		if (!exists) delete data.categoryId;
+	}
+	if (Object.keys(data).length === 0 && !portsRevert && !waysRevert) {
+		appError(409, 'catalog_revert_stale');
+	}
+	// A revert is a rename like any other, and the old name may have been
+	// taken since.
+	if ('name' in data || 'manufacturerId' in data) {
+		await assertProductNameFree(
+			'name' in data ? (data.name as string) : product.name,
+			'manufacturerId' in data ? (data.manufacturerId as string | null) : product.manufacturerId,
+			{ exceptId: product.id }
+		);
+	}
+
+	// The logged ends are names, so they are resolved like a form's — and a
+	// connector deleted since the entry was written simply comes back.
+	const endsReverted = 'connectorA' in data || 'connectorB' in data;
+	const connectors = endsReverted
+		? await ensureConnectors([data.connectorA as string | null, data.connectorB as string | null])
+		: null;
+	// What is written: the ids in place of the names. `data` itself keeps the
+	// names, because it is also what the revert logs.
+	const write: Record<string, unknown> = Object.fromEntries(
+		Object.entries(data).filter(([field]) => field !== 'connectorA' && field !== 'connectorB')
+	);
+	if (connectors) {
+		const ends = connectors.ends({
+			connectorA: (data.connectorA ?? null) as string | null,
+			connectorB: (data.connectorB ?? null) as string | null
+		});
+		if ('connectorA' in data) {
+			data.connectorA = connectors.name(data.connectorA as string | null);
+			write.connectorAId = ends.connectorAId;
+		}
+		if ('connectorB' in data) {
+			data.connectorB = connectors.name(data.connectorB as string | null);
+			write.connectorBId = ends.connectorBId;
+		}
+	}
+
+	// Whether its units need inspecting can move with the category, the licence
+	// flag or the flag itself, and their intervals move with it.
+	const requirementTouched =
+		'categoryId' in data || 'isLicense' in data || 'requiresInspection' in data;
+	const { updated, unitsChanged } = await prisma.$transaction(async (tx) => {
+		const updated =
+			Object.keys(write).length > 0
+				? await tx.product.update({
+						where: { id: product.id },
+						data: write as Prisma.ProductUncheckedUpdateInput
+					})
+				: product;
+		const unitsChanged = requirementTouched
+			? await applyInspectionRequirement(tx, userId, [product.id])
+			: [];
+		return { updated, unitsChanged };
+	});
+	const changes = fieldChanges(product, data);
+	let createdForWays: string[] = [];
+	if (waysRevert) {
+		createdForWays = await writeWays(product.id, waysRevert);
+		changes.push({ field: 'ways', from: waysBefore, to: await waySnapshot(product.id) });
+	}
+	if (portsRevert) {
+		await writePorts(product.id, portsRevert);
+		changes.push({ field: 'ports', from: portsBefore, to: await portSnapshot(product.id) });
+	}
+	await logCatalogChange({
+		userId,
+		action: 'PRODUCT_UPDATED',
+		productId: updated.id,
+		manufacturerId: updated.manufacturerId,
+		data: { changes, revertOf: entry.id }
+	});
+
+	if ('imagePath' in data) redrawPreviewsOf(updated.id);
+	return {
+		productId: updated.id,
+		unitsChanged,
+		cableChanged:
+			!!waysRevert ||
+			(['cableType', 'connectorA', 'connectorB', 'lengthCm'] as const).some(
+				(field) => field in data
+			),
+		connectorsCreated: (connectors?.created.length ?? 0) + createdForWays.length > 0,
+		portsReverted: !!portsRevert
+	};
 }

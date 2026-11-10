@@ -473,7 +473,7 @@
 													Connectors
 												</DropdownMenu.Item>
 											{/if}
-											{#if data.hasOrg}
+											{#if data.hasOrg || data.isAdmin}
 												<DropdownMenu.Item
 													onSelect={() => goto(resolve('devices'))}
 													class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"

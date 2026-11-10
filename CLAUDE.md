@@ -158,10 +158,13 @@ Logic needed by both remote functions and `/api/v1` lives in `src/lib/server/ser
 - `checkout.ts` — `performScan`, `performBulkCheckout`. Framework-agnostic: they take a user id
   and report touched records via `affected`, and the caller decides what to invalidate
   (`query().refresh()` only means something in the remote-function layer).
-- `products.ts` — `updateProduct`, `updateCategory`: every edit of a product or category,
-  with `productControl`, the catalog log and `applyInspectionRequirement`. Behind the web's
-  `updateProduct` / `set*InspectionRequirement` commands and `PATCH /api/v1/products/{id}` /
-  `/categories/{id}`. A new editable field goes here, then into both schemas.
+- `products.ts` — `updateProduct`, `updateCategory`, `setProductPorts`, `deleteProduct`,
+  `mergeProducts`, `revertCatalogChange`: every change to a product or category, with
+  `productControl`, the catalog log and `applyInspectionRequirement`. `manufacturers.ts`
+  (find-or-create, rename, merge) and `setConnectorMains` in `connectors.ts` likewise. Behind
+  the web's commands and `/api/v1/products`, `/manufacturers`, `/connectors`, `/categories`
+  and `/catalog-log`, so an assistant with a system admin's token can tidy the catalog under
+  the web's rules. A new editable field goes here, then into both schemas.
 
 ## Licenses
 

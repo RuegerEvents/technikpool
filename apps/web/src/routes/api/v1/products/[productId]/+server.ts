@@ -2,17 +2,14 @@ import type { RequestHandler } from './$types';
 import * as v from 'valibot';
 import { prisma } from '#lib/server/auth.js';
 import { apiError, ApiResponse, apiJson, handleApi, requireApiUser } from '#lib/server/api.js';
-import { isSystemAdmin, userOrgIds } from '#lib/server/services/access.js';
-import { mainsConnectorNames } from '#lib/server/services/inspections.js';
+import { deleteProduct, setProductPorts, updateProduct } from '#lib/server/services/products.js';
 import {
-	CATALOG_PRODUCT_INCLUDE,
-	catalogUnitCounts,
-	setProductPorts,
-	updateProduct
-} from '#lib/server/services/products.js';
+	catalogProductBody,
+	requireManufacturerExists,
+	requireProductExists
+} from '#lib/server/api-catalog.js';
 import { connectorSlug } from '#lib/server/services/connectors.js';
 import { PORT_REQUIREMENTS } from '#lib/ports.js';
-import { toCatalogProduct } from '#lib/server/services/api-mappers.js';
 import { parseApiBody } from '#lib/server/api-body.js';
 
 // ProductUpdateRequest in openapi.yaml. Strict, so a misspelt field is an
@@ -21,6 +18,7 @@ const bodySchema = v.strictObject({
 	name: v.optional(v.pipe(v.string(), v.trim(), v.minLength(1))),
 	caption: v.optional(v.string()),
 	details: v.optional(v.string()),
+	manufacturerId: v.optional(v.nullable(v.pipe(v.string(), v.minLength(1)))),
 	categoryId: v.optional(v.pipe(v.string(), v.minLength(1))),
 	isLicense: v.optional(v.boolean()),
 	requiresInspection: v.optional(v.nullable(v.boolean())),
@@ -95,15 +93,8 @@ export const PATCH: RequestHandler = ({ locals, params, request }) =>
 		const user = requireApiUser(locals);
 		const body = await parseApiBody(request, bodySchema);
 
-		const exists = await prisma.product.findUnique({
-			where: { id: params.productId },
-			select: { id: true }
-		});
-		if (!exists) {
-			throw new ApiResponse(
-				apiError(404, 'product_not_found', `Product "${params.productId}" not found`)
-			);
-		}
+		await requireProductExists(params.productId);
+		if (body.manufacturerId) await requireManufacturerExists(body.manufacturerId);
 		if (body.categoryId) {
 			const category = await prisma.category.findUnique({
 				where: { id: body.categoryId },
@@ -118,10 +109,12 @@ export const PATCH: RequestHandler = ({ locals, params, request }) =>
 
 		// Resolved before anything is written, so a misspelt connector changes nothing.
 		const ports = await portInputs(body.ports);
-		const { name, caption, details, categoryId, isLicense, requiresInspection, cable } = body;
+		const { name, manufacturerId, caption, details, categoryId, isLicense } = body;
+		const { requiresInspection, cable } = body;
 		const { unitsChanged } = await updateProduct(user.id, {
 			productId: params.productId,
 			name,
+			manufacturerId,
 			caption,
 			details,
 			categoryId,
@@ -142,17 +135,23 @@ export const PATCH: RequestHandler = ({ locals, params, request }) =>
 		});
 		if (ports) await setProductPorts(user.id, params.productId, ports);
 
-		const orgIds = (await isSystemAdmin(user.id)) ? null : await userOrgIds(user.id);
-		const [product, mainsConnectors, units] = await Promise.all([
-			prisma.product.findUniqueOrThrow({
-				where: { id: params.productId },
-				include: CATALOG_PRODUCT_INCLUDE
-			}),
-			mainsConnectorNames(params.productId),
-			catalogUnitCounts([params.productId], orgIds)
-		]);
 		return apiJson('ProductUpdated', {
-			product: toCatalogProduct(product, { mainsConnectors, units: units(product.id) }),
+			product: await catalogProductBody(user.id, params.productId),
 			unitsChanged: unitsChanged.length
 		});
+	});
+
+export const GET: RequestHandler = ({ locals, params }) =>
+	handleApi(async () => {
+		const user = requireApiUser(locals);
+		await requireProductExists(params.productId);
+		return apiJson('CatalogProduct', await catalogProductBody(user.id, params.productId));
+	});
+
+export const DELETE: RequestHandler = ({ locals, params }) =>
+	handleApi(async () => {
+		const user = requireApiUser(locals);
+		await requireProductExists(params.productId);
+		const { id } = await deleteProduct(user.id, params.productId);
+		return apiJson('ProductDeleted', { id });
 	});

@@ -638,3 +638,27 @@ export function toProductionHandout(view: HandoutView): Schemas['ProductionHando
 		othersCount: view.othersCount
 	};
 }
+
+export function toManufacturer(manufacturer: {
+	id: string;
+	name: string;
+	_count: { products: number };
+}): Schemas['Manufacturer'] {
+	return {
+		id: manufacturer.id,
+		name: manufacturer.name,
+		productCount: manufacturer._count.products
+	};
+}
+
+export function toConnector(
+	connector: { id: string; name: string; family: string | null; mains: boolean },
+	productCount: number
+): Schemas['Connector'] {
+	return {
+		name: connector.name,
+		family: connector.family,
+		mains: connector.mains,
+		productCount
+	};
+}

@@ -7,7 +7,6 @@ import { getNextAssetTag, getOrgEquipmentValue } from './orgs.remote';
 import type { FieldChange } from '#lib/types/asset-transaction.js';
 import {
 	isSystemAdmin,
-	managedOrgIds,
 	productionVisibility,
 	readableOrgIds,
 	readsOrgRecords,
@@ -21,11 +20,10 @@ import {
 	visibleProductionName,
 	writableOrgIds
 } from '#lib/server/services/access.js';
-import { productControl } from '#lib/server/services/product-control.js';
 import { assertProductNameFree } from '#lib/server/services/product-name.js';
 import { tagAllocator } from '#lib/server/services/tag-counter.js';
 import { assetsWithSerial, kitHoldingTag } from '#lib/server/services/asset-lookup.js';
-import { fieldChanges, logCatalogChange } from '#lib/server/services/catalog-log.js';
+import { logCatalogChange } from '#lib/server/services/catalog-log.js';
 import {
 	ACTIVE_ASSET_WHERE,
 	ASSET_STATUSES,
@@ -56,17 +54,11 @@ import {
 	isCable,
 	normalizeCable,
 	normalizeWays,
-	sameWays,
 	waysKey,
 	type CableInput,
 	type CableWayAttrs
 } from '#lib/cable.js';
-import {
-	connectorSlug,
-	ensureConnectors,
-	sameConnectorName
-} from '#lib/server/services/connectors.js';
-import { waySnapshot, writeWays, type WayInput } from '#lib/server/services/cable-ways.js';
+import { connectorSlug, ensureConnectors } from '#lib/server/services/connectors.js';
 import {
 	CABLE_ENDS,
 	CABLE_WAYS,
@@ -75,20 +67,21 @@ import {
 	withEndNames,
 	withProductCableNames
 } from '#lib/server/services/cable-ends.js';
-import {
-	portSnapshot,
-	samePorts,
-	writePorts,
-	type PortSnapshot
-} from '#lib/server/services/product-ports.js';
 import { PORT_REQUIREMENTS } from '#lib/ports.js';
 import { getConnectors, getConnectorUsage } from '#lib/remote/connectors.remote.js';
 import { getKnownAddresses } from '#lib/remote/addresses.remote.js';
 import { inspectionDue } from '#lib/inspection-due.js';
-import { applyInspectionRequirement, initialInspection } from '#lib/server/services/inspections.js';
+import { initialInspection } from '#lib/server/services/inspections.js';
 import { appError } from '#lib/errors.js';
 import { productLabel } from '#lib/product-label.js';
 import {
+	mergeManufacturers as mergeManufacturersRecord,
+	updateManufacturer as updateManufacturerRecord
+} from '#lib/server/services/manufacturers.js';
+import {
+	deleteProduct as deleteProductRecord,
+	mergeProducts as mergeProductsRecord,
+	revertCatalogChange as revertCatalogChangeRecord,
 	setProductPorts as setProductPortsRecord,
 	updateCategory as updateCategoryRecord,
 	updateProduct as updateProductRecord
@@ -325,36 +318,10 @@ const updateManufacturerSchema = v.object({
 	name: v.string()
 });
 
-// Manufacturers are global rows shared by every org, and editing or merging
-// one rewrites labels on other orgs' inventory and future documents — so,
-// like categories, they are system-admin territory. Creating one stays open
-// (the asset wizard has to register gear nobody has catalogued yet).
+// Rules in services/manufacturers.ts, shared with `/api/v1`.
 export const updateManufacturer = command(updateManufacturerSchema, async (input) => {
-	const user = await requireSystemAdmin();
-	const name = input.name.trim();
-	if (!name) appError(400, 'manufacturer_name_required');
-	const clash = await prisma.manufacturer.findFirst({
-		where: { name: { equals: name, mode: 'insensitive' }, id: { not: input.manufacturerId } },
-		select: { id: true }
-	});
-	if (clash) appError(409, 'manufacturer_exists');
-	const previous = await prisma.manufacturer.findUniqueOrThrow({
-		where: { id: input.manufacturerId },
-		select: { name: true }
-	});
-	const manufacturer = await prisma.manufacturer.update({
-		where: { id: input.manufacturerId },
-		data: { name }
-	});
-	const changes = fieldChanges(previous, { name });
-	if (changes.length > 0) {
-		await logCatalogChange({
-			userId: user.id,
-			action: 'MANUFACTURER_UPDATED',
-			manufacturerId: manufacturer.id,
-			data: { changes }
-		});
-	}
+	const user = await requireAuth();
+	const manufacturer = await updateManufacturerRecord(user.id, input);
 	await Promise.all([
 		getManufacturers().refresh(),
 		getProducts().refresh(),
@@ -368,66 +335,20 @@ const mergeManufacturersSchema = v.object({
 	sourceManufacturerId: v.string()
 });
 
-export const mergeManufacturers = command(
-	mergeManufacturersSchema,
-	async ({ targetManufacturerId, sourceManufacturerId }) => {
-		const user = await requireSystemAdmin();
-		if (targetManufacturerId === sourceManufacturerId) {
-			appError(409, 'manufacturer_merge_self');
-		}
-		const [target, source] = await Promise.all([
-			prisma.manufacturer.findUniqueOrThrow({ where: { id: targetManufacturerId } }),
-			prisma.manufacturer.findUniqueOrThrow({ where: { id: sourceManufacturerId } })
-		]);
-		const movedProducts = await prisma.product.count({ where: { manufacturerId: source.id } });
-		// Two spellings of one maker usually both got the same model entered, and
-		// one manufacturer cannot hold two products of one name. Those have to be
-		// merged first, and the product merge is where the units are sorted out.
-		const [sourceNames, targetNames] = await Promise.all(
-			[source.id, target.id].map((manufacturerId) =>
-				prisma.product.findMany({ where: { manufacturerId }, select: { name: true } })
-			)
-		);
-		const taken = new Set(targetNames.map((p) => p.name.trim().toLowerCase()));
-		const clashes = sourceNames.filter((p) => taken.has(p.name.trim().toLowerCase()));
-		if (clashes.length > 0) {
-			appError(409, 'manufacturer_merge_product_clash', [clashes.map((p) => p.name).join(', ')]);
-		}
-		await prisma.$transaction(async (tx) => {
-			await tx.product.updateMany({
-				where: { manufacturerId: source.id },
-				data: { manufacturerId: target.id }
-			});
-			if (!target.logoPath && source.logoPath) {
-				await tx.manufacturer.update({
-					where: { id: target.id },
-					data: { logoPath: source.logoPath }
-				});
-			}
-			await tx.manufacturer.delete({ where: { id: source.id } });
-		});
-		await logCatalogChange({
-			userId: user.id,
-			action: 'MANUFACTURER_MERGED',
-			manufacturerId: target.id,
-			data: {
-				source: { id: source.id, name: source.name },
-				target: { id: target.id, name: target.name },
-				movedProducts
-			}
-		});
-		await Promise.all([
-			getManufacturers().refresh(),
-			getProducts().refresh(),
-			getProducts(target.id).refresh(),
-			getProducts(source.id).refresh(),
-			getProductCatalog().refresh(),
-			getAssets().refresh(),
-			getInventorySummary().refresh()
-		]);
-		return { movedProducts };
-	}
-);
+export const mergeManufacturers = command(mergeManufacturersSchema, async (input) => {
+	const user = await requireAuth();
+	const { target, source, movedProducts } = await mergeManufacturersRecord(user.id, input);
+	await Promise.all([
+		getManufacturers().refresh(),
+		getProducts().refresh(),
+		getProducts(target.id).refresh(),
+		getProducts(source.id).refresh(),
+		getProductCatalog().refresh(),
+		getAssets().refresh(),
+		getInventorySummary().refresh()
+	]);
+	return { movedProducts };
+});
 
 export const getCategories = query(async () => {
 	await requireAuth();
@@ -2294,32 +2215,7 @@ async function refreshProductViews(changed: { cable: boolean; connectorsCreated:
 /** Delete a catalogue row only when no unit, including a retired one, refers to it. */
 export const deleteProduct = command(v.string(), async (productId: string) => {
 	const user = await requireAuth();
-	const systemAdmin = await isSystemAdmin(user.id);
-	const managed = systemAdmin ? [] : await managedOrgIds(user.id);
-	if (!systemAdmin && managed.length === 0) {
-		appError(403, 'product_delete_forbidden');
-	}
-
-	const product = await prisma.product.findUniqueOrThrow({
-		where: { id: productId },
-		include: { manufacturer: true, _count: { select: { assets: true } } }
-	});
-	if (product._count.assets > 0) {
-		appError(409, 'product_has_units');
-	}
-	// Without units there is no owning org, so this is the creator's call or a
-	// system admin's — see `productControl`.
-	const control = await productControl({ id: user.id, systemAdmin, managed }, product);
-	if (!control.allowed) appError(403, 'product_unowned_not_creator', [product.name]);
-
-	await prisma.product.delete({ where: { id: productId } });
-	await logCatalogChange({
-		userId: user.id,
-		action: 'PRODUCT_DELETED',
-		productId: product.id,
-		manufacturerId: product.manufacturerId,
-		data: { name: product.name, manufacturerName: product.manufacturer?.name ?? null }
-	});
+	const product = await deleteProductRecord(user.id, productId);
 	const orgIds = await userOrgIds(user.id);
 	await Promise.all([
 		getProducts().refresh(),
@@ -2413,244 +2309,68 @@ export const duplicateProduct = command(duplicateProductSchema, async (input) =>
 });
 
 // ── Merging duplicate products ───────────────────────────────────────────────
-// Nothing stops two rows describing the same device: there is no unique
-// constraint on (manufacturer, name), and the create-a-product path is a free
-// text field by design, because the pool has to be able to register a thing
-// nobody has catalogued yet. So "Robin 600" and "Robe Robin 600" both exist,
-// each holding half the units, and every count, every catalogue page and every
-// offer line built from them is wrong in a way that adds up.
-//
-// A merge is unusually cheap here because `Asset.productId` is the only foreign
-// key pointing at a product. OfferItem and InvoiceItem carry a productId too,
-// but as a *snapshot* with no relation (see the schema): an issued document
-// says what it said, and the id there is only ever used to collapse identical
-// lines on that one document. They are deliberately left alone — rewriting them
-// would be editing a sent invoice to make a catalogue tidier.
+// The rules are `mergeProducts` in services/products.ts; this refreshes what
+// the moved units show up in.
 
 const mergeProductsSchema = v.object({
-	/** Survives. Its name, manufacturer and category are the ones that remain. */
 	targetProductId: v.string(),
-	/** The duplicate: its units move to the target, then the row is deleted. */
 	sourceProductId: v.string()
 });
 
-export const mergeProducts = command(
-	mergeProductsSchema,
-	async ({ targetProductId, sourceProductId }) => {
-		const user = await requireAuth();
-		if (targetProductId === sourceProductId) appError(409, 'product_merge_self');
+export const mergeProducts = command(mergeProductsSchema, async (input) => {
+	const user = await requireAuth();
+	const { target, source, moving, ...inherited } = await mergeProductsRecord(user.id, input);
+	const { targetProductId, sourceProductId } = input;
 
-		const [target, source] = await Promise.all([
-			prisma.product.findUniqueOrThrow({
-				where: { id: targetProductId },
-				include: {
-					manufacturer: true,
-					ways: { select: { id: true } },
-					connectorARef: { select: { name: true } },
-					connectorBRef: { select: { name: true } }
-				}
-			}),
-			prisma.product.findUniqueOrThrow({
-				where: { id: sourceProductId },
-				include: {
-					manufacturer: true,
-					ways: { select: { id: true } },
-					connectorARef: { select: { name: true } },
-					connectorBRef: { select: { name: true } }
-				}
-			})
-		]);
-
-		// Retired and decommissioned units come too. They are not in
-		// ACTIVE_ASSET_WHERE and no page lists them next to the rest, but they are
-		// rows with a foreign key: leaving them behind would make the delete fail
-		// on exactly the old, half-abandoned product a merge is aimed at.
-		const moving = await prisma.asset.findMany({
-			where: { productId: sourceProductId },
-			select: {
-				id: true,
-				organizationId: true,
-				bundleId: true,
-				parent: { select: { productId: true } }
-			}
-		});
-
-		const systemAdmin = await isSystemAdmin(user.id);
-		if (!systemAdmin) {
-			const managed = await managedOrgIds(user.id);
-			if (managed.length === 0) {
-				appError(403, 'product_merge_forbidden');
-			}
-			// A merge moves *units*, and those belong to someone. The check is on the
-			// source alone because it is the only side that loses records: the
-			// target's units are not touched, and what it is called does not change.
-			// A duplicate nobody holds units of is its creator's to clean up.
-			const control = await productControl({ id: user.id, systemAdmin, managed }, source);
-			if (!control.allowed) {
-				if (control.reason === 'foreign_units') {
-					appError(403, 'product_merge_units_other_orgs', [source.name, control.orgNames]);
-				}
-				appError(403, 'product_unowned_not_creator', [source.name]);
-			}
+	const orgIds = [...new Set(moving.map((a) => a.organizationId))];
+	// Both products' accessory profiles are derived from what units carry, so
+	// they move whichever side the units were on. The parents' too: a unit
+	// whose accessory just became a different product is a unit whose fleet no
+	// longer carries what it carried.
+	const profiles = new Map<string, { productId: string; organizationId: string }>();
+	for (const organizationId of orgIds) {
+		for (const productId of [targetProductId, sourceProductId]) {
+			profiles.set(`${productId}:${organizationId}`, { productId, organizationId });
 		}
-
-		// The two identities the merge picks between. Name, manufacturer and
-		// category are the target's, always — that is what choosing a target
-		// means. An image is not identity, it is work someone did, so an empty
-		// one on the target takes the source's rather than throwing it away over
-		// which card the merge happened to be started from. Per-org prices are
-		// each org's own work for the same reason: a source row moves to the
-		// target unless that org already priced the target itself.
-		//
-		// What a cable is (type, ends, length, a loom's ways) goes the same way as
-		// the panel below: a target that is no cable takes the source's whole, one
-		// that is keeps its own, and two are never mixed. Otherwise merging a
-		// cable into a plain entry silently turned every unit into a non-cable
-		// and deleted the loom's ways with the source row. A license is a license
-		// whichever side said so — its units' credentials only show on one.
-		const inheritsCable = !isCable(withEndNames(target)) && isCable(withEndNames(source));
-		const inherited = {
-			...(!target.imagePath && source.imagePath ? { imagePath: source.imagePath } : {}),
-			...(inheritsCable
-				? {
-						cableType: source.cableType,
-						connectorAId: source.connectorAId,
-						connectorBId: source.connectorBId,
-						lengthCm: source.lengthCm
-					}
-				: {}),
-			...(source.isLicense && !target.isLicense ? { isLicense: true } : {})
-		};
-
-		const label = productLabel;
-
-		await prisma.$transaction(async (tx) => {
-			await tx.asset.updateMany({
-				where: { productId: sourceProductId },
-				data: { productId: targetProductId }
-			});
-			// What a unit *is* changed, which is the kind of thing the history exists
-			// to explain: a tag that has sat on a shelf for two years now reporting a
-			// different product is otherwise indistinguishable from someone having
-			// mislabelled it.
-			await tx.assetTransaction.createMany({
-				data: moving.map((asset) => ({
-					assetId: asset.id,
-					userId: user.id,
-					action: 'UPDATED',
-					data: {
-						type: 'UPDATED',
-						changes: [{ field: 'product', from: label(source), to: label(target) }]
-					}
-				}))
-			});
-			if (Object.keys(inherited).length > 0) {
-				await tx.product.update({ where: { id: targetProductId }, data: inherited });
-			}
-			if (inheritsCable) {
-				await tx.cableWay.updateMany({
-					where: { productId: sourceProductId },
-					data: { productId: targetProductId }
-				});
-			}
-			// A device's panel is the same kind of work as its picture: the target
-			// takes the source's where it has none of its own, and keeps its own
-			// otherwise — two panels are never mixed into one.
-			const targetPorts = await tx.productPort.count({ where: { productId: targetProductId } });
-			if (targetPorts === 0) {
-				await tx.productPort.updateMany({
-					where: { productId: sourceProductId },
-					data: { productId: targetProductId }
-				});
-			}
-			const pricedOrgs = await tx.orgProductPrice.findMany({
-				where: { productId: targetProductId },
-				select: { organizationId: true }
-			});
-			await tx.orgProductPrice.updateMany({
-				where: {
-					productId: sourceProductId,
-					organizationId: { notIn: pricedOrgs.map((p) => p.organizationId) }
-				},
-				data: { productId: targetProductId }
-			});
-			await tx.orgProductPrice.deleteMany({ where: { productId: sourceProductId } });
-			await tx.product.delete({ where: { id: sourceProductId } });
-			// The merged units are the target's now, and follow its DGUV requirement.
-			await applyInspectionRequirement(tx, user.id, [targetProductId]);
-		});
-
-		await logCatalogChange({
-			userId: user.id,
-			action: 'PRODUCT_MERGED',
-			productId: targetProductId,
-			manufacturerId: target.manufacturerId,
-			data: {
-				source: { id: source.id, name: label(source) },
-				target: { id: target.id, name: label(target) },
-				movedAssets: moving.length
-			}
-		});
-
-		// The moved units are a different product in every picture they are in,
-		// and the target may just have inherited the source's photo.
-		redrawPreviewsOf(targetProductId);
-
-		const orgIds = [...new Set(moving.map((a) => a.organizationId))];
-		// Both products' accessory profiles are derived from what units carry, so
-		// they move whichever side the units were on. The parents' too: a unit
-		// whose accessory just became a different product is a unit whose fleet no
-		// longer carries what it carried.
-		const profiles = new Map<string, { productId: string; organizationId: string }>();
-		for (const organizationId of orgIds) {
-			for (const productId of [targetProductId, sourceProductId]) {
-				profiles.set(`${productId}:${organizationId}`, { productId, organizationId });
-			}
-		}
-		for (const asset of moving) {
-			if (!asset.parent) continue;
-			const key = `${asset.parent.productId}:${asset.organizationId}`;
-			profiles.set(key, {
-				productId: asset.parent.productId,
-				organizationId: asset.organizationId
-			});
-		}
-
-		await Promise.all([
-			getProducts().refresh(),
-			getProducts(target.manufacturerId).refresh(),
-			getProducts(source.manufacturerId).refresh(),
-			getProductCatalog().refresh(),
-			getCableVocabulary().refresh(),
-			getConnectorUsage().refresh(),
-			getAssets().refresh(),
-			getRetiredAssets().refresh(),
-			getInventorySummary().refresh(),
-			...orgIds.flatMap((id) => [
-				getProductCatalog(id).refresh(),
-				getAssets(id).refresh(),
-				getRetiredAssets(id).refresh(),
-				getInventorySummary(id).refresh()
-			]),
-			...moving.flatMap((a) => [getAsset(a.id).refresh(), getAssetHistory(a.id).refresh()]),
-			...[...profiles.values()].map((key) => getProductAccessoryProfile(key).refresh()),
-			...[...new Set(moving.map((a) => a.bundleId).filter((id) => id !== null))].map((id) =>
-				getBundle(id as string).refresh()
-			)
-		]);
-		if (moving.some((a) => a.bundleId)) {
-			await getBundleTemplates().refresh();
-			await Promise.all(orgIds.map((id) => getBundleTemplates(id).refresh()));
-		}
-
-		return {
-			movedAssets: moving.length,
-			inheritedImage: 'imagePath' in inherited,
-			inheritedCable: inheritsCable,
-			inheritedLicense: 'isLicense' in inherited
-		};
 	}
-);
+	for (const asset of moving) {
+		if (!asset.parent) continue;
+		const key = `${asset.parent.productId}:${asset.organizationId}`;
+		profiles.set(key, {
+			productId: asset.parent.productId,
+			organizationId: asset.organizationId
+		});
+	}
+
+	await Promise.all([
+		getProducts().refresh(),
+		getProducts(target.manufacturerId).refresh(),
+		getProducts(source.manufacturerId).refresh(),
+		getProductCatalog().refresh(),
+		getCableVocabulary().refresh(),
+		getConnectorUsage().refresh(),
+		getAssets().refresh(),
+		getRetiredAssets().refresh(),
+		getInventorySummary().refresh(),
+		...orgIds.flatMap((id) => [
+			getProductCatalog(id).refresh(),
+			getAssets(id).refresh(),
+			getRetiredAssets(id).refresh(),
+			getInventorySummary(id).refresh()
+		]),
+		...moving.flatMap((a) => [getAsset(a.id).refresh(), getAssetHistory(a.id).refresh()]),
+		...[...profiles.values()].map((key) => getProductAccessoryProfile(key).refresh()),
+		...[...new Set(moving.map((a) => a.bundleId).filter((id) => id !== null))].map((id) =>
+			getBundle(id as string).refresh()
+		)
+	]);
+	if (moving.some((a) => a.bundleId)) {
+		await getBundleTemplates().refresh();
+		await Promise.all(orgIds.map((id) => getBundleTemplates(id).refresh()));
+	}
+
+	return { movedAssets: moving.length, ...inherited };
+});
 
 // ── Per-org product pricing ──────────────────────────────────────────────────
 // See OrgProductPrice in the schema: the catalog is shared, the price is not.
@@ -2865,183 +2585,15 @@ export const getCatalogTransactions = query(async () => {
 	};
 });
 
-/** The product columns a `PRODUCT_UPDATED` entry can carry, and so the ones a revert may write. */
-const REVERTIBLE_PRODUCT_FIELDS = [
-	'name',
-	'manufacturerId',
-	'categoryId',
-	'imagePath',
-	'cableType',
-	'connectorA',
-	'connectorB',
-	'lengthCm',
-	'isLicense',
-	'caption',
-	'details'
-] as const;
-type RevertibleProductField = (typeof REVERTIBLE_PRODUCT_FIELDS)[number];
-
-/**
- * Put a product back the way one log entry found it.
- *
- * Field by field, and only where the product still holds the value that entry
- * wrote: a field somebody has edited again since is theirs now, and rolling it
- * back would undo a change this entry knows nothing about. The revert is itself
- * logged as an update (`revertOf` names the entry), so it can be undone the
- * same way and the log never has to be rewritten.
- */
+/** Put a product back the way one log entry found it — see `revertCatalogChange` in services/products.ts. */
 export const revertCatalogChange = command(v.string(), async (entryId: string) => {
 	const user = await requireSystemAdmin();
-	const entry = await prisma.catalogTransaction.findUniqueOrThrow({ where: { id: entryId } });
-	const logged = (entry.data as { changes?: FieldChange[] } | null)?.changes ?? [];
-	if (entry.action !== 'PRODUCT_UPDATED' || !entry.productId || logged.length === 0) {
-		appError(409, 'catalog_revert_unavailable');
-	}
-
-	const found = await prisma.product.findUnique({
-		where: { id: entry.productId },
-		include: {
-			connectorARef: { select: { name: true } },
-			connectorBRef: { select: { name: true } }
-		}
-	});
-	if (!found) appError(409, 'catalog_revert_unavailable');
-	const product = withEndNames(found);
-
-	const data: Partial<Record<RevertibleProductField, string | number | boolean | null>> = {};
-	for (const change of logged) {
-		const field = REVERTIBLE_PRODUCT_FIELDS.find((f) => f === change.field);
-		if (!field) continue;
-		const stillHolds =
-			field === 'connectorA' || field === 'connectorB'
-				? // An entry older than the connector ids may spell the end differently
-					// from the row the migration settled on.
-					sameConnectorName(product[field], (change.to ?? null) as string | null)
-				: String(product[field] ?? null) === String(change.to ?? null);
-		if (!stillHolds) continue;
-		data[field] = (change.from ?? null) as string | number | boolean | null;
-	}
-
-	// A loom's ways are logged as the whole list on both sides, like the panel
-	// below, and reverted on the same terms: only while the product still has
-	// exactly the list this entry wrote.
-	const waysChange = logged.find((change) => change.field === 'ways');
-	const waysBefore = waysChange ? await waySnapshot(product.id) : [];
-	let waysRevert: WayInput[] | null = null;
-	if (waysChange) {
-		const wrote = (waysChange.to ?? []) as unknown as WayInput[];
-		if (sameWays(waysBefore, wrote)) waysRevert = (waysChange.from ?? []) as unknown as WayInput[];
-	}
-
-	// A device's panel is logged as the whole list on both sides, so it is
-	// reverted the same way: only while the product still has exactly the list
-	// this entry wrote. `FieldChange` types from/to as strings; for this field
-	// they are the snapshots `setProductPorts` logged.
-	const portsChange = logged.find((change) => change.field === 'ports');
-	const portsBefore = portsChange ? await portSnapshot(product.id) : [];
-	let portsRevert: PortSnapshot[] | null = null;
-	if (portsChange) {
-		const wrote = (portsChange.to ?? []) as unknown as PortSnapshot[];
-		if (samePorts(portsBefore, wrote)) {
-			const from = (portsChange.from ?? []) as unknown as PortSnapshot[];
-			// A connector nobody uses any more can have been deleted since.
-			const alive = new Set(
-				(
-					await prisma.connector.findMany({
-						where: { id: { in: from.map((p) => p.connectorId) } },
-						select: { id: true }
-					})
-				).map((c) => c.id)
-			);
-			portsRevert = from.filter((p) => alive.has(p.connectorId));
-		}
-	}
-	if (Object.keys(data).length === 0 && !portsRevert && !waysRevert) {
-		appError(409, 'catalog_revert_stale');
-	}
-
-	// The rows an old value points at can be gone — merges delete them.
-	if (typeof data.manufacturerId === 'string') {
-		const exists = await prisma.manufacturer.findUnique({ where: { id: data.manufacturerId } });
-		if (!exists) delete data.manufacturerId;
-	}
-	if (typeof data.categoryId === 'string') {
-		const exists = await prisma.category.findUnique({ where: { id: data.categoryId } });
-		if (!exists) delete data.categoryId;
-	}
-	if (Object.keys(data).length === 0 && !portsRevert && !waysRevert) {
-		appError(409, 'catalog_revert_stale');
-	}
-	// A revert is a rename like any other, and the old name may have been
-	// taken since.
-	if ('name' in data || 'manufacturerId' in data) {
-		await assertProductNameFree(
-			'name' in data ? (data.name as string) : product.name,
-			'manufacturerId' in data ? (data.manufacturerId as string | null) : product.manufacturerId,
-			{ exceptId: product.id }
-		);
-	}
-
-	// The logged ends are names, so they are resolved like a form's — and a
-	// connector deleted since the entry was written simply comes back.
-	const endsReverted = 'connectorA' in data || 'connectorB' in data;
-	const connectors = endsReverted
-		? await ensureConnectors([data.connectorA as string | null, data.connectorB as string | null])
-		: null;
-	// What is written: the ids in place of the names. `data` itself keeps the
-	// names, because it is also what the revert logs.
-	const write: Record<string, unknown> = Object.fromEntries(
-		Object.entries(data).filter(([field]) => field !== 'connectorA' && field !== 'connectorB')
-	);
-	if (connectors) {
-		const ends = connectors.ends({
-			connectorA: (data.connectorA ?? null) as string | null,
-			connectorB: (data.connectorB ?? null) as string | null
-		});
-		if ('connectorA' in data) {
-			data.connectorA = connectors.name(data.connectorA as string | null);
-			write.connectorAId = ends.connectorAId;
-		}
-		if ('connectorB' in data) {
-			data.connectorB = connectors.name(data.connectorB as string | null);
-			write.connectorBId = ends.connectorBId;
-		}
-	}
-
-	const updated =
-		Object.keys(write).length > 0
-			? await prisma.product.update({
-					where: { id: product.id },
-					data: write as Prisma.ProductUncheckedUpdateInput
-				})
-			: product;
-	const changes = fieldChanges(product, data);
-	let createdForWays: string[] = [];
-	if (waysRevert) {
-		createdForWays = await writeWays(product.id, waysRevert);
-		changes.push({ field: 'ways', from: waysBefore, to: await waySnapshot(product.id) });
-	}
-	if (portsRevert) {
-		await writePorts(product.id, portsRevert);
-		changes.push({ field: 'ports', from: portsBefore, to: await portSnapshot(product.id) });
-	}
-	await logCatalogChange({
-		userId: user.id,
-		action: 'PRODUCT_UPDATED',
-		productId: updated.id,
-		manufacturerId: updated.manufacturerId,
-		data: { changes, revertOf: entry.id }
-	});
-
-	if ('imagePath' in data) redrawPreviewsOf(updated.id);
-	const cableTouched =
-		!!waysRevert ||
-		(['cableType', 'connectorA', 'connectorB', 'lengthCm'] as const).some((field) => field in data);
+	const result = await revertCatalogChangeRecord(user.id, entryId);
 	await refreshProductViews({
-		cable: cableTouched,
-		connectorsCreated: (connectors?.created.length ?? 0) + createdForWays.length > 0
+		cable: result.cableChanged,
+		connectorsCreated: result.connectorsCreated
 	});
-	if (portsRevert) await getConnectorUsage().refresh();
+	if (result.portsReverted) await getConnectorUsage().refresh();
 	await getCatalogTransactions().refresh();
 });
 

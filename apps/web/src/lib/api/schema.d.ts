@@ -240,7 +240,15 @@ export interface paths {
          */
         get: operations["listConnectors"];
         put?: never;
-        post?: never;
+        /**
+         * Register a connector
+         * @description Returns the connector of that name if the catalog has one (ignoring
+         *     case), else registers it, so a panel can name it. Its family is the
+         *     name's first word unless given, and it carries mains voltage when that
+         *     family already does. Needs ADMIN or OWNER of an organization, as on
+         *     the web.
+         */
+        post: operations["createConnector"];
         delete?: never;
         options?: never;
         head?: never;
@@ -276,10 +284,17 @@ export interface paths {
             path?: never;
             cookie?: never;
         };
-        get?: never;
+        /** One product of the catalog */
+        get: operations["getProduct"];
         put?: never;
         post?: never;
-        delete?: never;
+        /**
+         * Delete a product nobody holds units of
+         * @description Only a product without units, retired ones included (`409` otherwise —
+         *     merge it into the right product instead). Without units it answers to
+         *     its creator or a system admin. Cannot be reverted.
+         */
+        delete: operations["deleteProduct"];
         options?: never;
         head?: never;
         /**
@@ -299,6 +314,166 @@ export interface paths {
          *     product of the same manufacturer already has is refused (`409`).
          */
         patch: operations["updateProduct"];
+        trace?: never;
+    };
+    "/api/v1/products/{productId}/merge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Merge a duplicate into this product
+         * @description Every unit of `sourceProductId` — retired ones too — becomes a unit of
+         *     this product, and the source row is deleted. This product keeps its
+         *     name, manufacturer and category; it takes the source's picture, cable
+         *     and panel only where it has none of its own, and an organization's
+         *     price for the source moves over unless that organization priced this
+         *     one itself. The moved units follow this product's inspection
+         *     requirement. Offers and invoices already written keep naming the
+         *     source. Needs the identity right over the *source* product. Cannot be
+         *     reverted.
+         */
+        post: operations["mergeProduct"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/manufacturers": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /** Manufacturers in the catalog */
+        get: operations["listManufacturers"];
+        put?: never;
+        /**
+         * Find or register a manufacturer
+         * @description Returns the manufacturer of that name if the catalog has one (ignoring
+         *     case), else registers it. Open to anyone who works in an organization,
+         *     as on the web.
+         */
+        post: operations["createManufacturer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/manufacturers/{manufacturerId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Rename a manufacturer
+         * @description System admins only. A name another manufacturer has is refused (`409`).
+         */
+        patch: operations["updateManufacturer"];
+        trace?: never;
+    };
+    "/api/v1/manufacturers/{manufacturerId}/merge": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Merge a duplicate manufacturer into this one
+         * @description System admins only. Every product of `sourceManufacturerId` moves to
+         *     this manufacturer and the source is deleted. Refused (`409`) while both
+         *     have a product of the same name — merge those products first.
+         */
+        post: operations["mergeManufacturer"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/connectors/{connector}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Say whether a connector carries mains voltage
+         * @description System admins only. Products are not re-flagged by this; a product with
+         *     a mains connector that does not need inspecting shows up under
+         *     `listProducts?mains=true&inspectionRequired=false`.
+         */
+        patch: operations["updateConnector"];
+        trace?: never;
+    };
+    "/api/v1/catalog-log": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The catalog log
+         * @description Every change to a product, manufacturer or category, newest first.
+         *     System admins only, since it spans every organization.
+         */
+        get: operations["listCatalogLog"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/catalog-log/{entryId}/revert": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Undo a product change
+         * @description System admins only. Puts back what one `PRODUCT_UPDATED` entry changed,
+         *     field by field, and only where the product still holds the value that
+         *     entry wrote. The revert is logged as a new entry with `revertOf`, so it
+         *     can be undone the same way. Merges and deletions cannot be reverted
+         *     (`409`), nor an entry every field of which has been changed again since.
+         */
+        post: operations["revertCatalogChange"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
         trace?: never;
     };
     "/api/v1/assets": {
@@ -1287,6 +1462,8 @@ export interface components {
             caption?: string;
             /** @description `""` clears it. */
             details?: string;
+            /** @description From listManufacturers or createManufacturer. Null says nobody in particular makes it. */
+            manufacturerId?: string | null;
             categoryId?: string;
             /** @description A cable is never a licence; `true` on a cable is ignored. */
             isLicense?: boolean;
@@ -1336,6 +1513,8 @@ export interface components {
             requirement: components["schemas"]["PortRequirement"];
         };
         Connector: {
+            /** @description Products naming it at a cable end, on a loom's way or on their panel. */
+            productCount: number;
             name: string;
             /** @description What it mates with — `Schuko M` and `Schuko F` are both `Schuko`. */
             family: string | null;
@@ -1346,6 +1525,81 @@ export interface components {
             product: components["schemas"]["CatalogProduct"];
             /** @description Units whose inspection interval this change set or cleared. */
             unitsChanged: number;
+        };
+        ProductDeleted: {
+            id: string;
+        };
+        ProductMergeRequest: {
+            /** @description The duplicate. Its units move, then it is deleted. */
+            sourceProductId: string;
+        };
+        ProductMerged: {
+            product: components["schemas"]["CatalogProduct"];
+            /** @description Units moved over, retired ones included. */
+            movedUnits: number;
+            inheritedImage: boolean;
+            inheritedCable: boolean;
+            inheritedLicense: boolean;
+        };
+        Manufacturer: {
+            id: string;
+            name: string;
+            productCount: number;
+        };
+        ManufacturerCreateRequest: {
+            name: string;
+        };
+        ManufacturerCreated: {
+            manufacturer: components["schemas"]["Manufacturer"];
+            /** @description False when the catalog already had a manufacturer of that name. */
+            created: boolean;
+        };
+        ManufacturerUpdateRequest: {
+            name: string;
+        };
+        ManufacturerMergeRequest: {
+            sourceManufacturerId: string;
+        };
+        ManufacturerMerged: {
+            manufacturer: components["schemas"]["Manufacturer"];
+            movedProducts: number;
+        };
+        ConnectorCreateRequest: {
+            name: string;
+            /** @description What it mates with. Defaults to the name's first word. */
+            family?: string | null;
+        };
+        ConnectorUpdateRequest: {
+            mains: boolean;
+        };
+        CatalogLogEntry: {
+            id: string;
+            /**
+             * @description `PRODUCT_UPDATED`, `PRODUCT_DELETED`, `PRODUCT_MERGED`,
+             *     `PRODUCT_PRICE_SET`, `PRODUCT_DOCUMENT_ADDED`,
+             *     `PRODUCT_DOCUMENT_REMOVED`, `MANUFACTURER_UPDATED`,
+             *     `MANUFACTURER_MERGED` or `CATEGORY_UPDATED`. Only a
+             *     `PRODUCT_UPDATED` entry can be reverted.
+             */
+            action: string;
+            /** Format: date-time */
+            createdAt: string;
+            /** @description Null once the account has been deleted. */
+            userName: string | null;
+            /** @description May name a product that no longer exists. */
+            productId: string | null;
+            /** @description The product's label now, while it still exists. */
+            productName?: string | null;
+            manufacturerId: string | null;
+            categoryId: string | null;
+            /**
+             * @description What the entry recorded. For an update, `changes` lists
+             *     `{ field, from, to }` per field that moved, and `revertOf` names
+             *     the entry a revert undid.
+             */
+            data: {
+                [key: string]: unknown;
+            } | null;
         };
         AssetDetail: components["schemas"]["Asset"] & {
             /** @description The production this asset is currently checked out to, if any. A production of an organization the caller is not a member of is still reported — the unit is not free — but its `name` is that organization's name, since the caller may not see the production itself. */
@@ -2493,6 +2747,33 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
         };
     };
+    createConnector: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConnectorCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description The connector */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Connector"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
     listProducts: {
         parameters: {
             query?: {
@@ -2530,6 +2811,56 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
         };
     };
+    getProduct: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                productId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The product */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogProduct"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    deleteProduct: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                productId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Deleted */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductDeleted"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
     updateProduct: {
         parameters: {
             query?: never;
@@ -2555,6 +2886,233 @@ export interface operations {
                 };
             };
             400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    mergeProduct: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The product that remains. */
+                productId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProductMergeRequest"];
+            };
+        };
+        responses: {
+            /** @description Merged */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductMerged"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    listManufacturers: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Manufacturers, by name */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Manufacturer"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    createManufacturer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ManufacturerCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description The manufacturer, and whether it was created now */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ManufacturerCreated"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    updateManufacturer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                manufacturerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ManufacturerUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description The manufacturer as it is now */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Manufacturer"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    mergeManufacturer: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The manufacturer that remains. */
+                manufacturerId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ManufacturerMergeRequest"];
+            };
+        };
+        responses: {
+            /** @description Merged */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ManufacturerMerged"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    updateConnector: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                /** @description The connector's name, URL-encoded, matched without case. */
+                connector: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ConnectorUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description The connector as it is now */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Connector"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    listCatalogLog: {
+        parameters: {
+            query?: {
+                /** @description Only entries about this product (merges name the product that remained). */
+                productId?: string;
+                limit?: number;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Entries, newest first */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogLogEntry"][];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+        };
+    };
+    revertCatalogChange: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                entryId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The product as it is now */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductUpdated"];
+                };
+            };
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];

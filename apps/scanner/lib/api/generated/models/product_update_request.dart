@@ -15,6 +15,7 @@ class ProductUpdateRequest {
     this.name,
     this.caption,
     this.details,
+    this.manufacturerId,
     this.categoryId,
     this.isLicense,
     this.requiresInspection,
@@ -31,6 +32,9 @@ class ProductUpdateRequest {
 
   /// `""` clears it.
   final String? details;
+
+  /// From listManufacturers or createManufacturer. Null says nobody in particular makes it.
+  final String? manufacturerId;
   final String? categoryId;
 
   /// A cable is never a licence; `true` on a cable is ignored.
