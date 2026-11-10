@@ -201,6 +201,106 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/categories/{categoryId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Change a category
+         * @description System admins only. Fields left out are left alone. Switching
+         *     `requiresInspection` moves the inspection interval of every unit whose
+         *     product follows its category (`requiresInspection: null` on the
+         *     product): units that now need inspecting get their organization's
+         *     default interval, units that no longer do lose theirs.
+         */
+        patch: operations["updateCategory"];
+        trace?: never;
+    };
+    "/api/v1/connectors": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Connectors in the catalog
+         * @description Every connector a cable end or a device panel can name, by the
+         *     spelling the catalog files it under. Use these names in a product's
+         *     `cable` and `ports`; a name is matched without case.
+         */
+        get: operations["listConnectors"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/products": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * Browse the product catalog
+         * @description The whole catalog, since it is shared, ordered by name. The unit counts
+         *     are of the caller's organizations only (every organization for a
+         *     system admin), and so are the `tracked` and `overdue` filters.
+         */
+        get: operations["listProducts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/products/{productId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        /**
+         * Change a product
+         * @description Fields left out are left alone. `cable` and `ports` each replace the
+         *     whole list they describe. A `ports` line naming a connector the catalog
+         *     does not have is refused (`404 connector_not_found`) before anything is
+         *     written; a cable end may name a new one, which is created and marked as
+         *     carrying mains voltage when its family already is. The panel answers to
+         *     a looser rule than the rest — a first panel is open to any MEMBER, as on
+         *     the web — and is written after the other fields, so a refusal there
+         *     leaves those applied. Changing `requiresInspection`, the
+         *     category or `isLicense` can change whether the product's units need
+         *     DGUV inspections, and moves their intervals accordingly — across every
+         *     organization holding units of it, which is why the right to do so is
+         *     the identity rule described under the `catalog` tag. A name another
+         *     product of the same manufacturer already has is refused (`409`).
+         */
+        patch: operations["updateProduct"];
+        trace?: never;
+    };
     "/api/v1/assets": {
         parameters: {
             query?: never;
@@ -1130,6 +1230,122 @@ export interface components {
             color: string;
             /** @description Ascending, ties broken by name. listCategories applies both. */
             sortOrder: number;
+            /**
+             * @description Whether units in this category need DGUV inspections, unless their
+             *     product says otherwise. Not required, so an older client keeps
+             *     compiling.
+             */
+            requiresInspection?: boolean;
+        };
+        CategoryUpdateRequest: {
+            /** @description The English source name. Unique. */
+            name?: string;
+            color?: string;
+            sortOrder?: number;
+            requiresInspection?: boolean;
+        };
+        CategoryUpdated: {
+            category: components["schemas"]["Category"];
+            /** @description Units whose inspection interval this change set or cleared. */
+            unitsChanged: number;
+        };
+        CatalogProduct: components["schemas"]["Product"] & {
+            /** @description The product's own answer. Null follows its category. */
+            requiresInspection: boolean | null;
+            /**
+             * @description Whether its units need DGUV inspections: `requiresInspection`,
+             *     else the category's. A licence never does.
+             */
+            inspectionRequired: boolean;
+            isLicense: boolean;
+            /**
+             * @description Connectors carrying mains voltage it has — on its panel, at a
+             *     cable end or on a loom's way. A product with one is electrical
+             *     equipment and normally needs inspecting.
+             */
+            mainsConnectors: string[];
+            /** @description The device's built-in connectors, in panel order. Empty on a cable. */
+            ports?: components["schemas"]["ProductPort"][];
+            units: components["schemas"]["CatalogProductUnits"];
+        };
+        /** @description Active units of the caller's organizations. */
+        CatalogProductUnits: {
+            active: number;
+            /** @description Units that carry an inspection interval. */
+            tracked: number;
+            /** @description Units whose inspection is due today or earlier. */
+            overdue: number;
+        };
+        CatalogProductPage: {
+            items: components["schemas"]["CatalogProduct"][];
+            /** @description Pass as `cursor` for the next page. Null on the last page. */
+            nextCursor: string | null;
+        };
+        ProductUpdateRequest: {
+            name?: string;
+            /** @description `""` clears it. */
+            caption?: string;
+            /** @description `""` clears it. */
+            details?: string;
+            categoryId?: string;
+            /** @description A cable is never a licence; `true` on a cable is ignored. */
+            isLicense?: boolean;
+            /** @description Null follows the category again. */
+            requiresInspection?: boolean | null;
+            /**
+             * @description The cable's ends, length and wire, or the loom's ways — replaced
+             *     wholesale. Null says this is not a cable and clears all of it.
+             */
+            cable?: components["schemas"]["CableUpdate"] | null;
+            /** @description The device's built-in connectors in panel order, replacing the panel. `[]` clears it. */
+            ports?: components["schemas"]["ProductPortInput"][];
+        };
+        CableUpdate: {
+            /** @description The wire — `CAT7`, `2,5 mm²`. Usually null. */
+            type?: string | null;
+            connectorA?: string | null;
+            connectorB?: string | null;
+            lengthCm?: number | null;
+            /** @description A loom's ways. Leave `connectorA`/`connectorB` null on a loom. */
+            ways?: {
+                count: number;
+                type?: string | null;
+                connectorA?: string | null;
+                connectorB?: string | null;
+            }[];
+        };
+        ProductPortInput: {
+            /** @description A connector name from listConnectors. */
+            connector: string;
+            count: number;
+            /** @description What the panel is printed with — `DMX In`, `Power Out`. */
+            label?: string | null;
+            requirement?: components["schemas"]["PortRequirement"];
+        };
+        /**
+         * @description Whether the port must be connected for a production's connection
+         *     check: `required` alone, or a letter shared by alternatives of which
+         *     one is enough. Null when it need not be.
+         * @enum {string|null}
+         */
+        PortRequirement: "required" | "A" | "B" | null;
+        ProductPort: {
+            connector: string;
+            count: number;
+            label: string | null;
+            requirement: components["schemas"]["PortRequirement"];
+        };
+        Connector: {
+            name: string;
+            /** @description What it mates with — `Schuko M` and `Schuko F` are both `Schuko`. */
+            family: string | null;
+            /** @description Carries mains voltage. A product with one is electrical equipment. */
+            mains: boolean;
+        };
+        ProductUpdated: {
+            product: components["schemas"]["CatalogProduct"];
+            /** @description Units whose inspection interval this change set or cleared. */
+            unitsChanged: number;
         };
         AssetDetail: components["schemas"]["Asset"] & {
             /** @description The production this asset is currently checked out to, if any. A production of an organization the caller is not a member of is still reported — the unit is not free — but its `name` is that organization's name, since the caller may not see the production itself. */
@@ -1963,6 +2179,9 @@ export interface components {
          *     Inspections: a sold or decommissioned unit is not inspected
          *     (`asset_retired`).
          *
+         *     Catalog: a product name its manufacturer already uses, or a category
+         *     name already taken, is refused (`conflict`).
+         *
          *     Loans: a lending org checks out only units the production has booked
          *     and approved (`not_approved`). A closed production check takes no more
          *     ticks (`check_closed`), and a cancelled production is not checked
@@ -2220,6 +2439,126 @@ export interface operations {
                 };
             };
             401: components["responses"]["Unauthorized"];
+        };
+    };
+    updateCategory: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                categoryId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CategoryUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description The category as it is now */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CategoryUpdated"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    listConnectors: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Connectors, by name */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Connector"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    listProducts: {
+        parameters: {
+            query?: {
+                /** @description Case-insensitive match on product name, caption or manufacturer name. */
+                q?: string;
+                categoryId?: string;
+                /** @description Only products whose units do (`true`) or do not (`false`) need DGUV inspections, after the category default. */
+                inspectionRequired?: boolean;
+                /** @description Only products with (`true`) or without (`false`) a connector that carries mains voltage. */
+                mains?: boolean;
+                /** @description Only products with (`true`) or without (`false`) active units that carry an inspection interval. `inspectionRequired=false&tracked=true` finds units still tracked although their product says they need not be. */
+                tracked?: boolean;
+                /** @description Only products with at least one active unit whose inspection is due today or earlier. */
+                overdue?: boolean;
+                limit?: number;
+                /** @description The `nextCursor` from a previous page. */
+                cursor?: string;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description A page of products */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CatalogProductPage"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+        };
+    };
+    updateProduct: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                productId: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProductUpdateRequest"];
+            };
+        };
+        responses: {
+            /** @description The product as it is now */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["ProductUpdated"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
         };
     };
     listAssets: {

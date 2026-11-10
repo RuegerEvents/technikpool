@@ -61,7 +61,11 @@ import {
 	type CableInput,
 	type CableWayAttrs
 } from '#lib/cable.js';
-import { connectorSlug, ensureConnectors } from '#lib/server/services/connectors.js';
+import {
+	connectorSlug,
+	ensureConnectors,
+	sameConnectorName
+} from '#lib/server/services/connectors.js';
 import { waySnapshot, writeWays, type WayInput } from '#lib/server/services/cable-ways.js';
 import {
 	CABLE_ENDS,
@@ -72,7 +76,6 @@ import {
 	withProductCableNames
 } from '#lib/server/services/cable-ends.js';
 import {
-	normalizePorts,
 	portSnapshot,
 	samePorts,
 	writePorts,
@@ -85,6 +88,11 @@ import { inspectionDue } from '#lib/inspection-due.js';
 import { applyInspectionRequirement, initialInspection } from '#lib/server/services/inspections.js';
 import { appError } from '#lib/errors.js';
 import { productLabel } from '#lib/product-label.js';
+import {
+	setProductPorts as setProductPortsRecord,
+	updateCategory as updateCategoryRecord,
+	updateProduct as updateProductRecord
+} from '#lib/server/services/products.js';
 
 async function ensureBundleImageWithoutBreakingRead(
 	bundle: Parameters<typeof ensureBundleImage>[0]
@@ -444,52 +452,9 @@ const updateCategorySchema = v.object({
  */
 export const updateCategory = command(updateCategorySchema, async (input) => {
 	const user = await requireAuth();
-	if (!(await isSystemAdmin(user.id))) appError(403, 'admin_required');
-
-	const data: {
-		name?: string;
-		nameDe?: string | null;
-		color?: string;
-		sortOrder?: number;
-		cableInputGender?: string | null;
-	} = {};
-	if ('name' in input) {
-		const name = input.name?.trim();
-		if (!name) appError(400, 'category_name_required');
-		const clash = await prisma.category.findFirst({
-			where: { name, id: { not: input.categoryId } },
-			select: { id: true }
-		});
-		if (clash) appError(409, 'category_exists', [name]);
-		data.name = name;
-	}
-	if ('nameDe' in input) data.nameDe = input.nameDe?.trim() || null;
-	if ('color' in input) data.color = input.color;
-	if ('sortOrder' in input) data.sortOrder = input.sortOrder;
-	if ('cableInputGender' in input) data.cableInputGender = input.cableInputGender ?? null;
-
-	const previous = await prisma.category.findUniqueOrThrow({
-		where: { id: input.categoryId },
-		select: {
-			name: true,
-			nameDe: true,
-			color: true,
-			sortOrder: true,
-			cableInputGender: true
-		}
-	});
-	const updated = await prisma.category.update({ where: { id: input.categoryId }, data });
-	const changes = fieldChanges(previous, data);
-	if (changes.length > 0) {
-		await logCatalogChange({
-			userId: user.id,
-			action: 'CATEGORY_UPDATED',
-			categoryId: updated.id,
-			data: { changes }
-		});
-	}
+	const { category } = await updateCategoryRecord(user.id, input);
 	await getCategories().refresh();
-	return updated;
+	return category;
 });
 
 export const getLocations = query(v.optional(v.string()), async (organizationId?: string) => {
@@ -1010,15 +975,6 @@ const cableAttrsSchema = v.object({
 	 */
 	ways: v.optional(v.array(cableWaySchema))
 });
-
-/**
- * Whether two connector names are the same connector — the way its slug files
- * it. "schuko m" typed into a form is the "Schuko M" already stored, and is
- * stored as that; it is no edit, and needs no right to make one.
- */
-function sameConnectorName(a: string | null, b: string | null): boolean {
-	return (a ? connectorSlug(a) : null) === (b ? connectorSlug(b) : null);
-}
 
 /**
  * "The same cable" as a Prisma filter. The three text columns are free text, so
@@ -2260,184 +2216,13 @@ const updateProductSchema = v.object({
 
 export const updateProduct = command(updateProductSchema, async (input) => {
 	const user = await requireAuth();
-	const systemAdmin = await isSystemAdmin(user.id);
-	const managed = systemAdmin ? [] : await managedOrgIds(user.id);
-
-	const previousProduct = withEndNames(
-		await prisma.product.findUniqueOrThrow({
-			where: { id: input.productId },
-			select: {
-				createdById: true,
-				name: true,
-				manufacturerId: true,
-				categoryId: true,
-				imagePath: true,
-				cableType: true,
-				connectorARef: { select: { name: true } },
-				connectorBRef: { select: { name: true } },
-				lengthCm: true,
-				isLicense: true,
-				caption: true,
-				details: true
-			}
-		})
-	);
-
-	// What a cable *is* — its type, its ends or its ways, its length — is identity
-	// in exactly the way a name is: it decides which product a unit belongs to,
-	// and every packing list groups by it. Normalised on both sides so a blank
-	// field arriving as '' doesn't read as a change from null.
-	const nextCable =
-		input.cable === undefined
-			? undefined
-			: input.cable === null
-				? { cableType: null, connectorA: null, connectorB: null, lengthCm: null }
-				: normalizeCable(input.cable);
-	// The ways travel with the cable: clearing it clears them, and a lead that
-	// never had any keeps an empty list rather than a null nobody can compare.
-	const nextWays = input.cable === undefined ? undefined : normalizeWays(input.cable?.ways);
-	const previousWays = await waySnapshot(input.productId);
-	// Being a licence is identity as well: it decides whether every unit of the
-	// product carries credentials. Never both a cable and a licence.
-	const nextIsLicense =
-		input.isLicense === undefined ? undefined : input.isLicense && !nextCable?.cableType;
-	const licenseChanged = nextIsLicense !== undefined && nextIsLicense !== previousProduct.isLicense;
-	const waysChanged = nextWays !== undefined && !sameWays(previousWays, nextWays);
-	const cableChanged =
-		waysChanged ||
-		(nextCable !== undefined &&
-			(nextCable.cableType !== previousProduct.cableType ||
-				!sameConnectorName(nextCable.connectorA, previousProduct.connectorA) ||
-				!sameConnectorName(nextCable.connectorB, previousProduct.connectorB) ||
-				nextCable.lengthCm !== previousProduct.lengthCm));
-
-	// Identity (name, manufacturer, category) follows the same rule as
-	// `mergeProducts` — see `productControl`: whoever's gear it is controls what
-	// it is called. Recategorizing is identity *and* money: the category decides
-	// which rental rate other orgs' offers apply.
-	// Caption and details are shared text every org reads, so they answer to
-	// the same rule as the name rather than being open to anyone.
-	const nextCaption = input.caption === undefined ? undefined : input.caption.trim() || null;
-	const nextDetails = input.details === undefined ? undefined : input.details.trim() || null;
-	const changesIdentity =
-		(nextCaption !== undefined && nextCaption !== previousProduct.caption) ||
-		(nextDetails !== undefined && nextDetails !== previousProduct.details) ||
-		(input.name !== undefined && input.name.trim() !== previousProduct.name) ||
-		(input.manufacturerId !== undefined &&
-			input.manufacturerId !== previousProduct.manufacturerId) ||
-		(input.categoryId !== undefined && input.categoryId !== previousProduct.categoryId) ||
-		cableChanged ||
-		licenseChanged;
-
-	// A first picture is a contribution and open to anyone who works in an org
-	// at all. Replacing or removing one somebody else took is not: that was the
-	// way to deface the whole catalog with nothing but an account.
-	const nextImagePath = input.imagePath === undefined ? undefined : input.imagePath.trim() || null;
-	const imageChanged = nextImagePath !== undefined && nextImagePath !== previousProduct.imagePath;
-	const replacesImage = imageChanged && !!previousProduct.imagePath;
-
-	if (changesIdentity || replacesImage) {
-		if (!systemAdmin && managed.length === 0) {
-			// The message matters here: the product wizard is reachable by any member,
-			// and "Internal Error" would look like a broken save rather than a missing
-			// right.
-			appError(403, 'product_edit_forbidden');
-		}
-		const control = await productControl(
-			{ id: user.id, systemAdmin, managed },
-			{ id: input.productId, createdById: previousProduct.createdById }
-		);
-		if (!control.allowed) {
-			if (control.reason === 'foreign_units') {
-				appError(403, 'product_units_other_orgs', [control.orgNames]);
-			}
-			appError(403, 'product_unowned_not_creator', [previousProduct.name]);
-		}
-	} else if (imageChanged && !systemAdmin && (await writableOrgIds(user.id)).length === 0) {
-		appError(403, 'product_edit_forbidden');
-	}
-
-	if (input.name || input.manufacturerId !== undefined) {
-		await assertProductNameFree(
-			input.name || previousProduct.name,
-			input.manufacturerId !== undefined ? input.manufacturerId : previousProduct.manufacturerId,
-			{ exceptId: input.productId }
-		);
-	}
-
-	// Only now, past the rights check: resolving a name nobody has used before
-	// creates its connector row. Stored and logged in the catalogue's spelling.
-	const connectors =
-		nextCable === undefined
-			? null
-			: await ensureConnectors([nextCable.connectorA, nextCable.connectorB]);
-	const storedCable = nextCable && connectors ? connectors.ends(nextCable) : undefined;
-
-	// Before the row, so the product that comes back already carries them.
-	const createdForWays = waysChanged && nextWays ? await writeWays(input.productId, nextWays) : [];
-
-	const product = await prisma.product.update({
-		where: { id: input.productId },
-		data: {
-			...(input.name ? { name: input.name.trim() } : {}),
-			...(input.manufacturerId !== undefined ? { manufacturerId: input.manufacturerId } : {}),
-			...(input.categoryId ? { categoryId: input.categoryId } : {}),
-			imagePath: nextImagePath,
-			...(storedCable ?? {}),
-			...(nextIsLicense !== undefined ? { isLicense: nextIsLicense } : {}),
-			...(nextCaption !== undefined ? { caption: nextCaption } : {}),
-			...(nextDetails !== undefined ? { details: nextDetails } : {})
-		},
-		include: { manufacturer: true, category: true, ...CABLE_ENDS }
-	});
-
-	const changes = fieldChanges(previousProduct, {
-		...(input.name ? { name: input.name.trim() } : {}),
-		...(input.manufacturerId !== undefined ? { manufacturerId: input.manufacturerId } : {}),
-		...(input.categoryId ? { categoryId: input.categoryId } : {}),
-		...(nextImagePath !== undefined ? { imagePath: nextImagePath } : {}),
-		// Names, not ids: the log is read by people, and a revert resolves the
-		// name again in case the row it once pointed at is gone.
-		...(nextCable && connectors
-			? {
-					cableType: nextCable.cableType,
-					connectorA: connectors.name(nextCable.connectorA),
-					connectorB: connectors.name(nextCable.connectorB),
-					lengthCm: nextCable.lengthCm
-				}
-			: {}),
-		...(nextIsLicense !== undefined ? { isLicense: nextIsLicense } : {}),
-		...(nextCaption !== undefined ? { caption: nextCaption } : {}),
-		...(nextDetails !== undefined ? { details: nextDetails } : {})
-	});
-	// The loom is logged as the whole list on both sides, like a device's panel:
-	// a way has no id a revert could match, so what it can put back is the list.
-	if (waysChanged && nextWays) {
-		changes.push({ field: 'ways', from: previousWays, to: nextWays });
-	}
-	if (changes.length > 0) {
-		await logCatalogChange({
-			userId: user.id,
-			action: 'PRODUCT_UPDATED',
-			productId: product.id,
-			manufacturerId: product.manufacturerId,
-			data: { changes }
-		});
-	}
-
-	// A new category, or becoming a licence, can change whether its units need
-	// DGUV inspections — see `requiresInspection`.
-	if (product.categoryId !== previousProduct.categoryId || licenseChanged) {
-		await applyInspectionRequirement(prisma, user.id, [product.id]);
-	}
-
-	if (imageChanged) redrawPreviewsOf(product.id);
+	const result = await updateProductRecord(user.id, input);
+	if (result.imageChanged) redrawPreviewsOf(result.product.id);
 	await refreshProductViews({
-		cable: cableChanged,
-		connectorsCreated: (connectors?.created.length ?? 0) + createdForWays.length > 0
+		cable: result.cableChanged,
+		connectorsCreated: result.connectorsCreated
 	});
-
-	return withCableNames(product);
+	return result.product;
 });
 
 const setProductPortsSchema = v.object({
@@ -2466,41 +2251,8 @@ const setProductPortsSchema = v.object({
  */
 export const setProductPorts = command(setProductPortsSchema, async (input) => {
 	const user = await requireAuth();
-	const systemAdmin = await isSystemAdmin(user.id);
-
-	const product = await prisma.product.findUniqueOrThrow({
-		where: { id: input.productId },
-		select: { id: true, name: true, createdById: true, manufacturerId: true }
-	});
-	const before = await portSnapshot(product.id);
-	const next = normalizePorts(input.ports);
-	if (samePorts(before, next)) return;
-
-	if (!systemAdmin) {
-		if (before.length === 0) {
-			if ((await writableOrgIds(user.id)).length === 0) appError(403, 'product_edit_forbidden');
-		} else {
-			const managed = await managedOrgIds(user.id);
-			if (managed.length === 0) appError(403, 'product_edit_forbidden');
-			const control = await productControl({ id: user.id, systemAdmin, managed }, product);
-			if (!control.allowed) {
-				if (control.reason === 'foreign_units') {
-					appError(403, 'product_units_other_orgs', [control.orgNames]);
-				}
-				appError(403, 'product_unowned_not_creator', [product.name]);
-			}
-		}
-	}
-
-	await writePorts(product.id, next);
-	await logCatalogChange({
-		userId: user.id,
-		action: 'PRODUCT_UPDATED',
-		productId: product.id,
-		manufacturerId: product.manufacturerId,
-		data: { changes: [{ field: 'ports', from: before, to: await portSnapshot(product.id) }] }
-	});
-
+	const { changed } = await setProductPortsRecord(user.id, input.productId, input.ports);
+	if (!changed) return;
 	await refreshProductViews({
 		cable: false,
 		connectorsCreated: false

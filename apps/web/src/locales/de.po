@@ -13449,3 +13449,15 @@ msgstr "Name, Geräte-ID-Präfix, visuelle Identität, DGUV-Standardintervall un
 #: src/routes/orgs/[id]/+page.svelte
 msgid "The full name, printed on offers, invoices and delivery notes. Documents already issued keep the old one; drafts offer to take the new one."
 msgstr "Der vollständige Name, wie er auf Angeboten, Rechnungen und Lieferscheinen steht. Bereits ausgestellte Dokumente behalten den alten; Entwürfe bieten an, den neuen zu übernehmen."
+
+#: src/routes/inspections/+page.svelte
+msgid "Set the interval in the org settings"
+msgstr "Intervall in den Einstellungen der Organisation festlegen"
+
+#: src/routes/inspections/+page.svelte
+msgid "The org's owner can set one in its settings."
+msgstr "Der Inhaber der Organisation kann es in ihren Einstellungen festlegen."
+
+#: src/routes/inspections/+page.svelte
+msgid "<0/> has no default inspection interval. Its new units that need inspecting get none, so they are never due and never listed here."
+msgstr "<0/> hat kein Standard-Prüfintervall. Neue prüfpflichtige Geräte bekommen dann keins, werden also nie fällig und tauchen hier nie auf."

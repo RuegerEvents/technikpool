@@ -167,7 +167,9 @@ model Organization {
   color       String @unique
   avatarLabel String @unique
 
-  defaultInspectionIntervalMonths Int?
+  /// 12 for a new org — the longest DGUV V3 allows for portable equipment in
+  /// workshop-like use. Null means new units are not tracked at all.
+  defaultInspectionIntervalMonths Int?     @default(12)
   isKleinunternehmer              Boolean @default(false)
 
   // Billing details for offer/invoice generation (issue #9 follow-up).

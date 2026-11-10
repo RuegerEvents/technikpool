@@ -8883,6 +8883,10 @@ export type $OrganizationPayload<ExtArgs extends runtime.Types.Extensions.Intern
     defaultAssetVisibility: string
     color: string
     avatarLabel: string
+    /**
+     * 12 for a new org — the longest DGUV V3 allows for portable equipment in
+     * workshop-like use. Null means new units are not tracked at all.
+     */
     defaultInspectionIntervalMonths: number | null
     isKleinunternehmer: boolean
     addressId: string | null

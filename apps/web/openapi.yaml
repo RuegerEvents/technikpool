@@ -5,7 +5,8 @@ info:
   version: 1.0.0
   description: |
     Read and scan access to Technikpool inventory for external clients — chiefly
-    the Flutter app running on warehouse PDA scanners.
+    the Flutter app running on warehouse PDA scanners — and maintenance of the
+    shared catalog (products and categories) for scripts and assistants.
 
     This document is the contract. Server response types are generated from it
     (`pnpm openapi:types`) and so is the Dart client (`dart run swagger_parser`),
@@ -79,6 +80,14 @@ tags:
       eye, or count interchangeable units without a tag. Unlike a check, a
       tick here is the booking itself, so nothing is stored beyond the
       units' own status and everyone on the list sees the same ticks.
+  - name: catalog
+    description: |
+      The product catalog, shared by every organization. Changing a product's
+      identity (name, category, caption, details, licence) or whether it needs
+      DGUV inspections answers to the same rule as on the web: a system admin,
+      or an ADMIN/OWNER of every organization holding units of it — and, for a
+      product nobody holds units of, whoever created it. Categories are system
+      admin only. Every change is written to the catalog log.
   - name: inspection
     description: |
       DGUV inspections. Recording an inspection, or deleting one recorded by
@@ -315,6 +324,183 @@ paths:
                   $ref: '#/components/schemas/Category'
         '401':
           $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/categories/{categoryId}:
+    patch:
+      operationId: updateCategory
+      tags: [catalog]
+      summary: Change a category
+      description: |
+        System admins only. Fields left out are left alone. Switching
+        `requiresInspection` moves the inspection interval of every unit whose
+        product follows its category (`requiresInspection: null` on the
+        product): units that now need inspecting get their organization's
+        default interval, units that no longer do lose theirs.
+      parameters:
+        - name: categoryId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CategoryUpdateRequest'
+      responses:
+        '200':
+          description: The category as it is now
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CategoryUpdated'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/connectors:
+    get:
+      operationId: listConnectors
+      tags: [catalog]
+      summary: Connectors in the catalog
+      description: |
+        Every connector a cable end or a device panel can name, by the
+        spelling the catalog files it under. Use these names in a product's
+        `cable` and `ports`; a name is matched without case.
+      responses:
+        '200':
+          description: Connectors, by name
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Connector'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/products:
+    get:
+      operationId: listProducts
+      tags: [catalog]
+      summary: Browse the product catalog
+      description: |
+        The whole catalog, since it is shared, ordered by name. The unit counts
+        are of the caller's organizations only (every organization for a
+        system admin), and so are the `tracked` and `overdue` filters.
+      parameters:
+        - name: q
+          in: query
+          description: Case-insensitive match on product name, caption or manufacturer name.
+          schema:
+            type: string
+        - name: categoryId
+          in: query
+          schema:
+            type: string
+        - name: inspectionRequired
+          in: query
+          description: Only products whose units do (`true`) or do not (`false`) need DGUV inspections, after the category default.
+          schema:
+            type: boolean
+        - name: mains
+          in: query
+          description: Only products with (`true`) or without (`false`) a connector that carries mains voltage.
+          schema:
+            type: boolean
+        - name: tracked
+          in: query
+          description: >-
+            Only products with (`true`) or without (`false`) active units that
+            carry an inspection interval. `inspectionRequired=false&tracked=true`
+            finds units still tracked although their product says they need not be.
+          schema:
+            type: boolean
+        - name: overdue
+          in: query
+          description: Only products with at least one active unit whose inspection is due today or earlier.
+          schema:
+            type: boolean
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 200
+            default: 50
+        - name: cursor
+          in: query
+          description: The `nextCursor` from a previous page.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A page of products
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CatalogProductPage'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
+  /api/v1/products/{productId}:
+    patch:
+      operationId: updateProduct
+      tags: [catalog]
+      summary: Change a product
+      description: |
+        Fields left out are left alone. `cable` and `ports` each replace the
+        whole list they describe. A `ports` line naming a connector the catalog
+        does not have is refused (`404 connector_not_found`) before anything is
+        written; a cable end may name a new one, which is created and marked as
+        carrying mains voltage when its family already is. The panel answers to
+        a looser rule than the rest — a first panel is open to any MEMBER, as on
+        the web — and is written after the other fields, so a refusal there
+        leaves those applied. Changing `requiresInspection`, the
+        category or `isLicense` can change whether the product's units need
+        DGUV inspections, and moves their intervals accordingly — across every
+        organization holding units of it, which is why the right to do so is
+        the identity rule described under the `catalog` tag. A name another
+        product of the same manufacturer already has is refused (`409`).
+      parameters:
+        - name: productId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductUpdateRequest'
+      responses:
+        '200':
+          description: The product as it is now
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductUpdated'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
 
   /api/v1/assets:
     get:
@@ -1464,6 +1650,9 @@ components:
         Inspections: a sold or decommissioned unit is not inspected
         (`asset_retired`).
 
+        Catalog: a product name its manufacturer already uses, or a category
+        name already taken, is refused (`conflict`).
+
         Loans: a lending org checks out only units the production has booked
         and approved (`not_approved`). A closed production check takes no more
         ticks (`check_closed`), and a cancelled production is not checked
@@ -1900,6 +2089,227 @@ components:
         sortOrder:
           type: integer
           description: Ascending, ties broken by name. listCategories applies both.
+        requiresInspection:
+          type: boolean
+          description: |
+            Whether units in this category need DGUV inspections, unless their
+            product says otherwise. Not required, so an older client keeps
+            compiling.
+
+    CategoryUpdateRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          minLength: 1
+          description: The English source name. Unique.
+        color:
+          type: string
+          pattern: '^#[0-9a-fA-F]{6}$'
+        sortOrder:
+          type: integer
+        requiresInspection:
+          type: boolean
+
+    CategoryUpdated:
+      type: object
+      required: [category, unitsChanged]
+      properties:
+        category:
+          $ref: '#/components/schemas/Category'
+        unitsChanged:
+          type: integer
+          description: Units whose inspection interval this change set or cleared.
+
+    CatalogProduct:
+      allOf:
+        - $ref: '#/components/schemas/Product'
+        - type: object
+          required: [requiresInspection, inspectionRequired, isLicense, mainsConnectors, units]
+          properties:
+            requiresInspection:
+              type: [boolean, 'null']
+              description: The product's own answer. Null follows its category.
+            inspectionRequired:
+              type: boolean
+              description: |
+                Whether its units need DGUV inspections: `requiresInspection`,
+                else the category's. A licence never does.
+            isLicense:
+              type: boolean
+            mainsConnectors:
+              type: array
+              description: |
+                Connectors carrying mains voltage it has — on its panel, at a
+                cable end or on a loom's way. A product with one is electrical
+                equipment and normally needs inspecting.
+              items:
+                type: string
+            ports:
+              type: array
+              description: The device's built-in connectors, in panel order. Empty on a cable.
+              items:
+                $ref: '#/components/schemas/ProductPort'
+            units:
+              $ref: '#/components/schemas/CatalogProductUnits'
+
+    CatalogProductUnits:
+      type: object
+      description: Active units of the caller's organizations.
+      required: [active, tracked, overdue]
+      properties:
+        active:
+          type: integer
+        tracked:
+          type: integer
+          description: Units that carry an inspection interval.
+        overdue:
+          type: integer
+          description: Units whose inspection is due today or earlier.
+
+    CatalogProductPage:
+      type: object
+      required: [items, nextCursor]
+      properties:
+        items:
+          type: array
+          items:
+            $ref: '#/components/schemas/CatalogProduct'
+        nextCursor:
+          type: [string, 'null']
+          description: Pass as `cursor` for the next page. Null on the last page.
+
+    ProductUpdateRequest:
+      type: object
+      additionalProperties: false
+      properties:
+        name:
+          type: string
+          minLength: 1
+        caption:
+          type: string
+          description: '`""` clears it.'
+        details:
+          type: string
+          description: '`""` clears it.'
+        categoryId:
+          type: string
+        isLicense:
+          type: boolean
+          description: A cable is never a licence; `true` on a cable is ignored.
+        requiresInspection:
+          type: [boolean, 'null']
+          description: Null follows the category again.
+        cable:
+          description: |
+            The cable's ends, length and wire, or the loom's ways — replaced
+            wholesale. Null says this is not a cable and clears all of it.
+          oneOf:
+            - $ref: '#/components/schemas/CableUpdate'
+            - type: 'null'
+        ports:
+          type: array
+          maxItems: 100
+          description: The device's built-in connectors in panel order, replacing the panel. `[]` clears it.
+          items:
+            $ref: '#/components/schemas/ProductPortInput'
+
+    CableUpdate:
+      type: object
+      additionalProperties: false
+      properties:
+        type:
+          type: [string, 'null']
+          description: The wire — `CAT7`, `2,5 mm²`. Usually null.
+        connectorA:
+          type: [string, 'null']
+        connectorB:
+          type: [string, 'null']
+        lengthCm:
+          type: [integer, 'null']
+          minimum: 1
+        ways:
+          type: array
+          description: A loom's ways. Leave `connectorA`/`connectorB` null on a loom.
+          items:
+            type: object
+            additionalProperties: false
+            required: [count]
+            properties:
+              count:
+                type: integer
+                minimum: 1
+                maximum: 99
+              type:
+                type: [string, 'null']
+              connectorA:
+                type: [string, 'null']
+              connectorB:
+                type: [string, 'null']
+
+    ProductPortInput:
+      type: object
+      additionalProperties: false
+      required: [connector, count]
+      properties:
+        connector:
+          type: string
+          description: A connector name from listConnectors.
+        count:
+          type: integer
+          minimum: 1
+          maximum: 999
+        label:
+          type: [string, 'null']
+          maxLength: 80
+          description: What the panel is printed with — `DMX In`, `Power Out`.
+        requirement:
+          $ref: '#/components/schemas/PortRequirement'
+
+    PortRequirement:
+      type: [string, 'null']
+      enum: [required, A, B, null]
+      description: |
+        Whether the port must be connected for a production's connection
+        check: `required` alone, or a letter shared by alternatives of which
+        one is enough. Null when it need not be.
+
+    ProductPort:
+      type: object
+      required: [connector, count, label, requirement]
+      properties:
+        connector:
+          type: string
+        count:
+          type: integer
+        label:
+          type: [string, 'null']
+        requirement:
+          $ref: '#/components/schemas/PortRequirement'
+
+    Connector:
+      type: object
+      required: [name, family, mains]
+      properties:
+        name:
+          type: string
+        family:
+          type: [string, 'null']
+          description: What it mates with — `Schuko M` and `Schuko F` are both `Schuko`.
+        mains:
+          type: boolean
+          description: Carries mains voltage. A product with one is electrical equipment.
+
+    ProductUpdated:
+      type: object
+      required: [product, unitsChanged]
+      properties:
+        product:
+          $ref: '#/components/schemas/CatalogProduct'
+        unitsChanged:
+          type: integer
+          description: Units whose inspection interval this change set or cleared.
 
     AssetDetail:
       allOf:

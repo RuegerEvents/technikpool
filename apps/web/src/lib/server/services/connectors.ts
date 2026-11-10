@@ -10,6 +10,15 @@ export function connectorSlug(name: string): string {
 	return name.trim().toLowerCase();
 }
 
+/**
+ * Whether two connector names are the same connector — the way its slug files
+ * it. "schuko m" typed into a form is the "Schuko M" already stored, and is
+ * stored as that; it is no edit, and needs no right to make one.
+ */
+export function sameConnectorName(a: string | null, b: string | null): boolean {
+	return (a ? connectorSlug(a) : null) === (b ? connectorSlug(b) : null);
+}
+
 type Ends = { connectorA: string | null; connectorB: string | null };
 type EndIds = { connectorAId: string | null; connectorBId: string | null };
 

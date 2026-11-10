@@ -13,6 +13,28 @@ import type { InspectedData, InspectionDeletedData } from '#lib/types/asset-tran
 
 type Tx = Prisma.TransactionClient;
 
+/** `requiresInspection` in `inspection-due.ts`, as a filter on products. */
+export const INSPECTION_REQUIRED_WHERE: Prisma.ProductWhereInput = {
+	isLicense: false,
+	OR: [
+		{ requiresInspection: true },
+		{ requiresInspection: null, category: { requiresInspection: true } }
+	]
+};
+
+/**
+ * Its negation, spelt out rather than `NOT: INSPECTION_REQUIRED_WHERE`: the
+ * product's column is nullable, and SQL's NOT over a comparison with NULL is
+ * NULL, not true — so every product that follows its category would drop out.
+ */
+export const INSPECTION_NOT_REQUIRED_WHERE: Prisma.ProductWhereInput = {
+	OR: [
+		{ isLicense: true },
+		{ requiresInspection: false },
+		{ requiresInspection: null, category: { requiresInspection: false } }
+	]
+};
+
 /** YYYY-MM-DD → midnight UTC, refusing what isn't a real day or hasn't happened yet. */
 export function parseInspectionDate(value: string): Date {
 	const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value.trim());

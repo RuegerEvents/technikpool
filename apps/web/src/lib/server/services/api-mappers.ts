@@ -3,6 +3,8 @@ import type { TransactionData } from '#lib/types/asset-transaction.js';
 import type { OrgRole } from '#lib/roles.js';
 import { imageSrc } from '#lib/images.js';
 import { isCable } from '#lib/cable.js';
+import { requiresInspection } from '#lib/inspection-due.js';
+import { portRequirement } from '#lib/ports.js';
 import { bundleLabel } from '#lib/product-label.js';
 import { withCableNames } from '#lib/server/services/cable-ends.js';
 import {
@@ -130,6 +132,8 @@ type CategoryRow = {
 	name: string;
 	color: string;
 	sortOrder: number;
+	/** Left out where a stocktake selects only what it shows. */
+	requiresInspection?: boolean;
 };
 
 export function toCategory(category: CategoryRow): Schemas['Category'] {
@@ -137,7 +141,10 @@ export function toCategory(category: CategoryRow): Schemas['Category'] {
 		id: category.id,
 		name: category.name,
 		color: category.color,
-		sortOrder: category.sortOrder
+		sortOrder: category.sortOrder,
+		...(category.requiresInspection !== undefined
+			? { requiresInspection: category.requiresInspection }
+			: {})
 	};
 }
 
@@ -198,6 +205,40 @@ export function toProduct(product: ProductRow): Schemas['Product'] {
 		// request rather than needing every row rewritten.
 		imageUrl: imageSrc(product.imagePath),
 		cable: toCableSpec(product)
+	};
+}
+
+/**
+ * A product as the catalog endpoints show it: the ordinary `Product`, plus
+ * whether it needs inspecting and how many of the caller's units it has.
+ */
+export function toCatalogProduct(
+	product: ProductRow & {
+		requiresInspection: boolean | null;
+		isLicense: boolean;
+		category: { requiresInspection: boolean };
+		ports: {
+			count: number;
+			label: string | null;
+			requirement: string | null;
+			connector: { name: string };
+		}[];
+	},
+	extra: { mainsConnectors: string[]; units: Schemas['CatalogProductUnits'] }
+): Schemas['CatalogProduct'] {
+	return {
+		...toProduct(product),
+		requiresInspection: product.requiresInspection,
+		inspectionRequired: requiresInspection(product),
+		isLicense: product.isLicense,
+		mainsConnectors: extra.mainsConnectors,
+		ports: product.ports.map((p) => ({
+			connector: p.connector.name,
+			count: p.count,
+			label: p.label,
+			requirement: portRequirement(p.requirement)
+		})),
+		units: extra.units
 	};
 }
 

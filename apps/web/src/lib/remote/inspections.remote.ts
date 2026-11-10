@@ -9,12 +9,15 @@ import {
 	userOrgIds
 } from '#lib/server/services/access.js';
 import { productControl } from '#lib/server/services/product-control.js';
+import { updateCategory, updateProduct } from '#lib/server/services/products.js';
 import { logCatalogChange } from '#lib/server/services/catalog-log.js';
 import { ACTIVE_ASSET_WHERE } from '#lib/asset-status.js';
 import { appError } from '#lib/errors.js';
 import { INSPECTION_RESULTS } from '#lib/inspection-due.js';
+import { ROLE_FOR, roleAtLeast } from '#lib/roles.js';
 import {
 	applyInspectionRequirement,
+	INSPECTION_REQUIRED_WHERE,
 	deleteInspection as deleteInspectionRecord,
 	mainsConnectorNames,
 	mainsConnectorsByProduct,
@@ -81,6 +84,35 @@ export const getOverdueInspectionCount = query(async () => {
 			nextInspectionDue: { not: null, lt: new Date() }
 		}
 	});
+});
+
+/**
+ * The caller's orgs that have units needing inspection but no default interval.
+ * New units there get no interval, so they are never due and never listed —
+ * the inspections page says so rather than staying quietly empty. Memberships
+ * only, even for a system admin: it is a nudge to whoever runs the org.
+ */
+export const getOrgsWithoutInspectionInterval = query(async () => {
+	const user = await requireAuth();
+	const memberships = await prisma.orgMembership.findMany({
+		where: {
+			userId: user.id,
+			organization: {
+				defaultInspectionIntervalMonths: null,
+				assets: { some: { ...ACTIVE_ASSET_WHERE, product: INSPECTION_REQUIRED_WHERE } }
+			}
+		},
+		select: {
+			role: true,
+			organization: { select: { id: true, name: true, shortName: true } }
+		},
+		orderBy: { organization: { name: 'asc' } }
+	});
+	return memberships.map((m) => ({
+		...m.organization,
+		// The interval is an org setting, which `updateOrg` leaves to its OWNER.
+		canEdit: roleAtLeast(m.role, ROLE_FOR.organization)
+	}));
 });
 
 export const getAssetInspections = query(v.string(), async (assetId: string) => {
@@ -248,46 +280,9 @@ const productRequirementSchema = v.object({
  */
 export const setProductInspectionRequirement = command(productRequirementSchema, async (input) => {
 	const user = await requireAuth();
-	const systemAdmin = await isSystemAdmin(user.id);
-	const managed = systemAdmin ? [] : await managedOrgIds(user.id);
-	if (!systemAdmin && managed.length === 0) appError(403, 'product_edit_forbidden');
-
-	const product = await prisma.product.findUniqueOrThrow({
-		where: { id: input.productId },
-		select: { id: true, name: true, createdById: true, requiresInspection: true }
-	});
-	const control = await productControl({ id: user.id, systemAdmin, managed }, product);
-	if (!control.allowed) {
-		if (control.reason === 'foreign_units') {
-			appError(403, 'product_units_other_orgs', [control.orgNames]);
-		}
-		appError(403, 'product_unowned_not_creator', [product.name]);
-	}
-	if (product.requiresInspection === input.requiresInspection) return { changed: 0 };
-
-	const changed = await prisma.$transaction(async (tx) => {
-		await tx.product.update({
-			where: { id: product.id },
-			data: { requiresInspection: input.requiresInspection }
-		});
-		return applyInspectionRequirement(tx, user.id, [product.id]);
-	});
-	await logCatalogChange({
-		userId: user.id,
-		action: 'PRODUCT_UPDATED',
-		productId: product.id,
-		data: {
-			changes: [
-				{
-					field: 'requiresInspection',
-					from: product.requiresInspection?.toString() ?? null,
-					to: input.requiresInspection?.toString() ?? null
-				}
-			]
-		}
-	});
-	await refreshRequirementViews(changed);
-	return { changed: changed.length };
+	const { unitsChanged, changed } = await updateProduct(user.id, input);
+	if (changed) await refreshRequirementViews(unitsChanged);
+	return { changed: unitsChanged.length };
 });
 
 const categoryRequirementSchema = v.object({
@@ -304,45 +299,9 @@ export const setCategoryInspectionRequirement = command(
 	categoryRequirementSchema,
 	async (input) => {
 		const user = await requireAuth();
-		if (!(await isSystemAdmin(user.id))) appError(403, 'admin_required');
-
-		const category = await prisma.category.findUniqueOrThrow({
-			where: { id: input.categoryId },
-			select: { id: true, requiresInspection: true }
-		});
-		if (category.requiresInspection === input.requiresInspection) return { changed: 0 };
-
-		const changed = await prisma.$transaction(async (tx) => {
-			await tx.category.update({
-				where: { id: category.id },
-				data: { requiresInspection: input.requiresInspection }
-			});
-			const following = await tx.product.findMany({
-				where: { categoryId: category.id, requiresInspection: null },
-				select: { id: true }
-			});
-			return applyInspectionRequirement(
-				tx,
-				user.id,
-				following.map((p) => p.id)
-			);
-		});
-		await logCatalogChange({
-			userId: user.id,
-			action: 'CATEGORY_UPDATED',
-			categoryId: category.id,
-			data: {
-				changes: [
-					{
-						field: 'requiresInspection',
-						from: String(category.requiresInspection),
-						to: String(input.requiresInspection)
-					}
-				]
-			}
-		});
-		await refreshRequirementViews(changed);
-		return { changed: changed.length };
+		const { unitsChanged, changed } = await updateCategory(user.id, input);
+		if (changed) await refreshRequirementViews(unitsChanged);
+		return { changed: unitsChanged.length };
 	}
 );
 

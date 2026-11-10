@@ -13,6 +13,7 @@ class Category {
     required this.name,
     required this.color,
     required this.sortOrder,
+    this.requiresInspection,
   });
   
   factory Category.fromJson(Map<String, Object?> json) => _$CategoryFromJson(json);
@@ -28,6 +29,12 @@ class Category {
 
   /// Ascending, ties broken by name. listCategories applies both.
   final int sortOrder;
+
+  /// Whether units in this category need DGUV inspections, unless their.
+  /// product says otherwise. Not required, so an older client keeps.
+  /// compiling.
+  ///
+  final bool? requiresInspection;
 
   Map<String, Object?> toJson() => _$CategoryToJson(this);
 }

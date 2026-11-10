@@ -11,6 +11,7 @@ Category _$CategoryFromJson(Map<String, dynamic> json) => Category(
   name: json['name'] as String,
   color: json['color'] as String,
   sortOrder: (json['sortOrder'] as num).toInt(),
+  requiresInspection: json['requiresInspection'] as bool?,
 );
 
 Map<String, dynamic> _$CategoryToJson(Category instance) => <String, dynamic>{
@@ -18,4 +19,5 @@ Map<String, dynamic> _$CategoryToJson(Category instance) => <String, dynamic>{
   'name': instance.name,
   'color': instance.color,
   'sortOrder': instance.sortOrder,
+  'requiresInspection': ?instance.requiresInspection,
 };

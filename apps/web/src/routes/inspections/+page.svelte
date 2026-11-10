@@ -2,7 +2,10 @@
 	import { orgLabel } from '#lib/utils.js';
 	import * as Card from '#lib/components/ui/card/index.js';
 	import { Button } from '#lib/components/ui/button/index.js';
-	import { getOverdueAssets } from '#lib/remote/inspections.remote.js';
+	import {
+		getOrgsWithoutInspectionInterval,
+		getOverdueAssets
+	} from '#lib/remote/inspections.remote.js';
 	import { OrgBadge } from '#lib/components/ui/org-badge/index.js';
 	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
 	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
@@ -12,6 +15,8 @@
 
 	let overdueQuery = $derived(getOverdueAssets());
 	let data = $derived(overdueQuery.current ?? { overdue: [], upcoming: [] });
+	let missingIntervalQuery = $derived(getOrgsWithoutInspectionInterval());
+	let missingInterval = $derived(missingIntervalQuery.current ?? []);
 
 	type AssetRow = Awaited<ReturnType<typeof getOverdueAssets>>['overdue'][number];
 
@@ -42,6 +47,22 @@
 			whose last inspection failed, is due at once.
 		</p>
 	</div>
+
+	{#each missingInterval as org (org.id)}
+		<div class="rounded-md border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm">
+			<p>
+				<span class="font-medium">{orgLabel(org)}</span> has no default inspection interval. Its new units
+				that need inspecting get none, so they are never due and never listed here.
+			</p>
+			{#if org.canEdit}
+				<Button variant="link" class="h-auto p-0" href={resolve(`orgs/${org.id}`)}
+					>Set the interval in the org settings</Button
+				>
+			{:else}
+				<p class="text-muted-foreground">The org's owner can set one in its settings.</p>
+			{/if}
+		</div>
+	{/each}
 
 	{#if !overdueQuery.ready}
 		<ContentSkeleton shape="table" count={5} error={overdueQuery.error} />

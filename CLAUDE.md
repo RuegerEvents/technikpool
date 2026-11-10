@@ -158,6 +158,10 @@ Logic needed by both remote functions and `/api/v1` lives in `src/lib/server/ser
 - `checkout.ts` — `performScan`, `performBulkCheckout`. Framework-agnostic: they take a user id
   and report touched records via `affected`, and the caller decides what to invalidate
   (`query().refresh()` only means something in the remote-function layer).
+- `products.ts` — `updateProduct`, `updateCategory`: every edit of a product or category,
+  with `productControl`, the catalog log and `applyInspectionRequirement`. Behind the web's
+  `updateProduct` / `set*InspectionRequirement` commands and `PATCH /api/v1/products/{id}` /
+  `/categories/{id}`. A new editable field goes here, then into both schemas.
 
 ## Licenses
 

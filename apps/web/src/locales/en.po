@@ -13449,3 +13449,15 @@ msgstr "Name, asset ID prefix, visual identity, DGUV default interval, and Klein
 #: src/routes/orgs/[id]/+page.svelte
 msgid "The full name, printed on offers, invoices and delivery notes. Documents already issued keep the old one; drafts offer to take the new one."
 msgstr "The full name, printed on offers, invoices and delivery notes. Documents already issued keep the old one; drafts offer to take the new one."
+
+#: src/routes/inspections/+page.svelte
+msgid "Set the interval in the org settings"
+msgstr "Set the interval in the org settings"
+
+#: src/routes/inspections/+page.svelte
+msgid "The org's owner can set one in its settings."
+msgstr "The org's owner can set one in its settings."
+
+#: src/routes/inspections/+page.svelte
+msgid "<0/> has no default inspection interval. Its new units that need inspecting get none, so they are never due and never listed here."
+msgstr "<0/> has no default inspection interval. Its new units that need inspecting get none, so they are never due and never listed here."
