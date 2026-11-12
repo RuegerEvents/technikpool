@@ -10670,9 +10670,8 @@ msgid_plural "Add # devices"
 msgstr[0] "Add 1 device"
 msgstr[1] "Add # devices"
 
-#: src/lib/components/ui/unit-picker/unit-picker.svelte
-msgid "Search by product, asset tag or serial number…"
-msgstr "Search by product, asset tag or serial number…"
+#~ msgid "Search by product, asset tag or serial number…"
+#~ msgstr "Search by product, asset tag or serial number…"
 
 #: src/lib/components/ui/unit-picker/unit-picker.svelte
 msgid "No loose units to add."
@@ -13932,3 +13931,31 @@ msgstr "Added to <0/> <1/>"
 #: src/routes/productions/[id]/equipment/equipment-planner.svelte
 msgid "You lend to this production and are on its crew, so you plan your own organization's equipment here. What you add is approved at once."
 msgstr "You lend to this production and are on its crew, so you plan your own organization's equipment here. What you add is approved at once."
+
+#: src/lib/components/ui/unit-picker/unit-picker.svelte
+msgid "Search by product, asset tag (also an accessory's) or serial number…"
+msgstr "Search by product, asset tag (also an accessory's) or serial number…"
+
+#: src/lib/components/ui/unit-picker/unit-picker.svelte
+msgid "· with accessories"
+msgstr "· with accessories"
+
+#. 0: unit.serialNumber
+#: src/lib/components/ui/unit-picker/unit-picker.svelte
+msgid "S/N {0}"
+msgstr "S/N {0}"
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "Also show other organizations' units"
+msgstr "Also show other organizations' units"
+
+#. 0: group.bundle.name
+#: src/lib/components/ui/unit-picker/unit-picker.svelte
+msgid "In {0}"
+msgstr "In {0}"
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "1 device is taken out of its current kit:"
+msgid_plural "# devices are taken out of their current kits:"
+msgstr[0] "1 device is taken out of its current kit:"
+msgstr[1] "# devices are taken out of their current kits:"

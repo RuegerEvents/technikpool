@@ -9,6 +9,10 @@
 		assetTag: string | null;
 		serialNumber: string | null;
 		locationName: string | null;
+		/** What hangs off it and goes into the kit with it. */
+		accessories?: { id: string; name: string; assetTag: string | null }[];
+		/** The kit it sits in now, if picking it moves it out of that one. */
+		bundle?: { id: string; name: string } | null;
 	};
 </script>
 
@@ -50,6 +54,7 @@
 		manufacturerName: string | null;
 		imagePath: string | null;
 		locationName: string | null;
+		bundle: { id: string; name: string } | null;
 		units: PickerUnit[];
 	};
 
@@ -66,7 +71,9 @@
 	let groups = $derived.by(() => {
 		const byKey: Record<string, Group> = {};
 		for (const unit of units) {
-			const key = `${unit.productId}|${unit.locationName ?? ''}`;
+			// Units in another kit get rows of their own, under the loose ones: "+1"
+			// on a loose row never empties someone else's case.
+			const key = `${unit.productId}|${unit.locationName ?? ''}|${unit.bundle?.id ?? ''}`;
 			byKey[key] ??= {
 				key,
 				productId: unit.productId,
@@ -75,6 +82,7 @@
 				manufacturerName: unit.manufacturerName,
 				imagePath: unit.imagePath,
 				locationName: unit.locationName,
+				bundle: unit.bundle ?? null,
 				units: []
 			};
 			byKey[key].units.push(unit);
@@ -84,6 +92,8 @@
 			.sort(
 				(a, b) =>
 					naturalCompare(a.productName, b.productName) ||
+					Number(!!a.bundle) - Number(!!b.bundle) ||
+					naturalCompare(a.bundle?.name ?? '', b.bundle?.name ?? '') ||
 					naturalCompare(a.locationName ?? '', b.locationName ?? '')
 			);
 	});
@@ -100,8 +110,12 @@
 				v?.toLowerCase().includes(q)
 			);
 			if (byProduct) return [{ group: g, units: g.units, byUnit: false }];
+			// An accessory's tag finds the unit it hangs off: the accessory cannot go
+			// into a kit on its own, and its sticker is often the one in reach.
 			const hits = g.units.filter((u) =>
-				[u.assetTag, u.serialNumber].some((v) => v?.toLowerCase().includes(q))
+				[u.assetTag, u.serialNumber, ...(u.accessories ?? []).map((a) => a.assetTag)].some((v) =>
+					v?.toLowerCase().includes(q)
+				)
 			);
 			return hits.length > 0 ? [{ group: g, units: hits, byUnit: true }] : [];
 		})
@@ -145,7 +159,7 @@
 		<input
 			type="search"
 			bind:value={search}
-			placeholder="Search by product, asset tag or serial number…"
+			placeholder="Search by product, asset tag (also an accessory's) or serial number…"
 			class="h-9 w-full rounded-md border border-input bg-background px-3 py-1 text-sm placeholder:text-muted-foreground focus:ring-2 focus:ring-ring focus:outline-none"
 		/>
 		<CameraScanButton onscan={(code) => (search = code)} />
@@ -185,7 +199,15 @@
 								</span>
 								<span class="block truncate text-xs text-muted-foreground">
 									{[group.manufacturerName, group.locationName].filter(Boolean).join(' · ')}
+									{#if group.units.some((u) => u.accessories?.length)}
+										· with accessories
+									{/if}
 								</span>
+								{#if group.bundle}
+									<span class="block truncate text-xs text-amber-700 dark:text-amber-400">
+										In {group.bundle.name}
+									</span>
+								{/if}
 							</span>
 						</button>
 						<CountStepper
@@ -213,8 +235,22 @@
 											onchange={() => toggle(group, unit)}
 										/>
 										<span class="w-28 shrink-0 font-mono text-xs">{unit.assetTag ?? '—'}</span>
-										<span class="truncate font-mono text-xs text-muted-foreground">
-											{unit.serialNumber ? `S/N ${unit.serialNumber}` : ''}
+										<span class="min-w-0">
+											{#if unit.serialNumber}
+												<span class="block truncate font-mono text-xs text-muted-foreground"
+													>S/N {unit.serialNumber}</span
+												>
+											{/if}
+											{#each unit.accessories ?? [] as accessory (accessory.id)}
+												<span class="block truncate text-xs text-muted-foreground">
+													+ {accessory.name}{#if accessory.assetTag}<span
+															class="ml-1 font-mono {q &&
+															accessory.assetTag.toLowerCase().includes(q)
+																? 'font-semibold text-foreground'
+																: ''}">{accessory.assetTag}</span
+														>{/if}
+												</span>
+											{/each}
 										</span>
 									</label>
 								</li>

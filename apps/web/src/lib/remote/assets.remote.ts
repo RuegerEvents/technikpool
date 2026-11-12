@@ -3045,14 +3045,21 @@ const addAssetsToBundleSchema = v.object({
 	// Set only after the user has been told what it means: the unit does not fit
 	// what this bundle type holds, and putting it in changes the type for every
 	// case of it. See `assertAdditionsFitType`.
-	allowTypeChange: v.optional(v.boolean())
+	allowTypeChange: v.optional(v.boolean()),
+	// Set when the picker showed which of the units sit in another kit and the
+	// user picked them anyway: they move out of it in the same step.
+	moveFromOtherBundles: v.optional(v.boolean())
 });
 
-/** The guards a unit has to pass to join a kit, and the move itself. */
+/**
+ * The guards a unit has to pass to join a kit, and the move itself. Returns
+ * the kit it came out of, if `moveFromOtherBundles` let it change kits.
+ */
 async function moveAssetIntoBundle(
 	tx: AssetTx,
 	bundle: { id: string; locationId: string | null },
-	assetId: string
+	assetId: string,
+	moveFromOtherBundles = false
 ) {
 	const asset = await tx.asset.findUniqueOrThrow({
 		where: { id: assetId },
@@ -3060,7 +3067,7 @@ async function moveAssetIntoBundle(
 			status: true,
 			bundleId: true,
 			parentAssetId: true,
-			bundle: { select: { template: true } }
+			bundle: { select: { id: true, templateId: true, template: true } }
 		}
 	});
 	if (isRetiredStatus(asset.status)) {
@@ -3074,22 +3081,25 @@ async function moveAssetIntoBundle(
 	if (asset.parentAssetId) {
 		appError(409, 'bundle_accessory_member');
 	}
-	// A unit belongs to one kit at a time. Both pickers already leave bundled
-	// assets out, so reaching here means a stale page — moving it silently would
-	// take it out of the other bundle without anyone seeing.
-	if (asset.bundleId && asset.bundleId !== bundle.id) {
-		appError(409, 'asset_in_other_bundle', [asset.bundle?.template.name ?? '']);
+	// A unit belongs to one kit at a time. Moving it out of another one takes
+	// the user having been shown which — without that flag this is a stale
+	// page, and moving it silently would empty a kit nobody was looking at.
+	const from = asset.bundle && asset.bundle.id !== bundle.id ? asset.bundle : null;
+	if (from) {
+		if (!moveFromOtherBundles) appError(409, 'asset_in_other_bundle', [from.template.name]);
+		await requireOrgInventory(from.template.organizationId);
 	}
 	const updateData: { bundleId: string; locationId?: string } = { bundleId: bundle.id };
 	if (bundle.locationId) updateData.locationId = bundle.locationId;
 	await tx.asset.update({ where: { id: assetId }, data: updateData });
 	// Whatever is attached to it comes along — the kit ships as one thing.
 	await syncAccessories(tx, assetId, updateData);
+	return from;
 }
 
 export const addAssetsToBundle = command(
 	addAssetsToBundleSchema,
-	async ({ bundleId, assetIds, allowTypeChange }) => {
+	async ({ bundleId, assetIds, allowTypeChange, moveFromOtherBundles }) => {
 		const bundle = await prisma.assetBundle.findUniqueOrThrow({
 			where: { id: bundleId },
 			include: { template: true }
@@ -3106,9 +3116,19 @@ export const addAssetsToBundle = command(
 			productIds: picked.map((asset) => asset.productId),
 			allowTypeChange
 		});
-		await prisma.$transaction(async (tx) => {
-			for (const assetId of assetIds) await moveAssetIntoBundle(tx, bundle, assetId);
+		const emptied = await prisma.$transaction(async (tx) => {
+			const from = [];
+			for (const assetId of assetIds) {
+				const left = await moveAssetIntoBundle(tx, bundle, assetId, moveFromOtherBundles);
+				if (left) from.push(left);
+			}
+			return from;
 		});
+		// The kits they came out of are short of them now, as after a removal.
+		for (const left of new Map(emptied.map((b) => [b.id, b])).values()) {
+			await getBundle(left.id).refresh();
+			await getBundleTypeSpec(left.templateId).refresh();
+		}
 		await getBundleTypeSpec(bundle.templateId).refresh();
 		await getBundleTemplates(bundle.template.organizationId).refresh();
 		await getBundleTemplates().refresh();

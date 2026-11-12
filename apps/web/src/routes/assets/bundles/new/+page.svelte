@@ -108,7 +108,12 @@
 				imagePath: a.product.imagePath,
 				assetTag: a.assetTag,
 				serialNumber: a.serialNumber,
-				locationName: a.location?.name ?? null
+				locationName: a.location?.name ?? null,
+				accessories: a.accessories.map((x) => ({
+					id: x.id,
+					name: x.product.name,
+					assetTag: x.assetTag
+				}))
 			}))
 	);
 

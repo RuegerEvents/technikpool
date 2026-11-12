@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { naturalCompare } from '#lib/sort.js';
 	import { rowLinkClick } from '#lib/row-link.js';
 	import { BackButton } from '#lib/components/ui/back-button/index.js';
 	import { CameraScanButton } from '#lib/components/ui/camera-scan/index.js';
@@ -353,6 +354,10 @@
 	// Deliberate, and the acknowledgement at the same time: ticking it is what
 	// says the kit itself is changing.
 	let changeType = $state(false);
+	// A kit is packed from its own org's shelves; another org's units are a
+	// tick away for the rare case, not mixed into every search.
+	let otherOrgs = $state(false);
+	let bundleOrgId = $derived(bundle.template.organizationId);
 
 	let availableToAdd = $derived.by(() => {
 		const bundleAssetIds = new Set(bundle.assets.map((a) => a.id));
@@ -364,13 +369,20 @@
 				roomFor(specLines, memberCounts, a.productId) === 0
 			)
 				return false;
-			if (a.bundle) return false;
+			// A unit in another kit is offered too, marked as such: picking it moves
+			// it out of that one (`moveFromOtherBundles`).
 			// An accessory is in whatever kit its parent is in — adding the parent
 			// brings it along, and there is no way to add it on its own.
 			if (a.parentAssetId) return false;
+			if (!otherOrgs && a.organizationId !== bundleOrgId) return false;
 			return isBookableStatus(a.status);
 		});
 	});
+	let otherOrgUnits = $derived(
+		allAssets.some(
+			(a) => a.organizationId !== bundleOrgId && !a.parentAssetId && isBookableStatus(a.status)
+		)
+	);
 	let pickerUnits = $derived<PickerUnit[]>(
 		availableToAdd.map((a) => ({
 			id: a.id,
@@ -381,7 +393,13 @@
 			imagePath: a.product.imagePath,
 			assetTag: a.assetTag,
 			serialNumber: a.serialNumber,
-			locationName: a.location?.name ?? null
+			locationName: a.location?.name ?? null,
+			accessories: a.accessories.map((x) => ({
+				id: x.id,
+				name: x.product.name,
+				assetTag: x.assetTag
+			})),
+			bundle: a.bundle ? { id: a.bundle.id, name: a.bundle.template.name } : null
 		}))
 	);
 	// What the picker may count up to per product: the kit's room for it, or
@@ -391,6 +409,15 @@
 		return roomFor(specLines, memberCounts, productId);
 	}
 	let pickedIds = $state<string[]>([]);
+	// The kits the picked units come out of, named before they are emptied.
+	let movedFrom = $derived(
+		[
+			...new Set(
+				pickerUnits.filter((u) => u.bundle && pickedIds.includes(u.id)).map((u) => u.bundle!.name)
+			)
+		].sort(naturalCompare)
+	);
+	let movedCount = $derived(pickerUnits.filter((u) => u.bundle && pickedIds.includes(u.id)).length);
 	// Picks follow what is on offer: unticking "show everything", or a unit that
 	// went into another case meanwhile, takes it out of the selection. Closing
 	// the dialog starts over.
@@ -448,7 +475,8 @@
 			await addAssetsToBundle({
 				bundleId,
 				assetIds: pickedIds,
-				allowTypeChange: changeType || undefined
+				allowTypeChange: changeType || undefined,
+				moveFromOtherBundles: movedFrom.length > 0 || undefined
 			});
 			toast.success(
 				plural(pickedIds.length, ['Device added to bundle', '# devices added to bundle'])
@@ -1098,12 +1126,29 @@
 			</div>
 		{/if}
 
+		{#if otherOrgUnits}
+			<label class="mb-2 flex cursor-pointer items-center gap-2 text-xs text-muted-foreground">
+				<input type="checkbox" bind:checked={otherOrgs} />
+				<span>Also show other organizations' units</span>
+			</label>
+		{/if}
 		<UnitPicker
 			units={pickerUnits}
 			bind:selected={pickedIds}
 			bind:search={searchQuery}
 			{limitFor}
 		/>
+		{#if movedFrom.length > 0}
+			<p
+				class="mt-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200"
+			>
+				{plural(movedCount, [
+					'1 device is taken out of its current kit:',
+					'# devices are taken out of their current kits:'
+				])}
+				{movedFrom.join(', ')}
+			</p>
+		{/if}
 
 		<!-- The catalogue, under the units. Everything above is a unit standing
 		     loose in the warehouse; below is every product the system knows, so a
