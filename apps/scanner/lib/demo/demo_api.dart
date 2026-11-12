@@ -124,6 +124,12 @@ class DemoBackend {
     if (segments.length >= 7 && segments[3] == 'productions' && segments[5] == 'handout') {
       return _handoutRoute(options, method, segments);
     }
+    if (method == 'GET' && path == '/api/v1/inspection-types') {
+      return _ok(options, _inspectionTypes);
+    }
+    if (method == 'POST' && path == '/api/v1/defects') {
+      return _reportDefect(options);
+    }
     if (method == 'POST' && path == '/api/v1/inspections') {
       return _recordInspection(options);
     }
@@ -563,6 +569,80 @@ class DemoBackend {
       );
     }
     return _error(options, 404, 'not_found', 'Inspection not found');
+  }
+
+  /// The types every installation has. The demo keeps one history per unit,
+  /// so whichever type a reviewer picks is recorded like electrical.
+  static const _inspectionTypes = [
+    InspectionType(
+      id: 'inst_electrical',
+      key: 'electrical',
+      name: 'Electrical (DGUV V3)',
+      nameDe: 'Elektrisch (DGUV V3)',
+      sortOrder: 0,
+      failStatus: 'BROKEN',
+      requiresQualification: true,
+      hasMeasurements: true,
+      defaultIntervalMonths: 12,
+    ),
+    InspectionType(
+      id: 'inst_lifting',
+      key: 'lifting',
+      name: 'Lifting equipment',
+      nameDe: 'Anschlagmittel',
+      sortOrder: 1,
+      failStatus: 'DECOMMISSIONED',
+      requiresQualification: true,
+      hasMeasurements: false,
+      defaultIntervalMonths: 12,
+    ),
+    InspectionType(
+      id: 'inst_visual',
+      key: 'visual',
+      name: 'Visual check',
+      nameDe: 'Sichtprüfung',
+      sortOrder: 2,
+      failStatus: 'MAINTENANCE',
+      requiresQualification: false,
+      hasMeasurements: false,
+      defaultIntervalMonths: null,
+    ),
+  ];
+
+  /// A failed visual check: the unit goes into maintenance, as on the server.
+  Response<dynamic> _reportDefect(RequestOptions options) {
+    final body = options.data;
+    final code = body is Map ? '${body['code'] ?? ''}'.trim() : '';
+    final notes = body is Map ? '${body['notes'] ?? ''}'.trim() : '';
+    if (code.isEmpty || notes.isEmpty) {
+      return _error(
+        options,
+        400,
+        'invalid_request',
+        'code and notes (what is wrong) are required.',
+      );
+    }
+    var asset = _resolve(code).asset;
+    if (asset == null) {
+      return _error(options, 404, 'asset_not_found', 'Tag "$code" not found');
+    }
+    final changed = asset.status != AssetStatus.maintenance;
+    _log(
+      asset,
+      'INSPECTED',
+      '',
+      inspection: TransactionInspection(
+        performedAt: DateTime.now().toUtc(),
+        result: InspectionResult.failed,
+        markedBroken: changed,
+      ),
+    );
+    if (changed) asset = _replace(asset, status: AssetStatus.maintenance);
+    return _ok(
+      options,
+      DefectReported(asset: asset, statusChanged: changed),
+      status: 201,
+    );
   }
 
   /// `YYYY-MM-DD` → midnight UTC, or null for anything that isn't a real day.

@@ -1362,4 +1362,51 @@ class SDe extends S {
   String caseLabelPage(int page, int count) {
     return 'Etikett $page von $count';
   }
+
+  @override
+  String get inspectionType => 'Prüfart';
+
+  @override
+  String get inspectionExternal => 'Von einer externen Firma geprüft';
+
+  @override
+  String get inspectionExternalHint =>
+      'Firma oder Prüfer und deren Qualifikation eintragen.';
+
+  @override
+  String get inspectionOwnHint =>
+      'Erfasst unter deinem Namen. Prüfarten mit Befähigung brauchen eine in der Organisation des Geräts.';
+
+  @override
+  String get inspectionExternalShort => 'extern';
+
+  @override
+  String get inspectionQualification => 'Deren Qualifikation';
+
+  @override
+  String get inspectionQualificationHint => 'z. B. Elektrofachkraft';
+
+  @override
+  String get inspectionOverdueNote => 'Prüfung überfällig';
+
+  @override
+  String inspectionOverdueOf(String types) {
+    return 'Prüfung überfällig: $types';
+  }
+
+  @override
+  String get reportDefect => 'Defekt melden';
+
+  @override
+  String get defectWhatIsWrong => 'Was ist kaputt?';
+
+  @override
+  String get defectHint =>
+      'Wird als nicht bestandene Sichtprüfung erfasst. Das Gerät kommt in Wartung; zurückbuchen geht trotzdem.';
+
+  @override
+  String get defectReported => 'Defekt gemeldet';
+
+  @override
+  String get defectReportedDone => 'Defekt gemeldet · das Gerät ist in Wartung';
 }

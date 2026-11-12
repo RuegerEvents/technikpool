@@ -2316,6 +2316,90 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Label {page} of {count}'**
   String caseLabelPage(int page, int count);
+
+  /// No description provided for @inspectionType.
+  ///
+  /// In en, this message translates to:
+  /// **'Inspection type'**
+  String get inspectionType;
+
+  /// No description provided for @inspectionExternal.
+  ///
+  /// In en, this message translates to:
+  /// **'Done by an outside firm'**
+  String get inspectionExternal;
+
+  /// No description provided for @inspectionExternalHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Enter the firm or inspector and their qualification.'**
+  String get inspectionExternalHint;
+
+  /// No description provided for @inspectionOwnHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded under your name. Types that need a qualification need one in the unit\'s organization.'**
+  String get inspectionOwnHint;
+
+  /// No description provided for @inspectionExternalShort.
+  ///
+  /// In en, this message translates to:
+  /// **'external'**
+  String get inspectionExternalShort;
+
+  /// No description provided for @inspectionQualification.
+  ///
+  /// In en, this message translates to:
+  /// **'Their qualification'**
+  String get inspectionQualification;
+
+  /// No description provided for @inspectionQualificationHint.
+  ///
+  /// In en, this message translates to:
+  /// **'e.g. Elektrofachkraft'**
+  String get inspectionQualificationHint;
+
+  /// No description provided for @inspectionOverdueNote.
+  ///
+  /// In en, this message translates to:
+  /// **'Inspection overdue'**
+  String get inspectionOverdueNote;
+
+  /// No description provided for @inspectionOverdueOf.
+  ///
+  /// In en, this message translates to:
+  /// **'inspection overdue: {types}'**
+  String inspectionOverdueOf(String types);
+
+  /// No description provided for @reportDefect.
+  ///
+  /// In en, this message translates to:
+  /// **'Report a defect'**
+  String get reportDefect;
+
+  /// No description provided for @defectWhatIsWrong.
+  ///
+  /// In en, this message translates to:
+  /// **'What is wrong?'**
+  String get defectWhatIsWrong;
+
+  /// No description provided for @defectHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Recorded as a failed visual check. The unit goes into maintenance; taking it back still works.'**
+  String get defectHint;
+
+  /// No description provided for @defectReported.
+  ///
+  /// In en, this message translates to:
+  /// **'Defect reported'**
+  String get defectReported;
+
+  /// No description provided for @defectReportedDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Defect reported · the unit is in maintenance'**
+  String get defectReportedDone;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

@@ -26,6 +26,7 @@ ProductionHandoutItem _$ProductionHandoutItemFromJson(
       ? null
       : ListKit.fromJson(json['kit'] as Map<String, dynamic>),
   kitAddition: json['kitAddition'] as bool?,
+  inspectionOverdue: json['inspectionOverdue'] as bool?,
 );
 
 Map<String, dynamic> _$ProductionHandoutItemToJson(
@@ -46,4 +47,5 @@ Map<String, dynamic> _$ProductionHandoutItemToJson(
   'done': instance.done,
   'received': instance.received,
   'returnReported': instance.returnReported,
+  'inspectionOverdue': ?instance.inspectionOverdue,
 };

@@ -21,6 +21,12 @@
 		setProductionHandoutDone,
 		setProductionHandoutLine
 	} from '#lib/remote/production-handout.remote.js';
+	import { reportDefect } from '#lib/remote/inspections.remote.js';
+	import { inspectionTypeLabel } from '#lib/inspection-ui.svelte.js';
+	import { Modal } from '#lib/components/ui/modal/index.js';
+	import { Label } from '#lib/components/ui/label/index.js';
+	import { SvelteSet } from 'svelte/reactivity';
+	import { TriangleAlert } from '@lucide/svelte';
 
 	// Handing a production's equipment out, or taking it back, against its
 	// list: the same list as a check, but a tick is the booking itself. Scan a
@@ -76,13 +82,53 @@
 	});
 	let sections = $derived(listSections(handout.items, handout.lines));
 
+	// Taking a unit back is when someone looks at it: whoever books it back and
+	// reports nothing found it fine (a passed visual check, where its product
+	// needs one). A defect is reported here instead.
+	let defectTarget = $state<Item | null>(null);
+	let defectOpen = $state(false);
+	let defectNotes = $state('');
+	let reportingDefect = $state(false);
+	const defectsReported = new SvelteSet<string>();
+
+	function openDefect(item: Item) {
+		defectTarget = item;
+		defectNotes = '';
+		defectOpen = true;
+	}
+
+	async function submitDefect(e: Event) {
+		e.preventDefault();
+		if (!defectTarget) return;
+		reportingDefect = true;
+		try {
+			await reportDefect({ assetId: defectTarget.assetId, notes: defectNotes });
+			defectsReported.add(defectTarget.assetId);
+			toast.success('Defect reported · the unit is in maintenance');
+			defectOpen = false;
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			reportingDefect = false;
+		}
+	}
+
 	function unitState(item: Item) {
 		let note: { text: string; tone: 'muted' | 'warn' } | null = null;
+		if (defectsReported.has(item.assetId)) {
+			return {
+				done: item.done,
+				locked: false,
+				note: { text: 'Defect reported', tone: 'warn' as const }
+			};
+		}
 		// On the take-back list: booked, but nobody handed it out. A tick books both.
 		if (mode === 'checkin' && item.status === 'APPROVED')
 			note = { text: 'Not out yet', tone: 'muted' };
 		else if (takenBack(item)) note = { text: 'Taken back · tick to hand out again', tone: 'muted' };
 		else if (item.kitAddition) note = { text: 'New in the kit, not booked yet', tone: 'warn' };
+		else if (mode === 'checkout' && item.inspectionOverdue && !item.done)
+			note = { text: 'Inspection overdue', tone: 'warn' };
 		else if (item.lentBy && item.returnReported) note = { text: 'Return reported', tone: 'muted' };
 		else if (item.lentBy && item.status === 'CHECKED_OUT' && !item.received)
 			note = { text: 'Receipt open', tone: 'warn' };
@@ -154,7 +200,18 @@
 	async function submitCode(value: string): Promise<ScanFeedback> {
 		const doneBefore = new Set(handout.items.filter((i) => i.done).map((i) => i.assetId));
 		const result = await scanProductionHandout({ productionId, mode, organizationId, code: value });
-		if (result.kit) return await kitScanned(result.kit, doneBefore);
+		const overdue = (result.overdueInspections ?? []).map((o) => inspectionTypeLabel(o));
+		if (result.kit) {
+			const kitFeedback = await kitScanned(result.kit, doneBefore);
+			if (overdue.length === 0) return kitFeedback;
+			return {
+				...kitFeedback,
+				tone: 'warn',
+				detail: [kitFeedback.detail, `Inspection overdue: ${overdue.join(', ')}`]
+					.filter(Boolean)
+					.join(' · ')
+			};
+		}
 		const name = makerAndName(result.asset.manufacturerName, result.asset.productName);
 		const rest = (result.group?.units ?? []).filter((u) => !u.done);
 		// Taking back puts any unit on its shelf, but only one that came from this
@@ -172,11 +229,14 @@
 			detail: [
 				result.asset.assetTag,
 				result.returnedFrom.length > 0 ? `From ${result.returnedFrom.join(', ')}` : null,
-				foreign ? `Put back on ${result.targetName}` : null
+				foreign ? `Put back on ${result.targetName}` : null,
+				overdue.length > 0 ? `Inspection overdue: ${overdue.join(', ')}` : null
 			]
 				.filter(Boolean)
 				.join(' · ')
 		};
+		// Out it goes all the same; whoever packs it should know.
+		if (overdue.length > 0) feedback.tone = 'warn';
 		// A unit taken out of its kit, or off the unit it hangs off, went on its
 		// own; the rest is offered, so a scan never waits on a tap.
 		if (rest.length > 0 && result.group) {
@@ -360,6 +420,7 @@
 					ontoggle={(item, done) => apply([item.assetId], done)}
 					oncount={count}
 					ontickSection={tickSection}
+					unitAction={mode === 'checkin' ? defectButton : undefined}
 				/>
 			{/if}
 
@@ -404,3 +465,62 @@
 </div>
 
 <UnitQuestion bind:this={question} />
+
+<Modal bind:open={defectOpen} title="Report a defect" dismissible={!reportingDefect}>
+	{#snippet children()}
+		<form id="defect-form" class="space-y-3" onsubmit={submitDefect}>
+			{#if defectTarget}
+				<p class="text-sm text-muted-foreground">
+					{defectTarget.productName}{defectTarget.assetTag ? ` · ${defectTarget.assetTag}` : ''}
+				</p>
+			{/if}
+			<div class="space-y-1">
+				<Label for="defect-notes">What is wrong?</Label>
+				<textarea
+					id="defect-notes"
+					bind:value={defectNotes}
+					required
+					maxlength={2000}
+					rows={3}
+					placeholder="e.g. Cable jacket cut near the plug"
+					class="w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
+				></textarea>
+			</div>
+			<p class="text-xs text-muted-foreground">
+				Recorded as a failed visual check. The unit goes into maintenance until someone has looked
+				at it; taking it back still works as usual.
+			</p>
+		</form>
+	{/snippet}
+	{#snippet footer()}
+		<Button
+			icon="save"
+			type="submit"
+			form="defect-form"
+			disabled={reportingDefect || !defectNotes.trim()}
+		>
+			{reportingDefect ? 'Saving…' : 'Report defect'}
+		</Button>
+		<Button
+			icon="close"
+			type="button"
+			variant="outline"
+			onclick={() => (defectOpen = false)}
+			disabled={reportingDefect}
+		>
+			Cancel
+		</Button>
+	{/snippet}
+</Modal>
+
+{#snippet defectButton(item: Item)}
+	<Button
+		size="sm"
+		variant="ghost"
+		title="Report a defect"
+		aria-label="Report a defect"
+		onclick={() => openDefect(item)}
+	>
+		<TriangleAlert class="size-4 text-amber-600 dark:text-amber-500" />
+	</Button>
+{/snippet}

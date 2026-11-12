@@ -11,6 +11,7 @@ import {
 import { connectorSlug } from '#lib/server/services/connectors.js';
 import { PORT_REQUIREMENTS } from '#lib/ports.js';
 import { parseApiBody } from '#lib/server/api-body.js';
+import { DEFAULT_INSPECTION_TYPE_ID } from '#lib/inspection-due.js';
 
 // ProductUpdateRequest in openapi.yaml. Strict, so a misspelt field is an
 // error rather than a change that silently did not happen.
@@ -22,6 +23,7 @@ const bodySchema = v.strictObject({
 	categoryId: v.optional(v.pipe(v.string(), v.minLength(1))),
 	isLicense: v.optional(v.boolean()),
 	requiresInspection: v.optional(v.nullable(v.boolean())),
+	inspections: v.optional(v.record(v.string(), v.nullable(v.boolean()))),
 	cable: v.optional(
 		v.nullable(
 			v.strictObject({
@@ -110,7 +112,7 @@ export const PATCH: RequestHandler = ({ locals, params, request }) =>
 		// Resolved before anything is written, so a misspelt connector changes nothing.
 		const ports = await portInputs(body.ports);
 		const { name, manufacturerId, caption, details, categoryId, isLicense } = body;
-		const { requiresInspection, cable } = body;
+		const { requiresInspection, inspections, cable } = body;
 		const { unitsChanged } = await updateProduct(user.id, {
 			productId: params.productId,
 			name,
@@ -119,7 +121,15 @@ export const PATCH: RequestHandler = ({ locals, params, request }) =>
 			details,
 			categoryId,
 			isLicense,
-			requiresInspection,
+			inspections:
+				requiresInspection === undefined && inspections === undefined
+					? undefined
+					: {
+							...(requiresInspection !== undefined
+								? { [DEFAULT_INSPECTION_TYPE_ID]: requiresInspection }
+								: {}),
+							...inspections
+						},
 			// The API calls the wire `type`, like CableSpec; the service `cableType`.
 			...(cable === undefined
 				? {}

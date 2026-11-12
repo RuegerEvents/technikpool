@@ -13,6 +13,9 @@ CategoryUpdateRequest _$CategoryUpdateRequestFromJson(
   color: json['color'] as String?,
   sortOrder: (json['sortOrder'] as num?)?.toInt(),
   requiresInspection: json['requiresInspection'] as bool?,
+  inspections: (json['inspections'] as Map<String, dynamic>?)?.map(
+    (k, e) => MapEntry(k, e as bool),
+  ),
 );
 
 Map<String, dynamic> _$CategoryUpdateRequestToJson(
@@ -22,4 +25,5 @@ Map<String, dynamic> _$CategoryUpdateRequestToJson(
   'color': ?instance.color,
   'sortOrder': ?instance.sortOrder,
   'requiresInspection': ?instance.requiresInspection,
+  'inspections': ?instance.inspections,
 };

@@ -38,6 +38,10 @@
 	import { toast } from 'svelte-sonner';
 	import { resolve } from '$app/paths';
 	import { OrgBadge } from '#lib/components/ui/org-badge/index.js';
+	import { getInspectionTypes, getOrgQualifications } from '#lib/remote/inspections.remote.js';
+	import QualificationDialog from './qualification-dialog.svelte';
+	import { orgIntervals } from '#lib/inspection-due.js';
+	import { inspectionTypeLabel } from '#lib/inspection-ui.svelte.js';
 	import { Modal } from '#lib/components/ui/modal/index.js';
 	import { AddressInput, type AddressValue } from '#lib/components/ui/address-input/index.js';
 	import { orgIdentityProblem } from '#lib/org-identity.svelte.js';
@@ -179,7 +183,24 @@
 	let prefixDraft = $state('');
 	let colorDraft = $state('');
 	let avatarLabelDraft = $state('');
-	let inspectionIntervalDraft = $state('');
+	// Per inspection type, the org's own interval, else the type's default.
+	let inspectionTypesQuery = $derived(getInspectionTypes());
+	let inspectionTypes = $derived(inspectionTypesQuery.current ?? []);
+	let intervals = $derived(
+		org ? orgIntervals(inspectionTypes, org.inspectionIntervals) : new Map<string, number | null>()
+	);
+	let inspectionIntervalDrafts = $state<Record<string, string>>({});
+
+	// Who may record which inspection types here; ADMIN+ records them.
+	let qualificationsQuery = $derived(getOrgQualifications(orgId));
+	let qualifications = $derived(qualificationsQuery.current ?? []);
+	let qualifiableTypes = $derived(inspectionTypes.filter((t) => t.requiresQualification));
+	let canQualify = $derived(!!data.isAdmin || (!!myMembership && canManageInventory(myMembership)));
+	let qualifyTarget = $state<{ id: string; name: string } | null>(null);
+	let qualifyOpen = $state(false);
+	function qualificationsOf(membershipId: string) {
+		return qualifications.filter((q) => q.membershipId === membershipId);
+	}
 	let isKleinunternehmerDraft = $state(false);
 	let savingSettings = $state(false);
 
@@ -190,7 +211,9 @@
 			prefixDraft = org.assetIdPrefix;
 			colorDraft = org.color;
 			avatarLabelDraft = org.avatarLabel;
-			inspectionIntervalDraft = org.defaultInspectionIntervalMonths?.toString() ?? '';
+			inspectionIntervalDrafts = Object.fromEntries(
+				inspectionTypes.map((t) => [t.id, intervals.get(t.id)?.toString() ?? ''])
+			);
 			isKleinunternehmerDraft = org.isKleinunternehmer;
 		}
 	});
@@ -218,9 +241,12 @@
 				assetIdPrefix: prefixDraft,
 				color: colorDraft,
 				avatarLabel: avatarLabelDraft,
-				defaultInspectionIntervalMonths: inspectionIntervalDraft
-					? Number(inspectionIntervalDraft)
-					: null,
+				inspectionIntervals: Object.fromEntries(
+					inspectionTypes.map((t) => [
+						t.id,
+						inspectionIntervalDrafts[t.id] ? Number(inspectionIntervalDrafts[t.id]) : null
+					])
+				),
 				isKleinunternehmer: isKleinunternehmerDraft
 			});
 			toast.success('Organization settings updated');
@@ -486,22 +512,30 @@
 											</div>
 										</div>
 										<div class="space-y-2">
-											<Label for="inspectionIntervalInput"
-												>Default DGUV inspection interval (months)</Label
-											>
-											<Input
-												id="inspectionIntervalInput"
-												type="number"
-												min="1"
-												bind:value={inspectionIntervalDraft}
-												placeholder="e.g. 12"
-												class="w-28"
-											/>
+											<span class="text-sm font-medium">Inspection intervals (months)</span>
+											<div class="grid gap-2 sm:grid-cols-2">
+												{#each inspectionTypes as type (type.id)}
+													<div class="flex items-center gap-2">
+														<Input
+															id="inspection-interval-{type.id}"
+															type="number"
+															min="1"
+															max="120"
+															bind:value={inspectionIntervalDrafts[type.id]}
+															placeholder="—"
+															class="w-20"
+														/>
+														<Label for="inspection-interval-{type.id}" class="font-normal"
+															>{inspectionTypeLabel(type)}</Label
+														>
+													</div>
+												{/each}
+											</div>
 											<p class="text-xs text-muted-foreground">
-												Given to new devices whose product needs DGUV inspections (set per category,
-												or on the product's page). They are due for their first inspection at once.
-												Existing devices keep theirs — change those from the Devices list. Leave
-												blank to not track inspections by default.
+												For devices whose product needs that inspection (set per category, or on the
+												product's page). A change applies to every device at once, except those with
+												an interval set for their product or of their own. A device never inspected
+												is due at once. Leave a type blank to not track it.
 											</p>
 										</div>
 										<label class="flex items-center gap-2 text-sm">
@@ -548,14 +582,15 @@
 												avatarLabel={org.avatarLabel}
 											/>
 										</div>
-										<div class="flex items-center justify-between">
-											<span class="text-sm text-muted-foreground">DGUV default interval</span>
-											<span>
-												{org.defaultInspectionIntervalMonths
-													? `${org.defaultInspectionIntervalMonths} months`
-													: 'Not tracked'}
-											</span>
-										</div>
+										{#each inspectionTypes as type (type.id)}
+											{@const months = intervals.get(type.id)}
+											<div class="flex items-center justify-between">
+												<span class="text-sm text-muted-foreground"
+													>Interval: {inspectionTypeLabel(type)}</span
+												>
+												<span>{months ? `${months} months` : 'Not tracked'}</span>
+											</div>
+										{/each}
 										<div class="flex items-center justify-between">
 											<span class="text-sm text-muted-foreground">Kleinunternehmer</span>
 											<span>{org.isKleinunternehmer ? 'Yes' : 'No'}</span>
@@ -842,8 +877,43 @@
 										{/if}
 									</div>
 									<p class="truncate text-sm text-muted-foreground">{membership.user.email}</p>
+									{#if qualificationsOf(membership.id).length > 0}
+										<div class="mt-1 flex flex-wrap gap-1">
+											{#each qualificationsOf(membership.id) as q (q.typeId)}
+												{@const type = inspectionTypes.find((t) => t.id === q.typeId)}
+												{@const lapsed = !!q.validUntil && new Date(q.validUntil) < new Date()}
+												<span
+													class="rounded border px-1.5 py-0.5 text-xs {lapsed
+														? 'border-destructive/40 text-destructive'
+														: 'text-muted-foreground'}"
+													title={q.validUntil
+														? `Valid until ${new Date(q.validUntil).toLocaleDateString('de-DE', { timeZone: 'UTC' })}`
+														: undefined}
+												>
+													{q.title}{type ? ` · ${inspectionTypeLabel(type)}` : ''}{lapsed
+														? ' · lapsed'
+														: ''}
+												</span>
+											{/each}
+										</div>
+									{/if}
 								</div>
 								<div class="ml-4 flex items-center gap-2">
+									{#if canQualify && qualifiableTypes.length > 0}
+										<Button
+											variant="outline"
+											size="sm"
+											onclick={() => {
+												qualifyTarget = {
+													id: membership.id,
+													name: membership.user.name || membership.user.email
+												};
+												qualifyOpen = true;
+											}}
+										>
+											Qualifications
+										</Button>
+									{/if}
 									{#if canManage && membership.userId !== data.user?.id}
 										<select
 											value={membership.role}
@@ -1013,3 +1083,13 @@
 		</Card.Content>
 	</Card.Root>
 {/snippet}
+
+{#if qualifyTarget}
+	<QualificationDialog
+		bind:open={qualifyOpen}
+		membershipId={qualifyTarget.id}
+		memberName={qualifyTarget.name}
+		types={qualifiableTypes}
+		current={qualificationsOf(qualifyTarget.id)}
+	/>
+{/if}

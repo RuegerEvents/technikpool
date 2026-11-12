@@ -4,7 +4,7 @@ import { appBaseUrl } from '#lib/server/app-url.js';
 import { imageSrc } from '#lib/images.js';
 import { nestAccessories } from '#lib/production-items.js';
 import { naturalCompare } from '#lib/sort.js';
-import type { ShareUnit, ShareView } from '#lib/production-share.js';
+import type { ShareInspection, ShareUnit, ShareView } from '#lib/production-share.js';
 import { productionRentalTerms } from './rental-terms';
 
 // A production's info link for its customer: what is booked for the job, to
@@ -72,6 +72,13 @@ export async function resolveShare(productionId: string, signature: string) {
 							assetTag: true,
 							parentAssetId: true,
 							productId: true,
+							inspectionSchedules: {
+								select: {
+									nextDue: true,
+									type: { select: { name: true, nameDe: true, sortOrder: true } }
+								},
+								orderBy: { type: { sortOrder: 'asc' } }
+							},
 							product: {
 								select: {
 									name: true,
@@ -101,6 +108,14 @@ export async function resolveShare(productionId: string, signature: string) {
 	const expiresAt = shareExpiry(production);
 	if (expiresAt && expiresAt < new Date()) return null;
 
+	const now = Date.now();
+	const proofOf = (asset: (typeof production.items)[number]['asset']): ShareInspection[] =>
+		asset.inspectionSchedules.map((s) => ({
+			name: s.type.name,
+			nameDe: s.type.nameDe,
+			validUntil: s.nextDue.toISOString().slice(0, 10),
+			overdue: s.nextDue.getTime() < now
+		}));
 	const unitOf = (item: (typeof production.items)[number]) => ({
 		id: item.asset.id,
 		name: item.asset.product.name,
@@ -108,7 +123,8 @@ export async function resolveShare(productionId: string, signature: string) {
 		manufacturer: item.asset.product.manufacturer?.name ?? null,
 		tag: item.asset.assetTag,
 		productId: item.asset.productId,
-		imageUrl: imageSrc(item.asset.product.imagePath)
+		imageUrl: imageSrc(item.asset.product.imagePath),
+		inspections: proofOf(item.asset)
 	});
 	const byUnit = (a: ShareUnit, b: ShareUnit) =>
 		naturalCompare(a.name, b.name) || naturalCompare(a.tag ?? '', b.tag ?? '');
@@ -121,7 +137,8 @@ export async function resolveShare(productionId: string, signature: string) {
 				id: accessory.asset.id,
 				name: accessory.asset.product.name,
 				tag: accessory.asset.assetTag,
-				imageUrl: imageSrc(accessory.asset.product.imagePath)
+				imageUrl: imageSrc(accessory.asset.product.imagePath),
+				inspections: proofOf(accessory.asset)
 			}))
 		} satisfies ShareUnit
 	}));

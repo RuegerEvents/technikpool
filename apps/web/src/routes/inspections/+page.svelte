@@ -14,7 +14,7 @@
 	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
 	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
 	import { InspectionDialog } from '#lib/components/ui/inspection-dialog/index.js';
-	import { formatInspectionDay } from '#lib/inspection-ui.svelte.js';
+	import { formatInspectionDay, inspectionTypeLabel } from '#lib/inspection-ui.svelte.js';
 	import { resolve } from '$app/paths';
 
 	let overdueQuery = $derived(getOverdueAssets());
@@ -43,10 +43,16 @@
 	let pickedOrgIds = $state<string[] | null>(null);
 	let locationId = $state('');
 	let categoryId = $state('');
+	let typeId = $state('');
 	let status = $state<Status>('all');
 	let windowDays = $state(30);
 
 	let allRows = $derived([...data.overdue, ...data.upcoming]);
+	let types = $derived(
+		[...new Map(allRows.map((a) => [a.type.id, a.type])).values()].sort(
+			(a, b) => a.sortOrder - b.sortOrder
+		)
+	);
 
 	// The orgs, shelves and categories that actually have something due, so no
 	// option leads to an empty list.
@@ -86,7 +92,8 @@
 		if (!selectedOrgIds.includes(asset.organization.id)) return false;
 		if (activeLocationId && asset.location.id !== activeLocationId) return false;
 		if (categoryId && asset.product.category?.id !== categoryId) return false;
-		const last = asset.inspections[0];
+		if (typeId && asset.type.id !== typeId) return false;
+		const last = asset.lastInspection;
 		if (status === 'never' && last) return false;
 		if (status === 'failed' && last?.result !== 'FAILED') return false;
 		if (status === 'again' && (!last || last.result === 'FAILED')) return false;
@@ -103,14 +110,13 @@
 	}
 
 	let overdue = $derived(data.overdue.filter(matches));
-	let upcoming = $derived(
-		data.upcoming.filter((a) => a.nextInspectionDue! <= cutoff).filter(matches)
-	);
+	let upcoming = $derived(data.upcoming.filter((a) => a.nextDue <= cutoff).filter(matches));
 	let filtered = $derived(
 		search.trim() !== '' ||
 			pickedOrgIds !== null ||
 			activeLocationId !== '' ||
 			categoryId !== '' ||
+			typeId !== '' ||
 			status !== 'all'
 	);
 
@@ -119,6 +125,7 @@
 		pickedOrgIds = null;
 		locationId = '';
 		categoryId = '';
+		typeId = '';
 		status = 'all';
 	}
 
@@ -130,6 +137,7 @@
 <InspectionDialog
 	bind:open={dialogOpen}
 	assetIds={target ? [target.id] : []}
+	typeId={target?.type.id}
 	subject={target
 		? `${target.product.name} · ${target.assetTag ?? target.serialNumber ?? `#${target.orgIndex}`}`
 		: undefined}
@@ -137,18 +145,20 @@
 
 <div class="space-y-8">
 	<div>
-		<h1 class="text-3xl font-bold tracking-tight">DGUV Inspections</h1>
+		<h1 class="text-3xl font-bold tracking-tight">Inspections</h1>
 		<p class="text-muted-foreground">
-			Overdue and upcoming asset inspections across your orgs. A unit that was never inspected, or
-			whose last inspection failed, is due at once.
+			Overdue and upcoming inspections across your orgs, one row per device and inspection type. A
+			device that was never inspected for a type, or whose last inspection of it failed, is due at
+			once.
 		</p>
 	</div>
 
-	{#each missingInterval as org (org.id)}
+	{#each missingInterval as org (`${org.id}:${org.type.id}`)}
 		<div class="rounded-md border border-amber-500/40 bg-amber-500/10 px-4 py-3 text-sm">
 			<p>
-				<span class="font-medium">{orgLabel(org)}</span> has no default inspection interval. Its new units
-				that need inspecting get none, so they are never due and never listed here.
+				<span class="font-medium">{orgLabel(org)}</span> has no interval for
+				<span class="font-medium">{inspectionTypeLabel(org.type)}</span>. Its new units that need
+				this inspection get none, so they are never due for it and never listed here.
 			</p>
 			{#if org.canEdit}
 				<Button variant="link" class="h-auto p-0" href={resolve(`orgs/${org.id}`)}
@@ -179,6 +189,12 @@
 				<option value={location.id}
 					>{orgs.length > 1 ? `${orgLabel(location.org)} · ` : ''}{location.name}</option
 				>
+			{/each}
+		</select>
+		<select bind:value={typeId} class={selectClass} aria-label="Inspection type">
+			<option value="">All inspection types</option>
+			{#each types as type (type.id)}
+				<option value={type.id}>{inspectionTypeLabel(type)}</option>
 			{/each}
 		</select>
 		<select bind:value={categoryId} class={selectClass} aria-label="Category">
@@ -247,6 +263,7 @@
 			<thead>
 				<tr class="border-b bg-muted/30">
 					<th class="px-4 py-3 text-left font-medium text-muted-foreground">Asset</th>
+					<th class="px-4 py-3 text-left font-medium text-muted-foreground">Type</th>
 					<th class="px-4 py-3 text-left font-medium text-muted-foreground">Org</th>
 					<th class="px-4 py-3 text-left font-medium text-muted-foreground">Location</th>
 					<th class="px-4 py-3 text-left font-medium text-muted-foreground">Last inspection</th>
@@ -255,7 +272,7 @@
 				</tr>
 			</thead>
 			<tbody>
-				{#each rows as asset (asset.id)}
+				{#each rows as asset (asset.key)}
 					<tr class="border-b transition-colors last:border-0 hover:bg-muted/30">
 						<td class="px-4 py-3">
 							<div class="flex items-center gap-2">
@@ -271,6 +288,7 @@
 								</div>
 							</div>
 						</td>
+						<td class="px-4 py-3 whitespace-nowrap">{inspectionTypeLabel(asset.type)}</td>
 						<td class="px-4 py-3">
 							<OrgBadge
 								name={orgLabel(asset.organization)}
@@ -280,9 +298,9 @@
 						</td>
 						<td class="px-4 py-3 text-muted-foreground">{asset.location.name}</td>
 						<td class="px-4 py-3">
-							{#if asset.inspections[0]}
-								{formatInspectionDay(asset.inspections[0].performedAt)}
-								{#if asset.inspections[0].result === 'FAILED'}
+							{#if asset.lastInspection}
+								{formatInspectionDay(asset.lastInspection.performedAt)}
+								{#if asset.lastInspection.result === 'FAILED'}
 									<span class="ml-1 text-xs font-medium text-destructive">Failed</span>
 								{/if}
 							{:else}
@@ -290,7 +308,7 @@
 							{/if}
 						</td>
 						<td class="px-4 py-3 {isOverdue ? 'font-medium text-destructive' : ''}"
-							>{formatInspectionDay(asset.nextInspectionDue!)}</td
+							>{formatInspectionDay(asset.nextDue)}</td
 						>
 						<td class="px-4 py-3 text-right">
 							<Button size="sm" variant="outline" onclick={() => openDialog(asset)}

@@ -142,7 +142,7 @@
 				key: 'inspections',
 				count: stats.overdueInspections,
 				label: plural(stats.overdueInspections, ['Overdue inspection', 'Overdue inspections']),
-				hint: 'DGUV inspection due',
+				hint: 'Inspection due',
 				href: resolve('inspections'),
 				tone: 'amber'
 			});

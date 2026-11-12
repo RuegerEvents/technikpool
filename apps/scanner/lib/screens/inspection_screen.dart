@@ -54,6 +54,7 @@ class InspectionScreen extends ConsumerStatefulWidget {
 
 class _InspectionScreenState extends ConsumerState<InspectionScreen> {
   final _inspectorController = TextEditingController();
+  final _qualificationController = TextEditingController();
   final _notesController = TextEditingController();
   final _manualController = TextEditingController();
   final _feedback = StreamController<CameraScanFeedback>.broadcast();
@@ -68,6 +69,15 @@ class _InspectionScreenState extends ConsumerState<InspectionScreen> {
   bool _started = false;
   late DateTime _day = _today();
   InspectionResult _result = InspectionResult.passed;
+
+  /// Which inspection this run records. Electrical unless picked otherwise.
+  String _typeId = _electrical;
+  static const _electrical = 'inst_electrical';
+
+  /// An outside firm inspected, and the result is only entered here: then the
+  /// firm's name and qualification go with it. Otherwise the inspection is
+  /// recorded under this account, which must be qualified for the type.
+  bool _external = false;
 
   final _entries = <_Entry>[];
 
@@ -96,6 +106,7 @@ class _InspectionScreenState extends ConsumerState<InspectionScreen> {
   void dispose() {
     _sub?.cancel();
     _inspectorController.dispose();
+    _qualificationController.dispose();
     _notesController.dispose();
     _manualController.dispose();
     _feedback.close();
@@ -129,7 +140,9 @@ class _InspectionScreenState extends ConsumerState<InspectionScreen> {
   }
 
   void _start() {
-    ref.read(inspectorNameProvider.notifier).save(_inspectorController.text);
+    if (_external) {
+      ref.read(inspectorNameProvider.notifier).save(_inspectorController.text);
+    }
     FocusScope.of(context).unfocus();
     setState(() => _started = true);
   }
@@ -149,6 +162,7 @@ class _InspectionScreenState extends ConsumerState<InspectionScreen> {
 
     final result = _result;
     final inspector = _inspectorController.text.trim();
+    final qualification = _qualificationController.text.trim();
     final notes = _notesController.text.trim();
     setState(() => _busy = true);
     try {
@@ -157,7 +171,10 @@ class _InspectionScreenState extends ConsumerState<InspectionScreen> {
           code: code,
           performedAt: inspectionRequestDate(_day),
           result: result,
-          inspectorName: inspector.isEmpty ? null : inspector,
+          typeId: _typeId,
+          externalValue: _external,
+          inspectorName: _external && inspector.isNotEmpty ? inspector : null,
+          qualification: _external && qualification.isNotEmpty ? qualification : null,
           notes: notes.isEmpty ? null : notes,
         ),
       );
@@ -186,6 +203,9 @@ class _InspectionScreenState extends ConsumerState<InspectionScreen> {
   /// The generic texts speak of booking; here the same refusals mean
   /// something more specific.
   String _describe(S l10n, Object error) => switch (unwrapError(error)) {
+    // Not a qualified member for this type is a refusal too, and the server's
+    // own words say which — the generic text only knows about roles.
+    ApiException(code: 'forbidden', :final message) when message.isNotEmpty => message,
     ApiException(code: 'forbidden') => l10n.inspectionForbidden,
     ApiException(code: 'asset_retired') => l10n.inspectionRetired,
     _ => describeError(l10n, error),
@@ -348,16 +368,40 @@ class _InspectionScreenState extends ConsumerState<InspectionScreen> {
           onTap: _pickDay,
         ),
         const SizedBox(height: 8),
-        TextField(
-          controller: _inspectorController,
-          textCapitalization: TextCapitalization.words,
-          textInputAction: TextInputAction.next,
-          decoration: InputDecoration(
-            labelText: l10n.inspectionInspector,
-            hintText: l10n.inspectionInspectorHint,
-            prefixIcon: const Icon(Icons.badge_outlined),
+        _typePicker(l10n),
+        const SizedBox(height: 8),
+        SwitchListTile(
+          contentPadding: EdgeInsets.zero,
+          value: _external,
+          onChanged: (v) => setState(() => _external = v),
+          title: Text(l10n.inspectionExternal),
+          subtitle: Text(
+            _external ? l10n.inspectionExternalHint : l10n.inspectionOwnHint,
           ),
         ),
+        if (_external) ...[
+          TextField(
+            controller: _inspectorController,
+            textCapitalization: TextCapitalization.words,
+            textInputAction: TextInputAction.next,
+            decoration: InputDecoration(
+              labelText: l10n.inspectionInspector,
+              hintText: l10n.inspectionInspectorHint,
+              prefixIcon: const Icon(Icons.badge_outlined),
+            ),
+          ),
+          const SizedBox(height: 16),
+          TextField(
+            controller: _qualificationController,
+            textCapitalization: TextCapitalization.sentences,
+            textInputAction: TextInputAction.next,
+            decoration: InputDecoration(
+              labelText: l10n.inspectionQualification,
+              hintText: l10n.inspectionQualificationHint,
+              prefixIcon: const Icon(Icons.workspace_premium_outlined),
+            ),
+          ),
+        ],
         const SizedBox(height: 16),
         TextField(
           controller: _notesController,
@@ -379,10 +423,46 @@ class _InspectionScreenState extends ConsumerState<InspectionScreen> {
     );
   }
 
+  String _typeName(S l10n, List<InspectionType> types) {
+    for (final t in types) {
+      if (t.id != _typeId) continue;
+      return l10n.localeName == 'de' && (t.nameDe?.trim().isNotEmpty ?? false)
+          ? t.nameDe!
+          : t.name;
+    }
+    return '';
+  }
+
+  Widget _typePicker(S l10n) {
+    final types = ref.watch(inspectionTypesProvider).value ?? const <InspectionType>[];
+    if (types.isEmpty) return const SizedBox.shrink();
+    return DropdownButtonFormField<String>(
+      initialValue: types.any((t) => t.id == _typeId) ? _typeId : types.first.id,
+      decoration: InputDecoration(
+        labelText: l10n.inspectionType,
+        prefixIcon: const Icon(Icons.fact_check_outlined),
+      ),
+      items: [
+        for (final t in types)
+          DropdownMenuItem(
+            value: t.id,
+            child: Text(
+              l10n.localeName == 'de' && (t.nameDe?.trim().isNotEmpty ?? false)
+                  ? t.nameDe!
+                  : t.name,
+            ),
+          ),
+      ],
+      onChanged: (id) => setState(() => _typeId = id ?? _electrical),
+    );
+  }
+
   Widget _scanning(S l10n) {
     final scheme = Theme.of(context).colorScheme;
     final failing = _result == InspectionResult.failed;
-    final inspector = _inspectorController.text.trim();
+    final inspector = _external ? _inspectorController.text.trim() : '';
+    final types = ref.watch(inspectionTypesProvider).value ?? const <InspectionType>[];
+    final typeName = _typeName(l10n, types);
 
     return Column(
       children: [
@@ -414,7 +494,9 @@ class _InspectionScreenState extends ConsumerState<InspectionScreen> {
                   child: Text(
                     [
                       formatInspectionDay(_day, l10n.localeName),
+                      ?(typeName.isEmpty ? null : typeName),
                       ?(inspector.isEmpty ? null : inspector),
+                      if (_external) l10n.inspectionExternalShort,
                     ].join(' · '),
                     style: TextStyle(color: scheme.onSurfaceVariant),
                     overflow: TextOverflow.ellipsis,

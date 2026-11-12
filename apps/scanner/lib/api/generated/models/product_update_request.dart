@@ -19,6 +19,7 @@ class ProductUpdateRequest {
     this.categoryId,
     this.isLicense,
     this.requiresInspection,
+    this.inspections,
     this.cable,
     this.ports,
   });
@@ -40,8 +41,13 @@ class ProductUpdateRequest {
   /// A cable is never a licence; `true` on a cable is ignored.
   final bool? isLicense;
 
-  /// Null follows the category again.
+  /// The electrical type. Null follows the category again.
   final bool? requiresInspection;
+
+  /// Inspection type id → the product's own answer, or null to follow.
+  /// the category again. Types left out are left alone.
+  ///
+  final Map<String, bool?>? inspections;
 
   /// The cable's ends, length and wire, or the loom's ways — replaced.
   /// wholesale. Null says this is not a cable and clears all of it.

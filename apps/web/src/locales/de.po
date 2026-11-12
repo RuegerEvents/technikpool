@@ -224,10 +224,12 @@ msgstr "Crew"
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/qualification-dialog.svelte
 #: src/routes/orgs/[id]/rates/service-catalog.svelte
 #: src/routes/orgs/[id]/rates/service-catalog.svelte
 #: src/routes/orgs/[id]/rental-terms-card.svelte
 #: src/routes/productions/[id]/copy-equipment-modal.svelte
+#: src/routes/productions/[id]/handout-detail.svelte
 #: src/routes/productions/[id]/loan-request-modal.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
@@ -271,6 +273,7 @@ msgid "Adding…"
 msgstr "Wird hinzugefügt…"
 
 #: src/lib/components/ui/data-view/DataView.svelte
+#: src/routes/admin/inspection-types/+page.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
@@ -758,7 +761,9 @@ msgstr "<0/> Nach dem Speichern weiteres erstellen"
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/qualification-dialog.svelte
 #: src/routes/orgs/[id]/rental-terms-card.svelte
+#: src/routes/productions/[id]/handout-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
@@ -1362,6 +1367,7 @@ msgstr "Standort"
 #: src/lib/components/ui/product-documents/product-documents.svelte
 #: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/routes/admin/categories/+page.svelte
+#: src/routes/admin/inspection-types/+page.svelte
 #: src/routes/admin/legal/legal-editor.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
@@ -1374,6 +1380,7 @@ msgstr "Standort"
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/qualification-dialog.svelte
 #: src/routes/orgs/[id]/rates/+page.svelte
 #: src/routes/orgs/[id]/rates/service-catalog.svelte
 #: src/routes/orgs/[id]/rates/service-catalog.svelte
@@ -2740,8 +2747,13 @@ msgstr "<0/> Jede zweite Lasche verschachteln, um Platz zu sparen"
 msgid "Rotates every second sticker 180° so its tail nests against its neighbor's, instead of each sticker needing its own full tail length of sheet width. Needs enough sticker height that the two tails' bleeds don't touch."
 msgstr "Dreht jeden zweiten Sticker um 180°, sodass sich seine Lasche mit der des Nachbarn verschachtelt, statt dass jeder Sticker seine eigene volle Laschenlänge an Bogenbreite braucht. Erfordert genug Stickerhöhe, damit sich die Beschnitte der beiden Laschen nicht berühren."
 
-#~ msgid "Inspections"
-#~ msgstr "Inspektionen"
+#: src/routes/admin/categories/+page.svelte
+#: src/routes/assets/[id]/asset-detail.svelte
+#: src/routes/inspections/+page.svelte
+#: src/routes/products/+page.svelte
+#: src/routes/products/[id]/product-detail.svelte
+msgid "Inspections"
+msgstr "Prüfungen"
 
 #: src/routes/offers/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
@@ -2756,9 +2768,8 @@ msgstr "Rechnungen"
 #~ msgid "Overdue Inspections"
 #~ msgstr "Überfällige Inspektionen"
 
-#: src/routes/+page.svelte
-msgid "DGUV inspection due"
-msgstr "DGUV-Prüfung fällig"
+#~ msgid "DGUV inspection due"
+#~ msgstr "DGUV-Prüfung fällig"
 
 #~ msgid "All up to date"
 #~ msgstr "Alles aktuell"
@@ -2789,11 +2800,11 @@ msgstr "Bestanden"
 
 #: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
 #: src/lib/inspection-ui.svelte.ts
+#: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/inspections/+page.svelte
 msgid "Failed"
 msgstr "Nicht bestanden"
 
-#: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 msgid "Inspector"
 msgstr "Prüfer"
@@ -2810,9 +2821,8 @@ msgstr "Optional"
 #~ msgid "Log inspection"
 #~ msgstr "Inspektion protokollieren"
 
-#: src/routes/inspections/+page.svelte
-msgid "DGUV Inspections"
-msgstr "DGUV-Prüfungen"
+#~ msgid "DGUV Inspections"
+#~ msgstr "DGUV-Prüfungen"
 
 #~ msgid "Overdue and upcoming asset inspections across your orgs."
 #~ msgstr "Überfällige und anstehende Geräteinspektionen über alle deine Organisationen."
@@ -2945,10 +2955,8 @@ msgstr "Netto-Einkaufspreis (€)"
 msgid "Purchase date"
 msgstr "Kaufdatum"
 
-#: src/lib/components/ui/inspection-dialog/interval-dialog.svelte
-#: src/routes/assets/[id]/asset-detail.svelte
-msgid "DGUV inspection interval (months)"
-msgstr "DGUV-Prüfintervall (Monate)"
+#~ msgid "DGUV inspection interval (months)"
+#~ msgstr "DGUV-Prüfintervall (Monate)"
 
 #~ msgid "Next due: {0}"
 #~ msgstr "Nächste Fälligkeit: {0}"
@@ -3151,9 +3159,8 @@ msgstr "Organisationseinstellungen"
 msgid "Asset ID prefix"
 msgstr "Geräte-ID-Präfix"
 
-#: src/routes/orgs/[id]/+page.svelte
-msgid "Default DGUV inspection interval (months)"
-msgstr "Standard-DGUV-Prüfintervall (Monate)"
+#~ msgid "Default DGUV inspection interval (months)"
+#~ msgstr "Standard-DGUV-Prüfintervall (Monate)"
 
 #~ msgid "Copied onto new assets at creation; leave blank to not track inspections by default."
 #~ msgstr "Wird bei Erstellung auf neue Geräte übertragen; leer lassen, um Prüfungen standardmäßig nicht zu verfolgen."
@@ -3166,9 +3173,8 @@ msgstr "<0/> Kleinunternehmer (§19 UStG) — keine Umsatzsteuer"
 msgid "Visual identity"
 msgstr "Visuelle Identität"
 
-#: src/routes/orgs/[id]/+page.svelte
-msgid "DGUV default interval"
-msgstr "DGUV-Standardintervall"
+#~ msgid "DGUV default interval"
+#~ msgstr "DGUV-Standardintervall"
 
 #: src/routes/orgs/[id]/+page.svelte
 msgid "Not tracked"
@@ -3921,7 +3927,7 @@ msgstr "{0} zur Organisation hinzugefügt"
 msgid "{0} removed from organization"
 msgstr "{0} aus Organisation entfernt"
 
-#. 0: org.defaultInspectionIntervalMonths
+#. 0: months
 #: src/routes/orgs/[id]/+page.svelte
 msgid "{0} months"
 msgstr "{0} Monate"
@@ -4636,14 +4642,19 @@ msgid "Colour"
 msgstr "Farbe"
 
 #: src/routes/admin/categories/+page.svelte
+#: src/routes/admin/inspection-types/+page.svelte
+#: src/routes/admin/inspection-types/+page.svelte
 msgid "English name"
 msgstr "Englischer Name"
 
 #: src/routes/admin/categories/+page.svelte
+#: src/routes/admin/inspection-types/+page.svelte
+#: src/routes/admin/inspection-types/+page.svelte
 msgid "German name"
 msgstr "Deutscher Name"
 
 #: src/routes/admin/categories/+page.svelte
+#: src/routes/admin/inspection-types/+page.svelte
 msgid "Order"
 msgstr "Reihenfolge"
 
@@ -6062,8 +6073,11 @@ msgstr "Keine Angabe"
 #~ msgid "Socket (female)"
 #~ msgstr "Buchse (female)"
 
-#~ msgid "Type"
-#~ msgstr ""
+#: src/routes/assets/[id]/asset-detail.svelte
+#: src/routes/assets/[id]/asset-detail.svelte
+#: src/routes/inspections/+page.svelte
+msgid "Type"
+msgstr "Art"
 
 #: src/lib/components/ui/connector-fields/connector-fields.svelte
 msgid "Connector image"
@@ -7993,7 +8007,9 @@ msgid "Expired"
 msgstr "Abgelaufen"
 
 #. 0: new Date(invitation.expiresAt).toLocaleDateString()
+#. 0: new Date(q.validUntil).toLocaleDateString('de-DE', { timeZone\\: 'UTC' })
 #: src/lib/components/ui/invitations/invitation-list.svelte
+#: src/routes/orgs/[id]/+page.svelte
 msgid "Valid until {0}"
 msgstr "Gültig bis {0}"
 
@@ -8213,10 +8229,8 @@ msgstr "Noch keine Stecker hinterlegt — auf der Produktseite hinzufügen."
 #~ msgid "Serial number, tag, status, location, purchase and inspection — facts about this individual unit. What it bills at is the product's price."
 #~ msgstr "Seriennummer, Tag, Status, Lagerort, Kauf und Prüfung — Angaben zu dieser einzelnen Einheit. Abgerechnet wird mit dem Preis des Produkts."
 
-#: src/routes/assets/[id]/asset-detail.svelte
-#: src/routes/assets/[id]/asset-detail.svelte
-msgid "Serial number, tag, status, location, purchase and inspection."
-msgstr "Seriennummer, Inventarnummer, Status, Lagerort, Kauf und Prüfung."
+#~ msgid "Serial number, tag, status, location, purchase and inspection."
+#~ msgstr "Seriennummer, Inventarnummer, Status, Lagerort, Kauf und Prüfung."
 
 #: src/lib/error-messages.svelte.ts
 msgid "Only org admins and owners can cancel or reopen productions."
@@ -8384,9 +8398,8 @@ msgstr "Nächste Prüfung"
 msgid "Not scheduled"
 msgstr "Nicht geplant"
 
-#: src/routes/assets/[id]/asset-detail.svelte
-msgid "DGUV inspection interval"
-msgstr "DGUV-Prüfintervall"
+#~ msgid "DGUV inspection interval"
+#~ msgstr "DGUV-Prüfintervall"
 
 #: src/routes/assets/[id]/asset-detail.svelte
 msgid "Every month"
@@ -12919,9 +12932,8 @@ msgstr "Eine Prüfung kann nicht für ein Datum in der Zukunft erfasst werden."
 msgid "This inspection no longer exists."
 msgstr "Diese Prüfung gibt es nicht mehr."
 
-#: src/routes/inspections/+page.svelte
-msgid "Overdue and upcoming asset inspections across your orgs. A unit that was never inspected, or whose last inspection failed, is due at once."
-msgstr "Überfällige und anstehende Prüfungen in deinen Organisationen. Ein Gerät, das noch nie geprüft wurde oder dessen letzte Prüfung nicht bestanden ist, ist sofort fällig."
+#~ msgid "Overdue and upcoming asset inspections across your orgs. A unit that was never inspected, or whose last inspection failed, is due at once."
+#~ msgstr "Überfällige und anstehende Prüfungen in deinen Organisationen. Ein Gerät, das noch nie geprüft wurde oder dessen letzte Prüfung nicht bestanden ist, ist sofort fällig."
 
 #: src/routes/inspections/+page.svelte
 msgid "Last inspection"
@@ -12938,15 +12950,15 @@ msgstr "Nie geprüft"
 #: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
+#: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/inspections/+page.svelte
 msgid "Record inspection"
 msgstr "Prüfung erfassen"
 
-#: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
-msgid "Inspection recorded · 1 unit marked broken"
-msgid_plural "Inspections recorded · # units marked broken"
-msgstr[0] "Prüfung erfasst · 1 Gerät als defekt markiert"
-msgstr[1] "Prüfungen erfasst · # Geräte als defekt markiert"
+#~ msgid "Inspection recorded · 1 unit marked broken"
+#~ msgid_plural "Inspections recorded · # units marked broken"
+#~ msgstr[0] "Prüfung erfasst · 1 Gerät als defekt markiert"
+#~ msgstr[1] "Prüfungen erfasst · # Geräte als defekt markiert"
 
 #: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
 msgid "Inspection recorded"
@@ -12993,9 +13005,8 @@ msgid_plural "Inspection interval for # units"
 msgstr[0] "Prüfintervall für 1 Gerät"
 msgstr[1] "Prüfintervall für # Geräte"
 
-#: src/lib/components/ui/inspection-dialog/interval-dialog.svelte
-msgid "The next due date of each unit follows from its latest inspection, or is due at once if it was never inspected. Leave empty to stop tracking the units."
-msgstr "Die nächste Fälligkeit jedes Geräts ergibt sich aus seiner letzten Prüfung; ein nie geprüftes Gerät ist sofort fällig. Leer lassen, um die Geräte nicht mehr zu verfolgen."
+#~ msgid "The next due date of each unit follows from its latest inspection, or is due at once if it was never inspected. Leave empty to stop tracking the units."
+#~ msgstr "Die nächste Fälligkeit jedes Geräts ergibt sich aus seiner letzten Prüfung; ein nie geprüftes Gerät ist sofort fällig. Leer lassen, um die Geräte nicht mehr zu verfolgen."
 
 #: src/routes/assets/[id]/asset-detail.svelte
 msgid "Delete this inspection?"
@@ -13015,31 +13026,22 @@ msgstr "Prüfung gelöscht"
 msgid "Last one failed"
 msgstr "Letzte nicht bestanden"
 
-#: src/routes/assets/[id]/asset-detail.svelte
-msgid "Inspected every month."
-msgid_plural "Inspected every # months."
-msgstr[0] "Wird jeden Monat geprüft."
-msgstr[1] "Wird alle # Monate geprüft."
+#~ msgid "Inspected every month."
+#~ msgid_plural "Inspected every # months."
+#~ msgstr[0] "Wird jeden Monat geprüft."
+#~ msgstr[1] "Wird alle # Monate geprüft."
 
-#. 0: plural(asset.inspectionIntervalMonths, [ 'Inspected every month.', 'Inspected every # months.' ])
-#: src/routes/assets/[id]/asset-detail.svelte
-msgid "{0} The next one is due an interval after the latest inspection — at once if it failed or there has never been one."
-msgstr "{0} Die nächste ist ein Intervall nach der letzten Prüfung fällig — sofort, wenn sie nicht bestanden wurde oder es noch keine gab."
+#~ msgid "{0} The next one is due an interval after the latest inspection — at once if it failed or there has never been one."
+#~ msgstr "{0} Die nächste ist ein Intervall nach der letzten Prüfung fällig — sofort, wenn sie nicht bestanden wurde oder es noch keine gab."
 
 #~ msgid "No interval is set, so this unit is not tracked. Set one under Edit to have it come due."
 #~ msgstr "Kein Intervall gesetzt, das Gerät wird daher nicht verfolgt. Unter Bearbeiten ein Intervall setzen, damit es fällig wird."
 
-#: src/routes/assets/[id]/asset-detail.svelte
-#: src/routes/products/+page.svelte
-#: src/routes/products/[id]/product-detail.svelte
-#: src/routes/products/[id]/product-detail.svelte
-#: src/routes/products/dguv-quick.svelte
-msgid "DGUV inspections"
-msgstr "DGUV-Prüfungen"
+#~ msgid "DGUV inspections"
+#~ msgstr "DGUV-Prüfungen"
 
-#: src/routes/assets/[id]/asset-detail.svelte
-msgid "Next inspection: <0/> <1/>"
-msgstr "Nächste Prüfung: <0/> <1/>"
+#~ msgid "Next inspection: <0/> <1/>"
+#~ msgstr "Nächste Prüfung: <0/> <1/>"
 
 #: src/routes/assets/[id]/asset-detail.svelte
 msgid "No inspections recorded yet."
@@ -13049,39 +13051,31 @@ msgstr "Noch keine Prüfungen erfasst."
 msgid "Delete inspection"
 msgstr "Prüfung löschen"
 
-#: src/routes/assets/[id]/asset-detail.svelte
-msgid "DGUV inspection failed"
-msgstr "DGUV-Prüfung nicht bestanden"
+#~ msgid "DGUV inspection failed"
+#~ msgstr "DGUV-Prüfung nicht bestanden"
 
-#: src/routes/assets/[id]/asset-detail.svelte
-msgid "DGUV inspection passed"
-msgstr "DGUV-Prüfung bestanden"
+#~ msgid "DGUV inspection passed"
+#~ msgstr "DGUV-Prüfung bestanden"
 
-#: src/routes/assets/[id]/asset-detail.svelte
-msgid "— marked broken"
-msgstr "— als defekt markiert"
+#~ msgid "— marked broken"
+#~ msgstr "— als defekt markiert"
 
 #. 0: formatInspectionDay(tx.performedAt); 1: tx.inspectorName ? ` · ${tx.inspectorName}` \\: ''
 #: src/routes/assets/[id]/asset-detail.svelte
 msgid "on {0}{1}"
 msgstr "am {0}{1}"
 
-#. 0: formatInspectionDay(tx.performedAt)
-#: src/routes/assets/[id]/asset-detail.svelte
-msgid "DGUV inspection of {0} deleted"
-msgstr "DGUV-Prüfung vom {0} gelöscht"
+#~ msgid "DGUV inspection of {0} deleted"
+#~ msgstr "DGUV-Prüfung vom {0} gelöscht"
 
-#: src/routes/assets/[id]/asset-detail.svelte
-msgid "The next due date follows from the latest inspection. Leave empty to stop tracking this unit."
-msgstr "Die nächste Fälligkeit ergibt sich aus der letzten Prüfung. Leer lassen, um das Gerät nicht mehr zu verfolgen."
+#~ msgid "The next due date follows from the latest inspection. Leave empty to stop tracking this unit."
+#~ msgstr "Die nächste Fälligkeit ergibt sich aus der letzten Prüfung. Leer lassen, um das Gerät nicht mehr zu verfolgen."
 
-#: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
-msgid "The units are marked broken and stay due until a passed inspection is recorded."
-msgstr "Die Geräte werden als defekt markiert und bleiben fällig, bis eine bestandene Prüfung erfasst ist."
+#~ msgid "The units are marked broken and stay due until a passed inspection is recorded."
+#~ msgstr "Die Geräte werden als defekt markiert und bleiben fällig, bis eine bestandene Prüfung erfasst ist."
 
-#: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
-msgid "The unit is marked broken and stays due until a passed inspection is recorded."
-msgstr "Das Gerät wird als defekt markiert und bleibt fällig, bis eine bestandene Prüfung erfasst ist."
+#~ msgid "The unit is marked broken and stays due until a passed inspection is recorded."
+#~ msgstr "Das Gerät wird als defekt markiert und bleibt fällig, bis eine bestandene Prüfung erfasst ist."
 
 #: src/routes/assets/+page.svelte
 msgid "Inspection interval"
@@ -13090,25 +13084,21 @@ msgstr "Prüfintervall"
 #~ msgid "Copied onto new assets at creation, which are due for their first inspection at once. Existing assets keep theirs — change those from the Devices list. Leave blank to not track inspections by default."
 #~ msgstr "Wird beim Anlegen auf neue Geräte übernommen, die sofort zur ersten Prüfung fällig sind. Bestehende Geräte behalten ihres — das änderst du in der Geräteliste. Leer lassen, um Prüfungen standardmäßig nicht zu verfolgen."
 
-#: src/routes/admin/categories/+page.svelte
-msgid "Inspect this category?"
-msgstr "Diese Kategorie prüfen?"
+#~ msgid "Inspect this category?"
+#~ msgstr "Diese Kategorie prüfen?"
 
-#: src/routes/admin/categories/+page.svelte
-msgid "Units of its products that have no interval get their organization's default and come due for a DGUV inspection. Products marked otherwise are left alone."
-msgstr "Geräte ihrer Produkte ohne Intervall bekommen den Standard ihrer Organisation und werden zur DGUV-Prüfung fällig. Produkte mit eigener Einstellung bleiben unberührt."
+#~ msgid "Units of its products that have no interval get their organization's default and come due for a DGUV inspection. Products marked otherwise are left alone."
+#~ msgstr "Geräte ihrer Produkte ohne Intervall bekommen den Standard ihrer Organisation und werden zur DGUV-Prüfung fällig. Produkte mit eigener Einstellung bleiben unberührt."
 
 #: src/routes/admin/categories/+page.svelte
 msgid "Require inspection"
 msgstr "Prüfpflichtig machen"
 
-#: src/routes/admin/categories/+page.svelte
-msgid "Stop inspecting this category?"
-msgstr "Diese Kategorie nicht mehr prüfen?"
+#~ msgid "Stop inspecting this category?"
+#~ msgstr "Diese Kategorie nicht mehr prüfen?"
 
-#: src/routes/admin/categories/+page.svelte
-msgid "Units of its products lose their DGUV interval and leave the inspection list. Products marked as needing inspection are left alone."
-msgstr "Geräte ihrer Produkte verlieren ihr DGUV-Intervall und verschwinden aus der Prüfliste. Produkte, die selbst als prüfpflichtig markiert sind, bleiben unberührt."
+#~ msgid "Units of its products lose their DGUV interval and leave the inspection list. Products marked as needing inspection are left alone."
+#~ msgstr "Geräte ihrer Produkte verlieren ihr DGUV-Intervall und verschwinden aus der Prüfliste. Produkte, die selbst als prüfpflichtig markiert sind, bleiben unberührt."
 
 #: src/routes/admin/categories/+page.svelte
 msgid "Stop inspecting"
@@ -13116,69 +13106,57 @@ msgstr "Nicht mehr prüfen"
 
 #: src/lib/components/ui/mains-hint/mains-hint.svelte
 #: src/routes/admin/categories/+page.svelte
+#: src/routes/admin/inspection-types/+page.svelte
+#: src/routes/products/[id]/product-detail.svelte
 #: src/routes/products/[id]/product-detail.svelte
 msgid "Saved · 1 unit changed"
 msgid_plural "Saved · # units changed"
 msgstr[0] "Gespeichert · 1 Gerät geändert"
 msgstr[1] "Gespeichert · # Geräte geändert"
 
-#: src/routes/admin/categories/+page.svelte
-msgid "Categories are shared by every organization. The English name is the source — it is what the API returns and what a billing line records; the German name is what the German UI and a German offer or invoice show. \"DGUV\" marks a category whose devices need DGUV V3 inspections; a product can say otherwise on its own page."
-msgstr "Kategorien gelten für alle Organisationen. Der englische Name ist die Quelle — ihn liefert die API und ihn hält eine Abrechnungsposition fest; der deutsche Name erscheint in der deutschen Oberfläche und auf einem deutschen Angebot oder einer Rechnung. „DGUV“ markiert eine Kategorie, deren Geräte DGUV-V3-prüfpflichtig sind; ein Produkt kann auf seiner eigenen Seite davon abweichen."
+#~ msgid "Categories are shared by every organization. The English name is the source — it is what the API returns and what a billing line records; the German name is what the German UI and a German offer or invoice show. \"DGUV\" marks a category whose devices need DGUV V3 inspections; a product can say otherwise on its own page."
+#~ msgstr "Kategorien gelten für alle Organisationen. Der englische Name ist die Quelle — ihn liefert die API und ihn hält eine Abrechnungsposition fest; der deutsche Name erscheint in der deutschen Oberfläche und auf einem deutschen Angebot oder einer Rechnung. „DGUV“ markiert eine Kategorie, deren Geräte DGUV-V3-prüfpflichtig sind; ein Produkt kann auf seiner eigenen Seite davon abweichen."
 
-#: src/routes/admin/categories/+page.svelte
-#: src/routes/products/dguv-quick.svelte
-msgid "DGUV"
-msgstr "DGUV"
+#~ msgid "DGUV"
+#~ msgstr "DGUV"
 
-#: src/routes/admin/categories/+page.svelte
-msgid "<0/> Inspect"
-msgstr "<0/> Prüfen"
+#~ msgid "<0/> Inspect"
+#~ msgstr "<0/> Prüfen"
 
-#: src/routes/products/[id]/product-detail.svelte
-msgid "Whether its devices need DGUV V3 inspections. Those that do get their organization's interval; the others are not tracked."
-msgstr "Ob seine Geräte DGUV-V3-prüfpflichtig sind. Prüfpflichtige bekommen das Intervall ihrer Organisation, die übrigen werden nicht verfolgt."
+#~ msgid "Whether its devices need DGUV V3 inspections. Those that do get their organization's interval; the others are not tracked."
+#~ msgstr "Ob seine Geräte DGUV-V3-prüfpflichtig sind. Prüfpflichtige bekommen das Intervall ihrer Organisation, die übrigen werden nicht verfolgt."
 
-#. 0: categoryLabel(product.category)
-#: src/routes/products/[id]/product-detail.svelte
-msgid "Like {0}: needs inspection"
-msgstr "Wie {0}: prüfpflichtig"
+#~ msgid "Like {0}: needs inspection"
+#~ msgstr "Wie {0}: prüfpflichtig"
 
-#. 0: categoryLabel(product.category)
-#: src/routes/products/[id]/product-detail.svelte
-msgid "Like {0}: no inspection"
-msgstr "Wie {0}: nicht prüfpflichtig"
+#~ msgid "Like {0}: no inspection"
+#~ msgstr "Wie {0}: nicht prüfpflichtig"
 
-#: src/routes/products/[id]/product-detail.svelte
 #: src/routes/products/dguv-quick.svelte
 #: src/routes/products/dguv-quick.svelte
 #: src/routes/products/dguv-quick.svelte
 msgid "Needs inspection"
 msgstr "Prüfpflichtig"
 
-#: src/routes/products/[id]/product-detail.svelte
 #: src/routes/products/dguv-quick.svelte
 #: src/routes/products/dguv-quick.svelte
 #: src/routes/products/dguv-quick.svelte
 msgid "No inspection"
 msgstr "Nicht prüfpflichtig"
 
-#: src/routes/assets/[id]/asset-detail.svelte
-msgid "Not tracked: this device has no inspection interval. Whether a product's devices need DGUV inspections is set on <0>its page</0>; an interval of its own can be set under Edit."
-msgstr "Nicht verfolgt: Dieses Gerät hat kein Prüfintervall. Ob die Geräte eines Produkts DGUV-prüfpflichtig sind, wird auf <0>seiner Seite</0> festgelegt; ein eigenes Intervall lässt sich unter Bearbeiten setzen."
+#~ msgid "Not tracked: this device has no inspection interval. Whether a product's devices need DGUV inspections is set on <0>its page</0>; an interval of its own can be set under Edit."
+#~ msgstr "Nicht verfolgt: Dieses Gerät hat kein Prüfintervall. Ob die Geräte eines Produkts DGUV-prüfpflichtig sind, wird auf <0>seiner Seite</0> festgelegt; ein eigenes Intervall lässt sich unter Bearbeiten setzen."
 
-#: src/routes/orgs/[id]/+page.svelte
-msgid "Given to new devices whose product needs DGUV inspections (set per category, or on the product's page). They are due for their first inspection at once. Existing devices keep theirs — change those from the Devices list. Leave blank to not track inspections by default."
-msgstr "Wird neuen Geräten gegeben, deren Produkt DGUV-prüfpflichtig ist (pro Kategorie oder auf der Produktseite festgelegt). Sie sind sofort zur ersten Prüfung fällig. Bestehende Geräte behalten ihres — das änderst du in der Geräteliste. Leer lassen, um Prüfungen standardmäßig nicht zu verfolgen."
+#~ msgid "Given to new devices whose product needs DGUV inspections (set per category, or on the product's page). They are due for their first inspection at once. Existing devices keep theirs — change those from the Devices list. Leave blank to not track inspections by default."
+#~ msgstr "Wird neuen Geräten gegeben, deren Produkt DGUV-prüfpflichtig ist (pro Kategorie oder auf der Produktseite festgelegt). Sie sind sofort zur ersten Prüfung fällig. Bestehende Geräte behalten ihres — das änderst du in der Geräteliste. Leer lassen, um Prüfungen standardmäßig nicht zu verfolgen."
 
 #. 0: names.join(', ')
 #: src/lib/components/ui/mains-hint/mains-hint.svelte
 msgid "It has a mains connection ({0}), so its devices most likely need DGUV V3 inspections — but the product is not marked as needing them."
 msgstr "Hat einen Netzanschluss ({0}) und ist damit sehr wahrscheinlich DGUV-V3-prüfpflichtig — das Produkt ist aber nicht als prüfpflichtig markiert."
 
-#: src/lib/components/ui/mains-hint/mains-hint.svelte
-msgid "Mark as needing inspection"
-msgstr "Als prüfpflichtig markieren"
+#~ msgid "Mark as needing inspection"
+#~ msgstr "Als prüfpflichtig markieren"
 
 #: src/routes/admin/connectors/+page.svelte
 msgid "Carries mains voltage — needs DGUV inspections"
@@ -13193,9 +13171,8 @@ msgstr "Netz"
 msgid "Mains voltage"
 msgstr "Netzspannung"
 
-#: src/routes/products/+page.svelte
-msgid "Set which products need DGUV inspections — many at once."
-msgstr "Festlegen, welche Produkte DGUV-prüfpflichtig sind — viele auf einmal."
+#~ msgid "Set which products need DGUV inspections — many at once."
+#~ msgstr "Festlegen, welche Produkte DGUV-prüfpflichtig sind — viele auf einmal."
 
 #: src/routes/products/+page.svelte
 msgid "Edit one by one"
@@ -13237,9 +13214,8 @@ msgid_plural "Let # products follow their category?"
 msgstr[0] "1 Produkt der Kategorie folgen lassen?"
 msgstr[1] "# Produkte ihrer Kategorie folgen lassen?"
 
-#: src/routes/products/dguv-quick.svelte
-msgid "Their devices lose their DGUV interval and leave the inspection list."
-msgstr "Ihre Geräte verlieren ihr DGUV-Intervall und verschwinden aus der Prüfliste."
+#~ msgid "Their devices lose their DGUV interval and leave the inspection list."
+#~ msgstr "Ihre Geräte verlieren ihr DGUV-Intervall und verschwinden aus der Prüfliste."
 
 #: src/routes/products/dguv-quick.svelte
 msgid "Devices that need inspecting and have no interval get their organization's default, and come due at once."
@@ -13266,9 +13242,8 @@ msgstr "Wie Kategorie: prüfpflichtig"
 msgid "Like category: no inspection"
 msgstr "Wie Kategorie: nicht prüfpflichtig"
 
-#: src/routes/products/dguv-quick.svelte
-msgid "Which products' devices need DGUV V3 inspections. A product follows its category unless it is set otherwise; the category default is set under Admin › Categories."
-msgstr "Welche Produkte DGUV-V3-prüfpflichtige Geräte haben. Ein Produkt folgt seiner Kategorie, sofern nicht anders eingestellt; die Vorgabe der Kategorie steht unter Admin › Kategorien."
+#~ msgid "Which products' devices need DGUV V3 inspections. A product follows its category unless it is set otherwise; the category default is set under Admin › Categories."
+#~ msgstr "Welche Produkte DGUV-V3-prüfpflichtige Geräte haben. Ein Produkt folgt seiner Kategorie, sofern nicht anders eingestellt; die Vorgabe der Kategorie steht unter Admin › Kategorien."
 
 #: src/routes/products/dguv-quick.svelte
 msgid "1 product selected"
@@ -13276,6 +13251,7 @@ msgid_plural "# products selected"
 msgstr[0] "1 Produkt ausgewählt"
 msgstr[1] "# Produkte ausgewählt"
 
+#: src/routes/admin/catalog-log/+page.svelte
 #: src/routes/products/dguv-quick.svelte
 msgid "Like category"
 msgstr "Wie Kategorie"
@@ -13455,9 +13431,8 @@ msgstr "Intervall in den Einstellungen der Organisation festlegen"
 msgid "The org's owner can set one in its settings."
 msgstr "Der Inhaber der Organisation kann es in ihren Einstellungen festlegen."
 
-#: src/routes/inspections/+page.svelte
-msgid "<0/> has no default inspection interval. Its new units that need inspecting get none, so they are never due and never listed here."
-msgstr "<0/> hat kein Standard-Prüfintervall. Neue prüfpflichtige Geräte bekommen dann keins, werden also nie fällig und tauchen hier nie auf."
+#~ msgid "<0/> has no default inspection interval. Its new units that need inspecting get none, so they are never due and never listed here."
+#~ msgstr "<0/> hat kein Standard-Prüfintervall. Neue prüfpflichtige Geräte bekommen dann keins, werden also nie fällig und tauchen hier nie auf."
 
 #: src/routes/inspections/+page.svelte
 msgid "Search product, tag, serial number…"
@@ -13510,3 +13485,435 @@ msgstr "In diesem Zeitraum ist nichts fällig, das zu den Filtern passt."
 #: src/routes/inspections/+page.svelte
 msgid "Nothing due in this period."
 msgstr "In diesem Zeitraum ist nichts fällig."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This inspection type no longer exists."
+msgstr "Diese Prüfart gibt es nicht mehr."
+
+#: src/routes/+page.svelte
+msgid "Inspection due"
+msgstr "Prüfung fällig"
+
+#: src/routes/inspections/+page.svelte
+msgid "Overdue and upcoming inspections across your orgs, one row per device and inspection type. A device that was never inspected for a type, or whose last inspection of it failed, is due at once."
+msgstr "Überfällige und anstehende Prüfungen in deinen Organisationen, eine Zeile je Gerät und Prüfart. Ein Gerät, das für eine Prüfart nie geprüft wurde oder dessen letzte Prüfung dieser Art nicht bestanden ist, ist sofort fällig."
+
+#: src/routes/inspections/+page.svelte
+msgid "<0/> has no interval for <1/>. Its new units that need this inspection get none, so they are never due for it and never listed here."
+msgstr "<0/> hat kein Intervall für <1/>. Neue Geräte, die diese Prüfung brauchen, bekommen keins, werden dafür also nie fällig und tauchen hier nicht auf."
+
+#: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
+#: src/lib/components/ui/inspection-dialog/interval-dialog.svelte
+#: src/routes/inspections/+page.svelte
+#: src/routes/products/dguv-quick.svelte
+msgid "Inspection type"
+msgstr "Prüfart"
+
+#: src/routes/inspections/+page.svelte
+msgid "All inspection types"
+msgstr "Alle Prüfarten"
+
+#: src/routes/products/dguv-quick.svelte
+msgid "Their devices lose their interval for this type and leave the inspection list for it."
+msgstr "Ihre Geräte verlieren ihr Intervall für diese Prüfart und verschwinden dafür aus der Prüfliste."
+
+#: src/routes/products/dguv-quick.svelte
+msgid "Inspection requirement"
+msgstr "Prüfpflicht"
+
+#: src/routes/products/dguv-quick.svelte
+msgid "Which products' devices need an inspection type. A product follows its category unless it is set otherwise; the category default is set under Admin › Categories."
+msgstr "Welche Produkte eine Prüfart brauchen. Ein Produkt folgt seiner Kategorie, solange es nicht anders eingestellt ist; die Vorgabe der Kategorie steht unter Admin › Kategorien."
+
+#: src/routes/products/+page.svelte
+msgid "Set which products need which inspections — many at once."
+msgstr "Festlegen, welche Produkte welche Prüfungen brauchen – viele auf einmal."
+
+#. 0: name
+#: src/routes/admin/categories/+page.svelte
+msgid "{0}: inspect this category?"
+msgstr "{0}: diese Kategorie prüfen?"
+
+#~ msgid "Units of its products that have no interval for it get their organization's and come due for this inspection. Products marked otherwise are left alone."
+#~ msgstr ""
+
+#. 0: name
+#: src/routes/admin/categories/+page.svelte
+msgid "{0}: stop inspecting this category?"
+msgstr "{0}: diese Kategorie nicht mehr prüfen?"
+
+#: src/routes/admin/categories/+page.svelte
+msgid "Units of its products lose their interval for it and leave the inspection list for it. Products marked as needing it are left alone."
+msgstr "Geräte ihrer Produkte verlieren ihr Intervall dafür und verschwinden dafür aus der Prüfliste. Produkte, die als prüfpflichtig markiert sind, bleiben, wie sie sind."
+
+#: src/routes/admin/categories/+page.svelte
+msgid "Categories are shared by every organization. The English name is the source — it is what the API returns and what a billing line records; the German name is what the German UI and a German offer or invoice show. \"Inspections\" marks which inspections a category's devices need by default; a product can say otherwise on its own page."
+msgstr "Kategorien gelten für alle Organisationen. Der englische Name ist die Quelle – ihn liefert die API, und eine Rechnungszeile hält ihn fest; der deutsche Name ist das, was die deutsche Oberfläche und ein deutsches Angebot oder eine Rechnung zeigen. „Prüfungen“ legt fest, welche Prüfungen die Geräte einer Kategorie standardmäßig brauchen; ein Produkt kann auf seiner Seite etwas anderes sagen."
+
+#: src/routes/assets/[id]/asset-detail.svelte
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Serial number, tag, status, location and purchase date."
+msgstr "Seriennummer, Tag, Status, Standort und Kaufdatum."
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Inspection intervals"
+msgstr "Prüfintervalle"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "every month"
+msgid_plural "every # months"
+msgstr[0] "jeden Monat"
+msgstr[1] "alle # Monate"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Each type is due an interval after its latest inspection — at once if it failed or there has never been one. Which types a product's devices need is set on <0>its page</0>."
+msgstr "Jede Prüfart ist ein Intervall nach ihrer letzten Prüfung fällig – sofort, wenn sie nicht bestanden ist oder es noch keine gab. Welche Prüfarten die Geräte eines Produkts brauchen, steht auf <0>seiner Seite</0>."
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Not tracked: this device needs no inspection and has no interval."
+msgstr "Nicht verfolgt: Dieses Gerät braucht keine Prüfung und hat kein Intervall."
+
+#: src/routes/assets/[id]/asset-detail.svelte
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Interval"
+msgstr "Intervall"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Next due"
+msgstr "Nächste fällig"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Latest"
+msgstr "Letzte"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Needed, but no interval"
+msgstr "Nötig, aber kein Intervall"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Never"
+msgstr "Nie"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Inspection failed"
+msgstr "Prüfung nicht bestanden"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Inspection passed"
+msgstr "Prüfung bestanden"
+
+#. 0: assetStatusLabel(tx.status ?? 'BROKEN')
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "— set to {0}"
+msgstr "– auf {0} gesetzt"
+
+#. 0: typeName(tx.inspectionTypeId); 1: formatInspectionDay( tx.performedAt )
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "{0}: inspection of {1} deleted"
+msgstr "{0}: Prüfung vom {1} gelöscht"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Inspection intervals (months)"
+msgstr "Prüfintervalle (Monate)"
+
+#~ msgid "Given to new devices whose product needs that inspection (set per category, or on the product's page). They are due for their first inspection at once. Existing devices keep theirs — change those from the Devices list. Leave a type blank to not track it by default."
+#~ msgstr "Gilt für neue Geräte, deren Produkt diese Prüfung braucht (festgelegt je Kategorie oder auf der Produktseite). Ihre erste Prüfung ist sofort fällig. Vorhandene Geräte behalten ihr Intervall – das änderst du in der Geräteliste. Leer lassen, um eine Prüfart standardmäßig nicht zu verfolgen."
+
+#. 0: inspectionTypeLabel(type)
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Interval: {0}"
+msgstr "Intervall: {0}"
+
+#~ msgid "Which inspections its devices need. Those that do get their organization's interval for each; the others are not tracked for it."
+#~ msgstr "Welche Prüfungen seine Geräte brauchen. Wer eine braucht, bekommt dafür das Intervall seiner Organisation; die anderen werden dafür nicht verfolgt."
+
+#. 0: categoryLabel(product.category)
+#: src/routes/products/[id]/product-detail.svelte
+msgid "Like {0}: needed"
+msgstr "Wie {0}: nötig"
+
+#. 0: categoryLabel(product.category)
+#: src/routes/products/[id]/product-detail.svelte
+msgid "Like {0}: not needed"
+msgstr "Wie {0}: nicht nötig"
+
+#: src/routes/admin/catalog-log/+page.svelte
+#: src/routes/products/[id]/product-detail.svelte
+msgid "Needed"
+msgstr "Nötig"
+
+#: src/routes/admin/catalog-log/+page.svelte
+#: src/routes/products/[id]/product-detail.svelte
+msgid "Not needed"
+msgstr "Nicht nötig"
+
+#. 0: failLabel
+#: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
+msgid "Inspection recorded · 1 unit set to {0}"
+msgstr "Prüfung erfasst · 1 Gerät auf {0} gesetzt"
+
+#. 0: failLabel
+#: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
+msgid "Inspections recorded · # units set to {0}"
+msgstr "Prüfungen erfasst · # Geräte auf {0} gesetzt"
+
+#. 0: failLabel
+#: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
+msgid "The units are set to “{0}” and stay due until a passed inspection is recorded."
+msgstr "Die Geräte werden auf „{0}“ gesetzt und bleiben fällig, bis eine bestandene Prüfung erfasst ist."
+
+#. 0: failLabel
+#: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
+msgid "The unit is set to “{0}” and stays due until a passed inspection is recorded."
+msgstr "Das Gerät wird auf „{0}“ gesetzt und bleibt fällig, bis eine bestandene Prüfung erfasst ist."
+
+#~ msgid "Interval (months)"
+#~ msgstr "Intervall (Monate)"
+
+#~ msgid "The next due date of each unit follows from its latest inspection of this type, or is due at once if it was never inspected. Leave empty to stop tracking the units for this type."
+#~ msgstr "Das nächste Fälligkeitsdatum jedes Geräts ergibt sich aus seiner letzten Prüfung dieser Art; ohne Prüfung ist es sofort fällig. Leer lassen, um die Geräte für diese Prüfart nicht mehr zu verfolgen."
+
+#: src/lib/components/ui/mains-hint/mains-hint.svelte
+msgid "Mark as needing electrical inspection"
+msgstr "Als prüfpflichtig (elektrisch) markieren"
+
+#: src/routes/admin/categories/+page.svelte
+msgid "Units of its products that have no interval for it get their organization's interval and come due for this inspection. Products marked otherwise are left alone."
+msgstr "Geräte ihrer Produkte ohne Intervall dafür bekommen das ihrer Organisation und werden für diese Prüfung fällig. Anders markierte Produkte bleiben, wie sie sind."
+
+#. 0: typeName(change.inspectionTypeId)
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Inspection interval · {0}"
+msgstr "Prüfintervall · {0}"
+
+#: src/routes/products/[id]/product-detail.svelte
+msgid "Which inspections its devices need, and how often. A device follows its organization's interval for the type unless one is set for this product here."
+msgstr "Welche Prüfungen seine Geräte brauchen und wie oft. Ein Gerät folgt dem Intervall seiner Organisation für die Prüfart, solange hier keins für dieses Produkt gesetzt ist."
+
+#~ msgid "Every ({0})"
+#~ msgstr ""
+
+#: src/routes/products/[id]/product-detail.svelte
+msgid "Every"
+msgstr "Alle"
+
+#: src/routes/products/[id]/product-detail.svelte
+msgid "Interval in months"
+msgstr "Intervall in Monaten"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "· own"
+msgstr "· eigenes"
+
+#: src/lib/components/ui/inspection-dialog/interval-dialog.svelte
+msgid "Own interval (months)"
+msgstr "Eigenes Intervall (Monate)"
+
+#: src/lib/components/ui/inspection-dialog/interval-dialog.svelte
+msgid "Only for an exception: normally a device follows its organization's interval for the product or the type. Leave empty to follow it again. The next due date follows from the latest inspection of this type, or is due at once if there was none."
+msgstr "Nur für Ausnahmen: Normalerweise folgt ein Gerät dem Intervall seiner Organisation für das Produkt oder die Prüfart. Leer lassen, um wieder zu folgen. Das nächste Fälligkeitsdatum ergibt sich aus der letzten Prüfung dieser Art; ohne Prüfung ist es sofort fällig."
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "For devices whose product needs that inspection (set per category, or on the product's page). A change applies to every device at once, except those with an interval set for their product or of their own. A device never inspected is due at once. Leave a type blank to not track it."
+msgstr "Für Geräte, deren Produkt diese Prüfung braucht (festgelegt je Kategorie oder auf der Produktseite). Eine Änderung gilt sofort für alle Geräte, außer für solche mit einem Intervall für ihr Produkt oder einem eigenen. Ein nie geprüftes Gerät ist sofort fällig. Leer lassen, um eine Prüfart nicht zu verfolgen."
+
+#: src/routes/products/[id]/product-detail.svelte
+msgid "Organization's default"
+msgstr "Standard der Organisation"
+
+#: src/routes/products/[id]/product-detail.svelte
+msgid "The organization tracks none of this type"
+msgstr "Die Organisation verfolgt diese Prüfart nicht"
+
+#: src/routes/products/[id]/product-detail.svelte
+msgid "months"
+msgstr "Monate"
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "Only a member qualified for “{0}” in this organization may record it. An inspection done by an outside firm can be entered as external."
+msgstr "Nur ein für „{0}“ befähigtes Mitglied dieser Organisation darf das erfassen. Eine Prüfung durch eine externe Firma lässt sich als extern eintragen."
+
+#: src/lib/error-messages.svelte.ts
+msgid "An external inspection needs the firm or inspector and their qualification."
+msgstr "Eine externe Prüfung braucht die Firma oder den Prüfer und deren Qualifikation."
+
+#: src/lib/error-messages.svelte.ts
+msgid "Enter a name for the inspection type."
+msgstr "Gib der Prüfart einen Namen."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "There is already an inspection type called “{0}”."
+msgstr "Es gibt schon eine Prüfart „{0}“."
+
+#: src/lib/error-messages.svelte.ts
+msgid "A failed inspection can set a unit to broken, in maintenance, unavailable or decommissioned."
+msgstr "Eine nicht bestandene Prüfung kann ein Gerät auf defekt, in Wartung, nicht verfügbar oder ausgemustert setzen."
+
+#: src/lib/error-messages.svelte.ts
+msgid "Enter the date the qualification runs until."
+msgstr "Gib das Datum ein, bis zu dem die Befähigung gilt."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This member is no longer in the organization."
+msgstr "Dieses Mitglied gehört nicht mehr zur Organisation."
+
+#: src/routes/+layout.svelte
+#: src/routes/+layout.svelte
+msgid "<0/> Inspection types"
+msgstr "<0/> Prüfarten"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "External"
+msgstr "Extern"
+
+#: src/routes/admin/inspection-types/+page.svelte
+msgid "Inspection type saved"
+msgstr "Prüfart gespeichert"
+
+#: src/routes/admin/inspection-types/+page.svelte
+msgid "Inspection type added"
+msgstr "Prüfart angelegt"
+
+#: src/routes/admin/inspection-types/+page.svelte
+msgid "Inspection types | Technikpool"
+msgstr "Prüfarten | Technikpool"
+
+#: src/routes/admin/inspection-types/+page.svelte
+msgid "Inspection types"
+msgstr "Prüfarten"
+
+#: src/routes/admin/inspection-types/+page.svelte
+msgid "Shared by every organization. Which products need a type is set per category and on the product's page; an organization sets its own interval per type in its settings, and the default interval here applies where it has not. Only members qualified for a type that needs a qualification record it themselves — an outside firm's inspection can always be entered."
+msgstr "Gilt für alle Organisationen. Welche Produkte eine Prüfart brauchen, wird je Kategorie und auf der Produktseite festgelegt; jede Organisation stellt in ihren Einstellungen ihr Intervall je Prüfart ein, und wo sie das nicht tut, gilt der Standard von hier. Prüfarten mit Befähigung erfassen nur befähigte Mitglieder selbst – die Prüfung einer externen Firma lässt sich immer eintragen."
+
+#: src/routes/admin/inspection-types/+page.svelte
+#: src/routes/admin/inspection-types/+page.svelte
+msgid "Failed sets"
+msgstr "Nicht bestanden setzt"
+
+#: src/routes/admin/inspection-types/+page.svelte
+#: src/routes/admin/inspection-types/+page.svelte
+msgid "<0/> Needs a qualification"
+msgstr "<0/> Befähigung nötig"
+
+#: src/routes/admin/inspection-types/+page.svelte
+#: src/routes/admin/inspection-types/+page.svelte
+msgid "<0/> Measured values"
+msgstr "<0/> Messwerte"
+
+#: src/routes/admin/inspection-types/+page.svelte
+#: src/routes/admin/inspection-types/+page.svelte
+msgid "Default (months)"
+msgstr "Standard (Monate)"
+
+#: src/routes/admin/inspection-types/+page.svelte
+msgid "New inspection type"
+msgstr "Neue Prüfart"
+
+#: src/routes/admin/inspection-types/+page.svelte
+msgid "No product needs it until it is switched on for a category or a product."
+msgstr "Kein Produkt braucht sie, bis sie für eine Kategorie oder ein Produkt eingeschaltet wird."
+
+#: src/routes/orgs/[id]/qualification-dialog.svelte
+msgid "Qualifications saved"
+msgstr "Befähigungen gespeichert"
+
+#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/qualification-dialog.svelte
+msgid "Qualifications"
+msgstr "Befähigungen"
+
+#: src/routes/orgs/[id]/qualification-dialog.svelte
+msgid "Valid until"
+msgstr "Gültig bis"
+
+#. 0: memberName
+#: src/routes/orgs/[id]/qualification-dialog.svelte
+msgid "{0} records inspections of a type only with a qualification for it here. Leave the title blank for none."
+msgstr "{0} erfasst Prüfungen einer Art nur mit einer Befähigung dafür in dieser Organisation. Bezeichnung leer lassen für keine."
+
+#: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
+msgid "You hold no qualification for this type, so you can only enter an outside firm's inspection. Qualifications are recorded with the members of the organization."
+msgstr "Du hast für diese Prüfart keine Befähigung und kannst nur die Prüfung einer externen Firma eintragen. Befähigungen werden bei den Mitgliedern der Organisation hinterlegt."
+
+#: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
+msgid "<0/> Inspected by an outside firm"
+msgstr "<0/> Von einer externen Firma geprüft"
+
+#: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
+msgid "Firm or inspector"
+msgstr "Firma oder Prüfer"
+
+#: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
+msgid "Their qualification"
+msgstr "Deren Qualifikation"
+
+#~ msgid "Recorded under your name{0}."
+#~ msgstr ""
+
+#. 0: myQualifications.find( (q) => q.typeId === pickedTypeId )?.title ?? ''
+#: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
+msgid "Recorded under your name and qualification: {0}"
+msgstr "Erfasst unter deinem Namen und deiner Befähigung: {0}"
+
+#: src/lib/components/ui/inspection-dialog/inspection-dialog.svelte
+msgid "Recorded under your name."
+msgstr "Erfasst unter deinem Namen."
+
+#: src/lib/error-messages.svelte.ts
+msgid "Say what is wrong with the unit."
+msgstr "Beschreib, was an dem Gerät kaputt ist."
+
+#. 0: type ? inspectionTypeLabel(type) \\: typeId; 1: requirementValue(change.from); 2: requirementValue(change.to)
+#: src/routes/admin/catalog-log/+page.svelte
+msgid "Inspection {0}: {1} → {2}"
+msgstr "Prüfung {0}: {1} → {2}"
+
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Defect reported · the unit is in maintenance"
+msgstr "Defekt gemeldet · das Gerät ist in Wartung"
+
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Defect reported"
+msgstr "Defekt gemeldet"
+
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Inspection overdue"
+msgstr "Prüfung überfällig"
+
+#. 0: overdue.join(', ')
+#. 0: overdue.join(', ')
+#: src/routes/productions/[id]/handout-detail.svelte
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Inspection overdue: {0}"
+msgstr "Prüfung überfällig: {0}"
+
+#: src/routes/productions/[id]/handout-detail.svelte
+#: src/routes/productions/[id]/handout-detail.svelte
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Report a defect"
+msgstr "Defekt melden"
+
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "What is wrong?"
+msgstr "Was ist kaputt?"
+
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Recorded as a failed visual check. The unit goes into maintenance until someone has looked at it; taking it back still works as usual."
+msgstr "Wird als nicht bestandene Sichtprüfung erfasst. Das Gerät kommt in Wartung, bis es sich jemand angesehen hat; zurückbuchen geht wie gewohnt."
+
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Report defect"
+msgstr "Defekt melden"
+
+#. 0: categoryLabel(inspection)
+#: src/routes/share/[id]/[signature]/+page.svelte
+msgid "{0}: inspection overdue"
+msgstr "{0}: Prüfung überfällig"
+
+#. 0: categoryLabel(inspection); 1: formatInspectionMonth( inspection.validUntil )
+#: src/routes/share/[id]/[signature]/+page.svelte
+msgid "{0}: inspected, valid until {1}"
+msgstr "{0}: geprüft, gültig bis {1}"

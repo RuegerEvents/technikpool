@@ -149,6 +149,9 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
   /// hand does not show as ticked yet.
   final _justBooked = <String>{};
 
+  /// Units a defect was reported for in this sitting, to say so on their row.
+  final _defects = <String>{};
+
   ProductionCheck? _check;
   ProductionHandout? _handout;
 
@@ -315,6 +318,8 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
           note: _handoutNote(l10n, item),
           noteWarn:
               item.kitAddition == true ||
+              _overdueToHandOut(item) ||
+              _defects.contains(item.assetId) ||
               item.status == ProductionHandoutItemStatus.checkedOut && !item.received,
           optional: _takenBack(item),
         ),
@@ -327,7 +332,15 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
       widget.mode == ProductionListMode.checkout &&
       item.status == ProductionHandoutItemStatus.returned;
 
+  /// Going out with an overdue inspection: said, never refused.
+  bool _overdueToHandOut(ProductionHandoutItem item) =>
+      widget.mode == ProductionListMode.checkout &&
+      item.inspectionOverdue == true &&
+      !item.done;
+
   String? _handoutNote(S l10n, ProductionHandoutItem item) {
+    if (_defects.contains(item.assetId)) return l10n.defectReported;
+    if (_overdueToHandOut(item)) return l10n.inspectionOverdueNote;
     // On the take-back list: booked, but nobody handed it out. A tick books both.
     if (widget.mode == ProductionListMode.checkin &&
         item.status == ProductionHandoutItemStatus.approved) {
@@ -565,7 +578,19 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
       mode: _handoutMode,
       body: ProductionCheckScanRequest(code: code),
     );
-    if (result.kit case final kit?) return _kitBooked(l10n, kit, result.action);
+    final overdue = _overdueNames(l10n, result.overdueInspections);
+    if (result.kit case final kit?) {
+      final scanned = _kitBooked(l10n, kit, result.action);
+      if (overdue.isNotEmpty) {
+        _report(
+          _Tone.warn,
+          l10n.inspectionOverdueNote,
+          overdue.join(', '),
+          ScanTone.attention,
+        );
+      }
+      return scanned;
+    }
     final rest = [
       for (final u in result.group?.units ?? const <ScanGroupUnit>[])
         if (!u.done) u.id,
@@ -597,15 +622,17 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
       );
       return _nothingToAsk;
     }
+    final fine = rest.isEmpty && !foreign && overdue.isEmpty;
     _report(
-      rest.isEmpty && !foreign ? _Tone.good : _Tone.warn,
+      fine ? _Tone.good : _Tone.warn,
       foreign ? '${l10n.productionCheckNotOnList}: $name' : name,
       [
         result.asset.assetTag,
         Labels.scanAction(l10n, result.action),
         if (returned.isNotEmpty) l10n.returnedFrom(returned.join(', ')),
+        if (overdue.isNotEmpty) l10n.inspectionOverdueOf(overdue.join(', ')),
       ].join(' · '),
-      rest.isEmpty && !foreign ? ScanTone.ok : ScanTone.attention,
+      fine ? ScanTone.ok : ScanTone.attention,
     );
     if (rest.isNotEmpty && mounted) {
       setState(
@@ -706,6 +733,37 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
       l10n.kitLeftOut(missing.length),
       ScanTone.attention,
     );
+  }
+
+  /// The inspection types a booked unit is overdue for, in the device's language.
+  List<String> _overdueNames(S l10n, List<OverdueInspection>? overdue) => [
+    for (final o in overdue ?? const <OverdueInspection>[])
+      l10n.localeName == 'de' && (o.nameDe?.trim().isNotEmpty ?? false)
+          ? o.nameDe!
+          : o.name,
+  ];
+
+  /// A failed visual check with what is wrong; the unit goes into maintenance.
+  Future<void> _reportDefect(_Unit unit) async {
+    final api = ref.read(apiClientProvider);
+    final tag = unit.assetTag;
+    if (api == null || tag == null) return;
+    final l10n = S.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final notes = await showDialog<String>(
+      context: context,
+      builder: (context) => _DefectDialog(unitName: unit.productName, tag: tag),
+    );
+    if (notes == null || notes.trim().isEmpty || !mounted) return;
+    try {
+      await api.inspection.reportDefect(
+        body: DefectRequest(code: tag, notes: notes.trim()),
+      );
+      if (mounted) setState(() => _defects.add(unit.assetId));
+      messenger.showSnackBar(SnackBar(content: Text(l10n.defectReportedDone)));
+    } catch (error) {
+      messenger.showSnackBar(SnackBar(content: Text(describeError(l10n, error))));
+    }
   }
 
   void _report(_Tone tone, String title, String? detail, ScanTone sound) {
@@ -1210,6 +1268,15 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
         ],
       ),
       onTap: onChanged == null ? null : () => onChanged(null),
+      // Taking back is when the unit is in someone's hands: a defect is
+      // reported here, and booking it back without one counts as looked at.
+      trailing: widget.mode == ProductionListMode.checkin && unit.assetTag != null
+          ? IconButton(
+              tooltip: l10n.reportDefect,
+              icon: Icon(Icons.report_problem_outlined, color: status?.warning),
+              onPressed: () => _reportDefect(unit),
+            )
+          : null,
       title: Text(unit.productName, style: const TextStyle(fontWeight: FontWeight.w600)),
       subtitle: Text.rich(
         TextSpan(
@@ -1486,6 +1553,65 @@ class _FeedbackBanner extends StatelessWidget {
             ),
         ],
       ),
+    );
+  }
+}
+
+/// Asks what is wrong with a unit; pops the text, or null when cancelled.
+class _DefectDialog extends StatefulWidget {
+  const _DefectDialog({required this.unitName, required this.tag});
+
+  final String unitName;
+  final String tag;
+
+  @override
+  State<_DefectDialog> createState() => _DefectDialogState();
+}
+
+class _DefectDialogState extends State<_DefectDialog> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final l10n = S.of(context);
+    return AlertDialog(
+      title: Text(l10n.reportDefect),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('${widget.unitName} · ${widget.tag}'),
+          const SizedBox(height: 12),
+          TextField(
+            controller: _controller,
+            autofocus: true,
+            minLines: 2,
+            maxLines: 4,
+            maxLength: 2000,
+            decoration: InputDecoration(
+              labelText: l10n.defectWhatIsWrong,
+              helperText: l10n.defectHint,
+              helperMaxLines: 3,
+            ),
+            onChanged: (_) => setState(() {}),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(onPressed: () => Navigator.of(context).pop(), child: Text(l10n.cancel)),
+        FilledButton(
+          onPressed: _controller.text.trim().isEmpty
+              ? null
+              : () => Navigator.of(context).pop(_controller.text),
+          child: Text(l10n.reportDefect),
+        ),
+      ],
     );
   }
 }

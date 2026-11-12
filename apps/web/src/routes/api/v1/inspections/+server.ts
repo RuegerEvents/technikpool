@@ -6,7 +6,11 @@ import { resolveScannedCode } from '#lib/server/services/asset-lookup.js';
 import { API_ASSET_INCLUDE } from '#lib/server/services/asset-tags.js';
 import { toAsset, toInspection } from '#lib/server/services/api-mappers.js';
 import { parseInspectionDate, recordInspections } from '#lib/server/services/inspections.js';
-import { INSPECTION_RESULTS, type InspectionResult } from '#lib/inspection-due.js';
+import {
+	DEFAULT_INSPECTION_TYPE_ID,
+	INSPECTION_RESULTS,
+	type InspectionResult
+} from '#lib/inspection-due.js';
 import { isRetiredStatus } from '#lib/asset-status.js';
 
 export const POST: RequestHandler = ({ locals, request }) =>
@@ -61,26 +65,35 @@ export const POST: RequestHandler = ({ locals, request }) =>
 			);
 		}
 
+		const typeId =
+			typeof body?.typeId === 'string' && body.typeId ? body.typeId : DEFAULT_INSPECTION_TYPE_ID;
 		const [recorded] = await recordInspections(user.id, {
 			assetIds: [match.assetId],
+			typeId,
+			source: 'scanner',
 			performedAt: parseInspectionDate(performedAt),
 			result: result as InspectionResult,
+			external: body?.external === true,
+			qualification: typeof body?.qualification === 'string' ? body.qualification : null,
 			inspectorName: typeof body?.inspectorName === 'string' ? body.inspectorName : null,
 			notes: typeof body?.notes === 'string' ? body.notes : null
 		});
 
-		const [inspection, asset] = await Promise.all([
+		const [inspection, asset, schedule] = await Promise.all([
 			prisma.inspection.findUniqueOrThrow({ where: { id: recorded.id } }),
 			prisma.asset.findUniqueOrThrow({
 				where: { id: match.assetId },
 				include: API_ASSET_INCLUDE
+			}),
+			prisma.assetInspectionSchedule.findUnique({
+				where: { assetId_typeId: { assetId: match.assetId, typeId } }
 			})
 		]);
 		const response: Schemas['InspectionRecorded'] = {
 			inspection: toInspection(inspection),
 			asset: toAsset(asset),
-			inspectionIntervalMonths: asset.inspectionIntervalMonths,
-			nextInspectionDue: asset.nextInspectionDue?.toISOString() ?? null,
+			inspectionIntervalMonths: schedule?.intervalMonths ?? null,
+			nextInspectionDue: schedule?.nextDue.toISOString() ?? null,
 			markedBroken: recorded.markedBroken
 		};
 		return Response.json(response, { status: 201 });

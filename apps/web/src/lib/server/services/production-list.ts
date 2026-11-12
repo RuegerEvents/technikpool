@@ -57,6 +57,8 @@ export const LIST_ITEM_INCLUDE = {
 			bundle: { select: KIT_SELECT },
 			productId: true,
 			locationId: true,
+			// The earliest due inspection of any type, for "overdue" on a hand-out list.
+			nextInspectionDue: true,
 			location: { select: { name: true } },
 			organization: { select: { name: true, shortName: true } },
 			product: {

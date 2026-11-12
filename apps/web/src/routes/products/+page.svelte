@@ -357,7 +357,7 @@
 			<p class="text-muted-foreground">
 				{mode === 'edit'
 					? "Step through the catalog and fill in what's missing — one product at a time."
-					: 'Set which products need DGUV inspections — many at once.'}
+					: 'Set which products need which inspections — many at once.'}
 			</p>
 		</div>
 		<select
@@ -371,7 +371,7 @@
 	</div>
 
 	<div class="inline-flex rounded-md border p-0.5">
-		{#each [{ key: 'edit', label: 'Edit one by one' }, { key: 'dguv', label: 'DGUV inspections' }] as tab (tab.key)}
+		{#each [{ key: 'edit', label: 'Edit one by one' }, { key: 'dguv', label: 'Inspections' }] as tab (tab.key)}
 			<button
 				type="button"
 				onclick={() => (modeChosen = tab.key as 'edit' | 'dguv')}

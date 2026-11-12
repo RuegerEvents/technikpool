@@ -25,7 +25,7 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 
 	const organization = await prisma.organization.findUnique({
 		where: { id: organizationId },
-		include: { address: true }
+		include: { address: true, inspectionIntervals: true }
 	});
 	if (!organization) error(404, 'Organization not found');
 
@@ -55,7 +55,10 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 		prisma.customer.findMany({ where: { organizationId }, include: { address: true } }),
 		prisma.asset.findMany({
 			where: { organizationId },
-			include: { inspections: { orderBy: { performedAt: 'asc' } } }
+			include: {
+				inspections: { orderBy: { performedAt: 'asc' } },
+				inspectionSchedules: true
+			}
 		}),
 		prisma.bundleTemplate.findMany({ where: { organizationId } }),
 		prisma.assetBundle.findMany({ where: { template: { organizationId } } }),

@@ -15,6 +15,7 @@ import { withAccessories } from './accessories';
 import { canPlaceAt } from './locations';
 import { kitByTag, resolveScannedCode, type TaggedKit } from './asset-lookup';
 import { onProductionSide } from './production-check';
+import { overdueInspections, recordReturnChecks, type OverdueInspection } from './inspections';
 
 // Scan/checkout behaviour lives here rather than in checkout.remote.ts so the
 // /api/v1 endpoints and the web UI share one implementation. These functions
@@ -56,6 +57,8 @@ export interface ScanResult {
 	 * See `performKitScan`.
 	 */
 	kit?: ScanKit | null;
+	/** Checking out: what of it is overdue for which inspection. Never a refusal. */
+	overdueInspections?: OverdueInspection[];
 }
 
 export interface ScanKit {
@@ -505,6 +508,13 @@ export async function performScan(
 				});
 			}
 
+			// Booked back without a defect reported: looked at and found fine.
+			await recordReturnChecks(
+				tx,
+				userId,
+				checkedOutItems.map((i) => i.assetId)
+			);
+
 			// A bundle's location follows the assets inside it.
 			if (asset.bundleId) {
 				await tx.assetBundle.update({
@@ -603,7 +613,8 @@ export async function performScan(
 			action: 'CHECKED_OUT',
 			targetName: production.name,
 			returnedFrom: [],
-			group: await scanGroup(asset, input)
+			group: await scanGroup(asset, input),
+			overdueInspections: await overdueInspections(touchedIds)
 		},
 		affected
 	};
@@ -720,11 +731,16 @@ async function performKitScan(
 			: [];
 	const { result, affected } = await performBulkCheckout(userId, { ...input, assetIds: ids });
 	return {
-		result: kitScanResult(kit, units, {
-			action: input.targetType === 'location' ? 'LOCATION_ASSIGNED' : 'CHECKED_OUT',
-			targetName: result.targetName,
-			returnedFrom: await returnedFromNames(userId, returning)
-		}),
+		result: {
+			...kitScanResult(kit, units, {
+				action: input.targetType === 'location' ? 'LOCATION_ASSIGNED' : 'CHECKED_OUT',
+				targetName: result.targetName,
+				returnedFrom: await returnedFromNames(userId, returning)
+			}),
+			...(input.targetType === 'production'
+				? { overdueInspections: await overdueInspections(affected.assetIds) }
+				: {})
+		},
 		affected
 	};
 }
@@ -986,6 +1002,7 @@ export async function performBulkCheckout(
 						}
 					});
 				}
+				if (checkedOutItems.length > 0) await recordReturnChecks(tx, userId, [asset.id]);
 			});
 
 			mergeAffected(affected, { productionIds: checkedOutItems.map((i) => i.production.id) });

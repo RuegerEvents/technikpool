@@ -33,11 +33,11 @@ abstract class CatalogClient {
 
   /// Change a category.
   ///
-  /// System admins only. Fields left out are left alone. Switching.
-  /// `requiresInspection` moves the inspection interval of every unit whose.
-  /// product follows its category (`requiresInspection: null` on the.
-  /// product): units that now need inspecting get their organization's.
-  /// default interval, units that no longer do lose theirs.
+  /// System admins only. Fields left out are left alone. Switching an.
+  /// inspection type (`inspections`, or `requiresInspection` for the.
+  /// electrical one) moves the inspection interval of every unit whose.
+  /// product follows its category for that type: units that now need it get.
+  /// their organization's interval, units that no longer do lose theirs.
   @PATCH('/api/v1/categories/{categoryId}')
   Future<CategoryUpdated> updateCategory({
     @Path('categoryId') required String categoryId,
@@ -72,7 +72,9 @@ abstract class CatalogClient {
   ///
   /// [q] - Case-insensitive match on product name, caption or manufacturer name.
   ///
-  /// [inspectionRequired] - Only products whose units do (`true`) or do not (`false`) need DGUV inspections, after the category default.
+  /// [inspectionRequired] - Only products whose units do (`true`) or do not (`false`) need the inspection type `inspectionTypeId`, after the category default.
+  ///
+  /// [inspectionTypeId] - The type `inspectionRequired` asks about. Absent - electrical.
   ///
   /// [mains] - Only products with (`true`) or without (`false`) a connector that carries mains voltage.
   ///
@@ -87,6 +89,7 @@ abstract class CatalogClient {
     @Query('q') String? q,
     @Query('categoryId') String? categoryId,
     @Query('inspectionRequired') bool? inspectionRequired,
+    @Query('inspectionTypeId') String? inspectionTypeId,
     @Query('mains') bool? mains,
     @Query('tracked') bool? tracked,
     @Query('overdue') bool? overdue,
@@ -118,9 +121,9 @@ abstract class CatalogClient {
   /// carrying mains voltage when its family already is. The panel answers to.
   /// a looser rule than the rest — a first panel is open to any MEMBER, as on.
   /// the web — and is written after the other fields, so a refusal there.
-  /// leaves those applied. Changing `requiresInspection`, the.
-  /// category or `isLicense` can change whether the product's units need.
-  /// DGUV inspections, and moves their intervals accordingly — across every.
+  /// leaves those applied. Changing `inspections` (or `requiresInspection`,.
+  /// the electrical type), the category or `isLicense` can change which.
+  /// inspections the product's units need, and moves their intervals accordingly — across every.
   /// organization holding units of it, which is why the right to do so is.
   /// the identity rule described under the `catalog` tag. A name another.
   /// product of the same manufacturer already has is refused (`409`).

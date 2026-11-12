@@ -1,8 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import {
 	addMonths,
-	initialInspectionInterval,
+	earliestDue,
 	inspectionDue,
+	inspectionOverride,
+	orgIntervals,
+	requiredInspectionTypes,
 	requiresInspection
 } from './inspection-due.ts';
 
@@ -48,26 +51,52 @@ describe('inspectionDue', () => {
 });
 
 describe('requiresInspection', () => {
-	const product = (own: boolean | null, category: boolean, isLicense = false) => ({
-		requiresInspection: own,
+	const product = (own: Record<string, boolean>, category: string[], isLicense = false) => ({
 		isLicense,
-		category: { requiresInspection: category }
+		inspectionTypes: Object.entries(own).map(([typeId, required]) => ({ typeId, required })),
+		category: { inspectionTypes: category.map((typeId) => ({ typeId })) }
 	});
 
-	it('follows the category unless the product says otherwise', () => {
-		expect(requiresInspection(product(null, true))).toBe(true);
-		expect(requiresInspection(product(null, false))).toBe(false);
-		expect(requiresInspection(product(false, true))).toBe(false);
-		expect(requiresInspection(product(true, false))).toBe(true);
+	it('follows the category per type unless the product says otherwise', () => {
+		expect(requiresInspection(product({}, ['el']), 'el')).toBe(true);
+		expect(requiresInspection(product({}, []), 'el')).toBe(false);
+		expect(requiresInspection(product({ el: false }, ['el']), 'el')).toBe(false);
+		expect(requiresInspection(product({ el: true }, []), 'el')).toBe(true);
+	});
+
+	it('answers each type on its own', () => {
+		const hoist = product({ lift: true }, ['el']);
+		expect([...requiredInspectionTypes(hoist)].sort()).toEqual(['el', 'lift']);
+		expect(inspectionOverride(hoist, 'lift')).toBe(true);
+		expect(inspectionOverride(hoist, 'el')).toBeNull();
 	});
 
 	it('never for a licence', () => {
-		expect(requiresInspection(product(true, true, true))).toBe(false);
+		expect(requiredInspectionTypes(product({ el: true }, ['el'], true)).size).toBe(0);
 	});
+});
 
-	it("gives a new unit the org's interval only when it needs inspecting", () => {
-		expect(initialInspectionInterval(product(null, true), 12)).toBe(12);
-		expect(initialInspectionInterval(product(null, false), 12)).toBeNull();
-		expect(initialInspectionInterval(product(true, false), null)).toBeNull();
+describe('orgIntervals', () => {
+	const types = [
+		{ id: 'el', defaultIntervalMonths: 12 },
+		{ id: 'vis', defaultIntervalMonths: null }
+	];
+
+	it("takes the org's own interval, null included, else the type's default", () => {
+		expect(orgIntervals(types, [])).toEqual(
+			new Map([
+				['el', 12],
+				['vis', null]
+			])
+		);
+		expect(orgIntervals(types, [{ typeId: 'el', months: null }]).get('el')).toBeNull();
+		expect(orgIntervals(types, [{ typeId: 'vis', months: 3 }]).get('vis')).toBe(3);
+	});
+});
+
+describe('earliestDue', () => {
+	it('is the earliest date, ignoring types that are not due', () => {
+		expect(earliestDue([null, day('2027-01-01'), day('2026-05-01')])).toEqual(day('2026-05-01'));
+		expect(earliestDue([null])).toBeNull();
 	});
 });

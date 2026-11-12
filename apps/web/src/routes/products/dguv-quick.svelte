@@ -1,9 +1,9 @@
 <script lang="ts">
-	// The DGUV quick mode of /products: the whole catalog as one table, filtered
-	// by category and by whether a product needs DGUV inspections, so the answer
-	// can be given for a shelf of products at once instead of one product page at
-	// a time. The rule itself is `requiresInspection` — the product's own answer,
-	// else its category's.
+	// The inspection quick mode of /products: the whole catalog as one table,
+	// filtered by category and by whether a product needs one inspection type, so
+	// the answer can be given for a shelf of products at once instead of one
+	// product page at a time. The rule itself is `requiresInspection` — per type,
+	// the product's own answer, else its category's.
 	import { resolve } from '$app/paths';
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { CategoryPill } from '#lib/components/ui/category-pill/index.js';
@@ -11,11 +11,17 @@
 	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
 	import { categoryLabel } from '#lib/category.js';
 	import { productLabel } from '#lib/product-label.js';
-	import { requiresInspection } from '#lib/inspection-due.js';
+	import {
+		INSPECTION_TYPE_IDS,
+		inspectionOverride,
+		requiresInspection as requires
+	} from '#lib/inspection-due.js';
+	import { inspectionTypeLabel } from '#lib/inspection-ui.svelte.js';
 	import { naturalCompare } from '#lib/sort.js';
 	import { confirmAction } from '#lib/confirm.svelte.js';
 	import { getErrorMessage, plural } from '#lib/utils.js';
 	import {
+		getInspectionTypes,
 		getMainsConnectorsByProduct,
 		setProductsInspectionRequirement
 	} from '#lib/remote/inspections.remote.js';
@@ -27,7 +33,7 @@
 		id: string;
 		name: string;
 		isLicense: boolean;
-		requiresInspection: boolean | null;
+		inspectionTypes: { typeId: string; required: boolean }[];
 		imagePath: string | null;
 		assetCount: number;
 		manufacturer: { name: string } | null;
@@ -36,7 +42,7 @@
 			name: string;
 			nameDe: string | null;
 			color: string;
-			requiresInspection: boolean;
+			inspectionTypes: { typeId: string }[];
 		};
 	};
 
@@ -51,6 +57,14 @@
 
 	let mainsQuery = $derived(getMainsConnectorsByProduct());
 	let mains = $derived(mainsQuery.current ?? {});
+	let typesQuery = $derived(getInspectionTypes());
+	let types = $derived(typesQuery.current ?? []);
+
+	// Every answer on this screen is about one type at a time.
+	let typeId = $state<string>(INSPECTION_TYPE_IDS.electrical);
+	let electrical = $derived(typeId === INSPECTION_TYPE_IDS.electrical);
+	const requiresInspection = (p: Product) => requires(p, typeId);
+	const byCategory = (p: Product) => p.category.inspectionTypes.some((t) => t.typeId === typeId);
 
 	type Status = 'all' | 'required' | 'not_required' | 'mains_unmarked';
 	let categoryId = $state('');
@@ -69,7 +83,7 @@
 				const required = requiresInspection(p);
 				if (status === 'required') return required;
 				if (status === 'not_required') return !required;
-				if (status === 'mains_unmarked') return !required && !!mains[p.id];
+				if (status === 'mains_unmarked') return electrical && !required && !!mains[p.id];
 				return true;
 			})
 			.filter(
@@ -98,7 +112,8 @@
 	}
 
 	function choiceOf(p: Product) {
-		return p.requiresInspection === null ? 'inherit' : p.requiresInspection ? 'yes' : 'no';
+		const own = inspectionOverride(p, typeId);
+		return own === null ? 'inherit' : own ? 'yes' : 'no';
 	}
 	function valueOf(choice: string) {
 		return choice === 'yes' ? true : choice === 'no' ? false : null;
@@ -109,7 +124,8 @@
 		try {
 			const result = await setProductsInspectionRequirement({
 				productIds,
-				requiresInspection: valueOf(choice)
+				typeId,
+				required: valueOf(choice)
 			});
 			if (result.refused.length > 0) {
 				toast.warning(
@@ -149,7 +165,7 @@
 							]),
 			description:
 				choice === 'no'
-					? 'Their devices lose their DGUV interval and leave the inspection list.'
+					? 'Their devices lose their interval for this type and leave the inspection list for it.'
 					: "Devices that need inspecting and have no interval get their organization's default, and come due at once.",
 			confirmLabel: 'Apply'
 		});
@@ -161,11 +177,20 @@
 
 <div class="space-y-4">
 	<p class="text-sm text-muted-foreground">
-		Which products' devices need DGUV V3 inspections. A product follows its category unless it is
-		set otherwise; the category default is set under Admin › Categories.
+		Which products' devices need an inspection type. A product follows its category unless it is set
+		otherwise; the category default is set under Admin › Categories.
 	</p>
 
 	<div class="flex flex-wrap items-center gap-2">
+		<select
+			bind:value={typeId}
+			aria-label="Inspection type"
+			class="h-10 rounded-md border border-input bg-background px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-ring focus:outline-none"
+		>
+			{#each types as type (type.id)}
+				<option value={type.id}>{inspectionTypeLabel(type)}</option>
+			{/each}
+		</select>
 		<input
 			type="search"
 			bind:value={search}
@@ -181,7 +206,7 @@
 			{#each categories as c (c.id)}<option value={c.id}>{categoryLabel(c)}</option>{/each}
 		</select>
 		<div class="flex flex-wrap items-center gap-1">
-			{#each [{ key: 'all', label: 'All' }, { key: 'required', label: 'Needs inspection' }, { key: 'not_required', label: 'No inspection' }, { key: 'mains_unmarked', label: `Mains, not marked (${mainsUnmarkedCount})` }] as option (option.key)}
+			{#each [{ key: 'all', label: 'All' }, { key: 'required', label: 'Needs inspection' }, { key: 'not_required', label: 'No inspection' }, ...(electrical ? [{ key: 'mains_unmarked', label: `Mains, not marked (${mainsUnmarkedCount})` }] : [])] as option (option.key)}
 				<button
 					type="button"
 					onclick={() => (status = option.key as Status)}
@@ -216,7 +241,11 @@
 						<th class="px-3 py-2 font-medium">Category</th>
 						<th class="px-3 py-2 text-right font-medium">Devices</th>
 						<th class="px-3 py-2 font-medium">Mains</th>
-						<th class="w-80 px-3 py-2 font-medium">DGUV</th>
+						<th class="w-80 px-3 py-2 font-medium">
+							{types.find((t) => t.id === typeId)
+								? inspectionTypeLabel(types.find((t) => t.id === typeId)!)
+								: ''}
+						</th>
 					</tr>
 				</thead>
 				<tbody>
@@ -267,7 +296,7 @@
 							</td>
 							<td class="px-3 py-2">
 								<select
-									aria-label="DGUV inspections"
+									aria-label="Inspection requirement"
 									value={choiceOf(product)}
 									disabled={saving}
 									onchange={(e) =>
@@ -277,7 +306,7 @@
 										: 'text-muted-foreground'}"
 								>
 									<option value="inherit">
-										{product.category.requiresInspection
+										{byCategory(product)
 											? 'Like category: needs inspection'
 											: 'Like category: no inspection'}
 									</option>

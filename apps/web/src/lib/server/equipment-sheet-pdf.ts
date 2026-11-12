@@ -20,6 +20,12 @@ export type EquipmentSheetLine = {
 	unitPrice?: number | null;
 	/** Object key of the product photo, or of the generated kit/unit preview. */
 	imagePath: string | null;
+	/**
+	 * Proof of inspection: per type the units are tracked for, until when the
+	 * earliest of them is good ("Elektrisch gültig bis 08/2027"). `overdue`
+	 * prints it as a warning. Absent where nothing on the line is inspected.
+	 */
+	inspection?: { text: string; overdue: boolean } | null;
 };
 
 export type EquipmentSheetGroup = { name: string; lines: EquipmentSheetLine[] };
@@ -390,7 +396,16 @@ export async function generateEquipmentSheetPdf(
 					font: regular,
 					color: muted,
 					gap: i === 0 ? 10 : 8.5
-				}))
+				})),
+				...(line.inspection ? wrap(line.inspection.text, regular, 7, textWidth) : []).map(
+					(value, i) => ({
+						value,
+						size: 7,
+						font: regular,
+						color: line.inspection!.overdue ? rgb(0.72, 0.11, 0.11) : muted,
+						gap: i === 0 ? 10 : 8.5
+					})
+				)
 			];
 			const firstBaseline = ROW_PAD + capHeight(bold, 9);
 			const textHeight = firstBaseline + text.reduce((sum, t) => sum + t.gap, 0) + ROW_PAD + 2;

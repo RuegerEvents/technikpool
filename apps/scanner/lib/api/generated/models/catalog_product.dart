@@ -7,6 +7,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'cable_spec.dart';
 import 'catalog_product_units.dart';
 import 'category.dart';
+import 'product_inspection_requirement.dart';
 import 'product_port.dart';
 
 part 'catalog_product.g.dart';
@@ -27,6 +28,7 @@ class CatalogProduct {
     this.details,
     this.imageUrl,
     this.cable,
+    this.inspections,
     this.ports,
   });
   
@@ -60,13 +62,19 @@ class CatalogProduct {
   ///
   final CableSpec? cable;
 
-  /// The product's own answer. Null follows its category.
+  /// The product's own answer for electrical inspections. Null follows its category.
   final bool? requiresInspection;
 
-  /// Whether its units need DGUV inspections: `requiresInspection`,.
-  /// else the category's. A licence never does.
+  /// Whether its units need electrical (DGUV V3) inspections:.
+  /// `requiresInspection`, else the category's. A licence never does.
   ///
   final bool inspectionRequired;
+
+  /// Per inspection type, whether its units need it and whether.
+  /// that is the product's own answer. Every type is listed. Not.
+  /// required, so an older client keeps compiling.
+  ///
+  final List<ProductInspectionRequirement>? inspections;
   final bool isLicense;
 
   /// Connectors carrying mains voltage it has — on its panel, at a.

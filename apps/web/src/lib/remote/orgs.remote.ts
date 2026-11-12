@@ -22,6 +22,7 @@ import { accountDeletionBlocker } from '#lib/server/services/account-deletion.js
 import { getInvitations } from './invitations.remote';
 import { getKnownAddresses } from './addresses.remote';
 import { getRentalTerms } from './rental-terms.remote';
+import { reconcileSchedules } from '#lib/server/services/inspections.js';
 
 export const getMyOrgs = query(async () => {
 	const user = await requireAuth();
@@ -109,6 +110,7 @@ export const getOrgWithMembers = query(v.string(), async (orgId: string) => {
 				},
 				orderBy: { role: 'asc' }
 			},
+			inspectionIntervals: { select: { typeId: true, months: true } },
 			// The latest accepted data processing agreement, to link its PDF.
 			dpaAcceptances: {
 				orderBy: { acceptedAt: 'desc' },
@@ -401,7 +403,13 @@ const updateOrgSchema = v.object({
 	assetIdPrefix: v.string(),
 	color: v.string(),
 	avatarLabel: v.string(),
-	defaultInspectionIntervalMonths: v.optional(v.nullable(v.number())),
+	/** Inspection type id → the org's interval in months, or null to track none of that type. */
+	inspectionIntervals: v.optional(
+		v.record(
+			v.string(),
+			v.nullable(v.pipe(v.number(), v.integer(), v.minValue(1), v.maxValue(120)))
+		)
+	),
 	isKleinunternehmer: v.optional(v.boolean()),
 	address: v.optional(v.nullable(billingAddressSchema)),
 	taxNumber: v.optional(v.nullable(v.string())),
@@ -428,7 +436,7 @@ export const updateOrg = command(
 		assetIdPrefix,
 		color,
 		avatarLabel,
-		defaultInspectionIntervalMonths,
+		inspectionIntervals,
 		isKleinunternehmer,
 		address,
 		taxNumber,
@@ -487,7 +495,7 @@ export const updateOrg = command(
 				}
 			}
 
-			return await tx.organization.update({
+			const updated = await tx.organization.update({
 				where: { id: orgId },
 				data: {
 					...(trimmedName ? { name: trimmedName } : {}),
@@ -495,8 +503,16 @@ export const updateOrg = command(
 					assetIdPrefix: prefix,
 					color: normalizedColor,
 					avatarLabel: normalizedLabel,
-					...(defaultInspectionIntervalMonths !== undefined
-						? { defaultInspectionIntervalMonths }
+					...(inspectionIntervals
+						? {
+								inspectionIntervals: {
+									upsert: Object.entries(inspectionIntervals).map(([typeId, months]) => ({
+										where: { organizationId_typeId: { organizationId: orgId, typeId } },
+										create: { typeId, months },
+										update: { months }
+									}))
+								}
+							}
 						: {}),
 					...(isKleinunternehmer !== undefined ? { isKleinunternehmer } : {}),
 					...(addressId !== undefined ? { addressId } : {}),
@@ -527,6 +543,16 @@ export const updateOrg = command(
 						: {})
 				}
 			});
+			// Every unit that follows the org's interval follows it to the new one.
+			if (inspectionIntervals) {
+				await reconcileSchedules(
+					tx,
+					caller.id,
+					{ organizationId: orgId },
+					Object.keys(inspectionIntervals)
+				);
+			}
+			return updated;
 		});
 
 		await getOrgWithMembers(orgId).refresh();

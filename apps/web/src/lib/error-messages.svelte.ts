@@ -139,6 +139,24 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return 'An inspection cannot be recorded for a date that has not happened yet.';
 		case 'inspection_not_found':
 			return 'This inspection no longer exists.';
+		case 'inspection_type_not_found':
+			return 'This inspection type no longer exists.';
+		case 'inspection_qualification_required':
+			return `Only a member qualified for “${p0}” in this organization may record it. An inspection done by an outside firm can be entered as external.`;
+		case 'inspection_external_details_required':
+			return 'An external inspection needs the firm or inspector and their qualification.';
+		case 'inspection_type_name_required':
+			return 'Enter a name for the inspection type.';
+		case 'inspection_type_exists':
+			return `There is already an inspection type called “${p0}”.`;
+		case 'inspection_fail_status_invalid':
+			return 'A failed inspection can set a unit to broken, in maintenance, unavailable or decommissioned.';
+		case 'qualification_date_invalid':
+			return 'Enter the date the qualification runs until.';
+		case 'member_not_found':
+			return 'This member is no longer in the organization.';
+		case 'defect_note_required':
+			return 'Say what is wrong with the unit.';
 		case 'asset_unavailable_no_booking':
 			return 'This unit is marked unavailable and cannot be booked or checked out.';
 		case 'asset_unavailable_no_bundle':

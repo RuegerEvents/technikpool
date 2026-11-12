@@ -70,8 +70,7 @@ import {
 import { PORT_REQUIREMENTS } from '#lib/ports.js';
 import { getConnectors, getConnectorUsage } from '#lib/remote/connectors.remote.js';
 import { getKnownAddresses } from '#lib/remote/addresses.remote.js';
-import { inspectionDue } from '#lib/inspection-due.js';
-import { initialInspection } from '#lib/server/services/inspections.js';
+import { initialInspection, type InitialInspection } from '#lib/server/services/inspections.js';
 import { appError } from '#lib/errors.js';
 import { productLabel } from '#lib/product-label.js';
 import {
@@ -252,7 +251,8 @@ export const getAsset = query(v.string(), async (assetId: string) => {
 			product: {
 				include: {
 					manufacturer: true,
-					category: true,
+					category: { include: { inspectionTypes: { select: { typeId: true } } } },
+					inspectionTypes: { select: { typeId: true, required: true } },
 					...CABLE_ENDS,
 					ports: { include: { connector: true }, orderBy: { sortOrder: 'asc' } }
 				}
@@ -261,7 +261,10 @@ export const getAsset = query(v.string(), async (assetId: string) => {
 			organization: true,
 			bundle: { select: { id: true, template: { select: { name: true, caption: true } } } },
 			parent: PARENT_SELECT,
-			accessories: ACCESSORIES_INCLUDE
+			accessories: ACCESSORIES_INCLUDE,
+			inspectionSchedules: {
+				select: { typeId: true, intervalMonths: true, overrideMonths: true, nextDue: true }
+			}
 		}
 	});
 
@@ -352,7 +355,10 @@ export const mergeManufacturers = command(mergeManufacturersSchema, async (input
 
 export const getCategories = query(async () => {
 	await requireAuth();
-	return await prisma.category.findMany({ orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }] });
+	return await prisma.category.findMany({
+		include: { inspectionTypes: { select: { typeId: true } } },
+		orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }]
+	});
 });
 
 const updateCategorySchema = v.object({
@@ -810,7 +816,8 @@ export const getProductCatalog = query(v.optional(v.string()), async (organizati
 	const products = await prisma.product.findMany({
 		include: {
 			manufacturer: true,
-			category: true,
+			category: { include: { inspectionTypes: { select: { typeId: true } } } },
+			inspectionTypes: { select: { typeId: true, required: true } },
 			// One row per org that owns units — `owningOrgIds` is what lets the
 			// wizard grey out identity fields the server would refuse to change.
 			assets: { select: { organizationId: true }, distinct: ['organizationId'] },
@@ -1077,7 +1084,14 @@ async function resolveProductRef(
 /** The subset of a Prisma client these helpers need — the real one or a `$transaction` handle. */
 type AssetTx = Pick<
 	typeof prisma,
-	'asset' | 'organization' | 'assetTransaction' | 'product' | '$queryRaw'
+	| 'asset'
+	| 'organization'
+	| 'assetTransaction'
+	| 'product'
+	| 'inspectionType'
+	| 'orgInspectionInterval'
+	| 'orgProductInspectionInterval'
+	| '$queryRaw'
 >;
 
 /** One unit as a caller asks for it — a tag it brought, one to allocate, or none. */
@@ -1177,7 +1191,7 @@ async function createUnitsInTx(tx: AssetTx, args: CreateUnitsArgs) {
 					status: 'AVAILABLE',
 					parentAssetId: parent?.id ?? null,
 					bundleId: parent?.bundleId ?? args.bundleId ?? null,
-					// Snapshot, not a live reference — see Organization.defaultInspectionIntervalMonths.
+					// Snapshot of the org's intervals, not a live reference — see OrgInspectionInterval.
 					...inspection(unit.productId),
 					transactions: {
 						create: [
@@ -1246,7 +1260,7 @@ async function createUnitsInTx(tx: AssetTx, args: CreateUnitsArgs) {
 						productId: acc.productId,
 						// A tagged original begets a tagged copy — where the org numbers.
 						assetTag: acc.tagged && tags.enabled ? tags.next() : null,
-						...inspection(acc.productId),
+						inspection: inspection(acc.productId),
 						parent: parentRecord
 					});
 				}
@@ -1650,8 +1664,7 @@ const updateAssetSchema = v.object({
 	assetTag: v.optional(v.string()),
 	status: v.optional(v.picklist(ASSET_STATUSES)),
 	locationId: v.optional(v.string()),
-	purchaseDate: v.optional(v.nullable(v.string())),
-	inspectionIntervalMonths: v.optional(v.nullable(v.number()))
+	purchaseDate: v.optional(v.nullable(v.string()))
 });
 
 export const updateAsset = command(updateAssetSchema, async (input) => {
@@ -1709,22 +1722,11 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 		bundleId?: string | null;
 		parentAssetId?: string | null;
 		purchaseDate?: Date | null;
-		inspectionIntervalMonths?: number | null;
-		nextInspectionDue?: Date | null;
 	} = {};
 
 	const changes: FieldChange[] = [];
 	if ('purchaseDate' in input) {
 		updateData.purchaseDate = input.purchaseDate ? new Date(input.purchaseDate) : null;
-	}
-	if ('inspectionIntervalMonths' in input) {
-		const interval = input.inspectionIntervalMonths ?? null;
-		updateData.inspectionIntervalMonths = interval;
-		const lastInspection = await prisma.inspection.findFirst({
-			where: { assetId: asset.id },
-			orderBy: [{ performedAt: 'desc' }, { createdAt: 'desc' }]
-		});
-		updateData.nextInspectionDue = inspectionDue(interval, lastInspection, asset.createdAt);
 	}
 	if ('serialNumber' in input) {
 		const serialNumber = input.serialNumber?.trim() || null;
@@ -3778,7 +3780,7 @@ export const duplicateBundle = command(duplicateBundleSchema, async (data) => {
 							organizationId,
 							productId: slot.productId,
 							assetTag: copyTag(slot.tagged),
-							...inspection(slot.productId),
+							inspection: inspection(slot.productId),
 							parent
 						});
 						created++;
@@ -4125,8 +4127,7 @@ function createAccessoryRecord(
 		organizationId: string;
 		productId: string;
 		assetTag: string | null;
-		inspectionIntervalMonths: number | null;
-		nextInspectionDue: Date | null;
+		inspection: InitialInspection;
 		parent: AccessoryParent;
 	}
 ) {
@@ -4139,8 +4140,7 @@ function createAccessoryRecord(
 			status: 'AVAILABLE',
 			parentAssetId: args.parent.id,
 			bundleId: args.parent.bundleId,
-			inspectionIntervalMonths: args.inspectionIntervalMonths,
-			nextInspectionDue: args.nextInspectionDue,
+			...args.inspection,
 			transactions: {
 				create: [
 					{ userId: args.userId, action: 'CREATED', data: { type: 'CREATED' } },
@@ -4488,7 +4488,7 @@ export const addProductAccessories = command(addProductAccessoriesSchema, async 
 					productId: accessoryProductId,
 					// Numbered like the units it copies, where the org numbers at all.
 					assetTag: data.noAssetTag || !tags.enabled ? null : tags.next(),
-					...inspection(accessoryProductId),
+					inspection: inspection(accessoryProductId),
 					parent: unit
 				});
 				created.push(record.id);

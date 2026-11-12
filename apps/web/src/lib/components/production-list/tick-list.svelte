@@ -2,6 +2,7 @@
 	lang="ts"
 	generics="U extends { assetId: string; assetTag: string | null; productName: string; productCaption: string | null; productImagePath: string | null; accessoryOf: string | null; kit: ListKit | null }"
 >
+	import type { Snippet } from 'svelte';
 	import { Handshake, MapPin, Package } from '@lucide/svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 	import { Button } from '#lib/components/ui/button/index.js';
@@ -53,6 +54,8 @@
 		ontoggle: (unit: U, done: boolean) => Promise<unknown>;
 		oncount: (line: ListLine, count: number) => Promise<unknown>;
 		ontickSection: (units: U[], lines: ListLine[]) => void;
+		/** Something to do with one unit besides ticking it, at the row's end. */
+		unitAction?: Snippet<[U]>;
 	};
 
 	let {
@@ -65,7 +68,8 @@
 		tickKitLabel,
 		ontoggle,
 		oncount,
-		ontickSection
+		ontickSection,
+		unitAction
 	}: Props = $props();
 
 	const wantedDone = new SvelteMap<string, boolean>();
@@ -253,9 +257,9 @@
 					{:else}
 						{@const unit = row.unit}
 						{@const s = stateOf(unit)}
-						<li>
+						<li class="flex items-center">
 							<label
-								class="flex items-center gap-3 px-3 py-2 {enabled && !s.locked
+								class="flex min-w-0 flex-1 items-center gap-3 px-3 py-2 {enabled && !s.locked
 									? 'cursor-pointer hover:bg-muted/40'
 									: ''} {indent(unit)}"
 							>
@@ -290,6 +294,9 @@
 									{/if}
 								</span>
 							</label>
+							{#if unitAction}
+								<div class="shrink-0 pr-2">{@render unitAction(unit)}</div>
+							{/if}
 						</li>
 					{/if}
 				{/each}

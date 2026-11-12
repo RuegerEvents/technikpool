@@ -11,6 +11,7 @@ export const GET: RequestHandler = ({ locals }) =>
 		requireApiUser(locals);
 
 		const categories = await prisma.category.findMany({
+			include: { inspectionTypes: { select: { typeId: true } } },
 			orderBy: [{ sortOrder: 'asc' }, { name: 'asc' }]
 		});
 

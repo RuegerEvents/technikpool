@@ -1356,4 +1356,52 @@ class SEn extends S {
   String caseLabelPage(int page, int count) {
     return 'Label $page of $count';
   }
+
+  @override
+  String get inspectionType => 'Inspection type';
+
+  @override
+  String get inspectionExternal => 'Done by an outside firm';
+
+  @override
+  String get inspectionExternalHint =>
+      'Enter the firm or inspector and their qualification.';
+
+  @override
+  String get inspectionOwnHint =>
+      'Recorded under your name. Types that need a qualification need one in the unit\'s organization.';
+
+  @override
+  String get inspectionExternalShort => 'external';
+
+  @override
+  String get inspectionQualification => 'Their qualification';
+
+  @override
+  String get inspectionQualificationHint => 'e.g. Elektrofachkraft';
+
+  @override
+  String get inspectionOverdueNote => 'Inspection overdue';
+
+  @override
+  String inspectionOverdueOf(String types) {
+    return 'inspection overdue: $types';
+  }
+
+  @override
+  String get reportDefect => 'Report a defect';
+
+  @override
+  String get defectWhatIsWrong => 'What is wrong?';
+
+  @override
+  String get defectHint =>
+      'Recorded as a failed visual check. The unit goes into maintenance; taking it back still works.';
+
+  @override
+  String get defectReported => 'Defect reported';
+
+  @override
+  String get defectReportedDone =>
+      'Defect reported · the unit is in maintenance';
 }

@@ -517,5 +517,20 @@
   "labelPrinterTimeout": "The printer at {printer} did not respond",
   "@labelPrinterTimeout": {"placeholders": {"printer": {"type": "String"}}},
   "caseLabelPage": "Label {page} of {count}",
-  "@caseLabelPage": {"placeholders": {"page": {"type": "int"}, "count": {"type": "int"}}}
+  "@caseLabelPage": {"placeholders": {"page": {"type": "int"}, "count": {"type": "int"}}},
+  "inspectionType": "Inspection type",
+  "inspectionExternal": "Done by an outside firm",
+  "inspectionExternalHint": "Enter the firm or inspector and their qualification.",
+  "inspectionOwnHint": "Recorded under your name. Types that need a qualification need one in the unit's organization.",
+  "inspectionExternalShort": "external",
+  "inspectionQualification": "Their qualification",
+  "inspectionQualificationHint": "e.g. Elektrofachkraft",
+  "inspectionOverdueNote": "Inspection overdue",
+  "inspectionOverdueOf": "inspection overdue: {types}",
+  "@inspectionOverdueOf": {"placeholders": {"types": {"type": "String"}}},
+  "reportDefect": "Report a defect",
+  "defectWhatIsWrong": "What is wrong?",
+  "defectHint": "Recorded as a failed visual check. The unit goes into maintenance; taking it back still works.",
+  "defectReported": "Defect reported",
+  "defectReportedDone": "Defect reported · the unit is in maintenance"
 }

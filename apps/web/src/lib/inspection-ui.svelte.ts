@@ -1,4 +1,6 @@
 /* eslint-disable svelte/prefer-svelte-reactivity -- every Date here is a throwaway value, never state */
+import { categoryLabel } from '#lib/category.js';
+
 // How a unit's inspection state reads on screen. The date itself is derived on
 // the server (see `inspectionDue`); this only decides how alarming it looks.
 
@@ -23,6 +25,11 @@ export function inspectionTone(state: InspectionState | null): string {
 			: '';
 }
 
+/** A type's name in the reader's language, like a category's. */
+export function inspectionTypeLabel(type: { name: string; nameDe?: string | null }): string {
+	return categoryLabel(type);
+}
+
 export function inspectionResultLabel(result: string): string {
 	return result === 'FAILED' ? 'Failed' : 'Passed';
 }
@@ -35,4 +42,13 @@ export function localToday(): string {
 /** A stored inspection day (midnight UTC) for display. */
 export function formatInspectionDay(date: Date | string): string {
 	return new Date(date).toLocaleDateString('de-DE', { timeZone: 'UTC' });
+}
+
+/** A due date as MM/YYYY — "valid until" on a customer's page needs no more. */
+export function formatInspectionMonth(date: Date | string): string {
+	return new Date(date).toLocaleDateString('de-DE', {
+		month: '2-digit',
+		year: 'numeric',
+		timeZone: 'UTC'
+	});
 }

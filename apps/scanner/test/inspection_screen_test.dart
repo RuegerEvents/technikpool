@@ -45,10 +45,14 @@ void main() {
     await tester.pumpAndSettle(const Duration(seconds: 1));
   }
 
-  testWidgets('remembers the inspector and ignores scans before the start', (
+  testWidgets('remembers the outside inspector and ignores scans before the start', (
     tester,
   ) async {
     final container = await pumpRun(tester);
+    // One's own inspection is under one's own name: no inspector to type.
+    expect(find.widgetWithText(TextField, 'Prüfdienst Nord'), findsNothing);
+    await tester.tap(find.text('Done by an outside firm'));
+    await tester.pumpAndSettle();
     expect(find.widgetWithText(TextField, 'Prüfdienst Nord'), findsOneWidget);
 
     await scan(tester, container, '40000001');

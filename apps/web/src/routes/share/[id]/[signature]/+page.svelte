@@ -11,7 +11,9 @@
 	import { SvelteSet } from 'svelte/reactivity';
 	import { BookOpen, FileText, Info, LayoutList, PackageCheck, ScanLine, X } from '@lucide/svelte';
 	import type { Html5Qrcode } from 'html5-qrcode';
-	import type { ShareUnit } from '#lib/production-share.js';
+	import type { ShareInspection, ShareUnit } from '#lib/production-share.js';
+	import { categoryLabel } from '#lib/category.js';
+	import { formatInspectionMonth } from '#lib/inspection-ui.svelte.js';
 	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
 	import { naturalCompare } from '#lib/sort.js';
 	import { plural } from '#lib/utils.js';
@@ -639,6 +641,7 @@
 				<span class="block text-xs text-muted-foreground">
 					{[unit.manufacturer, unit.tag].filter(Boolean).join(' · ')}
 				</span>
+				{@render proof(unit.inspections)}
 			</span>
 		</label>
 		{#each unit.accessories as accessory (accessory.id)}
@@ -652,8 +655,28 @@
 				<ProductThumb path={accessory.imageUrl} alt={accessory.name} size={20} />
 				<span class="text-xs {packed.has(accessory.id) ? 'line-through opacity-60' : ''}">
 					↳ {accessory.name}{accessory.tag ? ` · ${accessory.tag}` : ''}
+					{@render proof(accessory.inspections)}
 				</span>
 			</label>
 		{/each}
 	</li>
+{/snippet}
+
+<!-- Proof of inspection per type: until when it is good. -->
+{#snippet proof(inspections: ShareInspection[])}
+	{#each inspections as inspection (inspection.name)}
+		<span
+			class="block text-xs {inspection.overdue
+				? 'text-destructive'
+				: 'text-emerald-700 dark:text-emerald-400'}"
+		>
+			{#if inspection.overdue}
+				{categoryLabel(inspection)}: inspection overdue
+			{:else}
+				{categoryLabel(inspection)}: inspected, valid until {formatInspectionMonth(
+					inspection.validUntil
+				)}
+			{/if}
+		</span>
+	{/each}
 {/snippet}

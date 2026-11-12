@@ -36,6 +36,12 @@ const ORG_INCLUDE = { address: true } as const;
 /** What a sheet needs to know about a unit: its picture, kit and accessories. */
 const ASSET_INCLUDE = {
 	product: { include: { manufacturer: true, category: true } },
+	inspectionSchedules: {
+		select: {
+			nextDue: true,
+			type: { select: { id: true, name: true, nameDe: true, sortOrder: true } }
+		}
+	},
 	accessories: { include: { product: true } },
 	location: { select: { name: true } },
 	organization: { select: { name: true, shortName: true } },
@@ -95,6 +101,42 @@ type Org = Production['organization'];
 
 function categoryName(category: { name: string; nameDe: string | null }) {
 	return category.nameDe?.trim() || category.name;
+}
+
+/** MM/YYYY, the precision a "valid until" on paper needs. */
+function monthYear(date: Date) {
+	return `${String(date.getUTCMonth() + 1).padStart(2, '0')}/${date.getUTCFullYear()}`;
+}
+
+/**
+ * Per inspection type the line's units are tracked for, the earliest due date
+ * among them — what the whole line is good until. German, like the sheet.
+ */
+function inspectionProof(units: Unit['asset'][]): EquipmentSheetLine['inspection'] {
+	const earliest = new Map<string, { name: string; sortOrder: number; due: Date }>();
+	for (const unit of units) {
+		for (const s of unit.inspectionSchedules) {
+			const known = earliest.get(s.type.id);
+			if (!known || s.nextDue < known.due) {
+				earliest.set(s.type.id, {
+					name: s.type.nameDe?.trim() || s.type.name,
+					sortOrder: s.type.sortOrder,
+					due: s.nextDue
+				});
+			}
+		}
+	}
+	if (earliest.size === 0) return null;
+	const now = Date.now();
+	const parts = [...earliest.values()]
+		.sort((a, b) => a.sortOrder - b.sortOrder)
+		.map((e) =>
+			e.due.getTime() < now ? `${e.name} überfällig` : `${e.name} gültig bis ${monthYear(e.due)}`
+		);
+	return {
+		text: `Prüfung: ${parts.join(' · ')}`,
+		overdue: [...earliest.values()].some((e) => e.due.getTime() < now)
+	};
 }
 
 function identifier(asset: { assetTag: string | null; serialNumber: string | null }) {
@@ -197,6 +239,8 @@ async function pricingFor(organizationId: string): Promise<Pricing> {
 
 type PendingLine = EquipmentSheetLine & {
 	group: ListGroup;
+	/** Every unit on the line, accessories and kit members included, for its proof of inspection. */
+	units: Unit['asset'][];
 	image: () => Promise<string | null>;
 	/** The picture has to be redrawn first, which is what takes time. */
 	stale: boolean;
@@ -235,7 +279,7 @@ async function sheetGroups(
 	];
 
 	const lines = new Map<string, PendingLine>();
-	const add = (key: string, make: () => PendingLine, id: string | null) => {
+	const add = (key: string, make: () => PendingLine, id: string | null, units: Unit['asset'][]) => {
 		let line = lines.get(key);
 		if (!line) {
 			line = make();
@@ -243,6 +287,7 @@ async function sheetGroups(
 		}
 		line.quantity++;
 		if (id) line.identifiers.push(id);
+		line.units.push(...units);
 	};
 
 	const bundles = new Map<string, Unit[]>();
@@ -267,6 +312,7 @@ async function sheetGroups(
 			`${groupKey(group)}|product:${asset.productId}|${inkl ?? ''}`,
 			() => ({
 				group,
+				units: [],
 				label: productLabel(asset.product),
 				subtitle: inkl,
 				identifiers: [],
@@ -277,7 +323,8 @@ async function sheetGroups(
 					accessories.length ? assetImage(asset) : Promise.resolve(asset.product.imagePath),
 				stale: assetImageIsStale(asset)
 			}),
-			identifiers ? identifier(asset) : null
+			identifiers ? identifier(asset) : null,
+			[asset, ...accessories.map((a) => a.asset)]
 		);
 	}
 	for (const bundleItems of bundles.values()) {
@@ -288,6 +335,7 @@ async function sheetGroups(
 			`${groupKey(group)}|bundle:${bundle.templateId}|${contents}`,
 			() => ({
 				group,
+				units: [],
 				label: bundle.template.name,
 				subtitle: `bestehend aus: ${contents}`,
 				identifiers: [],
@@ -297,7 +345,11 @@ async function sheetGroups(
 				image: () => bundleImage(bundle),
 				stale: bundleImageIsStale(bundle)
 			}),
-			identifiers ? bundle.tag : null
+			identifiers ? bundle.tag : null,
+			bundleItems.flatMap((item) => [
+				item.asset,
+				...(accessoriesOf.get(item.assetId) ?? []).map((a) => a.asset)
+			])
 		);
 	}
 
@@ -323,11 +375,20 @@ async function sheetGroups(
 		identifiers,
 		quantity,
 		unitPrice,
-		imagePath
+		imagePath,
+		units
 	} of lines.values()) {
 		const key = groupKey(group);
 		if (!groups.has(key)) groups.set(key, { group, lines: [] });
-		groups.get(key)!.lines.push({ label, subtitle, identifiers, quantity, unitPrice, imagePath });
+		groups.get(key)!.lines.push({
+			label,
+			subtitle,
+			identifiers,
+			quantity,
+			unitPrice,
+			imagePath,
+			inspection: inspectionProof(units)
+		});
 	}
 	return [...groups.values()]
 		.sort((a, b) => compareGroups(a.group, b.group))

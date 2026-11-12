@@ -19,6 +19,7 @@ import {
 import { productDocuments } from '#lib/server/services/product-documents.js';
 import { resolveScannedCode } from '#lib/server/services/asset-lookup.js';
 import { KIT_SELECT, kitOf } from '#lib/server/services/production-list.js';
+import { DEFAULT_INSPECTION_TYPE_ID } from '#lib/inspection-due.js';
 
 const HISTORY_LIMIT = 20;
 const INSPECTION_LIMIT = 10;
@@ -56,9 +57,13 @@ export const GET: RequestHandler = ({ locals, params }) =>
 				inspections: {
 					orderBy: [{ performedAt: 'desc' }, { createdAt: 'desc' }],
 					take: INSPECTION_LIMIT
-				}
+				},
+				inspectionSchedules: { orderBy: { type: { sortOrder: 'asc' } } }
 			}
 		});
+		const electrical = asset.inspectionSchedules.find(
+			(s) => s.typeId === DEFAULT_INSPECTION_TYPE_ID
+		);
 
 		const admin = await isSystemAdmin(user.id);
 		const orgIds = await userOrgIds(user.id);
@@ -97,8 +102,13 @@ export const GET: RequestHandler = ({ locals, params }) =>
 			...toAsset(asset),
 			documents: (await productDocuments(asset.productId)).map(toProductDocument),
 			kit: kitOf(asset.bundle),
-			inspectionIntervalMonths: asset.inspectionIntervalMonths,
+			inspectionIntervalMonths: electrical?.intervalMonths ?? null,
 			nextInspectionDue: asset.nextInspectionDue?.toISOString() ?? null,
+			inspectionSchedules: asset.inspectionSchedules.map((s) => ({
+				typeId: s.typeId,
+				intervalMonths: s.intervalMonths,
+				nextDue: s.nextDue.toISOString()
+			})),
 			inspections: asset.inspections.map(toInspection),
 			currentProduction: openItem
 				? toProduction({

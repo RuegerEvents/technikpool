@@ -369,5 +369,19 @@
   "labelPrinterRemove": "Drucker entfernen",
   "labelPrinterUnreachable": "Drucker unter {printer} nicht erreichbar: {detail}",
   "labelPrinterTimeout": "Der Drucker unter {printer} antwortet nicht",
-  "caseLabelPage": "Etikett {page} von {count}"
+  "caseLabelPage": "Etikett {page} von {count}",
+  "inspectionType": "Prüfart",
+  "inspectionExternal": "Von einer externen Firma geprüft",
+  "inspectionExternalHint": "Firma oder Prüfer und deren Qualifikation eintragen.",
+  "inspectionOwnHint": "Erfasst unter deinem Namen. Prüfarten mit Befähigung brauchen eine in der Organisation des Geräts.",
+  "inspectionExternalShort": "extern",
+  "inspectionQualification": "Deren Qualifikation",
+  "inspectionQualificationHint": "z. B. Elektrofachkraft",
+  "inspectionOverdueNote": "Prüfung überfällig",
+  "inspectionOverdueOf": "Prüfung überfällig: {types}",
+  "reportDefect": "Defekt melden",
+  "defectWhatIsWrong": "Was ist kaputt?",
+  "defectHint": "Wird als nicht bestandene Sichtprüfung erfasst. Das Gerät kommt in Wartung; zurückbuchen geht trotzdem.",
+  "defectReported": "Defekt gemeldet",
+  "defectReportedDone": "Defekt gemeldet · das Gerät ist in Wartung"
 }

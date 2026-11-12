@@ -91,6 +91,8 @@ export interface HandoutItem {
 	done: boolean;
 	received: boolean;
 	returnReported: boolean;
+	/** Some inspection of it is overdue. Handing it out warns, never refuses. */
+	inspectionOverdue: boolean;
 }
 
 export interface HandoutView {
@@ -248,6 +250,7 @@ async function kitAdditions(scope: Scope) {
 			id: true,
 			assetTag: true,
 			organizationId: true,
+			nextInspectionDue: true,
 			bundle: { select: KIT_SELECT },
 			location: { select: { name: true } },
 			product: {
@@ -261,6 +264,10 @@ async function kitAdditions(scope: Scope) {
 		}
 	});
 	return assets;
+}
+
+function overdue(due: Date | null) {
+	return !!due && due.getTime() < Date.now();
 }
 
 function isDone(item: ListedItem, mode: HandoutMode) {
@@ -304,7 +311,8 @@ export async function getHandout(
 			kitAddition: true,
 			done: false,
 			received: false,
-			returnReported: false
+			returnReported: false,
+			inspectionOverdue: overdue(asset.nextInspectionDue)
 		})),
 		...listed.map((item) => {
 			const lent = item.asset.organizationId !== productionOrgId;
@@ -323,7 +331,8 @@ export async function getHandout(
 				kitAddition: false,
 				done: isDone(item, mode),
 				received: lent && item.receivedAt !== null,
-				returnReported: lent && item.returnReportedAt !== null
+				returnReported: lent && item.returnReportedAt !== null,
+				inspectionOverdue: overdue(item.asset.nextInspectionDue)
 			};
 		})
 	]);

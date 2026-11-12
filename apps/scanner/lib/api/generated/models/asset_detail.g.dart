@@ -35,6 +35,9 @@ AssetDetail _$AssetDetailFromJson(Map<String, dynamic> json) => AssetDetail(
   nextInspectionDue: json['nextInspectionDue'] == null
       ? null
       : DateTime.parse(json['nextInspectionDue'] as String),
+  inspectionSchedules: (json['inspectionSchedules'] as List<dynamic>?)
+      ?.map((e) => InspectionSchedule.fromJson(e as Map<String, dynamic>))
+      .toList(),
   inspections: (json['inspections'] as List<dynamic>?)
       ?.map((e) => Inspection.fromJson(e as Map<String, dynamic>))
       .toList(),
@@ -58,5 +61,6 @@ Map<String, dynamic> _$AssetDetailToJson(AssetDetail instance) =>
       'documents': ?instance.documents,
       'inspectionIntervalMonths': ?instance.inspectionIntervalMonths,
       'nextInspectionDue': ?instance.nextInspectionDue?.toIso8601String(),
+      'inspectionSchedules': ?instance.inspectionSchedules,
       'inspections': ?instance.inspections,
     };

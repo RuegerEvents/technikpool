@@ -13,14 +13,20 @@ Inspection _$InspectionFromJson(Map<String, dynamic> json) => Inspection(
   result: InspectionResult.fromJson(json['result'] as String),
   inspectorName: json['inspectorName'] as String?,
   notes: json['notes'] as String?,
+  typeId: json['typeId'] as String?,
+  externalValue: json['external'] as bool?,
+  qualification: json['qualification'] as String?,
 );
 
 Map<String, dynamic> _$InspectionToJson(Inspection instance) =>
     <String, dynamic>{
       'id': instance.id,
       'assetId': instance.assetId,
+      'typeId': ?instance.typeId,
       'performedAt': instance.performedAt.toIso8601String(),
       'result': instance.result,
       'inspectorName': ?instance.inspectorName,
       'notes': ?instance.notes,
+      'external': ?instance.externalValue,
+      'qualification': ?instance.qualification,
     };

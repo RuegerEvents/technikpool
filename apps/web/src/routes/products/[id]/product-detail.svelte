@@ -26,9 +26,19 @@
 		getProductUnits
 	} from '#lib/remote/assets.remote.js';
 	import { getMyOrgs } from '#lib/remote/orgs.remote.js';
-	import { setProductInspectionRequirement } from '#lib/remote/inspections.remote.js';
+	import {
+		getInspectionTypes,
+		getProductInspectionIntervals,
+		setProductInspectionInterval,
+		setProductInspectionRequirement
+	} from '#lib/remote/inspections.remote.js';
 	import { categoryLabel } from '#lib/category.js';
-	import { requiresInspection } from '#lib/inspection-due.js';
+	import {
+		INSPECTION_TYPE_IDS,
+		inspectionOverride,
+		requiresInspection
+	} from '#lib/inspection-due.js';
+	import { inspectionTypeLabel } from '#lib/inspection-ui.svelte.js';
 	import { MainsHint } from '#lib/components/ui/mains-hint/index.js';
 	import { getErrorMessage, orgLabel, plural } from '#lib/utils.js';
 	import { toast } from 'svelte-sonner';
@@ -60,23 +70,53 @@
 	let editor = $state<ReturnType<typeof ProductEditor>>();
 	let actions = $state<ProductEditorActions>();
 
-	// DGUV: the category's answer unless the product gives its own. Saved on
-	// change, since it moves the interval of every unit of the product.
+	// Per inspection type: the category's answer unless the product gives its
+	// own. Saved on change, since it moves the interval of every unit of it.
+	let inspectionTypes = $derived(await getInspectionTypes());
+	// Per org the user runs: its interval for this product per type, over its default.
+	let productIntervalsQuery = $derived(getProductInspectionIntervals(productId));
+	let productIntervals = $derived(productIntervalsQuery.current ?? []);
+	async function setProductInterval(
+		organizationId: string,
+		typeId: string,
+		input: HTMLInputElement,
+		stored: number | null
+	) {
+		const months = input.value ? Number(input.value) : null;
+		if (months === stored) return;
+		try {
+			const result = await setProductInspectionInterval({
+				organizationId,
+				productId,
+				typeId,
+				months
+			});
+			toast.success(plural(result.changed, ['Saved · 1 unit changed', 'Saved · # units changed']));
+		} catch (err) {
+			input.value = stored?.toString() ?? '';
+			toast.error(getErrorMessage(err));
+		}
+	}
 	let savingInspection = $state(false);
-	async function setInspection(select: HTMLSelectElement) {
+	function overrideValue(typeId: string) {
+		if (!product) return 'inherit';
+		const own = inspectionOverride(product, typeId);
+		return own === null ? 'inherit' : own ? 'yes' : 'no';
+	}
+	async function setInspection(typeId: string, select: HTMLSelectElement) {
 		if (!product) return;
 		const choice = select.value;
 		savingInspection = true;
 		try {
 			const result = await setProductInspectionRequirement({
 				productId: product.id,
-				requiresInspection: choice === 'yes' ? true : choice === 'no' ? false : null
+				typeId,
+				required: choice === 'yes' ? true : choice === 'no' ? false : null
 			});
 			toast.success(plural(result.changed, ['Saved · 1 unit changed', 'Saved · # units changed']));
 		} catch (err) {
 			// Refused (someone else's units): show what is stored, not the choice.
-			select.value =
-				product.requiresInspection === null ? 'inherit' : product.requiresInspection ? 'yes' : 'no';
+			select.value = overrideValue(typeId);
 			toast.error(getErrorMessage(err));
 		} finally {
 			savingInspection = false;
@@ -147,39 +187,6 @@
 			/>
 
 			<div class="space-y-6 self-start">
-				{#if !product.isLicense}
-					<Card.Root>
-						<Card.Header>
-							<Card.Title>DGUV inspections</Card.Title>
-							<Card.Description>
-								Whether its devices need DGUV V3 inspections. Those that do get their organization's
-								interval; the others are not tracked.
-							</Card.Description>
-						</Card.Header>
-						<Card.Content class="space-y-3">
-							<select
-								aria-label="DGUV inspections"
-								value={product.requiresInspection === null
-									? 'inherit'
-									: product.requiresInspection
-										? 'yes'
-										: 'no'}
-								disabled={savingInspection}
-								onchange={(e) => setInspection(e.currentTarget as HTMLSelectElement)}
-								class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
-							>
-								<option value="inherit">
-									{product.category.requiresInspection
-										? `Like ${categoryLabel(product.category)}: needs inspection`
-										: `Like ${categoryLabel(product.category)}: no inspection`}
-								</option>
-								<option value="yes">Needs inspection</option>
-								<option value="no">No inspection</option>
-							</select>
-							<MainsHint productId={product.id} required={requiresInspection(product)} />
-						</Card.Content>
-					</Card.Root>
-				{/if}
 				<Card.Root>
 					<Card.Header>
 						<Card.Title>Units</Card.Title>
@@ -264,6 +271,88 @@
 						{/if}
 					</Card.Content>
 				</Card.Root>
+				{#if !product.isLicense}
+					<Card.Root>
+						<Card.Header>
+							<Card.Title>Inspections</Card.Title>
+							<Card.Description>
+								Which inspections its devices need, and how often. A device follows its
+								organization's interval for the type unless one is set for this product here.
+							</Card.Description>
+						</Card.Header>
+						<Card.Content class="space-y-3">
+							{#each inspectionTypes as type (type.id)}
+								{@const byCategory = product.category.inspectionTypes.some(
+									(t) => t.typeId === type.id
+								)}
+								<div class="grid items-center gap-2 sm:grid-cols-[8rem_1fr]">
+									<label for="inspection-{type.id}" class="text-sm font-medium"
+										>{inspectionTypeLabel(type)}</label
+									>
+									<select
+										id="inspection-{type.id}"
+										value={overrideValue(type.id)}
+										disabled={savingInspection}
+										onchange={(e) => setInspection(type.id, e.currentTarget as HTMLSelectElement)}
+										class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
+									>
+										<option value="inherit">
+											{byCategory
+												? `Like ${categoryLabel(product.category)}: needed`
+												: `Like ${categoryLabel(product.category)}: not needed`}
+										</option>
+										<option value="yes">Needed</option>
+										<option value="no">Not needed</option>
+									</select>
+								</div>
+								{#if requiresInspection(product, type.id)}
+									{#each productIntervals as entry (entry.org.id)}
+										{@const row = entry.types.find((t) => t.typeId === type.id)}
+										{#if row}
+											<div class="grid items-center gap-2 sm:grid-cols-[8rem_1fr]">
+												<span></span>
+												<div class="flex flex-wrap items-center gap-2 text-sm">
+													{#if productIntervals.length > 1}
+														<span class="font-medium">{orgLabel(entry.org)}:</span>
+													{/if}
+													<span class="text-muted-foreground">Every</span>
+													<input
+														type="number"
+														min="1"
+														max="120"
+														aria-label="Interval in months"
+														value={row.own ?? ''}
+														placeholder={row.orgDefault?.toString() ?? '—'}
+														onchange={(e) =>
+															setProductInterval(
+																entry.org.id,
+																type.id,
+																e.currentTarget as HTMLInputElement,
+																row.own
+															)}
+														class="h-9 w-20 rounded-md border border-input bg-background px-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
+													/>
+													<span class="text-muted-foreground">months</span>
+													{#if !row.own}
+														<span class="text-xs text-muted-foreground"
+															>{row.orgDefault
+																? "Organization's default"
+																: 'The organization tracks none of this type'}</span
+														>
+													{/if}
+												</div>
+											</div>
+										{/if}
+									{/each}
+								{/if}
+							{/each}
+							<MainsHint
+								productId={product.id}
+								required={requiresInspection(product, INSPECTION_TYPE_IDS.electrical)}
+							/>
+						</Card.Content>
+					</Card.Root>
+				{/if}
 
 				<Card.Root>
 					<Card.Header>

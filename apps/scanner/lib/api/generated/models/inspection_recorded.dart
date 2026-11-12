@@ -23,12 +23,16 @@ class InspectionRecorded {
   
   final Inspection inspection;
   final Asset asset;
+
+  /// The unit's interval for the recorded type. Null when not tracked for it.
   final int? inspectionIntervalMonths;
 
-  /// The unit's next due date after this inspection. Null when not tracked.
+  /// The unit's next due date for the recorded type after this.
+  /// inspection. Null when not tracked for it.
+  ///
   final DateTime? nextInspectionDue;
 
-  /// The inspection failed and set the unit to `BROKEN`.
+  /// The inspection failed and set the unit to its type's `failStatus`.
   final bool markedBroken;
 
   Map<String, Object?> toJson() => _$InspectionRecordedToJson(this);

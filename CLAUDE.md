@@ -84,7 +84,7 @@ async function requireAuth() {
 | `src/lib/remote/equipment-sheets.remote.ts`   | `streamEquipmentSheet` — a `query.live` that yields progress, then the delivery note or packing list PDF; see "Delivery note and packing list"                                                                                            |
 | `src/lib/remote/product-documents.remote.ts`  | `getProductDocuments`, `addProductDocument`, `updateProductDocument`, `removeProductDocument` — a product's PDFs, public by design (see `services/product-documents.ts`)                                                                  |
 | `src/lib/remote/rental-terms.remote.ts`       | `getRentalTerms`, `saveRentalTerms`, `setRentalTermsEnabled`, `getLoanRentalTerms` — an org's rental terms (Miet-AGB), see "Rental terms"                                                                                                 |
-| `src/lib/remote/inspections.remote.ts`        | `getOverdueAssets`, `getAssetInspections`, `logInspection`, `deleteInspection`, `setInspectionInterval` — see "DGUV inspections"                                                                                                          |
+| `src/lib/remote/inspections.remote.ts`        | `getInspectionTypes`, `getOverdueAssets` (a row per unit and type), `getAssetInspections`, `logInspection`, `deleteInspection`, `setInspectionInterval` — see "Inspections"                                                               |
 
 ## External API (`/api/v1`)
 
@@ -397,26 +397,57 @@ and runs Mustang's validator (EN 16931 schematron + veraPDF) over them: it fetch
 Mustang CLI into `apps/web/.mustang/` (`scripts/fetch-mustang.mjs`, SHA-256-checked) and needs
 `java` 11+. Its XRechnung notices (BR-DE-\*) are expected and do not fail the check.
 
-## DGUV inspections
+## Inspections (Prüfarten)
 
-Nobody sets a unit's next inspection date. People record inspections (or delete one entered by
-mistake), and `inspectionDue` (`src/lib/inspection-due.ts`) derives the date from the unit's
-`inspectionIntervalMonths` and its latest `Inspection` by `performedAt`: no interval → not
-tracked; never inspected → due since the unit was created; latest failed → due on that day;
-otherwise latest + interval. `Asset.nextInspectionDue` only stores the result so lists can sort
-by it, and `refreshInspectionDue` in `services/inspections.ts` is the one place that writes it
-after creation. A failed inspection also sets the unit `BROKEN`; deleting it does not undo that.
-Both are logged (`INSPECTED`, `INSPECTION_DELETED`). Recording takes ADMIN+ of the unit's org.
-The service is shared with `/api/v1/inspections`, which the scanner's inspection mode uses.
+There are several **inspection types** (`InspectionType`, a shared list like categories):
+electrical (DGUV V3), lifting equipment, visual check, calibration — seeded with fixed ids
+(`INSPECTION_TYPE_IDS` in `src/lib/inspection-due.ts`). Everything below is **per type**. The plan
+for what comes next (qualifications, check-in visual check, test bench) is
+`docs/plans/pruefarten.md`.
 
-**Which units are tracked at all** is a catalog fact: `Category.requiresInspection` is the
-default, `Product.requiresInspection` (null = follow the category) overrides it, and a licence
-never is (`requiresInspection` in `inspection-due.ts`). Only units of such products get the org's
-`defaultInspectionIntervalMonths` when created (`initialInspection`, used by every path that
-creates units). Changing either flag, a product's category, or merging products runs
-`applyInspectionRequirement`: units that now need it and have no interval get their org's
-default, units that no longer do lose theirs. Categories are system-admin; a product's flag
-follows `productControl` like its name.
+Nobody sets a due date. People record inspections (or delete one entered by mistake), and
+`inspectionDue` derives each type's date from the unit's `AssetInspectionSchedule` (interval per
+type; no row = not tracked for it) and its latest `Inspection` of that type by `performedAt`:
+never inspected → due since the unit was created; latest failed → due on that day; otherwise
+latest + interval. `schedule.nextDue` and `Asset.nextInspectionDue` (the earliest over all types,
+so lists can sort) are written only by `refreshInspectionDue` in `services/inspections.ts`. A
+failed inspection sets the unit to its type's `failStatus` (BROKEN, MAINTENANCE, DECOMMISSIONED);
+deleting it does not undo that. Both are logged (`INSPECTED`, `INSPECTION_DELETED`, with
+`inspectionTypeId`; entries without one are electrical). Recording takes ADMIN+ of the unit's
+org. The service is shared with `/api/v1/inspections`; a request without `typeId` is electrical,
+and the old single-type API fields (`requiresInspection`, `inspectionRequired`,
+`inspectionIntervalMonths`) are the electrical type's, so older scanners keep working.
+
+**Which units are tracked at all** is a catalog fact: `CategoryInspectionType` is the category's
+default, `ProductInspectionType` (a row with `required`; no row = follow the category) overrides
+it per type, and a licence needs none (`requiredInspectionTypes`). An org's interval per type is
+`OrgInspectionInterval` (no row = the type's `defaultIntervalMonths`; a row with null = track
+none), and `OrgProductInspectionInterval` sets it for one product (Kabeltrommeln every 6 months).
+A unit's own interval (`AssetInspectionSchedule.overrideMonths`) is the exception.
+`schedule.intervalMonths` is the one in force — own, else org+product, else org, else type —
+and `reconcileSchedules` is the one place that creates, moves or drops schedules: a unit has
+one exactly where its product needs the type and an interval applies, or it has its own. So a
+changed org or product interval reaches every unit that follows it at once. New units get theirs
+from `initialInspection`. Changing a requirement, a product's category, the licence flag, or
+merging products runs `applyInspectionRequirement` (reconcile for those products); pass the
+changed `typeIds` so untouched types are left alone. **Who records it.** A type with `requiresQualification` is recorded by a member holding a valid
+`MemberQualification` for it in the unit's org (per membership, ADMIN+ maintains them in the
+member list; `services/qualifications.ts`), under their own name, and the title is snapshotted
+on the `Inspection` (`qualification`, `performedById`). An outside firm's inspection is
+entered with `external: true` plus the firm's name and qualification, by any ADMIN+. The types
+themselves are edited on `/admin/inspection-types` (system admin; a new default interval is
+reconciled into orgs without their own).
+
+**Around a loan.** Booking a unit back from a production (`checkout.ts`) calls
+`recordReturnChecks`: a passed visual check for units whose product needs the visual type and that
+are not broken or in maintenance — whoever takes it back and reports nothing has looked at it.
+`reportDefect` (`/api/v1/defects`, the take-back list's warning button) is a failed visual check
+with a note, by any MEMBER+. Handing out never refuses an overdue unit: handout items carry
+`inspectionOverdue` and a checkout scan `overdueInspections`, and the sheets
+(`equipment-sheet.ts`, `inspectionProof`) and the customer link print each type's "gültig bis".
+Catalog-log fields are
+`inspection:<typeId>` (old entries: `requiresInspection` = electrical). Categories are
+system-admin; a product's answers follow `productControl` like its name.
 
 `Connector.mains` marks a connector that carries mains voltage (set in the migration by family,
 editable on `/admin/connectors`; a new connector inherits it from its family, `familyIsMains`).

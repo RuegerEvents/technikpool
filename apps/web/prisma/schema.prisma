@@ -56,6 +56,7 @@ model User {
   loanRequests           LoanRequest[]
   billingDismissals      BillingDismissal[]
   defaultLocations       UserDefaultLocation[]
+  inspectionsRecorded    Inspection[]
 
   @@map("user")
 }
@@ -167,10 +168,8 @@ model Organization {
   color       String @unique
   avatarLabel String @unique
 
-  /// 12 for a new org — the longest DGUV V3 allows for portable equipment in
-  /// workshop-like use. Null means new units are not tracked at all.
-  defaultInspectionIntervalMonths Int?     @default(12)
-  isKleinunternehmer              Boolean @default(false)
+  /// The org's interval per inspection type lives in OrgInspectionInterval.
+  isKleinunternehmer Boolean @default(false)
 
   // Billing details for offer/invoice generation (issue #9 follow-up).
   addressId String?
@@ -208,25 +207,27 @@ model Organization {
   dpaAcceptances DpaAcceptance[]
   invitations    Invitation[]
 
-  locations         Location[]
-  defaultLocations  UserDefaultLocation[]
-  assets            Asset[]
-  bundleTemplates   BundleTemplate[]
-  productions       Production[]
-  categoryRates     OrgCategoryRate[]
-  serviceCategories ServiceCategory[]
-  services          OrgService[]
-  productPrices     OrgProductPrice[]
-  offerSequences    OfferSequence[]
-  offers            Offer[]
-  invoices          Invoice[]
-  offersReceived    Offer[]               @relation("OfferRecipientOrg")
-  invoicesReceived  Invoice[]             @relation("InvoiceRecipientOrg")
-  billingDismissals BillingDismissal[]
-  customers         Customer[]
-  stocktakes        Stocktake[]
-  productionChecks  ProductionCheck[]
-  loanRequests      LoanRequest[]
+  locations                  Location[]
+  defaultLocations           UserDefaultLocation[]
+  assets                     Asset[]
+  bundleTemplates            BundleTemplate[]
+  productions                Production[]
+  categoryRates              OrgCategoryRate[]
+  inspectionIntervals        OrgInspectionInterval[]
+  productInspectionIntervals OrgProductInspectionInterval[]
+  serviceCategories          ServiceCategory[]
+  services                   OrgService[]
+  productPrices              OrgProductPrice[]
+  offerSequences             OfferSequence[]
+  offers                     Offer[]
+  invoices                   Invoice[]
+  offersReceived             Offer[]                        @relation("OfferRecipientOrg")
+  invoicesReceived           Invoice[]                      @relation("InvoiceRecipientOrg")
+  billingDismissals          BillingDismissal[]
+  customers                  Customer[]
+  stocktakes                 Stocktake[]
+  productionChecks           ProductionCheck[]
+  loanRequests               LoanRequest[]
 
   rentalTermsVersions    RentalTermsVersion[]    @relation("RentalTermsVersions")
   rentalTermsAcceptances RentalTermsAcceptance[]
@@ -254,6 +255,8 @@ model OrgMembership {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  qualifications MemberQualification[]
 
   @@unique([userId, organizationId])
 }
@@ -526,10 +529,9 @@ model Category {
   /// and in light, so the answer belongs to the department, not the connector.
   cableInputGender String?
 
-  /// Whether units of products in this department need DGUV V3 inspections by
-  /// default. A product can say otherwise (Product.requiresInspection). Only
-  /// prüfpflichtig units get the org's default interval when registered.
-  requiresInspection Boolean @default(false)
+  /// Which inspection types units of products in this department need by
+  /// default. A product can say otherwise per type (ProductInspectionType).
+  inspectionTypes CategoryInspectionType[]
 
   products        Product[]
   bundleTemplates BundleTemplate[]
@@ -589,9 +591,10 @@ model Product {
   /// Resolume licence is Video like the media server it runs on.
   isLicense Boolean @default(false)
 
-  /// DGUV V3 inspections for this product's units: null follows the category
-  /// (Category.requiresInspection), true or false overrides it.
-  requiresInspection Boolean?
+  /// Per inspection type, whether this product's units need it: a row
+  /// overrides the category's default (CategoryInspectionType), no row follows it.
+  inspectionTypes        ProductInspectionType[]
+  orgInspectionIntervals OrgProductInspectionInterval[]
 
   /// Who added the row. While no org holds a unit of a product there is no
   /// owner to ask, so this is the only person besides a system admin who may
@@ -737,10 +740,11 @@ model Asset {
   // the Product — see Product.netPurchasePrice.
   purchaseDate DateTime?
 
-  // DGUV inspection tracking (issue #7). Snapshotted from the org's default
-  // at creation, not a live reference — see Organization.defaultInspectionIntervalMonths.
-  inspectionIntervalMonths Int?
-  nextInspectionDue        DateTime?
+  // The earliest AssetInspectionSchedule.nextDue over all inspection types,
+  // stored only so lists can sort and filter by it. Written by
+  // refreshInspectionDue alone, like each schedule's own date.
+  nextInspectionDue   DateTime?
+  inspectionSchedules AssetInspectionSchedule[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -1133,18 +1137,160 @@ model AssetTransaction {
 // DGUV inspection tracking (issue #7)
 // ----------------------------------------------------
 
+// The kinds of inspection a unit can need: electrical (DGUV V3), lifting
+// equipment, a visual check, a tester's calibration. One shared list, kept by
+// system admins like categories. `key` is what code and the API branch on for
+// the seeded ones; a type added later gets one made from its name.
+model InspectionType {
+  id                    String  @id @default(cuid())
+  key                   String  @unique
+  name                  String  @unique
+  nameDe                String?
+  sortOrder             Int     @default(0)
+  /// What a failed inspection sets the unit to (src/lib/asset-status.ts):
+  /// BROKEN, MAINTENANCE or DECOMMISSIONED.
+  failStatus            String  @default("BROKEN")
+  /// Whether recording one takes a qualification for this type. False for the
+  /// visual check, which anyone taking a unit back may record.
+  requiresQualification Boolean @default(true)
+  /// Whether an inspection of this type carries measured values (from a test
+  /// bench, never typed in).
+  hasMeasurements       Boolean @default(false)
+  /// The interval for an org that has not set one of its own
+  /// (OrgInspectionInterval). Null: units are not tracked until it does.
+  defaultIntervalMonths Int?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  categories          CategoryInspectionType[]
+  products            ProductInspectionType[]
+  orgIntervals        OrgInspectionInterval[]
+  orgProductIntervals OrgProductInspectionInterval[]
+  qualifications      MemberQualification[]
+  schedules           AssetInspectionSchedule[]
+  inspections         Inspection[]
+}
+
+/// A category's default: its products' units need this type unless the
+/// product says otherwise. A row means yes.
+model CategoryInspectionType {
+  categoryId String
+  category   Category       @relation(fields: [categoryId], references: [id], onDelete: Cascade)
+  typeId     String
+  type       InspectionType @relation(fields: [typeId], references: [id], onDelete: Cascade)
+
+  @@id([categoryId, typeId])
+}
+
+/// A product's own answer for one type, overriding its category's.
+model ProductInspectionType {
+  productId String
+  product   Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  typeId    String
+  type      InspectionType @relation(fields: [typeId], references: [id], onDelete: Cascade)
+  required  Boolean
+
+  @@id([productId, typeId])
+}
+
+/// An org's interval for one type. No row: the type's default. A row with
+/// null months: this org tracks no units of this type.
+model OrgInspectionInterval {
+  organizationId String
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  typeId         String
+  type           InspectionType @relation(fields: [typeId], references: [id], onDelete: Cascade)
+  months         Int?
+
+  @@id([organizationId, typeId])
+}
+
+/// An org's interval for one product and type, over its own default
+/// (OrgInspectionInterval) — Kabeltrommeln every 6 months where everything
+/// else is 12. Per org like OrgProductPrice, because the catalog is shared and
+/// how hard a product is used is each operator's call.
+model OrgProductInspectionInterval {
+  organizationId String
+  organization   Organization   @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  productId      String
+  product        Product        @relation(fields: [productId], references: [id], onDelete: Cascade)
+  typeId         String
+  type           InspectionType @relation(fields: [typeId], references: [id], onDelete: Cascade)
+  months         Int
+
+  @@id([organizationId, productId, typeId])
+}
+
+/// That a unit is tracked for one type, how often, and when it is next due.
+/// Derived, never edited directly: `reconcileSchedules` keeps a row exactly
+/// where the product needs the type and an interval applies, or the unit has
+/// an interval of its own (`overrideMonths`, the exception). `intervalMonths`
+/// is the one in force — the unit's own, else its org's for the product, else
+/// its org's for the type, else the type's default — so a changed default
+/// reaches every unit that follows it. `nextDue` follows from `inspectionDue`.
+model AssetInspectionSchedule {
+  assetId        String
+  asset          Asset          @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  typeId         String
+  type           InspectionType @relation(fields: [typeId], references: [id], onDelete: Cascade)
+  intervalMonths Int
+  overrideMonths Int?
+  nextDue        DateTime
+
+  @@id([assetId, typeId])
+  @@index([typeId, nextDue])
+}
+
 model Inspection {
-  id      String @id @default(cuid())
+  id      String         @id @default(cuid())
   assetId String
-  asset   Asset  @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  asset   Asset          @relation(fields: [assetId], references: [id], onDelete: Cascade)
+  typeId  String
+  type    InspectionType @relation(fields: [typeId], references: [id])
+  /// Where it was recorded: web | scanner | checkin | bench.
+  source  String         @default("web")
 
   performedAt   DateTime
   result        String // e.g. "PASSED", "FAILED"
   notes         String?
-  inspectorName String? // the certifying inspector is typically external, not an app user
+  /// Who inspected, as printed: the app user's name, or an outside firm's.
+  inspectorName String?
   nextDueDate   DateTime?
 
+  /// Done by an outside firm and only entered here. Then `inspectorName` and
+  /// `qualification` are theirs, and `performedBy` is whoever entered it.
+  external      Boolean @default(false)
+  /// The inspector's qualification at the time (MemberQualification.title, or
+  /// the outside firm's) — a snapshot, so the record keeps it after it lapses.
+  qualification String?
+  /// Who recorded it. Null on inspections from before this column, and when
+  /// the account is deleted (history is kept).
+  performedById String?
+  performedBy   User?   @relation(fields: [performedById], references: [id], onDelete: SetNull)
+
   createdAt DateTime @default(now())
+}
+
+/// What a member is qualified to inspect: an Elektrofachkraft or EuP for
+/// electrical, a Sachkundiger for lifting equipment. Recorded by an ADMIN+ of
+/// the org; only a qualified member records an inspection of a type that
+/// needs one (InspectionType.requiresQualification) — except one done by an
+/// outside firm, which carries the firm's details instead.
+model MemberQualification {
+  membershipId String
+  membership   OrgMembership  @relation(fields: [membershipId], references: [id], onDelete: Cascade)
+  typeId       String
+  type         InspectionType @relation(fields: [typeId], references: [id], onDelete: Cascade)
+  /// As it is printed on a protocol: "Elektrofachkraft", "EuP", "Sachkundiger".
+  title        String
+  /// Null: no end date. Past it, the member is no longer qualified.
+  validUntil   DateTime?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@id([membershipId, typeId])
 }
 
 // ----------------------------------------------------

@@ -4,7 +4,11 @@
 	import { Input } from '#lib/components/ui/input/index.js';
 	import { Label } from '#lib/components/ui/label/index.js';
 	import { getCategories, updateCategory } from '#lib/remote/assets.remote.js';
-	import { setCategoryInspectionRequirement } from '#lib/remote/inspections.remote.js';
+	import {
+		getInspectionTypes,
+		setCategoryInspectionRequirement
+	} from '#lib/remote/inspections.remote.js';
+	import { inspectionTypeLabel } from '#lib/inspection-ui.svelte.js';
 	import { confirmAction } from '#lib/confirm.svelte.js';
 	import { getErrorMessage, plural } from '#lib/utils.js';
 	import { toast } from 'svelte-sonner';
@@ -13,6 +17,8 @@
 
 	let categoriesQuery = $derived(getCategories());
 	let categories = $derived(categoriesQuery.current ?? []);
+	let typesQuery = $derived(getInspectionTypes());
+	let types = $derived(typesQuery.current ?? []);
 
 	type Draft = {
 		name: string;
@@ -62,21 +68,24 @@
 		}
 	}
 
-	// Saved on its own, not with the row: it moves the DGUV interval of every
-	// unit whose product follows the category, so it is a decision, not a field.
-	async function toggleInspection(c: (typeof categories)[number], requiresInspection: boolean) {
+	// Saved on its own, not with the row: it moves the interval of every unit
+	// whose product follows the category, so it is a decision, not a field.
+	async function toggleInspection(
+		c: (typeof categories)[number],
+		type: (typeof types)[number],
+		required: boolean
+	) {
+		const name = inspectionTypeLabel(type);
 		const ok = await confirmAction(
-			requiresInspection
+			required
 				? {
-						title: 'Inspect this category?',
-						description:
-							"Units of its products that have no interval get their organization's default and come due for a DGUV inspection. Products marked otherwise are left alone.",
+						title: `${name}: inspect this category?`,
+						description: `Units of its products that have no interval for it get their organization's interval and come due for this inspection. Products marked otherwise are left alone.`,
 						confirmLabel: 'Require inspection'
 					}
 				: {
-						title: 'Stop inspecting this category?',
-						description:
-							'Units of its products lose their DGUV interval and leave the inspection list. Products marked as needing inspection are left alone.',
+						title: `${name}: stop inspecting this category?`,
+						description: `Units of its products lose their interval for it and leave the inspection list for it. Products marked as needing it are left alone.`,
 						confirmLabel: 'Stop inspecting'
 					}
 		);
@@ -85,7 +94,8 @@
 		try {
 			const result = await setCategoryInspectionRequirement({
 				categoryId: c.id,
-				requiresInspection
+				typeId: type.id,
+				required
 			});
 			toast.success(plural(result.changed, ['Saved · 1 unit changed', 'Saved · # units changed']));
 		} catch (err) {
@@ -104,8 +114,8 @@
 		<p class="text-muted-foreground">
 			Categories are shared by every organization. The English name is the source — it is what the
 			API returns and what a billing line records; the German name is what the German UI and a
-			German offer or invoice show. "DGUV" marks a category whose devices need DGUV V3 inspections;
-			a product can say otherwise on its own page.
+			German offer or invoice show. "Inspections" marks which inspections a category's devices need
+			by default; a product can say otherwise on its own page.
 		</p>
 	</div>
 
@@ -170,24 +180,28 @@
 						</select>
 					</div>
 					<div class="space-y-1">
-						<!-- Whether its units need DGUV V3 inspections, unless a product says
+						<!-- Which inspections its units need, unless a product says
 						     otherwise. Saved at once, see toggleInspection. -->
-						<Label for="dguv-{category.id}" class="text-xs">DGUV</Label>
-						<label class="flex h-10 items-center gap-2 text-sm">
-							<input
-								id="dguv-{category.id}"
-								type="checkbox"
-								checked={category.requiresInspection}
-								disabled={saving.has(category.id)}
-								onchange={(e) => {
-									const box = e.currentTarget as HTMLInputElement;
-									const wanted = box.checked;
-									box.checked = category.requiresInspection;
-									toggleInspection(category, wanted);
-								}}
-							/>
-							Inspect
-						</label>
+						<span class="text-xs font-medium">Inspections</span>
+						<div class="flex min-h-10 flex-wrap items-center gap-x-3 gap-y-1">
+							{#each types as type (type.id)}
+								{@const on = category.inspectionTypes.some((t) => t.typeId === type.id)}
+								<label class="flex items-center gap-1.5 text-sm whitespace-nowrap">
+									<input
+										type="checkbox"
+										checked={on}
+										disabled={saving.has(category.id)}
+										onchange={(e) => {
+											const box = e.currentTarget as HTMLInputElement;
+											const wanted = box.checked;
+											box.checked = on;
+											toggleInspection(category, type, wanted);
+										}}
+									/>
+									{inspectionTypeLabel(type)}
+								</label>
+							{/each}
+						</div>
 					</div>
 					<div class="space-y-1">
 						<Label for="sort-{category.id}" class="text-xs">Order</Label>

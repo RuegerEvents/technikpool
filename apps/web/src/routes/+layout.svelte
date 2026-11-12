@@ -269,6 +269,13 @@
 											Connectors
 										</DropdownMenu.Item>
 										<DropdownMenu.Item
+											onSelect={() => goto(resolve('admin/inspection-types'))}
+											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+										>
+											<ClipboardCheck aria-hidden="true" />
+											Inspection types
+										</DropdownMenu.Item>
+										<DropdownMenu.Item
 											onSelect={() => goto(resolve('admin/users'))}
 											class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-2 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
 										>
@@ -383,7 +390,8 @@
 												page.url.pathname.startsWith('/stocktakes') ||
 												page.url.pathname.startsWith('/customers') ||
 												page.url.pathname.startsWith('/admin/categories') ||
-												page.url.pathname.startsWith('/admin/connectors')
+												page.url.pathname.startsWith('/admin/connectors') ||
+												page.url.pathname.startsWith('/admin/inspection-types')
 													? 'text-foreground'
 													: 'text-muted-foreground hover:text-foreground'}"
 											>
@@ -471,6 +479,13 @@
 												>
 													<PlugZap aria-hidden="true" />
 													Connectors
+												</DropdownMenu.Item>
+												<DropdownMenu.Item
+													onSelect={() => goto(resolve('admin/inspection-types'))}
+													class="flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent hover:text-accent-foreground data-[highlighted]:bg-accent data-[highlighted]:text-accent-foreground"
+												>
+													<ClipboardCheck aria-hidden="true" />
+													Inspection types
 												</DropdownMenu.Item>
 											{/if}
 											{#if data.hasOrg || data.isAdmin}

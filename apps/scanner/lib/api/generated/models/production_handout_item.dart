@@ -28,6 +28,7 @@ class ProductionHandoutItem {
     this.productImageUrl,
     this.kit,
     this.kitAddition,
+    this.inspectionOverdue,
   });
   
   factory ProductionHandoutItem.fromJson(Map<String, Object?> json) => _$ProductionHandoutItemFromJson(json);
@@ -65,6 +66,11 @@ class ProductionHandoutItem {
   final bool done;
   final bool received;
   final bool returnReported;
+
+  /// Some inspection of the unit is overdue. Handing it out still works;.
+  /// say so. Not required, so an older client keeps compiling.
+  ///
+  final bool? inspectionOverdue;
 
   Map<String, Object?> toJson() => _$ProductionHandoutItemToJson(this);
 }

@@ -7,6 +7,7 @@ import 'package:json_annotation/json_annotation.dart';
 import 'asset_status.dart';
 import 'asset_transaction.dart';
 import 'inspection.dart';
+import 'inspection_schedule.dart';
 import 'list_kit.dart';
 import 'location.dart';
 import 'organization.dart';
@@ -35,6 +36,7 @@ class AssetDetail {
     this.documents,
     this.inspectionIntervalMonths,
     this.nextInspectionDue,
+    this.inspectionSchedules,
     this.inspections,
   });
   
@@ -94,20 +96,25 @@ class AssetDetail {
   ///
   final List<ProductDocument>? documents;
 
-  /// Months between DGUV inspections. Null when the unit's.
-  /// inspections are not tracked. Not required, so an older client.
+  /// Months between electrical (DGUV V3) inspections. Null when the.
+  /// unit is not tracked for them. Not required, so an older client.
   /// keeps compiling.
   ///
   final int? inspectionIntervalMonths;
 
-  /// When the next DGUV inspection is due — derived, see the.
+  /// When the next inspection of any type is due — derived, see the.
   /// `inspection` tag. Null when not tracked. Not required, so an.
   /// older client keeps compiling.
   ///
   final DateTime? nextInspectionDue;
 
-  /// The unit's DGUV inspections, latest first, at most ten. Not.
-  /// required, so an older client keeps compiling.
+  /// Every inspection type the unit is tracked for, in type order.
+  /// Not required, so an older client keeps compiling.
+  ///
+  final List<InspectionSchedule>? inspectionSchedules;
+
+  /// The unit's inspections of every type, latest first, at most.
+  /// ten. Not required, so an older client keeps compiling.
   ///
   final List<Inspection>? inspections;
 

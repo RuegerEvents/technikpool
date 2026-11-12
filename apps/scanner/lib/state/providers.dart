@@ -432,6 +432,11 @@ final categoriesProvider = FutureProvider<List<Category>>(
   (ref) => _requireApi(ref).inventory.listCategories(),
 );
 
+/// The inspection types (electrical, lifting, visual …), in display order.
+final inspectionTypesProvider = FutureProvider<List<InspectionType>>(
+  (ref) => _requireApi(ref).inspection.listInspectionTypes(),
+);
+
 /// The stocktakes still being counted, for the session setup's third option.
 final openStocktakesProvider = FutureProvider<List<StocktakeSummary>>(
   (ref) => _requireApi(ref).stocktake.listStocktakes(status: StocktakeStatus.open),

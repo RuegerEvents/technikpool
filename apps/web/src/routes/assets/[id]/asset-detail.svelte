@@ -95,13 +95,21 @@
 		assetStatusLabel
 	} from '#lib/components/ui/asset-status/index.js';
 	import type { TransactionData } from '#lib/types/asset-transaction.js';
-	import { InspectionDialog } from '#lib/components/ui/inspection-dialog/index.js';
+	import {
+		InspectionDialog,
+		InspectionIntervalDialog
+	} from '#lib/components/ui/inspection-dialog/index.js';
 	import { MainsHint } from '#lib/components/ui/mains-hint/index.js';
-	import { requiresInspection } from '#lib/inspection-due.js';
-	import { deleteInspection, getAssetInspections } from '#lib/remote/inspections.remote.js';
+	import { DEFAULT_INSPECTION_TYPE_ID, requiredInspectionTypes } from '#lib/inspection-due.js';
+	import {
+		deleteInspection,
+		getAssetInspections,
+		getInspectionTypes
+	} from '#lib/remote/inspections.remote.js';
 	import {
 		formatInspectionDay,
 		inspectionResultLabel,
+		inspectionTypeLabel,
 		inspectionState as stateOf,
 		inspectionTone as toneOf
 	} from '#lib/inspection-ui.svelte.js';
@@ -139,13 +147,48 @@
 		asset.accessories.length > 0 ? asset.generatedImagePath : asset.product.imagePath
 	);
 
-	// ── DGUV inspections ──────────────────────────────────────────────────────
-	// Recorded or deleted, never dated by hand: the next due date follows from
-	// the latest one and the interval (see `inspectionDue`).
+	// ── Inspections ───────────────────────────────────────────────────────────
+	// Recorded or deleted, never dated by hand: each type's next due date
+	// follows from the latest inspection of that type and its interval (see
+	// `inspectionDue`). `asset.nextInspectionDue` is the earliest of them.
 	let inspections = $derived(await getAssetInspections(assetId));
+	let inspectionTypes = $derived(await getInspectionTypes());
 	let inspectionState = $derived(stateOf(asset.nextInspectionDue));
 	let inspectionTone = $derived(toneOf(inspectionState));
-	let lastFailed = $derived(inspections[0]?.result === 'FAILED');
+	let requiredTypes = $derived(requiredInspectionTypes(asset.product));
+	// Every type the unit is tracked for or its product needs, in type order —
+	// a needed one without a schedule is the one worth pointing out.
+	let typeRows = $derived(
+		inspectionTypes
+			.filter(
+				(t) => requiredTypes.has(t.id) || asset.inspectionSchedules.some((s) => s.typeId === t.id)
+			)
+			.map((type) => {
+				const schedule = asset.inspectionSchedules.find((s) => s.typeId === type.id) ?? null;
+				const latest = inspections.find((i) => i.typeId === type.id) ?? null;
+				const state = stateOf(schedule?.nextDue ?? null);
+				return { type, schedule, latest, required: requiredTypes.has(type.id), state };
+			})
+	);
+	let overdueRow = $derived(typeRows.find((r) => r.state === 'overdue'));
+	function typeName(typeId: string | undefined) {
+		const type = inspectionTypes.find((t) => t.id === (typeId ?? DEFAULT_INSPECTION_TYPE_ID));
+		return type ? inspectionTypeLabel(type) : '';
+	}
+	let inspectionTypeId = $state<string | undefined>(undefined);
+	let intervalDialogOpen = $state(false);
+	let intervalTarget = $state<{ typeId: string; months: number | null }>({
+		typeId: DEFAULT_INSPECTION_TYPE_ID,
+		months: null
+	});
+	function recordInspectionOf(typeId?: string) {
+		inspectionTypeId = typeId;
+		inspectionDialogOpen = true;
+	}
+	function editInterval(typeId: string, months: number | null) {
+		intervalTarget = { typeId, months };
+		intervalDialogOpen = true;
+	}
 	let canInspect = $derived(
 		!!page.data.isAdmin ||
 			(await getMyOrgs()).some((o) => o.id === asset.organizationId && canManageInventory(o))
@@ -490,8 +533,7 @@
 		assetTag: '',
 		status: 'AVAILABLE' as AssetStatus,
 		locationId: '',
-		purchaseDate: '',
-		inspectionIntervalMonths: ''
+		purchaseDate: ''
 	});
 
 	$effect(() => {
@@ -503,8 +545,7 @@
 			locationId: asset.locationId,
 			purchaseDate: asset.purchaseDate
 				? new Date(asset.purchaseDate).toISOString().slice(0, 10)
-				: '',
-			inspectionIntervalMonths: asset.inspectionIntervalMonths?.toString() ?? ''
+				: ''
 		};
 	});
 
@@ -515,9 +556,6 @@
 			// Purchase date and interval only when they moved, so a unit that was
 			// only moved writes no change to either into its history.
 			const purchaseDate = assetDraft.purchaseDate || null;
-			const inspectionIntervalMonths = assetDraft.inspectionIntervalMonths
-				? Number(assetDraft.inspectionIntervalMonths)
-				: null;
 			const storedPurchaseDate = asset.purchaseDate
 				? new Date(asset.purchaseDate).toISOString().slice(0, 10)
 				: null;
@@ -530,10 +568,7 @@
 							assetTag: assetDraft.assetTag,
 							status: assetDraft.status,
 							locationId: assetDraft.locationId,
-							...(purchaseDate !== storedPurchaseDate ? { purchaseDate } : {}),
-							...(inspectionIntervalMonths !== (asset.inspectionIntervalMonths ?? null)
-								? { inspectionIntervalMonths }
-								: {})
+							...(purchaseDate !== storedPurchaseDate ? { purchaseDate } : {})
 						}
 			);
 			toast.success('Asset updated');
@@ -772,11 +807,11 @@
 						<span class={inspectionTone}>
 							{formatInspectionDay(asset.nextInspectionDue)}
 						</span>
-						{#if inspectionState === 'overdue'}
+						{#if overdueRow}
 							<span class="ml-1 text-xs font-normal text-destructive">
-								{inspections.length === 0
+								{inspectionTypeLabel(overdueRow.type)} · {!overdueRow.latest
 									? 'Never inspected'
-									: lastFailed
+									: overdueRow.latest.result === 'FAILED'
 										? 'Last one failed'
 										: 'Overdue'}
 							</span>
@@ -824,7 +859,7 @@
 								This unit has left the pool. It can't be booked or edited — set the status back to
 								bring it into service again.
 							{:else}
-								Serial number, tag, status, location, purchase and inspection.
+								Serial number, tag, status, location and purchase date.
 							{/if}
 						</Card.Description>
 					</div>
@@ -862,12 +897,17 @@
 							<span class="font-normal text-muted-foreground">—</span>
 						{/if}
 					</Fact>
-					<Fact icon={Repeat} label="DGUV inspection interval">
-						{#if asset.inspectionIntervalMonths}
-							{plural(asset.inspectionIntervalMonths, ['Every month', 'Every # months'])}
+					<Fact icon={Repeat} label="Inspection intervals">
+						{#each typeRows.filter((r) => r.schedule) as row (row.type.id)}
+							<span class="block">
+								{inspectionTypeLabel(row.type)}: {plural(row.schedule!.intervalMonths, [
+									'every month',
+									'every # months'
+								])}
+							</span>
 						{:else}
 							<span class="font-normal text-muted-foreground">No interval set</span>
-						{/if}
+						{/each}
 					</Fact>
 				</dl>
 			</Card.Content>
@@ -1036,50 +1076,104 @@
 				<Card.Header>
 					<div class="flex flex-wrap items-start justify-between gap-4">
 						<div>
-							<Card.Title>DGUV inspections</Card.Title>
+							<Card.Title>Inspections</Card.Title>
 							<Card.Description>
-								{#if asset.inspectionIntervalMonths}
-									{plural(asset.inspectionIntervalMonths, [
-										'Inspected every month.',
-										'Inspected every # months.'
-									])}
-									The next one is due an interval after the latest inspection — at once if it failed or
-									there has never been one.
-								{:else}
-									Not tracked: this device has no inspection interval. Whether a product's devices
-									need DGUV inspections is set on
-									<a
-										href={resolve(`products/${asset.product.id}`)}
-										class="underline underline-offset-2">its page</a
-									>; an interval of its own can be set under Edit.
-								{/if}
+								Each type is due an interval after its latest inspection — at once if it failed or
+								there has never been one. Which types a product's devices need is set on
+								<a
+									href={resolve(`products/${asset.product.id}`)}
+									class="underline underline-offset-2">its page</a
+								>.
 							</Card.Description>
 						</div>
 						{#if canInspect && !retired}
-							<Button icon="add" variant="outline" onclick={() => (inspectionDialogOpen = true)}
+							<Button icon="add" variant="outline" onclick={() => recordInspectionOf()}
 								>Record inspection</Button
 							>
 						{/if}
 					</div>
 				</Card.Header>
 				<Card.Content class="space-y-4">
-					<MainsHint productId={asset.product.id} required={requiresInspection(asset.product)} />
-					{#if asset.nextInspectionDue}
-						<p class="text-sm">
-							Next inspection:
-							<span class="font-medium {inspectionTone}">
-								{formatInspectionDay(asset.nextInspectionDue)}
-							</span>
-							{#if inspectionState === 'overdue'}
-								<span class="text-destructive">
-									— {inspections.length === 0
-										? 'Never inspected'
-										: lastFailed
-											? 'Last one failed'
-											: 'Overdue'}
-								</span>
-							{/if}
+					<MainsHint
+						productId={asset.product.id}
+						required={requiredTypes.has(DEFAULT_INSPECTION_TYPE_ID)}
+					/>
+					{#if typeRows.length === 0}
+						<p class="text-sm text-muted-foreground">
+							Not tracked: this device needs no inspection and has no interval.
 						</p>
+					{:else}
+						<div class="overflow-x-auto rounded-md border">
+							<table class="w-full text-sm">
+								<thead>
+									<tr class="border-b bg-muted/30">
+										<th class="px-4 py-2 text-left font-medium text-muted-foreground">Type</th>
+										<th class="px-4 py-2 text-left font-medium text-muted-foreground">Interval</th>
+										<th class="px-4 py-2 text-left font-medium text-muted-foreground">Next due</th>
+										<th class="px-4 py-2 text-left font-medium text-muted-foreground">Latest</th>
+										<th class="px-4 py-2"></th>
+									</tr>
+								</thead>
+								<tbody>
+									{#each typeRows as row (row.type.id)}
+										<tr class="border-b last:border-0">
+											<td class="px-4 py-2 font-medium">{inspectionTypeLabel(row.type)}</td>
+											<td class="px-4 py-2">
+												{#if row.schedule}
+													{plural(row.schedule.intervalMonths, ['Every month', 'Every # months'])}
+													{#if row.schedule.overrideMonths}
+														<span class="text-xs text-muted-foreground">· own</span>
+													{/if}
+												{:else}
+													<span class="text-muted-foreground">
+														{row.required ? 'Needed, but no interval' : '—'}
+													</span>
+												{/if}
+											</td>
+											<td class="px-4 py-2 whitespace-nowrap {toneOf(row.state)}">
+												{row.schedule ? formatInspectionDay(row.schedule.nextDue) : '—'}
+												{#if row.state === 'overdue'}
+													<span class="text-xs">
+														· {!row.latest
+															? 'Never inspected'
+															: row.latest.result === 'FAILED'
+																? 'Last one failed'
+																: 'Overdue'}
+													</span>
+												{/if}
+											</td>
+											<td class="px-4 py-2 whitespace-nowrap">
+												{#if row.latest}
+													{formatInspectionDay(row.latest.performedAt)}
+													{#if row.latest.result === 'FAILED'}
+														<span class="text-xs font-medium text-destructive">Failed</span>
+													{/if}
+												{:else}
+													<span class="text-muted-foreground">Never</span>
+												{/if}
+											</td>
+											<td class="px-4 py-2 text-right whitespace-nowrap">
+												{#if canInspect && !retired}
+													<Button
+														size="sm"
+														variant="ghost"
+														onclick={() =>
+															editInterval(row.type.id, row.schedule?.overrideMonths ?? null)}
+														>Interval</Button
+													>
+													<Button
+														size="sm"
+														variant="outline"
+														onclick={() => recordInspectionOf(row.type.id)}
+														>Record inspection</Button
+													>
+												{/if}
+											</td>
+										</tr>
+									{/each}
+								</tbody>
+							</table>
+						</div>
 					{/if}
 					{#if inspections.length === 0}
 						<p class="text-sm text-muted-foreground">No inspections recorded yet.</p>
@@ -1089,6 +1183,7 @@
 								<thead>
 									<tr class="border-b bg-muted/30">
 										<th class="px-4 py-2 text-left font-medium text-muted-foreground">Date</th>
+										<th class="px-4 py-2 text-left font-medium text-muted-foreground">Type</th>
 										<th class="px-4 py-2 text-left font-medium text-muted-foreground">Result</th>
 										<th class="px-4 py-2 text-left font-medium text-muted-foreground">Inspector</th>
 										<th class="px-4 py-2 text-left font-medium text-muted-foreground">Notes</th>
@@ -1101,6 +1196,7 @@
 											<td class="px-4 py-2 whitespace-nowrap">
 												{formatInspectionDay(inspection.performedAt)}
 											</td>
+											<td class="px-4 py-2">{inspectionTypeLabel(inspection.type)}</td>
 											<td
 												class="px-4 py-2 font-medium {inspection.result === 'FAILED'
 													? 'text-destructive'
@@ -1108,7 +1204,16 @@
 											>
 												{inspectionResultLabel(inspection.result)}
 											</td>
-											<td class="px-4 py-2">{inspection.inspectorName ?? '—'}</td>
+											<td class="px-4 py-2">
+												{inspection.inspectorName ?? '—'}
+												{#if inspection.qualification || inspection.external}
+													<span class="block text-xs text-muted-foreground"
+														>{[inspection.qualification, inspection.external ? 'External' : null]
+															.filter(Boolean)
+															.join(' · ')}</span
+													>
+												{/if}
+											</td>
 											<td class="px-4 py-2 text-muted-foreground">{inspection.notes ?? ''}</td>
 											<td class="px-4 py-2 text-right">
 												{#if canInspect}
@@ -1519,19 +1624,22 @@
 														: 'underline underline-offset-2'}">{tx.productionName}</a
 												>
 											{:else if tx?.type === 'INSPECTED'}
-												{tx.result === 'FAILED'
-													? 'DGUV inspection failed'
-													: 'DGUV inspection passed'}
+												{tx.result === 'FAILED' ? 'Inspection failed' : 'Inspection passed'}
+												<span class="font-normal">· {typeName(tx.inspectionTypeId)}</span>
 												<span class="font-normal text-muted-foreground">
 													on {formatInspectionDay(tx.performedAt)}{tx.inspectorName
 														? ` · ${tx.inspectorName}`
 														: ''}
 												</span>
 												{#if tx.markedBroken}
-													<span class="font-normal text-destructive">— marked broken</span>
+													<span class="font-normal text-destructive"
+														>— set to {assetStatusLabel(tx.status ?? 'BROKEN')}</span
+													>
 												{/if}
 											{:else if tx?.type === 'INSPECTION_DELETED'}
-												DGUV inspection of {formatInspectionDay(tx.performedAt)} deleted
+												{typeName(tx.inspectionTypeId)}: inspection of {formatInspectionDay(
+													tx.performedAt
+												)} deleted
 											{:else if tx?.type === 'ACCESSORY_DETACHED'}
 												Detached from
 												<a
@@ -1547,9 +1655,13 @@
 										</div>
 										{#if tx?.type === 'UPDATED' && tx.changes.length > 0}
 											<div class="mt-2 space-y-1 rounded-md bg-muted/50 p-2">
-												{#each tx.changes as change (change.field)}
+												{#each tx.changes as change (`${change.field}:${change.inspectionTypeId ?? ''}`)}
 													<div class="text-sm text-muted-foreground">
-														<span class="font-medium text-foreground">{change.field}:</span>
+														<span class="font-medium text-foreground"
+															>{change.field === 'inspectionIntervalMonths'
+																? `Inspection interval · ${typeName(change.inspectionTypeId)}`
+																: change.field}:</span
+														>
 														{change.from ?? '—'} →
 														<span class="font-medium text-foreground">{change.to ?? '—'}</span>
 													</div>
@@ -1572,7 +1684,7 @@
 		{#if retired}
 			This unit is sold or decommissioned — only its status can be changed.
 		{:else}
-			Serial number, tag, status, location, purchase and inspection.
+			Serial number, tag, status, location and purchase date.
 		{/if}
 	{/snippet}
 	{#snippet children()}
@@ -1628,19 +1740,6 @@
 				<div class="space-y-2">
 					<Label for="purchaseDate">Purchase date</Label>
 					<Input id="purchaseDate" type="date" bind:value={assetDraft.purchaseDate} />
-				</div>
-				<div class="space-y-2">
-					<Label for="inspectionInterval">DGUV inspection interval (months)</Label>
-					<Input
-						id="inspectionInterval"
-						type="number"
-						min="1"
-						bind:value={assetDraft.inspectionIntervalMonths}
-					/>
-					<p class="text-xs text-muted-foreground">
-						The next due date follows from the latest inspection. Leave empty to stop tracking this
-						unit.
-					</p>
 				</div>
 			{/if}
 		</form>
@@ -1863,8 +1962,16 @@
 
 <BundleVsAccessoryInfo bind:open={differenceOpen} />
 
+<InspectionIntervalDialog
+	bind:open={intervalDialogOpen}
+	assetIds={[asset.id]}
+	typeId={intervalTarget.typeId}
+	currentMonths={intervalTarget.months}
+/>
+
 <InspectionDialog
 	bind:open={inspectionDialogOpen}
+	typeId={inspectionTypeId}
 	assetIds={[asset.id]}
 	subject={`${productLabel(asset.product)}${asset.assetTag ? ` · ${asset.assetTag}` : ''}`}
 />

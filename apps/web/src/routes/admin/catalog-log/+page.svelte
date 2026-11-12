@@ -8,6 +8,9 @@
 	import { getErrorMessage } from '#lib/utils.js';
 	import { PRODUCT_VIEWS } from '#lib/product-views.js';
 	import { toast } from 'svelte-sonner';
+	import { getInspectionTypes } from '#lib/remote/inspections.remote.js';
+	import { inspectionTypeLabel } from '#lib/inspection-ui.svelte.js';
+	import { DEFAULT_INSPECTION_TYPE_ID } from '#lib/inspection-due.js';
 
 	// The empty log the page renders before the first answer arrives. Spelled out
 	// rather than left undefined so nothing below has to ask twice whether the
@@ -23,6 +26,26 @@
 
 	let logQuery = $derived(getCatalogTransactions());
 	let log = $derived(logQuery.current ?? EMPTY_LOG);
+	let typesQuery = $derived(getInspectionTypes());
+	let types = $derived(typesQuery.current ?? []);
+
+	// A requirement per inspection type is logged as `inspection:<typeId>`
+	// ('requiresInspection' before types: electrical), its values as text.
+	function inspectionTypeOf(field: string) {
+		if (field === 'requiresInspection') return DEFAULT_INSPECTION_TYPE_ID;
+		return field.startsWith('inspection:') ? field.slice('inspection:'.length) : null;
+	}
+	function requirementValue(value: unknown) {
+		if (value === 'true' || value === true) return 'Needed';
+		if (value === 'false' || value === false) return 'Not needed';
+		return 'Like category';
+	}
+	function changeText(change: { field: string; from: unknown; to: unknown }) {
+		const typeId = inspectionTypeOf(change.field);
+		if (!typeId) return `${change.field}: ${logValue(change.from)} → ${logValue(change.to)}`;
+		const type = types.find((t) => t.id === typeId);
+		return `Inspection ${type ? inspectionTypeLabel(type) : typeId}: ${requirementValue(change.from)} → ${requirementValue(change.to)}`;
+	}
 
 	const actionLabels: Record<string, string> = {
 		PRODUCT_UPDATED: 'Product updated',
@@ -136,9 +159,7 @@
 		if (!payload) return '';
 		if (payload.document) return payload.document.title ?? '';
 		if (payload.changes) {
-			return payload.changes
-				.map((change) => `${change.field}: ${logValue(change.from)} → ${logValue(change.to)}`)
-				.join(' · ');
+			return payload.changes.map(changeText).join(' · ');
 		}
 		if (payload.source && payload.target) {
 			const moved = payload.movedAssets ?? payload.movedProducts ?? 0;

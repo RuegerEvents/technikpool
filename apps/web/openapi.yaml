@@ -93,14 +93,21 @@ tags:
       product update can be reverted from it.
   - name: inspection
     description: |
-      DGUV inspections. Recording an inspection, or deleting one recorded by
-      mistake, is all a client ever does: the next due date is never set. It
-      follows from the unit's interval and its latest inspection — that plus
-      the interval after a pass, that same day after a fail, and the day the
-      unit was registered if it was never inspected. A unit without an
-      interval is not tracked and is never due. A failed inspection also
-      marks the unit `BROKEN`. Needs ADMIN or OWNER of the unit's
-      organization.
+      Inspections of every type — electrical (DGUV V3), lifting equipment, a
+      visual check, a tester's calibration; listInspectionTypes has the
+      list. Recording an inspection, or deleting one recorded by mistake, is
+      all a client ever does: a due date is never set. Per type, it follows
+      from the unit's interval for that type and its latest inspection of that
+      type — that plus the interval after a pass, that same day after a fail,
+      and the day the unit was registered if it was never inspected. A unit
+      without an interval for a type is not tracked for it and is never due.
+      A failed inspection also sets the unit to its type's `failStatus`.
+      Needs ADMIN or OWNER of the unit's organization.
+
+      Everything from before inspection types is electrical, and so is an
+      inspection recorded without a `typeId`, so an older client keeps
+      working. `requiresInspection`, `inspectionRequired`,
+      `inspectionIntervalMonths` and the like are the electrical type's.
 
 paths:
   /api/auth/device/code:
@@ -334,11 +341,11 @@ paths:
       tags: [catalog]
       summary: Change a category
       description: |
-        System admins only. Fields left out are left alone. Switching
-        `requiresInspection` moves the inspection interval of every unit whose
-        product follows its category (`requiresInspection: null` on the
-        product): units that now need inspecting get their organization's
-        default interval, units that no longer do lose theirs.
+        System admins only. Fields left out are left alone. Switching an
+        inspection type (`inspections`, or `requiresInspection` for the
+        electrical one) moves the inspection interval of every unit whose
+        product follows its category for that type: units that now need it get
+        their organization's interval, units that no longer do lose theirs.
       parameters:
         - name: categoryId
           in: path
@@ -440,9 +447,14 @@ paths:
             type: string
         - name: inspectionRequired
           in: query
-          description: Only products whose units do (`true`) or do not (`false`) need DGUV inspections, after the category default.
+          description: Only products whose units do (`true`) or do not (`false`) need the inspection type `inspectionTypeId`, after the category default.
           schema:
             type: boolean
+        - name: inspectionTypeId
+          in: query
+          description: The type `inspectionRequired` asks about. Absent - electrical.
+          schema:
+            type: string
         - name: mains
           in: query
           description: Only products with (`true`) or without (`false`) a connector that carries mains voltage.
@@ -548,9 +560,9 @@ paths:
         carrying mains voltage when its family already is. The panel answers to
         a looser rule than the rest — a first panel is open to any MEMBER, as on
         the web — and is written after the other fields, so a refusal there
-        leaves those applied. Changing `requiresInspection`, the
-        category or `isLicense` can change whether the product's units need
-        DGUV inspections, and moves their intervals accordingly — across every
+        leaves those applied. Changing `inspections` (or `requiresInspection`,
+        the electrical type), the category or `isLicense` can change which
+        inspections the product's units need, and moves their intervals accordingly — across every
         organization holding units of it, which is why the right to do so is
         the identity rule described under the `catalog` tag. A name another
         product of the same manufacturer already has is refused (`409`).
@@ -1912,6 +1924,24 @@ paths:
         '409':
           $ref: '#/components/responses/Conflict'
 
+  /api/v1/inspection-types:
+    get:
+      operationId: listInspectionTypes
+      tags: [inspection]
+      summary: Inspection types
+      description: Shared by every organization and kept by system admins, like categories.
+      responses:
+        '200':
+          description: Inspection types, already in display order
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InspectionType'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+
   /api/v1/inspections:
     post:
       operationId: recordInspection
@@ -1934,6 +1964,42 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/InspectionRecorded'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/defects:
+    post:
+      operationId: reportDefect
+      tags: [inspection]
+      summary: Report a defect on a scanned unit
+      description: |
+        What taking a unit back offers besides booking it: a failed visual
+        check with what is wrong, which sets the unit to the visual type's
+        `failStatus` (in maintenance). Needs MEMBER or more of the unit's
+        organization, like taking it back. Booking a unit back without one
+        records a passed visual check where its product needs one.
+        `code` is resolved like `getAssetByTag`.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DefectRequest'
+      responses:
+        '201':
+          description: The defect was recorded
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefectReported'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -2497,9 +2563,16 @@ components:
         requiresInspection:
           type: boolean
           description: |
-            Whether units in this category need DGUV inspections, unless their
-            product says otherwise. Not required, so an older client keeps
-            compiling.
+            Whether units in this category need electrical (DGUV V3)
+            inspections, unless their product says otherwise. Not required, so
+            an older client keeps compiling.
+        inspectionTypeIds:
+          type: array
+          description: |
+            Every inspection type units in this category need by default.
+            Not required, so an older client keeps compiling.
+          items:
+            type: string
 
     CategoryUpdateRequest:
       type: object
@@ -2516,6 +2589,12 @@ components:
           type: integer
         requiresInspection:
           type: boolean
+          description: The electrical type. Same as `inspections` with its id.
+        inspections:
+          type: object
+          description: Inspection type id → whether units in this category need it by default.
+          additionalProperties:
+            type: boolean
 
     CategoryUpdated:
       type: object
@@ -2535,12 +2614,20 @@ components:
           properties:
             requiresInspection:
               type: [boolean, 'null']
-              description: The product's own answer. Null follows its category.
+              description: The product's own answer for electrical inspections. Null follows its category.
             inspectionRequired:
               type: boolean
               description: |
-                Whether its units need DGUV inspections: `requiresInspection`,
-                else the category's. A licence never does.
+                Whether its units need electrical (DGUV V3) inspections:
+                `requiresInspection`, else the category's. A licence never does.
+            inspections:
+              type: array
+              description: |
+                Per inspection type, whether its units need it and whether
+                that is the product's own answer. Every type is listed. Not
+                required, so an older client keeps compiling.
+              items:
+                $ref: '#/components/schemas/ProductInspectionRequirement'
             isLicense:
               type: boolean
             mainsConnectors:
@@ -2558,6 +2645,19 @@ components:
                 $ref: '#/components/schemas/ProductPort'
             units:
               $ref: '#/components/schemas/CatalogProductUnits'
+
+    ProductInspectionRequirement:
+      type: object
+      required: [typeId, required, override]
+      properties:
+        typeId:
+          type: string
+        required:
+          type: boolean
+          description: The answer that applies, after the category default. A licence needs none.
+        override:
+          type: [boolean, 'null']
+          description: The product's own answer. Null follows its category.
 
     CatalogProductUnits:
       type: object
@@ -2608,7 +2708,14 @@ components:
           description: A cable is never a licence; `true` on a cable is ignored.
         requiresInspection:
           type: [boolean, 'null']
-          description: Null follows the category again.
+          description: The electrical type. Null follows the category again.
+        inspections:
+          type: object
+          description: |
+            Inspection type id → the product's own answer, or null to follow
+            the category again. Types left out are left alone.
+          additionalProperties:
+            type: [boolean, 'null']
         cable:
           description: |
             The cable's ends, length and wire, or the loom's ways — replaced
@@ -2906,21 +3013,28 @@ components:
             inspectionIntervalMonths:
               type: [integer, 'null']
               description: |
-                Months between DGUV inspections. Null when the unit's
-                inspections are not tracked. Not required, so an older client
+                Months between electrical (DGUV V3) inspections. Null when the
+                unit is not tracked for them. Not required, so an older client
                 keeps compiling.
             nextInspectionDue:
               type: [string, 'null']
               format: date-time
               description: |
-                When the next DGUV inspection is due — derived, see the
+                When the next inspection of any type is due — derived, see the
                 `inspection` tag. Null when not tracked. Not required, so an
                 older client keeps compiling.
+            inspectionSchedules:
+              type: array
+              description: |
+                Every inspection type the unit is tracked for, in type order.
+                Not required, so an older client keeps compiling.
+              items:
+                $ref: '#/components/schemas/InspectionSchedule'
             inspections:
               type: array
               description: |
-                The unit's DGUV inspections, latest first, at most ten. Not
-                required, so an older client keeps compiling.
+                The unit's inspections of every type, latest first, at most
+                ten. Not required, so an older client keeps compiling.
               items:
                 $ref: '#/components/schemas/Inspection'
 
@@ -2976,6 +3090,9 @@ components:
       type: object
       required: [performedAt, result]
       properties:
+        typeId:
+          type: string
+          description: Not required, so an older client keeps compiling.
         performedAt:
           type: string
           format: date-time
@@ -2986,7 +3103,7 @@ components:
           type: [string, 'null']
         markedBroken:
           type: boolean
-          description: This inspection failed and set the unit to `BROKEN`.
+          description: This inspection failed and set the unit to its type's `failStatus`.
 
     AssetPage:
       type: object
@@ -3052,6 +3169,27 @@ components:
           oneOf:
             - $ref: '#/components/schemas/ScanKit'
             - type: 'null'
+        overdueInspections:
+          type: array
+          description: |
+            Checking out: how many of the units just booked are overdue, per
+            inspection type. Never a refusal — warn. Empty otherwise. Not
+            required, so an older client keeps compiling.
+          items:
+            $ref: '#/components/schemas/OverdueInspection'
+
+    OverdueInspection:
+      type: object
+      required: [typeId, name, nameDe, count]
+      properties:
+        typeId:
+          type: string
+        name:
+          type: string
+        nameDe:
+          type: [string, 'null']
+        count:
+          type: integer
 
     ScanKit:
       type: object
@@ -3140,6 +3278,64 @@ components:
       type: string
       enum: [PASSED, FAILED]
 
+    InspectionType:
+      type: object
+      required:
+        [
+          id,
+          key,
+          name,
+          nameDe,
+          sortOrder,
+          failStatus,
+          requiresQualification,
+          hasMeasurements,
+          defaultIntervalMonths
+        ]
+      properties:
+        id:
+          type: string
+        key:
+          type: string
+          description: |
+            `electrical`, `lifting`, `visual` or `calibration` for the types
+            every installation has. A type added later gets a key made from
+            its name and means nothing special.
+          examples: [electrical]
+        name:
+          type: string
+          description: English.
+        nameDe:
+          type: [string, 'null']
+          description: German. Null shows the English name.
+        sortOrder:
+          type: integer
+        failStatus:
+          type: string
+          description: The status a failed inspection sets the unit to.
+          examples: [BROKEN, MAINTENANCE, DECOMMISSIONED]
+        requiresQualification:
+          type: boolean
+          description: Whether recording one takes a qualification for this type.
+        hasMeasurements:
+          type: boolean
+          description: Whether an inspection of this type carries measured values.
+        defaultIntervalMonths:
+          type: [integer, 'null']
+          description: The interval of an organization that has not set its own.
+
+    InspectionSchedule:
+      type: object
+      required: [typeId, intervalMonths, nextDue]
+      properties:
+        typeId:
+          type: string
+        intervalMonths:
+          type: integer
+        nextDue:
+          type: string
+          format: date-time
+
     Inspection:
       type: object
       required: [id, assetId, performedAt, result, inspectorName, notes]
@@ -3148,6 +3344,9 @@ components:
           type: string
         assetId:
           type: string
+        typeId:
+          type: string
+          description: Not required, so an older client keeps compiling.
         performedAt:
           type: string
           format: date-time
@@ -3156,9 +3355,17 @@ components:
           $ref: '#/components/schemas/InspectionResult'
         inspectorName:
           type: [string, 'null']
-          description: Who inspected it — often an outside firm, not a user.
+          description: Who inspected it — the user who recorded it, or an outside firm.
         notes:
           type: [string, 'null']
+        external:
+          type: boolean
+          description: Done by an outside firm and only entered. Not required, so an older client keeps compiling.
+        qualification:
+          type: [string, 'null']
+          description: |
+            The inspector's qualification at the time, e.g. Elektrofachkraft.
+            Not required, so an older client keeps compiling.
 
     InspectionRequest:
       type: object
@@ -3174,8 +3381,24 @@ components:
           examples: ['2026-10-17']
         result:
           $ref: '#/components/schemas/InspectionResult'
+        typeId:
+          type: string
+          description: From listInspectionTypes. Absent - electrical.
+        external:
+          type: boolean
+          description: |
+            Done by an outside firm and only entered here. Then
+            `inspectorName` and `qualification` are the firm's, and required
+            for a type that needs a qualification. Otherwise the caller must
+            hold a qualification for the type in the unit's organization
+            (`403 forbidden`), and the inspection is
+            recorded under the caller's name.
         inspectorName:
           type: string
+          description: The outside firm or inspector. Ignored unless `external`.
+        qualification:
+          type: string
+          description: The outside inspector's qualification. Ignored unless `external`.
         notes:
           type: string
 
@@ -3189,13 +3412,39 @@ components:
           $ref: '#/components/schemas/Asset'
         inspectionIntervalMonths:
           type: [integer, 'null']
+          description: The unit's interval for the recorded type. Null when not tracked for it.
         nextInspectionDue:
           type: [string, 'null']
           format: date-time
-          description: The unit's next due date after this inspection. Null when not tracked.
+          description: |
+            The unit's next due date for the recorded type after this
+            inspection. Null when not tracked for it.
         markedBroken:
           type: boolean
-          description: The inspection failed and set the unit to `BROKEN`.
+          description: The inspection failed and set the unit to its type's `failStatus`.
+
+    DefectRequest:
+      type: object
+      required: [code, notes]
+      properties:
+        code:
+          type: string
+          description: The scanned asset tag, or a serial number.
+        notes:
+          type: string
+          minLength: 1
+          maxLength: 2000
+          description: What is wrong with it.
+
+    DefectReported:
+      type: object
+      required: [asset, statusChanged]
+      properties:
+        asset:
+          $ref: '#/components/schemas/Asset'
+        statusChanged:
+          type: boolean
+          description: The unit was not in that status before.
 
     InspectionDeleted:
       type: object
@@ -4261,6 +4510,11 @@ components:
           type: boolean
         returnReported:
           type: boolean
+        inspectionOverdue:
+          type: boolean
+          description: |
+            Some inspection of the unit is overdue. Handing it out still works;
+            say so. Not required, so an older client keeps compiling.
 
     ProductionHandout:
       type: object

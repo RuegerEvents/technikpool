@@ -1,13 +1,20 @@
 <script lang="ts">
-	// Recording a DGUV inspection: one unit from its page or the inspections
-	// list, or a whole selection from the Devices list. The next due date is
-	// never entered here — it follows from the result and the unit's interval.
+	// Recording an inspection of one type: one unit from its page or the
+	// inspections list, or a whole selection from the Devices list. The next due
+	// date is never entered here — it follows from the result and the unit's
+	// interval for that type.
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { Input } from '#lib/components/ui/input/index.js';
 	import { Label } from '#lib/components/ui/label/index.js';
 	import { Modal } from '#lib/components/ui/modal/index.js';
-	import { logInspection } from '#lib/remote/inspections.remote.js';
-	import { localToday } from '#lib/inspection-ui.svelte.js';
+	import {
+		getInspectionTypes,
+		getMyQualifications,
+		logInspection
+	} from '#lib/remote/inspections.remote.js';
+	import { inspectionTypeLabel, localToday } from '#lib/inspection-ui.svelte.js';
+	import { DEFAULT_INSPECTION_TYPE_ID } from '#lib/inspection-due.js';
+	import { assetStatusLabel } from '#lib/components/ui/asset-status/asset-status.svelte.js';
 	import { getErrorMessage, plural } from '#lib/utils.js';
 	import { toast } from 'svelte-sonner';
 
@@ -16,10 +23,30 @@
 		assetIds: string[];
 		/** What is being inspected — a unit's name, or nothing for a selection. */
 		subject?: string;
+		/** The type to start with; the dialog still lets it be changed. Electrical if absent. */
+		typeId?: string;
 		ondone?: () => void;
 	};
 
-	let { open = $bindable(false), assetIds, subject, ondone }: Props = $props();
+	let { open = $bindable(false), assetIds, subject, typeId, ondone }: Props = $props();
+
+	let typesQuery = $derived(getInspectionTypes());
+	let types = $derived(typesQuery.current ?? []);
+	let pickedTypeId = $state<string>(DEFAULT_INSPECTION_TYPE_ID);
+	let pickedType = $derived(types.find((t) => t.id === pickedTypeId));
+	let failLabel = $derived(assetStatusLabel(pickedType?.failStatus ?? 'BROKEN'));
+
+	// A type that needs a qualification is recorded by someone who has one, or
+	// entered as an outside firm's inspection with the firm's details. The
+	// server checks the unit's org; this only decides what the form offers.
+	let qualificationsQuery = $derived(getMyQualifications());
+	let myQualifications = $derived(qualificationsQuery.current ?? []);
+	let needsQualification = $derived(!!pickedType?.requiresQualification);
+	let qualified = $derived(myQualifications.some((q) => q.typeId === pickedTypeId));
+	let external = $state(false);
+	let externalForced = $derived(needsQualification && !qualified);
+	let isExternal = $derived(external || externalForced);
+	let qualification = $state('');
 
 	// The inspector is usually the same firm all day, so the last name is kept.
 	const INSPECTOR_KEY = 'technikpool.inspectorName';
@@ -32,10 +59,18 @@
 
 	$effect(() => {
 		if (!open) return;
+		pickedTypeId = typeId ?? DEFAULT_INSPECTION_TYPE_ID;
+		external = false;
+		qualification = '';
 		performedAt = localToday();
 		result = 'PASSED';
 		notes = '';
-		inspectorName = localStorage.getItem(INSPECTOR_KEY) ?? '';
+		inspectorName = '';
+		try {
+			inspectorName = localStorage.getItem(INSPECTOR_KEY) ?? '';
+		} catch {
+			// Storage blocked: the field simply starts empty.
+		}
 	});
 
 	async function save(e: Event) {
@@ -44,17 +79,26 @@
 		try {
 			const outcome = await logInspection({
 				assetIds,
+				typeId: pickedTypeId,
+				external: isExternal,
+				qualification: isExternal ? qualification || undefined : undefined,
 				performedAt,
 				result,
-				inspectorName: inspectorName || undefined,
+				inspectorName: isExternal ? inspectorName || undefined : undefined,
 				notes: notes || undefined
 			});
-			if (inspectorName.trim()) localStorage.setItem(INSPECTOR_KEY, inspectorName.trim());
+			if (isExternal && inspectorName.trim()) {
+				try {
+					localStorage.setItem(INSPECTOR_KEY, inspectorName.trim());
+				} catch {
+					// Not remembered; nothing else depends on it.
+				}
+			}
 			toast.success(
 				outcome.markedBroken > 0
 					? plural(outcome.markedBroken, [
-							'Inspection recorded · 1 unit marked broken',
-							'Inspections recorded · # units marked broken'
+							`Inspection recorded · 1 unit set to ${failLabel}`,
+							`Inspections recorded · # units set to ${failLabel}`
 						])
 					: plural(outcome.count, ['Inspection recorded', '# inspections recorded'])
 			);
@@ -77,6 +121,18 @@
 >
 	{#snippet children()}
 		<form id="inspection-form" class="space-y-4" onsubmit={save}>
+			<div class="space-y-2">
+				<Label for="inspection-type">Inspection type</Label>
+				<select
+					id="inspection-type"
+					bind:value={pickedTypeId}
+					class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-ring focus:outline-none"
+				>
+					{#each types as type (type.id)}
+						<option value={type.id}>{inspectionTypeLabel(type)}</option>
+					{/each}
+				</select>
+			</div>
 			<div class="space-y-2">
 				<Label for="inspection-date">Inspected on</Label>
 				<Input
@@ -103,15 +159,55 @@
 				{#if result === 'FAILED'}
 					<p class="text-xs text-destructive">
 						{assetIds.length > 1
-							? 'The units are marked broken and stay due until a passed inspection is recorded.'
-							: 'The unit is marked broken and stays due until a passed inspection is recorded.'}
+							? `The units are set to “${failLabel}” and stay due until a passed inspection is recorded.`
+							: `The unit is set to “${failLabel}” and stays due until a passed inspection is recorded.`}
 					</p>
 				{/if}
 			</div>
 			<div class="space-y-2">
-				<Label for="inspection-inspector">Inspector</Label>
-				<Input id="inspection-inspector" bind:value={inspectorName} placeholder="e.g. TÜV Nord" />
+				<label class="flex items-center gap-2 text-sm">
+					<input type="checkbox" bind:checked={external} disabled={externalForced} />
+					Inspected by an outside firm
+				</label>
+				{#if externalForced}
+					<p class="text-xs text-muted-foreground">
+						You hold no qualification for this type, so you can only enter an outside firm's
+						inspection. Qualifications are recorded with the members of the organization.
+					</p>
+				{/if}
 			</div>
+			{#if isExternal}
+				<div class="grid gap-4 sm:grid-cols-2">
+					<div class="space-y-2">
+						<Label for="inspection-inspector">Firm or inspector</Label>
+						<Input
+							id="inspection-inspector"
+							bind:value={inspectorName}
+							placeholder="e.g. TÜV Nord"
+							required={needsQualification}
+						/>
+					</div>
+					<div class="space-y-2">
+						<Label for="inspection-qualification">Their qualification</Label>
+						<Input
+							id="inspection-qualification"
+							bind:value={qualification}
+							placeholder="e.g. Elektrofachkraft"
+							required={needsQualification}
+						/>
+					</div>
+				</div>
+			{:else}
+				<p class="text-xs text-muted-foreground">
+					{#if needsQualification}
+						Recorded under your name and qualification: {myQualifications.find(
+							(q) => q.typeId === pickedTypeId
+						)?.title ?? ''}
+					{:else}
+						Recorded under your name.
+					{/if}
+				</p>
+			{/if}
 			<div class="space-y-2">
 				<Label for="inspection-notes">Notes</Label>
 				<Input id="inspection-notes" bind:value={notes} placeholder="Optional" />

@@ -11,6 +11,7 @@ TransactionInspection _$TransactionInspectionFromJson(
 ) => TransactionInspection(
   performedAt: DateTime.parse(json['performedAt'] as String),
   result: InspectionResult.fromJson(json['result'] as String),
+  typeId: json['typeId'] as String?,
   inspectorName: json['inspectorName'] as String?,
   markedBroken: json['markedBroken'] as bool?,
 );
@@ -18,6 +19,7 @@ TransactionInspection _$TransactionInspectionFromJson(
 Map<String, dynamic> _$TransactionInspectionToJson(
   TransactionInspection instance,
 ) => <String, dynamic>{
+  'typeId': ?instance.typeId,
   'performedAt': instance.performedAt.toIso8601String(),
   'result': instance.result,
   'inspectorName': ?instance.inspectorName,

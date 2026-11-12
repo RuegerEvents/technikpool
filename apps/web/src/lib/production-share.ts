@@ -2,6 +2,15 @@
 // src/lib/server/services/production-share.ts, which builds it. Here rather than
 // there so the page, which runs in the browser, can name the types.
 
+/** Proof of one inspection type: until when it is good (its next due date). */
+export type ShareInspection = {
+	name: string;
+	nameDe: string | null;
+	/** YYYY-MM-DD. */
+	validUntil: string;
+	overdue: boolean;
+};
+
 export type ShareUnit = {
 	id: string;
 	name: string;
@@ -11,7 +20,14 @@ export type ShareUnit = {
 	productId: string;
 	/** The product's photo, resolved to an address like every URL here. */
 	imageUrl: string | null;
-	accessories: { id: string; name: string; tag: string | null; imageUrl: string | null }[];
+	inspections: ShareInspection[];
+	accessories: {
+		id: string;
+		name: string;
+		tag: string | null;
+		imageUrl: string | null;
+		inspections: ShareInspection[];
+	}[];
 };
 
 export type ShareView = {

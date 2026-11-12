@@ -4,6 +4,9 @@ export type FieldChange = {
 	to: string | null;
 	fromRef?: { type: 'location' | 'production'; id: string } | null;
 	toRef?: { type: 'location' | 'production'; id: string } | null;
+	/** On `inspectionIntervalMonths`: which type's interval. Absent on entries
+	 * from before inspection types, which were all electrical. */
+	inspectionTypeId?: string;
 };
 
 export type CreatedData = { type: 'CREATED' };
@@ -170,12 +173,17 @@ export type ReturnReportedData = {
 };
 
 /**
- * A DGUV inspection was recorded. A failed one marks the unit broken, unless it
- * already was — `markedBroken` says whether this entry is what did it.
+ * An inspection was recorded. A failed one sets the unit to its type's fail
+ * status (`status`; broken before types existed), unless it already was —
+ * `markedBroken` says whether this entry is what did it.
  */
 export type InspectedData = {
 	type: 'INSPECTED';
 	inspectionId: string;
+	/** Absent on entries from before inspection types: electrical. */
+	inspectionTypeId?: string;
+	/** The status a failed inspection set, when `markedBroken`. Absent: BROKEN. */
+	status?: string;
 	/** The day it took place, YYYY-MM-DD. The entry's own date is when it was entered. */
 	performedAt: string;
 	result: 'PASSED' | 'FAILED';
@@ -186,6 +194,7 @@ export type InspectedData = {
 /** An inspection recorded by mistake was removed. The status it may have set stays. */
 export type InspectionDeletedData = {
 	type: 'INSPECTION_DELETED';
+	inspectionTypeId?: string;
 	performedAt: string;
 	result: 'PASSED' | 'FAILED';
 };

@@ -4,6 +4,7 @@
 
 import 'package:json_annotation/json_annotation.dart';
 
+import 'overdue_inspection.dart';
 import 'scan_group.dart';
 import 'scan_kit.dart';
 import 'scan_result_action.dart';
@@ -20,6 +21,7 @@ class ScanResult {
     required this.returnedFrom,
     this.group,
     this.kit,
+    this.overdueInspections,
   });
   
   factory ScanResult.fromJson(Map<String, Object?> json) => _$ScanResultFromJson(json);
@@ -48,6 +50,12 @@ class ScanResult {
   /// client keeps working.
   ///
   final ScanKit? kit;
+
+  /// Checking out: how many of the units just booked are overdue, per.
+  /// inspection type. Never a refusal — warn. Empty otherwise. Not.
+  /// required, so an older client keeps compiling.
+  ///
+  final List<OverdueInspection>? overdueInspections;
 
   Map<String, Object?> toJson() => _$ScanResultToJson(this);
 }

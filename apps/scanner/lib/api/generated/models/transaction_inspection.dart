@@ -13,18 +13,22 @@ class TransactionInspection {
   const TransactionInspection({
     required this.performedAt,
     required this.result,
+    this.typeId,
     this.inspectorName,
     this.markedBroken,
   });
   
   factory TransactionInspection.fromJson(Map<String, Object?> json) => _$TransactionInspectionFromJson(json);
   
+  /// Not required, so an older client keeps compiling.
+  final String? typeId;
+
   /// The day it took place, as midnight UTC.
   final DateTime performedAt;
   final InspectionResult result;
   final String? inspectorName;
 
-  /// This inspection failed and set the unit to `BROKEN`.
+  /// This inspection failed and set the unit to its type's `failStatus`.
   final bool? markedBroken;
 
   Map<String, Object?> toJson() => _$TransactionInspectionToJson(this);

@@ -13,6 +13,7 @@ class CategoryUpdateRequest {
     this.color,
     this.sortOrder,
     this.requiresInspection,
+    this.inspections,
   });
   
   factory CategoryUpdateRequest.fromJson(Map<String, Object?> json) => _$CategoryUpdateRequestFromJson(json);
@@ -21,7 +22,12 @@ class CategoryUpdateRequest {
   final String? name;
   final String? color;
   final int? sortOrder;
+
+  /// The electrical type. Same as `inspections` with its id.
   final bool? requiresInspection;
+
+  /// Inspection type id → whether units in this category need it by default.
+  final Map<String, bool>? inspections;
 
   Map<String, Object?> toJson() => _$CategoryUpdateRequestToJson(this);
 }

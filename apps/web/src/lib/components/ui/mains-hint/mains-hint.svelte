@@ -1,7 +1,8 @@
 <script lang="ts">
 	// A product with a mains connector — Schuko, C13/C14, powerCON, TRUE1, CEE —
-	// is electrical equipment, which needs DGUV V3 inspections. Where such a
-	// product isn't marked as needing them, this says so and offers to mark it.
+	// is electrical equipment, which needs electrical (DGUV V3) inspections.
+	// Where such a product isn't marked as needing them, this says so and offers
+	// to mark it.
 	// Read without awaiting: it sits inside detail pages, and a hint is not worth
 	// holding them back for. See CLAUDE.md, "Loading states".
 	import { Button } from '#lib/components/ui/button/index.js';
@@ -10,12 +11,13 @@
 		setProductInspectionRequirement
 	} from '#lib/remote/inspections.remote.js';
 	import { getErrorMessage, plural } from '#lib/utils.js';
+	import { INSPECTION_TYPE_IDS } from '#lib/inspection-due.js';
 	import { toast } from 'svelte-sonner';
 	import { Zap } from '@lucide/svelte';
 
 	type Props = {
 		productId: string;
-		/** Whether the product already needs inspecting — then there is nothing to say. */
+		/** Whether the product already needs electrical inspections — then there is nothing to say. */
 		required: boolean;
 	};
 
@@ -30,7 +32,8 @@
 		try {
 			const result = await setProductInspectionRequirement({
 				productId,
-				requiresInspection: true
+				typeId: INSPECTION_TYPE_IDS.electrical,
+				required: true
 			});
 			toast.success(plural(result.changed, ['Saved · 1 unit changed', 'Saved · # units changed']));
 		} catch (err) {
@@ -52,7 +55,7 @@
 				inspections — but the product is not marked as needing them.
 			</p>
 			<Button size="sm" variant="outline" disabled={saving} onclick={mark}
-				>Mark as needing inspection</Button
+				>Mark as needing electrical inspection</Button
 			>
 		</div>
 	</div>

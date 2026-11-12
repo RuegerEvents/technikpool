@@ -1,7 +1,7 @@
 import { prisma } from '#lib/server/auth.js';
 import { apiError, ApiResponse, type Schemas } from '#lib/server/api.js';
 import { isSystemAdmin, userOrgIds } from '#lib/server/services/access.js';
-import { mainsConnectorNames } from '#lib/server/services/inspections.js';
+import { listInspectionTypes, mainsConnectorNames } from '#lib/server/services/inspections.js';
 import { CATALOG_PRODUCT_INCLUDE, catalogUnitCounts } from '#lib/server/services/products.js';
 import { connectorSlug } from '#lib/server/services/connectors.js';
 import { toCatalogProduct } from '#lib/server/services/api-mappers.js';
@@ -39,13 +39,18 @@ export async function catalogProductBody(
 	productId: string
 ): Promise<Schemas['CatalogProduct']> {
 	const orgIds = (await isSystemAdmin(userId)) ? null : await userOrgIds(userId);
-	const [product, mainsConnectors, units] = await Promise.all([
+	const [product, mainsConnectors, units, types] = await Promise.all([
 		prisma.product.findUniqueOrThrow({
 			where: { id: productId },
 			include: CATALOG_PRODUCT_INCLUDE
 		}),
 		mainsConnectorNames(productId),
-		catalogUnitCounts([productId], orgIds)
+		catalogUnitCounts([productId], orgIds),
+		listInspectionTypes()
 	]);
-	return toCatalogProduct(product, { mainsConnectors, units: units(product.id) });
+	return toCatalogProduct(product, {
+		mainsConnectors,
+		units: units(product.id),
+		typeIds: types.map((t) => t.id)
+	});
 }

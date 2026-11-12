@@ -12,6 +12,7 @@ import { ensureConnectors, sameConnectorName } from '#lib/server/services/connec
 import { waySnapshot, writeWays, type WayInput } from '#lib/server/services/cable-ways.js';
 import { CABLE_ENDS, withCableNames, withEndNames } from '#lib/server/services/cable-ends.js';
 import { applyInspectionRequirement } from '#lib/server/services/inspections.js';
+import { DEFAULT_INSPECTION_TYPE_ID } from '#lib/inspection-due.js';
 import {
 	isCable,
 	normalizeCable,
@@ -62,10 +63,10 @@ export type ProductUpdateInput = {
 	caption?: string;
 	details?: string;
 	/**
-	 * Whether its units need DGUV inspections, overriding the category. `null`
-	 * follows the category again; `undefined` leaves it alone.
+	 * Per inspection type id, whether its units need that type, overriding the
+	 * category. `null` follows the category again; a type left out is left alone.
 	 */
-	requiresInspection?: boolean | null;
+	inspections?: Record<string, boolean | null>;
 };
 
 export type ProductUpdateResult = Awaited<ReturnType<typeof updateProduct>>;
@@ -96,7 +97,7 @@ export async function updateProduct(userId: string, input: ProductUpdateInput) {
 				isLicense: true,
 				caption: true,
 				details: true,
-				requiresInspection: true
+				inspectionTypes: { select: { typeId: true, required: true } }
 			}
 		})
 	);
@@ -128,9 +129,11 @@ export async function updateProduct(userId: string, input: ProductUpdateInput) {
 				!sameConnectorName(nextCable.connectorA, previousProduct.connectorA) ||
 				!sameConnectorName(nextCable.connectorB, previousProduct.connectorB) ||
 				nextCable.lengthCm !== previousProduct.lengthCm));
-	const inspectionChanged =
-		input.requiresInspection !== undefined &&
-		input.requiresInspection !== previousProduct.requiresInspection;
+	const inspectionChanges = await overrideChanges(
+		previousProduct.inspectionTypes,
+		input.inspections
+	);
+	const inspectionChanged = inspectionChanges.length > 0;
 
 	// Identity (name, manufacturer, category) follows the same rule as
 	// `mergeProducts` — see `productControl`: whoever's gear it is controls what
@@ -210,8 +213,7 @@ export async function updateProduct(userId: string, input: ProductUpdateInput) {
 			...(storedCable ?? {}),
 			...(nextIsLicense !== undefined ? { isLicense: nextIsLicense } : {}),
 			...(nextCaption !== undefined ? { caption: nextCaption } : {}),
-			...(nextDetails !== undefined ? { details: nextDetails } : {}),
-			...(inspectionChanged ? { requiresInspection: input.requiresInspection } : {})
+			...(nextDetails !== undefined ? { details: nextDetails } : {})
 		},
 		include: { manufacturer: true, category: true, ...CABLE_ENDS }
 	});
@@ -240,14 +242,11 @@ export async function updateProduct(userId: string, input: ProductUpdateInput) {
 	if (waysChanged && nextWays) {
 		changes.push({ field: 'ways', from: previousWays, to: nextWays });
 	}
-	// As text, the way the requirement has always been logged — null is
-	// "follows the category".
+	// One entry per type, as text the way the requirement has always been
+	// logged — null is "follows the category".
 	if (inspectionChanged) {
-		changes.push({
-			field: 'requiresInspection',
-			from: previousProduct.requiresInspection?.toString() ?? null,
-			to: input.requiresInspection?.toString() ?? null
-		});
+		await writeOverrides(prisma, input.productId, inspectionChanges);
+		changes.push(...inspectionChanges.map(inspectionFieldChange));
 	}
 	if (changes.length > 0) {
 		await logCatalogChange({
@@ -261,9 +260,15 @@ export async function updateProduct(userId: string, input: ProductUpdateInput) {
 
 	// A new category, becoming a licence, or the product's own answer can change
 	// whether its units need DGUV inspections — see `requiresInspection`.
+	const everyType = product.categoryId !== previousProduct.categoryId || licenseChanged;
 	const unitsChanged =
-		product.categoryId !== previousProduct.categoryId || licenseChanged || inspectionChanged
-			? await applyInspectionRequirement(prisma, userId, [product.id])
+		everyType || inspectionChanged
+			? await applyInspectionRequirement(
+					prisma,
+					userId,
+					[product.id],
+					everyType ? undefined : inspectionChanges.map((c) => c.typeId)
+				)
 			: [];
 
 	return {
@@ -277,6 +282,67 @@ export async function updateProduct(userId: string, input: ProductUpdateInput) {
 	};
 }
 
+/** The catalog log's field for one inspection type's requirement. */
+export function inspectionField(typeId: string) {
+	return `inspection:${typeId}`;
+}
+
+/**
+ * The inspection type a logged field is about, or null. `requiresInspection`
+ * is how entries from before inspection types name the electrical one.
+ */
+export function inspectionFieldType(field: string): string | null {
+	if (field === 'requiresInspection') return DEFAULT_INSPECTION_TYPE_ID;
+	return field.startsWith('inspection:') ? field.slice('inspection:'.length) : null;
+}
+
+type OverrideChange = { typeId: string; from: boolean | null; to: boolean | null };
+
+/** Which of a product's per-type answers `next` changes, refusing unknown types. */
+async function overrideChanges(
+	current: { typeId: string; required: boolean }[],
+	next: Record<string, boolean | null> | undefined
+): Promise<OverrideChange[]> {
+	if (!next) return [];
+	const own = new Map(current.map((t) => [t.typeId, t.required]));
+	const changes = Object.entries(next)
+		.map(([typeId, to]) => ({ typeId, from: own.get(typeId) ?? null, to }))
+		.filter((c) => c.from !== c.to);
+	if (changes.length) {
+		const known = await prisma.inspectionType.count({
+			where: { id: { in: changes.map((c) => c.typeId) } }
+		});
+		if (known !== changes.length) appError(404, 'inspection_type_not_found');
+	}
+	return changes;
+}
+
+async function writeOverrides(
+	tx: Pick<Prisma.TransactionClient, 'productInspectionType'>,
+	productId: string,
+	changes: { typeId: string; to: boolean | null }[]
+) {
+	for (const { typeId, to } of changes) {
+		const where = { productId_typeId: { productId, typeId } };
+		if (to === null) await tx.productInspectionType.deleteMany({ where: { productId, typeId } });
+		else {
+			await tx.productInspectionType.upsert({
+				where,
+				create: { productId, typeId, required: to },
+				update: { required: to }
+			});
+		}
+	}
+}
+
+function inspectionFieldChange(change: OverrideChange) {
+	return {
+		field: inspectionField(change.typeId),
+		from: change.from?.toString() ?? null,
+		to: change.to?.toString() ?? null
+	};
+}
+
 export type CategoryUpdateInput = {
 	categoryId: string;
 	name?: string;
@@ -285,16 +351,19 @@ export type CategoryUpdateInput = {
 	sortOrder?: number;
 	/** Which contacts feed, on a cable in this department. See $lib/cable. */
 	cableInputGender?: 'male' | 'female' | null;
-	/** Whether units in it need DGUV inspections, unless their product says otherwise. */
-	requiresInspection?: boolean;
+	/**
+	 * Per inspection type id, whether units in it need that type unless their
+	 * product says otherwise. A type left out is left alone.
+	 */
+	inspections?: Record<string, boolean>;
 };
 
 /**
  * Categories are global, not per-org — one org renaming "Light" would rename it
  * on every other org's assets — so editing them is a system-admin action.
  * `name` stays the English source name; `nameDe` is what the German UI and a
- * German billing document show. Changing `requiresInspection` moves the
- * interval of every unit whose product follows the category.
+ * German billing document show. Changing which inspections it needs moves
+ * the intervals of every unit whose product follows the category.
  */
 export async function updateCategory(userId: string, input: CategoryUpdateInput) {
 	if (!(await isSystemAdmin(userId))) appError(403, 'admin_required');
@@ -329,42 +398,50 @@ export async function updateCategory(userId: string, input: CategoryUpdateInput)
 			color: true,
 			sortOrder: true,
 			cableInputGender: true,
-			requiresInspection: true
+			inspectionTypes: { select: { typeId: true } }
 		}
 	});
-	const inspectionChanged =
-		input.requiresInspection !== undefined &&
-		input.requiresInspection !== previous.requiresInspection;
+	const had = new Set(previous.inspectionTypes.map((t) => t.typeId));
+	const typeChanges = Object.entries(input.inspections ?? {}).filter(
+		([typeId, on]) => had.has(typeId) !== on
+	);
+	if (typeChanges.length) {
+		const known = await prisma.inspectionType.count({
+			where: { id: { in: typeChanges.map(([id]) => id) } }
+		});
+		if (known !== typeChanges.length) appError(404, 'inspection_type_not_found');
+	}
+	const inspectionChanged = typeChanges.length > 0;
 
 	const { category, unitsChanged } = await prisma.$transaction(async (tx) => {
-		const category = await tx.category.update({
-			where: { id: input.categoryId },
-			data: {
-				...data,
-				...(inspectionChanged ? { requiresInspection: input.requiresInspection } : {})
-			}
-		});
+		const category = await tx.category.update({ where: { id: input.categoryId }, data });
 		if (!inspectionChanged) return { category, unitsChanged: [] as string[] };
+		for (const [typeId, on] of typeChanges) {
+			if (on) await tx.categoryInspectionType.create({ data: { categoryId: category.id, typeId } });
+			else {
+				await tx.categoryInspectionType.delete({
+					where: { categoryId_typeId: { categoryId: category.id, typeId } }
+				});
+			}
+		}
+		// Those with an answer of their own for the type stay as they are;
+		// applyInspectionRequirement finds that out per unit anyway.
 		const following = await tx.product.findMany({
-			where: { categoryId: category.id, requiresInspection: null },
+			where: { categoryId: category.id },
 			select: { id: true }
 		});
 		const unitsChanged = await applyInspectionRequirement(
 			tx,
 			userId,
-			following.map((p) => p.id)
+			following.map((p) => p.id),
+			typeChanges.map(([typeId]) => typeId)
 		);
 		return { category, unitsChanged };
 	});
 
-	const { requiresInspection: wasRequired, ...previousFields } = previous;
-	const changes = fieldChanges(previousFields, data);
-	if (inspectionChanged) {
-		changes.push({
-			field: 'requiresInspection',
-			from: String(wasRequired),
-			to: String(input.requiresInspection)
-		});
+	const changes = fieldChanges(previous, data);
+	for (const [typeId, on] of typeChanges) {
+		changes.push({ field: inspectionField(typeId), from: String(!on), to: String(on) });
 	}
 	if (changes.length > 0) {
 		await logCatalogChange({
@@ -430,7 +507,8 @@ export async function setProductPorts(
 /** What `/api/v1`'s catalog endpoints load of a product. */
 export const CATALOG_PRODUCT_INCLUDE = {
 	manufacturer: true,
-	category: true,
+	category: { include: { inspectionTypes: { select: { typeId: true } } } },
+	inspectionTypes: { select: { typeId: true, required: true } },
 	...CABLE_ENDS,
 	ports: { include: { connector: { select: { name: true } } }, orderBy: { sortOrder: 'asc' } }
 } as const;
@@ -453,7 +531,7 @@ export async function catalogUnitCounts(
 		prisma.asset.groupBy({ by: ['productId'], where: scope, _count: { _all: true } }),
 		prisma.asset.groupBy({
 			by: ['productId'],
-			where: { ...scope, inspectionIntervalMonths: { not: null } },
+			where: { ...scope, inspectionSchedules: { some: {} } },
 			_count: { _all: true }
 		}),
 		prisma.asset.groupBy({
@@ -699,14 +777,12 @@ const REVERTIBLE_PRODUCT_FIELDS = [
 	'lengthCm',
 	'isLicense',
 	'caption',
-	'details',
-	'requiresInspection'
+	'details'
 ] as const;
 type RevertibleProductField = (typeof REVERTIBLE_PRODUCT_FIELDS)[number];
 
-/** A logged value as the column holds it: `requiresInspection` is logged as text. */
-function revertValue(field: RevertibleProductField, value: unknown) {
-	if (field !== 'requiresInspection') return (value ?? null) as string | number | boolean | null;
+/** An inspection requirement as logged, as text: 'true', 'false', or null to follow the category. */
+function loggedOverride(value: unknown): boolean | null {
 	return value === 'true' || value === true
 		? true
 		: value === 'false' || value === false
@@ -735,7 +811,8 @@ export async function revertCatalogChange(userId: string, entryId: string) {
 		where: { id: entry.productId },
 		include: {
 			connectorARef: { select: { name: true } },
-			connectorBRef: { select: { name: true } }
+			connectorBRef: { select: { name: true } },
+			inspectionTypes: { select: { typeId: true, required: true } }
 		}
 	});
 	if (!found) appError(409, 'catalog_revert_unavailable');
@@ -752,7 +829,23 @@ export async function revertCatalogChange(userId: string, entryId: string) {
 					sameConnectorName(product[field], (change.to ?? null) as string | null)
 				: String(product[field] ?? null) === String(change.to ?? null);
 		if (!stillHolds) continue;
-		data[field] = revertValue(field, change.from);
+		data[field] = (change.from ?? null) as string | number | boolean | null;
+	}
+
+	// The per-type requirements, on the same terms: only where the product
+	// still gives the answer this entry wrote. A type deleted since is skipped.
+	const own = new Map(product.inspectionTypes.map((t) => [t.typeId, t.required]));
+	const types = new Set(
+		(await prisma.inspectionType.findMany({ select: { id: true } })).map((t) => t.id)
+	);
+	const inspectionRevert: OverrideChange[] = [];
+	for (const change of logged) {
+		const typeId = inspectionFieldType(change.field);
+		if (!typeId || !types.has(typeId)) continue;
+		const current = own.get(typeId) ?? null;
+		if (current !== loggedOverride(change.to)) continue;
+		const to = loggedOverride(change.from);
+		if (to !== current) inspectionRevert.push({ typeId, from: current, to });
 	}
 
 	// A loom's ways are logged as the whole list on both sides, like the panel
@@ -789,7 +882,12 @@ export async function revertCatalogChange(userId: string, entryId: string) {
 			portsRevert = from.filter((p) => alive.has(p.connectorId));
 		}
 	}
-	if (Object.keys(data).length === 0 && !portsRevert && !waysRevert) {
+	if (
+		Object.keys(data).length === 0 &&
+		!portsRevert &&
+		!waysRevert &&
+		inspectionRevert.length === 0
+	) {
 		appError(409, 'catalog_revert_stale');
 	}
 
@@ -802,7 +900,12 @@ export async function revertCatalogChange(userId: string, entryId: string) {
 		const exists = await prisma.category.findUnique({ where: { id: data.categoryId } });
 		if (!exists) delete data.categoryId;
 	}
-	if (Object.keys(data).length === 0 && !portsRevert && !waysRevert) {
+	if (
+		Object.keys(data).length === 0 &&
+		!portsRevert &&
+		!waysRevert &&
+		inspectionRevert.length === 0
+	) {
 		appError(409, 'catalog_revert_stale');
 	}
 	// A revert is a rename like any other, and the old name may have been
@@ -844,7 +947,7 @@ export async function revertCatalogChange(userId: string, entryId: string) {
 	// Whether its units need inspecting can move with the category, the licence
 	// flag or the flag itself, and their intervals move with it.
 	const requirementTouched =
-		'categoryId' in data || 'isLicense' in data || 'requiresInspection' in data;
+		'categoryId' in data || 'isLicense' in data || inspectionRevert.length > 0;
 	const { updated, unitsChanged } = await prisma.$transaction(async (tx) => {
 		const updated =
 			Object.keys(write).length > 0
@@ -853,12 +956,20 @@ export async function revertCatalogChange(userId: string, entryId: string) {
 						data: write as Prisma.ProductUncheckedUpdateInput
 					})
 				: product;
+		await writeOverrides(tx, product.id, inspectionRevert);
+		const everyType = 'categoryId' in data || 'isLicense' in data;
 		const unitsChanged = requirementTouched
-			? await applyInspectionRequirement(tx, userId, [product.id])
+			? await applyInspectionRequirement(
+					tx,
+					userId,
+					[product.id],
+					everyType ? undefined : inspectionRevert.map((c) => c.typeId)
+				)
 			: [];
 		return { updated, unitsChanged };
 	});
 	const changes = fieldChanges(product, data);
+	changes.push(...inspectionRevert.map(inspectionFieldChange));
 	let createdForWays: string[] = [];
 	if (waysRevert) {
 		createdForWays = await writeWays(product.id, waysRevert);

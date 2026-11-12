@@ -3,10 +3,12 @@ import { prisma } from '#lib/server/auth.js';
 import { apiError, ApiResponse, apiJson, handleApi, requireApiUser } from '#lib/server/api.js';
 import { isSystemAdmin, userOrgIds } from '#lib/server/services/access.js';
 import {
-	INSPECTION_NOT_REQUIRED_WHERE,
-	INSPECTION_REQUIRED_WHERE,
+	inspectionNotRequiredWhere,
+	inspectionRequiredWhere,
+	listInspectionTypes,
 	mainsConnectorsByProduct
 } from '#lib/server/services/inspections.js';
+import { DEFAULT_INSPECTION_TYPE_ID } from '#lib/inspection-due.js';
 import { CATALOG_PRODUCT_INCLUDE, catalogUnitCounts } from '#lib/server/services/products.js';
 import { toCatalogProduct } from '#lib/server/services/api-mappers.js';
 import { ACTIVE_ASSET_WHERE } from '#lib/asset-status.js';
@@ -39,6 +41,7 @@ export const GET: RequestHandler = ({ locals, url }) =>
 		const categoryId = url.searchParams.get('categoryId');
 		const cursor = url.searchParams.get('cursor');
 		const inspectionRequired = booleanParam(url, 'inspectionRequired');
+		const inspectionTypeId = url.searchParams.get('inspectionTypeId') || DEFAULT_INSPECTION_TYPE_ID;
 		const mains = booleanParam(url, 'mains');
 		const tracked = booleanParam(url, 'tracked');
 		const overdue = booleanParam(url, 'overdue');
@@ -64,13 +67,17 @@ export const GET: RequestHandler = ({ locals, url }) =>
 			});
 		}
 		if (inspectionRequired !== undefined) {
-			and.push(inspectionRequired ? INSPECTION_REQUIRED_WHERE : INSPECTION_NOT_REQUIRED_WHERE);
+			and.push(
+				inspectionRequired
+					? inspectionRequiredWhere(inspectionTypeId)
+					: inspectionNotRequiredWhere(inspectionTypeId)
+			);
 		}
 		if (mains !== undefined) {
 			and.push(mains ? { id: { in: mainsIds } } : { id: { notIn: mainsIds } });
 		}
 		if (tracked !== undefined) {
-			const units = { ...unitScope, inspectionIntervalMonths: { not: null } };
+			const units = { ...unitScope, inspectionSchedules: { some: {} } };
 			and.push(tracked ? { assets: { some: units } } : { assets: { none: units } });
 		}
 		if (overdue !== undefined) {
@@ -86,15 +93,23 @@ export const GET: RequestHandler = ({ locals, url }) =>
 			...(cursor ? { cursor: { id: cursor }, skip: 1 } : {})
 		});
 		const items = rows.slice(0, limit);
-		const units = await catalogUnitCounts(
-			items.map((p) => p.id),
-			orgIds,
-			now
-		);
+		const [units, types] = await Promise.all([
+			catalogUnitCounts(
+				items.map((p) => p.id),
+				orgIds,
+				now
+			),
+			listInspectionTypes()
+		]);
+		const typeIds = types.map((t) => t.id);
 
 		return apiJson('CatalogProductPage', {
 			items: items.map((p) =>
-				toCatalogProduct(p, { mainsConnectors: mainsByProduct[p.id] ?? [], units: units(p.id) })
+				toCatalogProduct(p, {
+					mainsConnectors: mainsByProduct[p.id] ?? [],
+					units: units(p.id),
+					typeIds
+				})
 			),
 			nextCursor: rows.length > limit ? (items.at(-1)?.id ?? null) : null
 		});

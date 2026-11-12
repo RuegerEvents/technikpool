@@ -3,7 +3,11 @@ import type { TransactionData } from '#lib/types/asset-transaction.js';
 import type { OrgRole } from '#lib/roles.js';
 import { imageSrc } from '#lib/images.js';
 import { isCable } from '#lib/cable.js';
-import { requiresInspection } from '#lib/inspection-due.js';
+import {
+	DEFAULT_INSPECTION_TYPE_ID,
+	inspectionOverride,
+	requiredInspectionTypes
+} from '#lib/inspection-due.js';
 import { portRequirement } from '#lib/ports.js';
 import { bundleLabel } from '#lib/product-label.js';
 import { withCableNames } from '#lib/server/services/cable-ends.js';
@@ -133,7 +137,7 @@ type CategoryRow = {
 	color: string;
 	sortOrder: number;
 	/** Left out where a stocktake selects only what it shows. */
-	requiresInspection?: boolean;
+	inspectionTypes?: { typeId: string }[];
 };
 
 export function toCategory(category: CategoryRow): Schemas['Category'] {
@@ -142,8 +146,13 @@ export function toCategory(category: CategoryRow): Schemas['Category'] {
 		name: category.name,
 		color: category.color,
 		sortOrder: category.sortOrder,
-		...(category.requiresInspection !== undefined
-			? { requiresInspection: category.requiresInspection }
+		...(category.inspectionTypes !== undefined
+			? {
+					requiresInspection: category.inspectionTypes.some(
+						(t) => t.typeId === DEFAULT_INSPECTION_TYPE_ID
+					),
+					inspectionTypeIds: category.inspectionTypes.map((t) => t.typeId)
+				}
 			: {})
 	};
 }
@@ -214,9 +223,9 @@ export function toProduct(product: ProductRow): Schemas['Product'] {
  */
 export function toCatalogProduct(
 	product: ProductRow & {
-		requiresInspection: boolean | null;
 		isLicense: boolean;
-		category: { requiresInspection: boolean };
+		inspectionTypes: { typeId: string; required: boolean }[];
+		category: { inspectionTypes: { typeId: string }[] };
 		ports: {
 			count: number;
 			label: string | null;
@@ -224,12 +233,23 @@ export function toCatalogProduct(
 			connector: { name: string };
 		}[];
 	},
-	extra: { mainsConnectors: string[]; units: Schemas['CatalogProductUnits'] }
+	extra: {
+		mainsConnectors: string[];
+		units: Schemas['CatalogProductUnits'];
+		/** Every inspection type id, in order. */
+		typeIds: string[];
+	}
 ): Schemas['CatalogProduct'] {
+	const required = requiredInspectionTypes(product);
 	return {
 		...toProduct(product),
-		requiresInspection: product.requiresInspection,
-		inspectionRequired: requiresInspection(product),
+		requiresInspection: inspectionOverride(product, DEFAULT_INSPECTION_TYPE_ID),
+		inspectionRequired: required.has(DEFAULT_INSPECTION_TYPE_ID),
+		inspections: extra.typeIds.map((typeId) => ({
+			typeId,
+			required: required.has(typeId),
+			override: inspectionOverride(product, typeId)
+		})),
 		isLicense: product.isLicense,
 		mainsConnectors: extra.mainsConnectors,
 		ports: product.ports.map((p) => ({
@@ -303,6 +323,7 @@ function transactionInspection(data: unknown): Schemas['TransactionInspection'] 
 	const tx = data as TransactionData | null | undefined;
 	if (tx?.type === 'INSPECTED') {
 		return {
+			typeId: tx.inspectionTypeId ?? DEFAULT_INSPECTION_TYPE_ID,
 			performedAt: new Date(`${tx.performedAt}T00:00:00.000Z`).toISOString(),
 			result: tx.result,
 			inspectorName: tx.inspectorName,
@@ -311,6 +332,7 @@ function transactionInspection(data: unknown): Schemas['TransactionInspection'] 
 	}
 	if (tx?.type === 'INSPECTION_DELETED') {
 		return {
+			typeId: tx.inspectionTypeId ?? DEFAULT_INSPECTION_TYPE_ID,
 			performedAt: new Date(`${tx.performedAt}T00:00:00.000Z`).toISOString(),
 			result: tx.result
 		};
@@ -332,20 +354,26 @@ export function toAssetTransaction(tx: TransactionRow): Schemas['AssetTransactio
 type InspectionRow = {
 	id: string;
 	assetId: string;
+	typeId: string;
 	performedAt: Date;
 	result: string;
 	inspectorName: string | null;
 	notes: string | null;
+	external: boolean;
+	qualification: string | null;
 };
 
 export function toInspection(i: InspectionRow): Schemas['Inspection'] {
 	return {
 		id: i.id,
 		assetId: i.assetId,
+		typeId: i.typeId,
 		performedAt: i.performedAt.toISOString(),
 		result: i.result === 'FAILED' ? 'FAILED' : 'PASSED',
 		inspectorName: i.inspectorName,
-		notes: i.notes
+		notes: i.notes,
+		external: i.external,
+		qualification: i.qualification
 	};
 }
 
@@ -469,7 +497,8 @@ export function toScanResult(result: ScanResult): Schemas['ScanResult'] {
 		targetName: result.targetName,
 		returnedFrom: result.returnedFrom,
 		group: toScanGroup(result.group),
-		kit: toScanKit(result.kit)
+		kit: toScanKit(result.kit),
+		overdueInspections: (result.overdueInspections ?? []).map((o) => ({ ...o }))
 	};
 }
 
@@ -632,7 +661,8 @@ export function toProductionHandout(view: HandoutView): Schemas['ProductionHando
 			status: i.status,
 			done: i.done,
 			received: i.received,
-			returnReported: i.returnReported
+			returnReported: i.returnReported,
+			inspectionOverdue: i.inspectionOverdue
 		})),
 		lines: view.lines.map(toListLine),
 		othersCount: view.othersCount
