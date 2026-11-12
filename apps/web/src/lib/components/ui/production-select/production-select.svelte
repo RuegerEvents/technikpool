@@ -11,6 +11,7 @@
 </script>
 
 <script lang="ts">
+	import { searchMatcher } from '#lib/search.js';
 	import { page } from '$app/state';
 	import { tick } from 'svelte';
 	import { ChevronDown, Search } from '@lucide/svelte';
@@ -70,13 +71,10 @@
 	}
 
 	let sections = $derived.by(() => {
-		const q = query.trim().toLowerCase();
-		const matches = productions.filter(
-			(p) =>
-				!q ||
-				p.name.toLowerCase().includes(q) ||
-				orgLabel(p.organization).toLowerCase().includes(q) ||
-				p.organization.name.toLowerCase().includes(q)
+		const q = query.trim();
+		const matchSearch = searchMatcher(q);
+		const matches = productions.filter((p) =>
+			matchSearch(p.name, orgLabel(p.organization), p.organization.name)
 		);
 		const time = (d: Date | null) => (d ? new Date(d).getTime() : Infinity);
 		const running = matches

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { matchesSearch } from '#lib/search.js';
 	import { rowLinkClick } from '#lib/row-link.js';
 	import { resolve } from '$app/paths';
 	import { goto } from '$app/navigation';
@@ -41,7 +42,8 @@
 			if (holderFilter === 'out' && l.holders.length === 0) return false;
 			if (holderFilter === 'free' && l.holders.length > 0) return false;
 			if (!term) return true;
-			return [
+			return matchesSearch(
+				term,
 				l.product.name,
 				l.product.manufacturer?.name,
 				l.assetTag,
@@ -49,7 +51,7 @@
 				orgLabel(l.organization),
 				l.location.name,
 				...l.holders.flatMap((h) => [h.productionName, h.checkedOutBy])
-			].some((v) => v?.toLowerCase().includes(term));
+			);
 		})
 	);
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { searchMatcher } from '#lib/search.js';
 	// Under the loose units, the catalogue. A kit is usually short of a product
 	// the pool knows perfectly well and has no spare unit of — every one of them
 	// is already in another case — so the list that ends in "nothing matches"
@@ -30,11 +31,11 @@
 	let catalogue = $derived(catalogueQuery.current ?? []);
 	let term = $derived(search.trim());
 	let matches = $derived.by(() => {
-		const q = term.toLowerCase();
+		const matchSearch = searchMatcher(term);
 		return (
 			catalogue
 				.map((p) => ({ ...p, label: productLabel(p) }))
-				.filter((p) => !q || p.label.toLowerCase().includes(q))
+				.filter((p) => matchSearch(p.label, p.caption))
 				// Registering a unit straight into the kit answers to the type like
 				// every other way in, so the catalogue is cut to the same list.
 				.filter((p) => allows(p.id))

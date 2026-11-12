@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { searchMatcher } from '#lib/search.js';
 	import { cn } from '#lib/utils.js';
 	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
 
@@ -95,8 +96,10 @@
 	let inputEl: HTMLInputElement;
 
 	let query = $derived(inputValue.toLowerCase().trim());
+	// See `#lib/search.ts`: words in any order, lengths written either way, a typo forgiven.
+	let matchSearch = $derived(searchMatcher(inputValue));
 	const matching = (list: Item[]) =>
-		query ? list.filter((i) => i.name.toLowerCase().includes(query)) : list;
+		query ? list.filter((i) => matchSearch(i.name, i.hint)) : list;
 
 	let filtered = $derived(matching(items));
 	let selectableFiltered = $derived(filtered.filter((i) => !i.disabled));

@@ -1,6 +1,7 @@
 import { prisma } from '#lib/server/auth.js';
 import { BOOKABLE_ASSET_WHERE } from '#lib/asset-status.js';
 import type { Prisma } from '#lib/prisma/client.js';
+import { searchMatcher } from '#lib/search.js';
 import { naturalCompare } from '#lib/sort.js';
 import {
 	isSystemAdmin,
@@ -676,25 +677,18 @@ export async function searchHandoutCandidates(
 	organizationId?: string
 ): Promise<HandoutCandidate[]> {
 	const scope = await handoutScope(userId, productionId, organizationId);
-	const words = text.trim().split(/\s+/).filter(Boolean);
-	if (!scope.books || scope.production.cancelledAt || words.join('').length < 2) return [];
-	const assets = await prisma.asset.findMany({
+	if (!scope.books || scope.production.cancelledAt || text.replace(/\s/g, '').length < 2) return [];
+	// Matched here rather than in SQL, by the same rules as every search box
+	// (`#lib/search.ts`): "powercon 1m" finds "TRUE1 → powerCON 1 m" with a
+	// word left out, a length written either way, and its cable ends counted.
+	const matchSearch = searchMatcher(text);
+	const all = await prisma.asset.findMany({
 		where: {
 			...(scope.organizationIds ? { organizationId: { in: scope.organizationIds } } : {}),
 			parentAssetId: null,
 			bundleId: null,
 			...BOOKABLE_ASSET_WHERE,
-			...freeForProduction(scope.production),
-			AND: words.map((word) => ({
-				OR: [
-					{ product: { name: { contains: word, mode: 'insensitive' as const } } },
-					{ product: { caption: { contains: word, mode: 'insensitive' as const } } },
-					{
-						product: { manufacturer: { name: { contains: word, mode: 'insensitive' as const } } }
-					},
-					{ assetTag: { contains: word, mode: 'insensitive' as const } }
-				]
-			}))
+			...freeForProduction(scope.production)
 		},
 		select: {
 			assetTag: true,
@@ -708,12 +702,25 @@ export async function searchHandoutCandidates(
 					name: true,
 					caption: true,
 					imagePath: true,
-					manufacturer: { select: { name: true } }
+					cableType: true,
+					manufacturer: { select: { name: true } },
+					connectorARef: { select: { name: true } },
+					connectorBRef: { select: { name: true } }
 				}
 			}
-		},
-		take: 2000
+		}
 	});
+	const assets = all.filter((asset) =>
+		matchSearch(
+			asset.product.name,
+			asset.product.caption,
+			asset.product.manufacturer?.name,
+			asset.product.cableType,
+			asset.product.connectorARef?.name,
+			asset.product.connectorBRef?.name,
+			asset.assetTag
+		)
+	);
 	const groups = new Map<string, HandoutCandidate>();
 	for (const asset of assets) {
 		const key = `${asset.productId}|${asset.locationId}|${asset.organizationId}`;

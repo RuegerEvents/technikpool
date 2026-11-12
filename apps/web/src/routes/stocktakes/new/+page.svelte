@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { matchesSearch } from '#lib/search.js';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/state';
 	import { resolve } from '$app/paths';
@@ -58,11 +59,7 @@
 		);
 		if (!q) return [];
 		return inCategory
-			.filter(
-				(p) =>
-					!productIds.includes(p.id) &&
-					`${p.manufacturer?.name ?? ''} ${p.name}`.toLowerCase().includes(q)
-			)
+			.filter((p) => !productIds.includes(p.id) && matchesSearch(q, p.manufacturer?.name, p.name))
 			.slice(0, 8);
 	});
 	let chosenProducts = $derived(products.filter((p) => productIds.includes(p.id)));

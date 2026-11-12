@@ -17,6 +17,7 @@
 </script>
 
 <script lang="ts">
+	import { searchMatcher } from '#lib/search.js';
 	import { CameraScanButton } from '#lib/components/ui/camera-scan/index.js';
 	// Picking loose units for a kit the way a production books them: one row per
 	// product and place, a count, and "all" — because "4 of the CAT cables" is
@@ -100,22 +101,21 @@
 
 	let picked = $derived(new Set(selected));
 	let q = $derived(search.toLowerCase().trim());
+	let matchSearch = $derived(searchMatcher(search));
 
 	// A row is shown when it is what was searched for, or when one of its units
 	// is — and then only that unit, opened, since a tag names exactly one.
 	let shown = $derived.by(() =>
 		groups.flatMap((g) => {
 			if (!q) return [{ group: g, units: g.units, byUnit: false }];
-			const byProduct = [g.productName, g.productCaption, g.manufacturerName].some((v) =>
-				v?.toLowerCase().includes(q)
-			);
+			const byProduct = matchSearch(g.productName, g.productCaption, g.manufacturerName);
 			if (byProduct) return [{ group: g, units: g.units, byUnit: false }];
 			// An accessory's tag finds the unit it hangs off: the accessory cannot go
 			// into a kit on its own, and its sticker is often the one in reach.
-			const hits = g.units.filter((u) =>
-				[u.assetTag, u.serialNumber, ...(u.accessories ?? []).map((a) => a.assetTag)].some((v) =>
-					v?.toLowerCase().includes(q)
-				)
+			const hits = g.units.filter(
+				(u) =>
+					matchSearch(u.assetTag, u.serialNumber) ||
+					(u.accessories ?? []).some((a) => matchSearch(a.assetTag))
 			);
 			return hits.length > 0 ? [{ group: g, units: hits, byUnit: true }] : [];
 		})

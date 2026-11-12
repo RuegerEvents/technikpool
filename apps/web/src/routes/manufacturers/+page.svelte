@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { matchesSearch } from '#lib/search.js';
 	import { getErrorMessage, plural } from '#lib/utils.js';
 	import {
 		getManufacturers,
@@ -21,9 +22,7 @@
 	let canEdit = $derived(data.isAdmin);
 	let search = $state('');
 	let visible = $derived(
-		manufacturers.filter((manufacturer) =>
-			manufacturer.name.toLowerCase().includes(search.trim().toLowerCase())
-		)
+		manufacturers.filter((manufacturer) => matchesSearch(search, manufacturer.name))
 	);
 
 	let drafts = $state<Record<string, { name: string }>>({});

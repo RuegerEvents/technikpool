@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { searchMatcher } from '#lib/search.js';
 	import { productLabel } from '#lib/product-label.js';
 	import { categoryLabel } from '#lib/category.js';
 	import { cableTwinGroups, cableTwinKey } from '#lib/cable.js';
@@ -147,30 +148,30 @@
 	let currentId = $state('');
 
 	let searchTrimmed = $derived(searchQuery.toLowerCase().trim());
+	// See `#lib/search.ts`: every word anywhere, in any order, a typo forgiven.
+	let matchSearch = $derived(searchMatcher(searchQuery));
 
 	function matches(product: CatalogProduct) {
 		if (missing === 'image' && product.imagePath) return false;
 		if (missing === 'price' && !needsPrice(product)) return false;
 		if (missing === 'twin' && !hasTwin(product)) return false;
 		if (!searchTrimmed) return true;
-		return (
-			product.name.toLowerCase().includes(searchTrimmed) ||
-			(product.caption?.toLowerCase().includes(searchTrimmed) ?? false) ||
-			(product.manufacturer?.name.toLowerCase().includes(searchTrimmed) ?? false) ||
-			categoryLabel(product.category).toLowerCase().includes(searchTrimmed) ||
+		return matchSearch(
+			product.name,
+			product.caption,
+			product.manufacturer?.name,
+			categoryLabel(product.category),
 			// "everything with a TRUE1 end" is a question the name can't answer.
-			[product.cableType, product.connectorA, product.connectorB].some((v) =>
-				v?.toLowerCase().includes(searchTrimmed)
-			)
+			product.cableType,
+			product.connectorA,
+			product.connectorB
 		);
 	}
 
 	function matchesBundle(bundle: CatalogBundle) {
 		if (missing !== 'price' || storedBundlePrice(bundle) != null) return false;
 		if (!searchTrimmed) return true;
-		return [bundle.template.name, bundle.tag, categoryLabel(bundle.template.category)].some((v) =>
-			v?.toLowerCase().includes(searchTrimmed)
-		);
+		return matchSearch(bundle.template.name, bundle.tag, categoryLabel(bundle.template.category));
 	}
 
 	let entries = $derived<Entry[]>([

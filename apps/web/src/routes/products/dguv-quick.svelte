@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { matchesSearch } from '#lib/search.js';
 	// The inspection quick mode of /products: the whole catalog as one table,
 	// filtered by category and by whether a product needs one inspection type, so
 	// the answer can be given for a shelf of products at once instead of one
@@ -86,12 +87,7 @@
 				if (status === 'mains_unmarked') return electrical && !required && !!mains[p.id];
 				return true;
 			})
-			.filter(
-				(p) =>
-					!searchTrimmed ||
-					productLabel(p).toLowerCase().includes(searchTrimmed) ||
-					(mains[p.id] ?? []).some((n) => n.toLowerCase().includes(searchTrimmed))
-			)
+			.filter((p) => matchesSearch(searchTrimmed, productLabel(p), ...(mains[p.id] ?? [])))
 			.sort((a, b) => naturalCompare(productLabel(a), productLabel(b)))
 	);
 	let mainsUnmarkedCount = $derived(

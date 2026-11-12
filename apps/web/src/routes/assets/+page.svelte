@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { searchMatcher } from '#lib/search.js';
 	import { rowLinkClick } from '#lib/row-link.js';
 	import { naturalCompare } from '#lib/sort.js';
 	import { withCaption } from '#lib/product-label.js';
@@ -441,11 +442,13 @@
 	);
 
 	let searchTrimmed = $derived(searchQuery.toLowerCase().trim());
+	// See `#lib/search.ts`: every word anywhere, in any order, a typo forgiven.
+	let matchSearch = $derived(searchMatcher(searchQuery));
 	// Per unit, so the flat list can use it as it is. A product group matches when
 	// any of its units does — everything a group row shows is taken from them.
 	function assetMatchesSearch(a: Asset) {
 		if (!searchTrimmed) return true;
-		return [
+		return matchSearch(
 			a.product.name,
 			a.product.caption,
 			a.product.manufacturer?.name,
@@ -461,7 +464,7 @@
 			a.bundle?.template.caption,
 			orgLabel(a.organization),
 			a.organization.name
-		].some((v) => v?.toLowerCase().includes(searchTrimmed));
+		);
 	}
 
 	let filteredGroups = $derived(
@@ -625,20 +628,22 @@
 					})
 					.filter((t) => {
 						if (!searchTrimmed) return t.totalAssets > 0;
-						if ([t.name, t.caption].some((v) => v?.toLowerCase().includes(searchTrimmed)))
-							return true;
-						if (t.instances.some((i) => i.tag?.toLowerCase().includes(searchTrimmed))) return true;
+						if (matchSearch(t.name, t.caption)) return true;
+						if (t.instances.some((i) => matchSearch(t.name, t.caption, i.tag))) return true;
 						// Search full asset list so bundles surface even when status/category filter hides the match
 						return t.instances.some((inst) =>
 							inst.assets
 								.filter((a) => !a.parentAssetId)
-								.some(
-									(a) =>
-										a.product.name.toLowerCase().includes(searchTrimmed) ||
-										(a.product.caption?.toLowerCase().includes(searchTrimmed) ?? false) ||
-										(a.product.manufacturer?.name.toLowerCase().includes(searchTrimmed) ?? false) ||
-										(a.serialNumber?.toLowerCase().includes(searchTrimmed) ?? false) ||
-										(a.assetTag?.toLowerCase().includes(searchTrimmed) ?? false)
+								.some((a) =>
+									matchSearch(
+										a.product.name,
+										a.product.caption,
+										a.product.manufacturer?.name,
+										a.product.connectorA,
+										a.product.connectorB,
+										a.serialNumber,
+										a.assetTag
+									)
 								)
 						);
 					})

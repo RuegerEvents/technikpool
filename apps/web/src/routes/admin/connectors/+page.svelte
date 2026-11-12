@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { matchesSearch } from '#lib/search.js';
 	// The connector catalogue, as an admin sees it. Rows arrive here two ways:
 	// created deliberately from the picker's "create" option, or created for us
 	// the first time a product names a connector nobody had catalogued. The
@@ -33,13 +34,7 @@
 	let search = $state('');
 	let trimmed = $derived(search.toLowerCase().trim());
 	let visible = $derived(
-		!trimmed
-			? connectors
-			: connectors.filter(
-					(c) =>
-						c.name.toLowerCase().includes(trimmed) ||
-						(c.family?.toLowerCase().includes(trimmed) ?? false)
-				)
+		!trimmed ? connectors : connectors.filter((c) => matchesSearch(trimmed, c.name, c.family))
 	);
 
 	// Grouped by what they mate with, because that is the thing an admin is

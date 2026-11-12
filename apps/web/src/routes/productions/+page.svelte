@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { matchesSearch } from '#lib/search.js';
 	/* eslint-disable svelte/prefer-svelte-reactivity */
 	import * as Card from '#lib/components/ui/card/index.js';
 	import { DataView } from '#lib/components/ui/data-view/index.js';
@@ -230,7 +231,7 @@
 			storageKey="productions_view"
 			defaultView="cards"
 			href={(p) => `/productions/${p.id}`}
-			searchFn={(p, q) => p.name.toLowerCase().includes(q)}
+			searchFn={(p, q) => matchesSearch(q, p.name)}
 			searchPlaceholder="Search productions…"
 			addHref={orgs.some(canWrite) ? '/productions/new' : undefined}
 			addLabel="New Production"

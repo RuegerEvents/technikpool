@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { matchesSearch } from '#lib/search.js';
 	import { orgLabel } from '#lib/utils.js';
 	import { naturalCompare } from '#lib/sort.js';
 	import { categoryLabel } from '#lib/category.js';
@@ -99,14 +100,16 @@
 		if (status === 'again' && (!last || last.result === 'FAILED')) return false;
 		const q = search.trim().toLowerCase();
 		if (!q) return true;
-		return [
+		// "#12" while typing "#123" is the unit number as far as it goes.
+		if (`#${asset.orgIndex}`.includes(q)) return true;
+		return matchesSearch(
+			q,
 			asset.product.name,
 			asset.product.manufacturer?.name,
 			asset.assetTag,
 			asset.serialNumber,
-			`#${asset.orgIndex}`,
 			asset.location.name
-		].some((field) => field?.toLowerCase().includes(q));
+		);
 	}
 
 	let overdue = $derived(data.overdue.filter(matches));

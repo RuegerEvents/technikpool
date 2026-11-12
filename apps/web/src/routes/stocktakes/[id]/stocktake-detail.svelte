@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { matchesSearch } from '#lib/search.js';
 	import { naturalCompare } from '#lib/sort.js';
 	import { userLabel } from '#lib/user-label.svelte.js';
 	import { goto } from '$app/navigation';
@@ -456,10 +457,7 @@
 		return stocktake.products
 			.filter((p) => !categoryFilter || p.product.category.id === categoryFilter)
 			.filter((p) => !locationFilter || p.locations.some((l) => l.location.id === locationFilter))
-			.filter(
-				(p) =>
-					!q || `${p.product.manufacturer?.name ?? ''} ${p.product.name}`.toLowerCase().includes(q)
-			)
+			.filter((p) => matchesSearch(q, p.product.manufacturer?.name, p.product.name))
 			.filter((p) => effectiveState === 'all' || p.counted < p.expected)
 			.sort(
 				(a, b) =>

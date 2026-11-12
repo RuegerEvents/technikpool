@@ -11,6 +11,7 @@
 </script>
 
 <script lang="ts">
+	import { searchMatcher } from '#lib/search.js';
 	import { tick } from 'svelte';
 	import { ChevronDown, MapPin, Search, Star } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
@@ -111,15 +112,11 @@
 	}
 
 	let sections = $derived.by(() => {
-		const q = query.trim().toLowerCase();
+		const matchSearch = searchMatcher(query);
 		const matches = locations.filter(
 			(l) =>
 				!exclude.includes(l.id) &&
-				(!q ||
-					l.name.toLowerCase().includes(q) ||
-					orgLabel(l.organization).toLowerCase().includes(q) ||
-					l.organization.name.toLowerCase().includes(q) ||
-					(l.address?.city ?? '').toLowerCase().includes(q))
+				matchSearch(l.name, orgLabel(l.organization), l.organization.name, l.address?.city)
 		);
 		const orgIds = [...new Set(matches.map((l) => l.organizationId))];
 		return orgIds

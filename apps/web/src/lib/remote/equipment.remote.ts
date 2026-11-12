@@ -22,6 +22,7 @@ import { requireOpenProduction } from '#lib/server/services/production-state.js'
 import { copyEquipment, planEquipmentCopy } from '#lib/server/services/equipment-copy.js';
 import type { AddedToProductionData } from '#lib/types/asset-transaction.js';
 import { productLabel } from '#lib/product-label.js';
+import { CABLE_ENDS } from '#lib/server/services/cable-ends.js';
 
 const ACTIVE_STATUSES = ['PENDING', 'APPROVED', 'CHECKED_OUT', 'RETURNED'] as const;
 const CONFLICT_STATUSES = ['PENDING', 'APPROVED', 'CHECKED_OUT'] as const;
@@ -63,7 +64,7 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 	const assets = await prisma.asset.findMany({
 		where: { organizationId: { in: orgIds }, parentAssetId: null, ...BOOKABLE_ASSET_WHERE },
 		include: {
-			product: { include: { manufacturer: true, category: true } },
+			product: { include: { manufacturer: true, category: true, ...CABLE_ENDS } },
 			organization: {
 				select: { id: true, name: true, shortName: true, color: true, avatarLabel: true }
 			},
@@ -96,6 +97,8 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 		productCaption: string | null;
 		imagePath: string | null;
 		manufacturerName: string | null;
+		/** Both ends of a cable, and a loom's ways: searched, not shown. */
+		cableEnds: string;
 		categoryId: string;
 		categoryName: string;
 		categoryNameDe: string | null;
@@ -136,6 +139,18 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 				productCaption: a.product.caption,
 				imagePath: a.generatedImagePath ?? a.product.imagePath,
 				manufacturerName: a.product.manufacturer?.name ?? null,
+				cableEnds: [
+					a.product.cableType,
+					a.product.connectorARef?.name,
+					a.product.connectorBRef?.name,
+					...a.product.ways.flatMap((w) => [
+						w.cableType,
+						w.connectorARef?.name,
+						w.connectorBRef?.name
+					])
+				]
+					.filter(Boolean)
+					.join(' '),
 				categoryId: a.product.categoryId,
 				categoryName: a.product.category.name,
 				categoryNameDe: a.product.category.nameDe,

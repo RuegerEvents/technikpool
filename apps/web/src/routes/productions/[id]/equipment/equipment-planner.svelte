@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { searchMatcher } from '#lib/search.js';
 	import { naturalCompare } from '#lib/sort.js';
 	import { withCaption } from '#lib/product-label.js';
 	import { CountStepper } from '#lib/components/ui/count-stepper/index.js';
@@ -196,15 +197,10 @@
 		);
 	}
 
+	// See `#lib/search.ts`: every word anywhere, in any order, a typo forgiven.
+	let matchSearch = $derived(searchMatcher(search));
 	function matchesFiltersExceptCategory(g: Group): boolean {
-		const q = search.toLowerCase().trim();
-		if (
-			q &&
-			!(
-				g.productName.toLowerCase().includes(q) ||
-				(g.manufacturerName?.toLowerCase().includes(q) ?? false)
-			)
-		)
+		if (!matchSearch(g.productName, g.productCaption, g.manufacturerName, g.cableEnds))
 			return false;
 		if (selectedOrgs.size > 0 && !selectedOrgs.has(g.organizationId)) return false;
 		if (locMode === 'locations') {
@@ -220,8 +216,7 @@
 	}
 
 	function matchesBundleFiltersExceptCategory(b: Bundle): boolean {
-		const q = search.toLowerCase().trim();
-		if (q && !(b.name.toLowerCase().includes(q) || b.memberSearchText.includes(q))) return false;
+		if (!matchSearch(b.name, b.caption, b.tag, b.memberSearchText)) return false;
 		if (selectedOrgs.size > 0 && !selectedOrgs.has(b.organizationId)) return false;
 		if (locMode === 'locations') {
 			if (selectedLocs.size > 0 && !b.locations.some((l) => selectedLocs.has(l.id))) return false;
