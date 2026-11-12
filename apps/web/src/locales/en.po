@@ -4815,8 +4815,8 @@ msgstr "Search this organisation's devices, or type a new one…"
 
 #: src/lib/components/asset-form/asset-form.svelte
 #: src/lib/components/ui/customer-select/customer-select.svelte
+#: src/lib/components/ui/unit-picker/register-from-catalogue.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
-#: src/routes/assets/bundles/[id]/bundle-detail.svelte
 msgid "New"
 msgstr "New"
 
@@ -4867,7 +4867,7 @@ msgstr "New accessory"
 msgid "Without a tag the unit can't be scanned, and an inspection record has nothing to hang off — so anything DGUV-relevant wants one."
 msgstr "Without a tag the unit can't be scanned, and an inspection record has nothing to hang off — so anything DGUV-relevant wants one."
 
-#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+#: src/lib/components/ui/unit-picker/register-from-catalogue.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/new/+page.svelte
@@ -4879,8 +4879,8 @@ msgstr "New device"
 msgid "Nothing here matches \"{0}\"."
 msgstr "Nothing here matches \"{0}\"."
 
-#. 0: searchQuery.trim()
-#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+#. 0: term
+#: src/lib/components/ui/unit-picker/register-from-catalogue.svelte
 msgid "Register \"{0}\" as a new device"
 msgstr "Register \"{0}\" as a new device"
 
@@ -4998,13 +4998,13 @@ msgstr[1] "# units"
 msgid "Also create the accessories the other units carry <0>{0} — each new unit gets its own, attached.</0>"
 msgstr "Also create the accessories the other units carry <0>{0} — each new unit gets its own, attached.</0>"
 
+#: src/lib/components/ui/unit-picker/register-from-catalogue.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
-#: src/routes/assets/bundles/[id]/bundle-detail.svelte
 msgid "Register a new unit of…"
 msgstr "Register a new unit of…"
 
-#. 0: searchQuery.trim()
-#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+#. 0: term
+#: src/lib/components/ui/unit-picker/register-from-catalogue.svelte
 msgid "No product matches \"{0}\" either."
 msgstr "No product matches \"{0}\" either."
 
@@ -13955,6 +13955,7 @@ msgid "In {0}"
 msgstr "In {0}"
 
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
+#: src/routes/assets/bundles/new/+page.svelte
 msgid "1 device is taken out of its current kit:"
 msgid_plural "# devices are taken out of their current kits:"
 msgstr[0] "1 device is taken out of its current kit:"

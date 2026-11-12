@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { CameraScanButton } from '#lib/components/ui/camera-scan/index.js';
+	import { naturalCompare } from '#lib/sort.js';
 	import { makerAndName } from '#lib/product-label.js';
 	import { getErrorMessage, orgLabel, plural } from '#lib/utils.js';
 	import { canManageInventory } from '#lib/roles.js';
@@ -26,7 +27,12 @@
 	import { toast } from 'svelte-sonner';
 	import { AssetStatusBadge } from '#lib/components/ui/asset-status/index.js';
 	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
-	import { UnitPicker, type PickerUnit } from '#lib/components/ui/unit-picker/index.js';
+	import {
+		RegisterFromCatalogue,
+		UnitPicker,
+		type PickerUnit
+	} from '#lib/components/ui/unit-picker/index.js';
+	import type { NewAssetSeed } from '#lib/components/ui/new-asset-modal/index.js';
 	import { isBookableStatus } from '#lib/asset-status.js';
 
 	// Bundle fields
@@ -92,12 +98,12 @@
 	let stillMissing = $derived(shortfall.reduce((total, line) => total + line.missing, 0));
 	let fitsType = $derived(specLines.length === 0 || matchesSpec(specLines, selectedCounts));
 
-	// A unit belongs to one kit at a time and an accessory follows its parent,
-	// so neither is on offer — the same rule the bundle page's picker applies.
-	// Nor is a product the type doesn't hold.
+	// An accessory follows its parent, so it is not on offer; a unit in another
+	// kit is, marked as such, and moves out of it — the same rules the bundle
+	// page's picker applies. Nor is a product the type doesn't hold.
 	let pickerUnits = $derived<PickerUnit[]>(
 		availableAssets
-			.filter((a) => !a.bundleId && !a.parentAssetId && isBookableStatus(a.status))
+			.filter((a) => !a.parentAssetId && isBookableStatus(a.status))
 			.filter((a) => limitFor(a.productId) > 0)
 			.map((a) => ({
 				id: a.id,
@@ -113,8 +119,14 @@
 					id: x.id,
 					name: x.product.name,
 					assetTag: x.assetTag
-				}))
+				})),
+				bundle: a.bundle ? { id: a.bundle.id, name: a.bundle.template.name } : null
 			}))
+	);
+	// The kits the picked units come out of, named before they are emptied.
+	let movedUnits = $derived(pickerUnits.filter((u) => u.bundle && selectedIds.includes(u.id)));
+	let movedFrom = $derived(
+		[...new Set(movedUnits.map((u) => u.bundle!.name))].sort(naturalCompare)
 	);
 
 	// A type that is already on the shelf holds a fixed number of each product,
@@ -133,10 +145,10 @@
 	// can't hand the modal a bundleId — the asset is created loose and collected
 	// into `selectedAssets`, and joins the bundle when it is created.
 	let showModal = $state(false);
-	let newAssetModal = $state<{ reset: (name?: string) => void } | null>(null);
+	let newAssetModal = $state<{ reset: (seed?: string | NewAssetSeed) => void } | null>(null);
 
-	function openNewAsset() {
-		newAssetModal?.reset(assetSearch);
+	function openNewAsset(seed: string | NewAssetSeed = assetSearch) {
+		newAssetModal?.reset(seed);
 		showModal = true;
 	}
 
@@ -157,7 +169,8 @@
 				details: isNewBundleType ? bundleDetails.trim() || undefined : undefined,
 				categoryId: isNewBundleType ? bundleCategoryId : undefined,
 				tag: bundleTag.trim() || undefined,
-				assetIds: selectedIds
+				assetIds: selectedIds,
+				moveFromOtherBundles: movedFrom.length > 0 || undefined
 			});
 			toast.success('Bundle created!');
 			goto(resolve(`assets/bundles/${bundle.id}`));
@@ -269,7 +282,12 @@
 						<Card.Title>Assets</Card.Title>
 						<Card.Description>Add existing assets or create new ones.</Card.Description>
 					</div>
-					<Button type="button" variant="outline" disabled={!selectedOrgId} onclick={openNewAsset}>
+					<Button
+						type="button"
+						variant="outline"
+						disabled={!selectedOrgId}
+						onclick={() => openNewAsset()}
+					>
 						+ New Asset
 					</Button>
 				</div>
@@ -350,6 +368,25 @@
 						bind:search={assetSearch}
 						{limitFor}
 					/>
+					<!-- Same catalogue as the bundle page: a kit short of a product the
+					     pool has no loose unit of registers one right here. -->
+					<RegisterFromCatalogue
+						search={assetSearch}
+						allows={(productId) => limitFor(productId) > 0}
+						disabled={saving}
+						onregister={openNewAsset}
+					/>
+					{#if movedFrom.length > 0}
+						<p
+							class="rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200"
+						>
+							{plural(movedUnits.length, [
+								'1 device is taken out of its current kit:',
+								'# devices are taken out of their current kits:'
+							])}
+							{movedFrom.join(', ')}
+						</p>
+					{/if}
 				{/if}
 			</Card.Content>
 		</Card.Root>

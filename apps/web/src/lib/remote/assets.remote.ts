@@ -2800,7 +2800,10 @@ const createBundleInstanceSchema = v.object({
 	// it holds the kit — created first and filled afterwards, it would spend the
 	// time in between as a case that is not the kit, and a failure halfway
 	// through would leave it that way for good.
-	assetIds: v.optional(v.array(v.string()))
+	assetIds: v.optional(v.array(v.string())),
+	// As on `addAssetsToBundle`: the picker showed that some of them sit in
+	// another kit, and they move out of it.
+	moveFromOtherBundles: v.optional(v.boolean())
 });
 
 export const createBundleInstance = command(createBundleInstanceSchema, async (data) => {
@@ -2854,7 +2857,7 @@ export const createBundleInstance = command(createBundleInstanceSchema, async (d
 		);
 	}
 
-	const bundle = await prisma.$transaction(async (tx) => {
+	const { left: emptied, ...bundle } = await prisma.$transaction(async (tx) => {
 		const created = await tx.assetBundle.create({
 			data: {
 				templateId,
@@ -2862,9 +2865,17 @@ export const createBundleInstance = command(createBundleInstanceSchema, async (d
 			},
 			include: { template: { include: { organization: true, category: true } }, assets: true }
 		});
-		for (const assetId of assetIds) await moveAssetIntoBundle(tx, created, assetId);
-		return created;
+		const left = [];
+		for (const assetId of assetIds) {
+			const from = await moveAssetIntoBundle(tx, created, assetId, data.moveFromOtherBundles);
+			if (from) left.push(from);
+		}
+		return { ...created, left };
 	});
+	for (const from of new Map(emptied.map((b) => [b.id, b])).values()) {
+		await getBundle(from.id).refresh();
+		await getBundleTypeSpec(from.templateId).refresh();
+	}
 	await getBundleTypeSpec(templateId).refresh();
 	await getBundleTemplates(data.organizationId).refresh();
 	await getBundleTemplates().refresh();

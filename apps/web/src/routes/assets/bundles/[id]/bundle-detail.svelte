@@ -4,8 +4,6 @@
 	import { BackButton } from '#lib/components/ui/back-button/index.js';
 	import { CameraScanButton } from '#lib/components/ui/camera-scan/index.js';
 	import { makerAndName } from '#lib/product-label.js';
-	import { manufacturerSelection } from '#lib/no-manufacturer.svelte.js';
-	import { productLabel } from '#lib/product-label.js';
 	import { categoryLabel } from '#lib/category.js';
 	import { imageSrc } from '#lib/images.js';
 	import { getErrorMessage, orgLabel, plural } from '#lib/utils.js';
@@ -38,7 +36,6 @@
 		getCategories,
 		getAssets,
 		getPlaceableLocations,
-		getProducts,
 		addAssetsToBundle,
 		removeAssetFromBundle,
 		updateBundleTemplate,
@@ -61,9 +58,14 @@
 	import { AssetPlace, placeOf, sharedPlace } from '#lib/components/ui/asset-place/index.js';
 	import {
 		NewAssetModal,
-		type NewAssetModalHandle
+		type NewAssetModalHandle,
+		type NewAssetSeed
 	} from '#lib/components/ui/new-asset-modal/index.js';
-	import { UnitPicker, type PickerUnit } from '#lib/components/ui/unit-picker/index.js';
+	import {
+		RegisterFromCatalogue,
+		UnitPicker,
+		type PickerUnit
+	} from '#lib/components/ui/unit-picker/index.js';
 	import { isBookableStatus } from '#lib/asset-status.js';
 	import { countProducts, roomFor, specShortfall } from '#lib/bundle-spec.js';
 
@@ -441,30 +443,8 @@
 		newOpen = true;
 	}
 
-	// Under the loose units, the catalogue. A kit is usually short of a product
-	// the pool knows perfectly well and has no spare unit of — every one of them
-	// is already in another case — so the list that ends in "nothing matches"
-	// carries on into "register one of these instead".
-	let catalogue = $derived(await getProducts());
-	let productMatches = $derived.by(() => {
-		const q = searchQuery.toLowerCase().trim();
-		return (
-			catalogue
-				.map((p) => ({ ...p, label: productLabel(p) }))
-				.filter((p) => !q || p.label.toLowerCase().includes(q))
-				// Registering a unit straight into the kit answers to the type like
-				// every other way in, so the catalogue is cut to the same list.
-				.filter(
-					(p) => changeType || specLines.length === 0 || roomFor(specLines, memberCounts, p.id) > 0
-				)
-		);
-	});
-
-	function openNewAssetOfProduct(p: (typeof productMatches)[number]) {
-		newAssetModal?.reset({
-			manufacturer: manufacturerSelection(p.manufacturer),
-			product: { id: p.id, name: p.name }
-		});
+	function openNewAssetFrom(seed: string | NewAssetSeed) {
+		newAssetModal?.reset(seed);
 		newOpen = true;
 	}
 
@@ -1154,35 +1134,13 @@
 		     loose in the warehouse; below is every product the system knows, so a
 		     kit short of a thing the pool has no spare of is one click from having
 		     one registered straight into it. -->
-		<p class="mt-4 mb-2 text-xs font-medium text-muted-foreground">Register a new unit of…</p>
-		{#if productMatches.length === 0}
-			{#if searchQuery.trim()}
-				<p class="text-sm text-muted-foreground">
-					No product matches "{searchQuery.trim()}" either.
-				</p>
-			{/if}
-			<Button size="sm" class="mt-3" disabled={working} onclick={openNewAsset}>
-				{searchQuery.trim() ? `Register "${searchQuery.trim()}" as a new device` : 'New device'}
-			</Button>
-		{:else}
-			<ul class="max-h-56 divide-y overflow-y-auto rounded-md border">
-				{#each productMatches as p (p.id)}
-					<li class="flex items-center gap-2 bg-background px-3 py-2">
-						<ProductThumb path={p.imagePath} alt={p.name} />
-						<div class="min-w-0 flex-1">
-							<p class="truncate text-sm font-medium">{p.name}</p>
-							<p class="text-xs text-muted-foreground">{p.manufacturer?.name}</p>
-						</div>
-						<Button
-							size="sm"
-							variant="outline"
-							disabled={working}
-							onclick={() => openNewAssetOfProduct(p)}>New</Button
-						>
-					</li>
-				{/each}
-			</ul>
-		{/if}
+		<RegisterFromCatalogue
+			search={searchQuery}
+			allows={(productId) =>
+				changeType || specLines.length === 0 || roomFor(specLines, memberCounts, productId) > 0}
+			disabled={working}
+			onregister={openNewAssetFrom}
+		/>
 	{/snippet}
 	{#snippet footer()}
 		<Button icon="add" disabled={working || pickedIds.length === 0} onclick={handleAdd}>
