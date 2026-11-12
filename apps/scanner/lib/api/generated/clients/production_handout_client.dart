@@ -5,6 +5,9 @@
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 
+import '../models/count_result.dart';
+import '../models/handout_addition.dart';
+import '../models/handout_addition_request.dart';
 import '../models/handout_mode.dart';
 import '../models/handover_result.dart';
 import '../models/production_check_scan_request.dart';
@@ -76,5 +79,32 @@ abstract class ProductionHandoutClient {
     @Path('productionId') required String productionId,
     @Path('mode') required HandoutMode mode,
     @Body() required ProductionListLineCount body,
+  });
+
+  /// Find units the hand-out list does not have, by name.
+  ///
+  /// For what was never booked and has nothing to scan: a cable without a.
+  /// tag. Units of the caller's side whose product matches `q` by the same.
+  /// rules as every search box (words in any order, lengths written either.
+  /// way, cable ends included), free for the production's dates, grouped by.
+  /// product, shelf and owner. Empty when the caller may not add to the.
+  /// production from that side, or `q` is shorter than two characters.
+  ///
+  /// [organizationId] - The side, as on the hand-out list.
+  @GET('/api/v1/productions/{productionId}/handout/checkout/additions')
+  Future<List<HandoutAddition>> searchProductionHandoutAdditions({
+    @Path('productionId') required String productionId,
+    @Query('q') required String q,
+    @Query('organizationId') String? organizationId,
+  });
+
+  /// Hand out a number of one search result.
+  ///
+  /// Hands out up to `count` units of one group, untagged first. Someone.
+  /// may have taken some meanwhile: `count` in the answer is how many went.
+  @POST('/api/v1/productions/{productionId}/handout/checkout/additions')
+  Future<CountResult> handOutProductionAdditions({
+    @Path('productionId') required String productionId,
+    @Body() required HandoutAdditionRequest body,
   });
 }

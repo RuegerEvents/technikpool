@@ -2,6 +2,7 @@ import type { Schemas } from '#lib/server/api.js';
 import type { TransactionData } from '#lib/types/asset-transaction.js';
 import type { OrgRole } from '#lib/roles.js';
 import { imageSrc } from '#lib/images.js';
+import { naturalCompare } from '#lib/sort.js';
 import { isCable } from '#lib/cable.js';
 import {
 	DEFAULT_INSPECTION_TYPE_ID,
@@ -23,7 +24,8 @@ import {
 import { userLabel } from '#lib/user-label.svelte.js';
 import type { CaseCheck } from '#lib/server/services/case-check.js';
 import type { ProductionCheckView } from '#lib/server/services/production-check.js';
-import type { HandoutView } from '#lib/server/services/production-handout.js';
+import type { HandoutCandidate, HandoutView } from '#lib/server/services/production-handout.js';
+import type { LooseGroup } from '#lib/server/services/bundles.js';
 import type {
 	ScanGroup,
 	ScanGroupUnit,
@@ -690,5 +692,126 @@ export function toConnector(
 		family: connector.family,
 		mains: connector.mains,
 		productCount
+	};
+}
+
+// ── Bundles ─────────────────────────────────────────────────────────────────
+
+type BundleSummaryRow = {
+	id: string;
+	tag: string | null;
+	imagePath: string | null;
+	location: { id: string; name: string } | null;
+	template: {
+		name: string;
+		caption: string | null;
+		organizationId: string;
+		category: { name: string };
+	};
+};
+
+export function toBundleSummary(
+	bundle: BundleSummaryRow,
+	unitCount: number
+): Schemas['BundleSummary'] {
+	return {
+		id: bundle.id,
+		name: bundle.template.name,
+		caption: bundle.template.caption,
+		tag: bundle.tag,
+		imageUrl: imageSrc(bundle.imagePath),
+		categoryName: bundle.template.category.name,
+		organizationId: bundle.template.organizationId,
+		location: bundle.location ? { id: bundle.location.id, name: bundle.location.name } : null,
+		unitCount
+	};
+}
+
+type BundleUnitRow = {
+	id: string;
+	assetTag: string | null;
+	serialNumber: string | null;
+	orgIndex: number;
+	status: string;
+	parentAssetId: string | null;
+	product: {
+		id: string;
+		name: string;
+		caption: string | null;
+		imagePath: string | null;
+		manufacturer: { name: string } | null;
+	};
+	location: { id: string; name: string };
+	productionItems: { production: { name: string } }[];
+};
+
+function toBundleUnit(unit: BundleUnitRow): Schemas['BundleUnit'] {
+	return {
+		id: unit.id,
+		assetTag: unit.assetTag,
+		serialNumber: unit.serialNumber,
+		orgIndex: unit.orgIndex,
+		status: unit.status,
+		parentAssetId: unit.parentAssetId,
+		productId: unit.product.id,
+		productName: unit.product.name,
+		productCaption: unit.product.caption,
+		manufacturerName: unit.product.manufacturer?.name ?? null,
+		productImageUrl: imageSrc(unit.product.imagePath),
+		location: { id: unit.location.id, name: unit.location.name },
+		checkedOutTo: unit.productionItems[0]?.production.name ?? null
+	};
+}
+
+export function toBundleDetail(
+	bundle: BundleSummaryRow & { assets: BundleUnitRow[]; canEdit: boolean }
+): Schemas['BundleDetail'] {
+	const units = bundle.assets.filter((a) => !a.parentAssetId);
+	const byName = (a: BundleUnitRow, b: BundleUnitRow) =>
+		naturalCompare(a.product.name, b.product.name) ||
+		naturalCompare(a.assetTag ?? '', b.assetTag ?? '');
+	// Each unit followed by what hangs off it, the way the case is packed.
+	const ordered = units
+		.sort(byName)
+		.flatMap((unit) => [
+			unit,
+			...bundle.assets.filter((a) => a.parentAssetId === unit.id).sort(byName)
+		]);
+	return {
+		...toBundleSummary(bundle, units.length),
+		units: ordered.map(toBundleUnit),
+		canEdit: bundle.canEdit
+	};
+}
+
+export function toLooseGroup(group: LooseGroup): Schemas['LooseGroup'] {
+	return {
+		key: group.key,
+		productId: group.productId,
+		locationId: group.locationId,
+		productName: group.productName,
+		productCaption: group.productCaption,
+		productImageUrl: imageSrc(group.productImagePath),
+		manufacturerName: group.manufacturerName,
+		locationName: group.locationName,
+		available: group.available,
+		untagged: group.untagged
+	};
+}
+
+export function toHandoutAddition(candidate: HandoutCandidate): Schemas['HandoutAddition'] {
+	return {
+		key: candidate.key,
+		productId: candidate.productId,
+		organizationId: candidate.organizationId,
+		locationId: candidate.locationId,
+		productName: candidate.productName,
+		productCaption: candidate.productCaption,
+		productImageUrl: imageSrc(candidate.productImagePath),
+		manufacturerName: candidate.manufacturerName,
+		locationName: candidate.locationName,
+		organizationName: candidate.organizationName,
+		available: candidate.available,
+		untagged: candidate.untagged
 	};
 }

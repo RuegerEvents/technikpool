@@ -73,6 +73,14 @@ tags:
       hands: ticked units another org lent can be confirmed as received, and
       later reported as sent back. The lender's side of the handover is the
       ordinary scan — out to the production, then back onto a location.
+  - name: bundles
+    description: |
+      Keeping kits (Bundles): finding them, making a new one, and changing
+      what one holds — scanning units in, taking them out, adding a number of
+      loose untagged units. Under the same rules as the web's bundle page: a
+      unit is in one kit at a time, its accessories go with it, a kit's own
+      location wins, and a bundle type already on the shelf takes only what
+      it holds.
   - name: productionHandout
     description: |
       Handing a production's equipment out and taking it back by working
@@ -2039,6 +2047,273 @@ paths:
         '404':
           $ref: '#/components/responses/NotFound'
 
+  /api/v1/productions/{productionId}/handout/checkout/additions:
+    get:
+      operationId: searchProductionHandoutAdditions
+      tags: [productionHandout]
+      summary: Find units the hand-out list does not have, by name
+      description: |
+        For what was never booked and has nothing to scan: a cable without a
+        tag. Units of the caller's side whose product matches `q` by the same
+        rules as every search box (words in any order, lengths written either
+        way, cable ends included), free for the production's dates, grouped by
+        product, shelf and owner. Empty when the caller may not add to the
+        production from that side, or `q` is shorter than two characters.
+      parameters:
+        - $ref: '#/components/parameters/ProductionId'
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: organizationId
+          in: query
+          required: false
+          description: The side, as on the hand-out list.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Up to 40 groups
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/HandoutAddition'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      operationId: handOutProductionAdditions
+      tags: [productionHandout]
+      summary: Hand out a number of one search result
+      description: |
+        Hands out up to `count` units of one group, untagged first. Someone
+        may have taken some meanwhile: `count` in the answer is how many went.
+      parameters:
+        - $ref: '#/components/parameters/ProductionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/HandoutAdditionRequest'
+      responses:
+        '200':
+          description: How many went out
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CountResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/bundles:
+    get:
+      operationId: listBundles
+      tags: [bundles]
+      summary: The kits of the caller's organizations
+      parameters:
+        - name: organizationId
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: q
+          in: query
+          required: false
+          description: Matches the kit's name, caption and tag, or anything in it.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: By name
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/BundleSummary'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+    post:
+      operationId: createBundle
+      tags: [bundles]
+      summary: Make a new kit, and a bundle type for it
+      description: |
+        A new bundle type of this name with its one case, empty, to be filled
+        by scanning. ADMIN or above of the organization.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BundleCreateRequest'
+      responses:
+        '201':
+          description: The new kit
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BundleDetail'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/bundles/{bundleId}:
+    get:
+      operationId: getBundle
+      tags: [bundles]
+      summary: One kit with everything in it
+      parameters:
+        - $ref: '#/components/parameters/BundleId'
+      responses:
+        '200':
+          description: The kit
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BundleDetail'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/bundles/{bundleId}/scans:
+    post:
+      operationId: scanIntoBundle
+      tags: [bundles]
+      summary: Put a scanned unit into the kit
+      description: |
+        A unit's tag or unique serial number puts the unit in; an accessory's
+        puts in the unit it hangs off. A unit in another kit is moved only with
+        `moveFromOtherBundle` — without it the answer is `in_other_bundle`,
+        naming that kit, so the client can ask first. A bundle's own tag is
+        `is_bundle`: kits do not go into kits. Answers 200 for every outcome;
+        an error status means the unit could not go in (retired, unavailable,
+        no room in the bundle type).
+      parameters:
+        - $ref: '#/components/parameters/BundleId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BundleScanRequest'
+      responses:
+        '200':
+          description: What happened, and the kit as it is now
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BundleScanResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/bundles/{bundleId}/units/{assetId}:
+    delete:
+      operationId: removeFromBundle
+      tags: [bundles]
+      summary: Take a unit out of the kit
+      description: Its accessories leave with it. The unit stays where it is.
+      parameters:
+        - $ref: '#/components/parameters/BundleId'
+        - name: assetId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The kit as it is now
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BundleDetail'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+
+  /api/v1/bundles/{bundleId}/loose:
+    get:
+      operationId: searchLooseForBundle
+      tags: [bundles]
+      summary: Find loose units for the kit by name
+      description: |
+        The kit's organization's units in no kit and not out, whose product
+        matches `q` (same rules as every search box), by product and shelf —
+        for cables without a tag, which a scan cannot put in.
+      parameters:
+        - $ref: '#/components/parameters/BundleId'
+        - name: q
+          in: query
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Up to 40 groups
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/LooseGroup'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+    post:
+      operationId: addLooseToBundle
+      tags: [bundles]
+      summary: Put a number of one product's loose units into the kit
+      description: Untagged units first, then by unit number. `count` in the answer is how many went in.
+      parameters:
+        - $ref: '#/components/parameters/BundleId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LooseAddRequest'
+      responses:
+        '200':
+          description: The kit as it is now
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/LooseAddResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
 components:
   securitySchemes:
     bearerAuth:
@@ -2055,6 +2330,12 @@ components:
         type: string
     ProductionId:
       name: productionId
+      in: path
+      required: true
+      schema:
+        type: string
+    BundleId:
+      name: bundleId
       in: path
       required: true
       schema:
@@ -4569,3 +4850,280 @@ components:
             type: string
         done:
           type: boolean
+
+    HandoutAddition:
+      type: object
+      required:
+        [
+          key,
+          productId,
+          organizationId,
+          locationId,
+          productName,
+          productCaption,
+          productImageUrl,
+          manufacturerName,
+          locationName,
+          organizationName,
+          available,
+          untagged
+        ]
+      properties:
+        key:
+          type: string
+        productId:
+          type: string
+        organizationId:
+          type: string
+          description: The units' owner.
+        locationId:
+          type: string
+        productName:
+          type: string
+        productCaption:
+          type: [string, 'null']
+        productImageUrl:
+          type: [string, 'null']
+        manufacturerName:
+          type: [string, 'null']
+        locationName:
+          type: string
+        organizationName:
+          type: string
+        available:
+          type: integer
+          description: Free for the production's dates, not out anywhere, not on it already.
+        untagged:
+          type: integer
+          description: Of those, how many carry no tag.
+
+    HandoutAdditionRequest:
+      type: object
+      required: [productId, ownerId, locationId, count]
+      properties:
+        organizationId:
+          type: string
+          description: The side, as on the hand-out list.
+        productId:
+          type: string
+        ownerId:
+          type: string
+          description: '`organizationId` of the chosen group.'
+        locationId:
+          type: string
+        count:
+          type: integer
+          minimum: 1
+
+    CountResult:
+      type: object
+      required: [count]
+      properties:
+        count:
+          type: integer
+
+    BundleSummary:
+      type: object
+      required:
+        [id, name, caption, tag, imageUrl, categoryName, organizationId, location, unitCount]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+          description: The bundle type's name.
+        caption:
+          type: [string, 'null']
+        tag:
+          type: [string, 'null']
+        imageUrl:
+          type: [string, 'null']
+        categoryName:
+          type: string
+        organizationId:
+          type: string
+        location:
+          description: The kit's own location; null for one that is wherever its units are.
+          oneOf:
+            - $ref: '#/components/schemas/LocationRef'
+            - type: 'null'
+        unitCount:
+          type: integer
+          description: Units in it, not counting accessories.
+
+    LocationRef:
+      type: object
+      required: [id, name]
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+
+    BundleUnit:
+      type: object
+      required:
+        [
+          id,
+          assetTag,
+          serialNumber,
+          orgIndex,
+          status,
+          parentAssetId,
+          productId,
+          productName,
+          productCaption,
+          manufacturerName,
+          productImageUrl,
+          location,
+          checkedOutTo
+        ]
+      properties:
+        id:
+          type: string
+        assetTag:
+          type: [string, 'null']
+        serialNumber:
+          type: [string, 'null']
+        orgIndex:
+          type: integer
+        status:
+          type: string
+        parentAssetId:
+          type: [string, 'null']
+          description: Set on an accessory; it follows the unit with this id.
+        productId:
+          type: string
+        productName:
+          type: string
+        productCaption:
+          type: [string, 'null']
+        manufacturerName:
+          type: [string, 'null']
+        productImageUrl:
+          type: [string, 'null']
+        location:
+          $ref: '#/components/schemas/LocationRef'
+        checkedOutTo:
+          type: [string, 'null']
+          description: The production it is out on, if any.
+
+    BundleDetail:
+      allOf:
+        - $ref: '#/components/schemas/BundleSummary'
+        - type: object
+          required: [units, canEdit]
+          properties:
+            units:
+              type: array
+              description: Each unit followed by its accessories, by product name.
+              items:
+                $ref: '#/components/schemas/BundleUnit'
+            canEdit:
+              type: boolean
+              description: Whether the caller may change what it holds (ADMIN or above).
+
+    BundleCreateRequest:
+      type: object
+      required: [organizationId, name, categoryId]
+      properties:
+        organizationId:
+          type: string
+        name:
+          type: string
+          minLength: 1
+        categoryId:
+          type: string
+        caption:
+          type: string
+        tag:
+          type: string
+          description: The sticker on the case. Unique, and not a unit's tag.
+
+    BundleScanRequest:
+      type: object
+      required: [code]
+      properties:
+        code:
+          type: string
+        moveFromOtherBundle:
+          type: boolean
+          description: The user agreed to take the unit out of the kit it is in.
+
+    BundleScanOutcome:
+      type: string
+      enum: [added, already_in, in_other_bundle, not_found, ambiguous, is_bundle]
+
+    BundleScanResult:
+      type: object
+      required: [outcome, bundle]
+      properties:
+        outcome:
+          $ref: '#/components/schemas/BundleScanOutcome'
+        assetId:
+          type: [string, 'null']
+        otherBundle:
+          description: With `in_other_bundle`, the kit the unit is in now.
+          oneOf:
+            - $ref: '#/components/schemas/LocationRef'
+            - type: 'null'
+        bundle:
+          $ref: '#/components/schemas/BundleDetail'
+
+    LooseGroup:
+      type: object
+      required:
+        [
+          key,
+          productId,
+          locationId,
+          productName,
+          productCaption,
+          productImageUrl,
+          manufacturerName,
+          locationName,
+          available,
+          untagged
+        ]
+      properties:
+        key:
+          type: string
+        productId:
+          type: string
+        locationId:
+          type: string
+        productName:
+          type: string
+        productCaption:
+          type: [string, 'null']
+        productImageUrl:
+          type: [string, 'null']
+        manufacturerName:
+          type: [string, 'null']
+        locationName:
+          type: string
+        available:
+          type: integer
+        untagged:
+          type: integer
+
+    LooseAddRequest:
+      type: object
+      required: [productId, locationId, count]
+      properties:
+        productId:
+          type: string
+        locationId:
+          type: string
+        count:
+          type: integer
+          minimum: 1
+
+    LooseAddResult:
+      type: object
+      required: [count, bundle]
+      properties:
+        count:
+          type: integer
+        bundle:
+          $ref: '#/components/schemas/BundleDetail'

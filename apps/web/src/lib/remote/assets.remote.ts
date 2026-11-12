@@ -28,11 +28,16 @@ import {
 	ACTIVE_ASSET_WHERE,
 	ASSET_STATUSES,
 	BOOKABLE_ASSET_WHERE,
-	isBookableStatus,
 	isRetiredStatus,
 	RETIRED_ASSET_WHERE
 } from '#lib/asset-status.js';
 import { syncAccessories } from '#lib/server/services/accessories.js';
+import {
+	addUnitsToBundle,
+	assertBundleTagAvailable,
+	createBundle,
+	removeUnitFromBundle
+} from '#lib/server/services/bundles.js';
 import { CHECKED_OUT_TO_INCLUDE, checkedOutTo } from '#lib/server/services/checked-out-to.js';
 import { canPlaceAt, placeableLocationWhere } from '#lib/server/services/locations.js';
 import {
@@ -42,11 +47,7 @@ import {
 	ensureBundleImage,
 	redrawPreviewsOf
 } from '#lib/server/services/bundle-image.js';
-import {
-	assertAdditionsFitType,
-	assertNewInstanceMatchesType,
-	bundleTypeSpec
-} from '#lib/server/services/bundle-spec.js';
+import { assertAdditionsFitType, bundleTypeSpec } from '#lib/server/services/bundle-spec.js';
 import { getProduction } from '#lib/remote/productions.remote.js';
 import {
 	CABLE_TYPE_DEFAULTS,
@@ -2852,24 +2853,6 @@ export const regenerateBundleImage = command(v.string(), async (bundleId) => {
 	return { imagePath };
 });
 
-// AssetBundle.tag is globally unique like Asset.assetTag — check up front so the
-// user gets a readable message instead of a raw constraint violation.
-async function assertBundleTagAvailable(tag: string | null, exceptBundleId?: string) {
-	if (!tag) return;
-	const clash = await prisma.assetBundle.findUnique({
-		where: { tag },
-		select: { id: true }
-	});
-	if (clash && clash.id !== exceptBundleId) {
-		appError(409, 'bundle_tag_taken', [tag]);
-	}
-	const unit = await prisma.asset.findUnique({
-		where: { assetTag: tag },
-		select: { product: { select: { name: true } } }
-	});
-	if (unit) appError(409, 'bundle_tag_on_unit', [tag, unit.product.name]);
-}
-
 const createBundleInstanceSchema = v.object({
 	organizationId: v.string(),
 	templateId: v.optional(v.string()),
@@ -2890,72 +2873,9 @@ const createBundleInstanceSchema = v.object({
 });
 
 export const createBundleInstance = command(createBundleInstanceSchema, async (data) => {
-	await requireOrgInventory(data.organizationId);
-
-	// An existing template must belong to the org the caller was authorized for —
-	// otherwise ADMIN in one org could hang instances off another org's template.
-	if (data.templateId) {
-		const existing = await prisma.bundleTemplate.findUniqueOrThrow({
-			where: { id: data.templateId },
-			select: { organizationId: true }
-		});
-		if (existing.organizationId !== data.organizationId) appError(403, 'unauthorized');
-	}
-
-	await assertBundleTagAvailable(data.tag?.trim() || null);
-
-	let templateId = data.templateId;
-	if (data.newTemplateName && !templateId) {
-		if (!data.categoryId) appError(400, 'bundle_category_required');
-		await prisma.category.findUniqueOrThrow({ where: { id: data.categoryId } });
-		const template = await prisma.bundleTemplate.create({
-			data: {
-				name: data.newTemplateName,
-				caption: data.caption?.trim() || undefined,
-				details: data.details?.trim() || undefined,
-				organizationId: data.organizationId,
-				categoryId: data.categoryId
-			}
-		});
-		templateId = template.id;
-		await getBundleTemplates(data.organizationId).refresh();
-		await getBundleTemplates().refresh();
-	}
-
-	if (!templateId) appError(400, 'bundle_type_required');
-
-	// Every case of a type holds the same gear, so a new one has to arrive as the
-	// kit: the same products, in the same numbers, as the cases already on the
-	// shelf. A brand-new type has nothing to match and takes whatever it is given.
-	const assetIds = data.assetIds ?? [];
-	if (assetIds.length > 0 || !data.newTemplateName) {
-		const picked = await prisma.asset.findMany({
-			where: { id: { in: assetIds } },
-			select: { productId: true }
-		});
-		if (picked.length !== assetIds.length) appError(404, 'assets_not_found');
-		await assertNewInstanceMatchesType(
-			templateId,
-			picked.map((asset) => asset.productId)
-		);
-	}
-
-	const { left: emptied, ...bundle } = await prisma.$transaction(async (tx) => {
-		const created = await tx.assetBundle.create({
-			data: {
-				templateId,
-				tag: data.tag?.trim() || undefined
-			},
-			include: { template: { include: { organization: true, category: true } }, assets: true }
-		});
-		const left = [];
-		for (const assetId of assetIds) {
-			const from = await moveAssetIntoBundle(tx, created, assetId, data.moveFromOtherBundles);
-			if (from) left.push(from);
-		}
-		return { ...created, left };
-	});
-	for (const from of new Map(emptied.map((b) => [b.id, b])).values()) {
+	const user = await requireAuth();
+	const { bundle, templateId, left } = await createBundle(user.id, data);
+	for (const from of left) {
 		await getBundle(from.id).refresh();
 		await getBundleTypeSpec(from.templateId).refresh();
 	}
@@ -2964,7 +2884,7 @@ export const createBundleInstance = command(createBundleInstanceSchema, async (d
 	await getBundleTemplates().refresh();
 	await getBundles(data.organizationId).refresh();
 	await getBundles().refresh();
-	if (assetIds.length > 0) {
+	if ((data.assetIds ?? []).length > 0) {
 		await getAssets(data.organizationId).refresh();
 		await getAssets().refresh();
 	}
@@ -3145,122 +3065,51 @@ const addAssetsToBundleSchema = v.object({
 	moveFromOtherBundles: v.optional(v.boolean())
 });
 
-/**
- * The guards a unit has to pass to join a kit, and the move itself. Returns
- * the kit it came out of, if `moveFromOtherBundles` let it change kits.
- */
-async function moveAssetIntoBundle(
-	tx: AssetTx,
-	bundle: { id: string; locationId: string | null },
-	assetId: string,
-	moveFromOtherBundles = false
-) {
-	const asset = await tx.asset.findUniqueOrThrow({
-		where: { id: assetId },
-		select: {
-			status: true,
-			bundleId: true,
-			parentAssetId: true,
-			bundle: { select: { id: true, templateId: true, template: true } }
-		}
-	});
-	if (isRetiredStatus(asset.status)) {
-		appError(409, 'asset_retired_no_bundle');
-	}
-	if (!isBookableStatus(asset.status)) {
-		appError(409, 'asset_unavailable_no_bundle');
-	}
-	// An accessory is in whatever kit its parent is in and no other. Both
-	// pickers leave accessories out, so this is a stale page.
-	if (asset.parentAssetId) {
-		appError(409, 'bundle_accessory_member');
-	}
-	// A unit belongs to one kit at a time. Moving it out of another one takes
-	// the user having been shown which — without that flag this is a stale
-	// page, and moving it silently would empty a kit nobody was looking at.
-	const from = asset.bundle && asset.bundle.id !== bundle.id ? asset.bundle : null;
-	if (from) {
-		if (!moveFromOtherBundles) appError(409, 'asset_in_other_bundle', [from.template.name]);
-		await requireOrgInventory(from.template.organizationId);
-	}
-	const updateData: { bundleId: string; locationId?: string } = { bundleId: bundle.id };
-	if (bundle.locationId) updateData.locationId = bundle.locationId;
-	await tx.asset.update({ where: { id: assetId }, data: updateData });
-	// Whatever is attached to it comes along — the kit ships as one thing.
-	await syncAccessories(tx, assetId, updateData);
-	return from;
-}
-
 export const addAssetsToBundle = command(
 	addAssetsToBundleSchema,
 	async ({ bundleId, assetIds, allowTypeChange, moveFromOtherBundles }) => {
-		const bundle = await prisma.assetBundle.findUniqueOrThrow({
-			where: { id: bundleId },
-			include: { template: true }
+		const user = await requireAuth();
+		const { bundle, left } = await addUnitsToBundle(user.id, bundleId, assetIds, {
+			allowTypeChange,
+			moveFromOtherBundles
 		});
-		await requireOrgInventory(bundle.template.organizationId);
-		const picked = await prisma.asset.findMany({
-			where: { id: { in: assetIds } },
-			select: { productId: true }
-		});
-		if (picked.length !== assetIds.length) appError(404, 'assets_not_found');
-		await assertAdditionsFitType({
-			templateId: bundle.templateId,
-			bundleId,
-			productIds: picked.map((asset) => asset.productId),
-			allowTypeChange
-		});
-		const emptied = await prisma.$transaction(async (tx) => {
-			const from = [];
-			for (const assetId of assetIds) {
-				const left = await moveAssetIntoBundle(tx, bundle, assetId, moveFromOtherBundles);
-				if (left) from.push(left);
-			}
-			return from;
-		});
-		// The kits they came out of are short of them now, as after a removal.
-		for (const left of new Map(emptied.map((b) => [b.id, b])).values()) {
-			await getBundle(left.id).refresh();
-			await getBundleTypeSpec(left.templateId).refresh();
-		}
-		await getBundleTypeSpec(bundle.templateId).refresh();
-		await getBundleTemplates(bundle.template.organizationId).refresh();
-		await getBundleTemplates().refresh();
-		await getBundles(bundle.template.organizationId).refresh();
-		await getBundles().refresh();
-		await getBundle(bundleId).refresh();
-		// Both variants: the bundle page and the unfiltered Devices list read the
-		// argument-less one, and it stayed stale after a bundle was put together.
-		await getAssets(bundle.template.organizationId).refresh();
-		await getAssets().refresh();
+		await refreshBundleViews(bundle, left);
 		return { bundleId, assetIds };
 	}
 );
 
 export const removeAssetFromBundle = command(bundleAssetSchema, async ({ bundleId, assetId }) => {
-	const bundle = await prisma.assetBundle.findUniqueOrThrow({
-		where: { id: bundleId },
-		include: { template: true }
-	});
-	await requireOrgInventory(bundle.template.organizationId);
-	await prisma.$transaction(async (tx) => {
-		await tx.asset.update({ where: { id: assetId }, data: { bundleId: null } });
-		await syncAccessories(tx, assetId, { bundleId: null });
-	});
+	const user = await requireAuth();
+	const bundle = await removeUnitFromBundle(user.id, bundleId, assetId);
 	// The kit is now short of it — which is what the type's spec is read against,
 	// and why what it holds may have shrunk as well.
-	await getBundleTypeSpec(bundle.templateId).refresh();
-	await getBundleTemplates(bundle.template.organizationId).refresh();
-	await getBundleTemplates().refresh();
-	await getBundles(bundle.template.organizationId).refresh();
-	await getBundles().refresh();
-	await getBundle(bundleId).refresh();
-	// Both variants: the bundle page and the unfiltered Devices list read the
-	// argument-less one, and it stayed stale after a bundle was put together.
-	await getAssets(bundle.template.organizationId).refresh();
-	await getAssets().refresh();
+	await refreshBundleViews(bundle, []);
 	return { bundleId, assetId };
 });
+
+/**
+ * Everything that shows what a kit holds, after it changed — the kits units
+ * came out of as well. Both `getAssets` variants: the bundle page and the
+ * unfiltered Devices list read the argument-less one.
+ */
+async function refreshBundleViews(
+	bundle: { id: string; templateId: string; template: { organizationId: string } },
+	left: { id: string; templateId: string }[]
+) {
+	for (const from of left) {
+		await getBundle(from.id).refresh();
+		await getBundleTypeSpec(from.templateId).refresh();
+	}
+	const orgId = bundle.template.organizationId;
+	await getBundleTypeSpec(bundle.templateId).refresh();
+	await getBundleTemplates(orgId).refresh();
+	await getBundleTemplates().refresh();
+	await getBundles(orgId).refresh();
+	await getBundles().refresh();
+	await getBundle(bundle.id).refresh();
+	await getAssets(orgId).refresh();
+	await getAssets().refresh();
+}
 
 // ── Deleting a bundle ────────────────────────────────────────────────────────
 // A case that was built by mistake, or one whose contents were never really in
