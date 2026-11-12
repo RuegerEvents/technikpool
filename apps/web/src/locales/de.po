@@ -210,6 +210,7 @@ msgstr "Crew"
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/new/+page.svelte
+#: src/routes/assets/by-location/+page.svelte
 #: src/routes/assets/equipment-list-modal.svelte
 #: src/routes/assets/new/+page.svelte
 #: src/routes/invoices/[id]/invoice-detail.svelte
@@ -464,6 +465,7 @@ msgstr "Bundle"
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/bundles/new/+page.svelte
+#: src/routes/assets/by-location/+page.svelte
 #: src/routes/assets/equipment-list-modal.svelte
 #: src/routes/assets/license-list.svelte
 #: src/routes/assets/new/cables/+page.svelte
@@ -931,6 +933,7 @@ msgstr "Zugehörige Organisation"
 
 #: src/lib/components/ui/creatable-select/creatable-select.svelte
 #: src/lib/components/ui/data-view/DataView.svelte
+#: src/routes/assets/by-location/+page.svelte
 #: src/routes/productions/[id]/equipment/equipment-planner.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
 msgid "Search…"
@@ -1290,6 +1293,7 @@ msgstr "Ausstehend"
 msgid "Approved"
 msgstr "Genehmigt"
 
+#: src/routes/assets/by-location/+page.svelte
 #: src/routes/productions/[id]/handout-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "Out"
@@ -2207,9 +2211,8 @@ msgstr "{0} Zeilen"
 msgid "Import"
 msgstr "Importieren"
 
-#: src/routes/assets/+page.svelte
-msgid "Import CSV"
-msgstr "CSV importieren"
+#~ msgid "Import CSV"
+#~ msgstr "CSV importieren"
 
 #: src/routes/calendar/+page.svelte
 msgid "Month"
@@ -3660,8 +3663,10 @@ msgstr "Keine auswählen"
 #~ msgid "Removed \"{0}\" from production"
 #~ msgstr "„{0}“ aus Produktion entfernt"
 
-#~ msgid "Bundle · {0}"
-#~ msgstr "Bundle · {0}"
+#. 0: plural(card.units.length, ['1 device', '# devices'])
+#: src/routes/assets/by-location/+page.svelte
+msgid "Bundle · {0}"
+msgstr "Bundle · {0}"
 
 #~ msgid "— €{0} net (billed as one line on offers)"
 #~ msgstr "— {0} € netto (wird auf Angeboten als eine Position abgerechnet)"
@@ -4827,6 +4832,7 @@ msgstr "Neu"
 #~ msgstr "\"{0}\" ist neu und braucht deshalb eine Kategorie. Es wird ein Produkt wie jedes andere — die nächste Einheit davon wird aus der Liste gewählt."
 
 #: src/lib/components/ui/product-fields/product-fields.svelte
+#: src/routes/assets/by-location/+page.svelte
 #: src/routes/productions/[id]/handout-search.svelte
 msgid "How many"
 msgstr "Anzahl"
@@ -7678,8 +7684,9 @@ msgstr "seit {0}"
 msgid "Key"
 msgstr "Schlüssel"
 
-#~ msgid "Show"
-#~ msgstr "Anzeigen"
+#: src/routes/assets/by-location/+page.svelte
+msgid "Show"
+msgstr "Anzeigen"
 
 #: src/routes/assets/+page.svelte
 msgid "Licenses"
@@ -10931,6 +10938,8 @@ msgstr "Für dieses Equipment sind noch keine Handbücher oder Datenblätter hin
 msgid "Ticks are kept in this browser only."
 msgstr "Die Häkchen werden nur in diesem Browser gespeichert."
 
+#: src/routes/assets/by-location/+page.svelte
+#: src/routes/assets/by-location/+page.svelte
 #: src/routes/share/[id]/[signature]/+page.svelte
 msgid "1 device"
 msgid_plural "# devices"
@@ -12389,11 +12398,13 @@ msgid "Move to location…"
 msgstr "An Standort umbuchen…"
 
 #: src/lib/components/ui/bulk-actions-bar.svelte
+#: src/routes/assets/by-location/+page.svelte
 msgid "Moving…"
 msgstr "Wird umgebucht…"
 
 #: src/lib/components/ui/bulk-actions-bar.svelte
 #: src/lib/components/ui/bulk-actions-bar.svelte
+#: src/routes/assets/by-location/+page.svelte
 msgid "Move"
 msgstr "Umbuchen"
 
@@ -13987,3 +13998,100 @@ msgstr "Keins, lose ins Regal. Für ein neues den Namen eintippen…"
 #: src/routes/assets/new/cables/+page.svelte
 msgid "A new bundle \"{0}\" is made with these cables."
 msgstr "Mit diesen Kabeln wird das neue Bundle \"{0}\" angelegt."
+
+#: src/routes/assets/+page.svelte
+msgid "By location"
+msgstr "Nach Lagerort"
+
+#: src/routes/assets/by-location/+page.svelte
+msgid "1 device moved to"
+msgid_plural "# devices moved to"
+msgstr[0] "1 Gerät umgelagert nach"
+msgstr[1] "# Geräte umgelagert nach"
+
+#: src/routes/assets/by-location/+page.svelte
+msgid "By Location | Technikpool"
+msgstr "Nach Lagerort | Technikpool"
+
+#: src/routes/assets/by-location/+page.svelte
+msgid "Drag a card into another column to move it there."
+msgstr "Zieh eine Karte in eine andere Spalte, um sie dorthin umzulagern."
+
+#: src/routes/assets/by-location/+page.svelte
+msgid "By Location"
+msgstr "Nach Lagerort"
+
+#: src/routes/assets/by-location/+page.svelte
+msgid "Every location a column.<0/>"
+msgstr "Jeder Lagerort eine Spalte.<0/>"
+
+#: src/routes/assets/by-location/+page.svelte
+msgid "Devices list"
+msgstr "Geräteliste"
+
+#~ msgid "<0/> Show what is out on a production"
+#~ msgstr "<0/> Zeigen, was gerade auf einer Produktion ist"
+
+#: src/routes/assets/by-location/+page.svelte
+msgid "This organization has no locations yet."
+msgstr "Diese Organisation hat noch keine Lagerorte."
+
+#~ msgid "Another organization's location, keeping some of these."
+#~ msgstr "Lagerort einer anderen Organisation, die einiges davon aufbewahrt."
+
+#. 0: card.out.length
+#: src/routes/assets/by-location/+page.svelte
+msgid "{0} out"
+msgstr "{0} unterwegs"
+
+#: src/routes/assets/by-location/+page.svelte
+msgid "out"
+msgstr "unterwegs"
+
+#: src/routes/assets/by-location/+page.svelte
+msgid "Nothing here."
+msgstr "Hier ist nichts."
+
+#: src/routes/assets/by-location/+page.svelte
+msgid "Move to another location"
+msgstr "An einen anderen Lagerort umlagern"
+
+#. 0: plural(move.units.length, [ '1 device', '# devices' ])
+#: src/routes/assets/by-location/+page.svelte
+msgid "The whole bundle <0/>, {0}."
+msgstr "Das ganze Bundle <0/>, {0}."
+
+#: src/routes/assets/by-location/+page.svelte
+msgid "Choose a location"
+msgstr "Lagerort wählen"
+
+#: src/routes/assets/by-location/+page.svelte
+#: src/routes/assets/by-location/+page.svelte
+#: src/routes/assets/by-location/+page.svelte
+msgid "New location"
+msgstr "Neuer Lagerort"
+
+#: src/routes/assets/by-location/+page.svelte
+msgid "Available and out on a production"
+msgstr "Verfügbar und auf Produktion"
+
+#: src/routes/assets/by-location/+page.svelte
+msgid "Only available"
+msgstr "Nur verfügbar"
+
+#: src/routes/assets/by-location/+page.svelte
+msgid "Only out on a production"
+msgstr "Nur auf Produktion"
+
+#: src/routes/assets/by-location/+page.svelte
+msgid "Drop a card here to pick where it goes, another organization's location as well."
+msgstr "Karte hier ablegen und wählen, wohin sie soll, auch an den Lagerort einer anderen Organisation."
+
+#. 0: ownerName(column.owner)
+#: src/routes/assets/by-location/+page.svelte
+msgid "· at {0}"
+msgstr "· bei {0}"
+
+#: src/routes/assets/+page.svelte
+msgid "Import CSV…"
+msgstr "CSV importieren…"

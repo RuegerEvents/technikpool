@@ -760,7 +760,7 @@
 					</optgroup>
 				{/if}
 			</select>
-			<Button variant="outline" onclick={() => (showImportModal = true)}>Import CSV</Button>
+			<Button variant="outline" href={resolve('assets/by-location')}>By location</Button>
 			<Button icon="add" variant="outline" href={resolve('assets/bundles/new')}>Add Bundle</Button>
 			<Button icon="add" variant="outline" href={resolve('assets/new/cables')}>Add Cables</Button>
 			<Button icon="add" href={resolve('assets/new')}>Add Asset</Button>
@@ -804,6 +804,12 @@
 							class="flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent data-[highlighted]:bg-accent"
 						>
 							Equipment list (PDF)…
+						</DropdownMenu.Item>
+						<DropdownMenu.Item
+							onSelect={() => (showImportModal = true)}
+							class="flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent data-[highlighted]:bg-accent"
+						>
+							Import CSV…
 						</DropdownMenu.Item>
 					</DropdownMenu.Content>
 				</DropdownMenu.Portal>

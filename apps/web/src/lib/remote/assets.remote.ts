@@ -169,7 +169,9 @@ export const getAssets = query(v.optional(v.string()), async (organizationId?: s
 			},
 			location: true,
 			organization: true,
-			bundle: { select: { id: true, template: { select: { name: true, caption: true } } } },
+			bundle: {
+				select: { id: true, imagePath: true, template: { select: { name: true, caption: true } } }
+			},
 			parent: PARENT_SELECT,
 			accessories: ACCESSORIES_INCLUDE,
 			...CHECKED_OUT_TO_INCLUDE
@@ -201,7 +203,9 @@ export const getProductUnits = query(v.string(), async (productId: string) => {
 		include: {
 			organization: true,
 			location: true,
-			bundle: { select: { id: true, template: { select: { name: true, caption: true } } } },
+			bundle: {
+				select: { id: true, imagePath: true, template: { select: { name: true, caption: true } } }
+			},
 			parent: PARENT_SELECT,
 			...CHECKED_OUT_TO_INCLUDE
 		},
@@ -227,7 +231,9 @@ export const getRetiredAssets = query(v.optional(v.string()), async (organizatio
 			},
 			location: true,
 			organization: true,
-			bundle: { select: { id: true, template: { select: { name: true, caption: true } } } },
+			bundle: {
+				select: { id: true, imagePath: true, template: { select: { name: true, caption: true } } }
+			},
 			// Retiring detaches in both directions, so these are always empty here —
 			// they are included so the two listings stay one shape for the page that
 			// renders both.
@@ -259,7 +265,9 @@ export const getAsset = query(v.string(), async (assetId: string) => {
 			},
 			location: true,
 			organization: true,
-			bundle: { select: { id: true, template: { select: { name: true, caption: true } } } },
+			bundle: {
+				select: { id: true, imagePath: true, template: { select: { name: true, caption: true } } }
+			},
 			parent: PARENT_SELECT,
 			accessories: ACCESSORIES_INCLUDE,
 			inspectionSchedules: {
