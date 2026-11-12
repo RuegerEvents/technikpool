@@ -13950,7 +13950,9 @@ msgid "Also show other organizations' units"
 msgstr "Also show other organizations' units"
 
 #. 0: group.bundle.name
+#. 0: into
 #: src/lib/components/ui/unit-picker/unit-picker.svelte
+#: src/routes/assets/new/cables/+page.svelte
 msgid "In {0}"
 msgstr "In {0}"
 
@@ -13960,3 +13962,28 @@ msgid "1 device is taken out of its current kit:"
 msgid_plural "# devices are taken out of their current kits:"
 msgstr[0] "1 device is taken out of its current kit:"
 msgstr[1] "# devices are taken out of their current kits:"
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "Add cables"
+msgstr "Add cables"
+
+#. 0: bundle.location?.name
+#: src/routes/assets/new/cables/+page.svelte
+msgid "The case has a location of its own ({0}); the cables go there."
+msgstr "The case has a location of its own ({0}); the cables go there."
+
+#~ msgid "None, loose on the shelf"
+#~ msgstr "None, loose on the shelf"
+
+#: src/routes/assets/new/cables/+page.svelte
+msgid "Into a bundle <0>(optional)</0>"
+msgstr "Into a bundle <0>(optional)</0>"
+
+#: src/routes/assets/new/cables/+page.svelte
+msgid "None, loose on the shelf. Type a name for a new one…"
+msgstr "None, loose on the shelf. Type a name for a new one…"
+
+#. 0: newBundleName
+#: src/routes/assets/new/cables/+page.svelte
+msgid "A new bundle \"{0}\" is made with these cables."
+msgstr "A new bundle \"{0}\" is made with these cables."

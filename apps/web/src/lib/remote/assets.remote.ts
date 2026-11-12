@@ -1474,6 +1474,13 @@ const createCableBatchSchema = v.object({
 	locationId: v.string(),
 	/** Number the cables — honoured only where the org numbers its units at all. */
 	assignAssetTags: v.optional(v.boolean()),
+	/** A case to put them straight into — a drawer of cables is often a case's. */
+	bundleId: v.optional(v.string()),
+	/**
+	 * Or a new one of this name, made with them: a new bundle type and its one
+	 * case, filed under the first row's category (editable on the bundle page).
+	 */
+	newBundleName: v.optional(v.pipe(v.string(), v.trim(), v.minLength(1))),
 	rows: v.pipe(v.array(cableBatchRowSchema), v.minLength(1))
 });
 
@@ -1481,7 +1488,25 @@ export const createCableBatch = command(createCableBatchSchema, async (data) => 
 	const user = await requireAuth();
 	await requireOrgInventory(data.organizationId, 'asset_create_forbidden');
 
-	const location = await prisma.location.findUniqueOrThrow({ where: { id: data.locationId } });
+	// Same rules as registering one unit into a kit (`createAssets`): the kit is
+	// this org's, its own location wins, and what goes in answers to its type.
+	const bundle = data.bundleId
+		? await prisma.assetBundle.findUniqueOrThrow({
+				where: { id: data.bundleId },
+				select: {
+					id: true,
+					locationId: true,
+					templateId: true,
+					template: { select: { organizationId: true } }
+				}
+			})
+		: null;
+	if (bundle && bundle.template.organizationId !== data.organizationId) {
+		appError(409, 'bundle_org_mismatch');
+	}
+	const location = await prisma.location.findUniqueOrThrow({
+		where: { id: bundle?.locationId ?? data.locationId }
+	});
 	if (!(await canPlaceAt(user.id, location, data.organizationId)))
 		appError(400, 'location_invalid');
 	const { autoAssetTags: numbered } = await prisma.organization.findUniqueOrThrow({
@@ -1568,6 +1593,17 @@ export const createCableBatch = command(createCableBatchSchema, async (data) => 
 		});
 	}
 
+	// Checked once the products are known, before a single unit exists. A
+	// product created just now is in no type yet, so a type already on the
+	// shelf refuses it — the same as registering it into the kit one by one.
+	if (bundle) {
+		await assertAdditionsFitType({
+			templateId: bundle.templateId,
+			bundleId: bundle.id,
+			productIds: resolved.flatMap((row) => Array(row.quantity).fill(row.productId))
+		});
+	}
+
 	const units = resolved.flatMap((row) =>
 		Array.from({ length: row.quantity }, () => ({
 			productId: row.productId,
@@ -1578,14 +1614,48 @@ export const createCableBatch = command(createCableBatchSchema, async (data) => 
 		}))
 	);
 
-	const { created } = await prisma.$transaction((tx) =>
-		createUnitsInTx(tx, {
+	// A new case is made in the same transaction as its cables, so a batch that
+	// fails leaves no empty bundle behind.
+	const newBundleName = bundle ? undefined : data.newBundleName;
+	const { created, made } = await prisma.$transaction(async (tx) => {
+		const made = newBundleName
+			? await tx.assetBundle.create({
+					data: {
+						template: {
+							create: {
+								name: newBundleName,
+								organizationId: data.organizationId,
+								categoryId: data.rows[0].categoryId
+							}
+						}
+					},
+					select: { id: true, templateId: true }
+				})
+			: null;
+		const { created } = await createUnitsInTx(tx, {
 			userId: user.id,
 			organizationId: data.organizationId,
 			locationId: location.id,
-			units
-		})
-	);
+			units,
+			bundleId: bundle?.id ?? made?.id ?? null
+		});
+		return { created, made };
+	});
+	if (made) {
+		await getBundleTypeSpec(made.templateId).refresh();
+		await getBundles(data.organizationId).refresh();
+		await getBundles().refresh();
+		await getBundleTemplates(data.organizationId).refresh();
+		await getBundleTemplates().refresh();
+	}
+	if (bundle) {
+		await getBundleTypeSpec(bundle.templateId).refresh();
+		await getBundle(bundle.id).refresh();
+		await getBundles(data.organizationId).refresh();
+		await getBundles().refresh();
+		await getBundleTemplates(data.organizationId).refresh();
+		await getBundleTemplates().refresh();
+	}
 
 	const manufacturerIds = new Set(data.rows.map((row) => row.manufacturerId));
 	await refreshAfterUnitsCreated(
@@ -1602,7 +1672,12 @@ export const createCableBatch = command(createCableBatchSchema, async (data) => 
 		...(connectors.created.length > 0 ? [getConnectors().refresh()] : [])
 	]);
 
-	return { created: created.length, rows: resolved };
+	return {
+		created: created.length,
+		rows: resolved,
+		/** The case they went into — the new one, if one was made. */
+		bundleId: bundle?.id ?? made?.id ?? null
+	};
 });
 
 // Enough of a production to name it to someone who may not be allowed to —

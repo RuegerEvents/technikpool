@@ -11,6 +11,7 @@
 	import { ConnectorFormModal } from '#lib/components/ui/connector-form-modal/index.js';
 	import {
 		createCableBatch,
+		getBundles,
 		getCableVocabulary,
 		getCategories,
 		getDefaultLocations,
@@ -36,6 +37,7 @@
 		type CableEndRole
 	} from '#lib/cable.js';
 	import { resolve } from '$app/paths';
+	import { page } from '$app/state';
 	import { browser } from '$app/env';
 	import { toast } from 'svelte-sonner';
 	import { getErrorMessage, orgLabel, plural } from '#lib/utils.js';
@@ -83,6 +85,47 @@
 			locationId = defaultLocationFor(locations, selectedOrgId, defaultsQuery.current);
 		}
 	});
+
+	// A case to put them straight into. `?bundle=` comes from the bundle page's
+	// "Add cables", and picks the case's org with it.
+	// A name that is not a case yet makes one (`newBundleName`): a cable
+	// bundle is made right here, with the cables that go in it.
+	const linkedBundleId = page.url.searchParams.get('bundle') ?? '';
+	let bundleChoice = $state<{ id: string | null; name: string } | null>(
+		linkedBundleId ? { id: linkedBundleId, name: '' } : null
+	);
+	let bundleId = $derived(bundleChoice?.id ?? '');
+	let newBundleName = $derived(bundleChoice && !bundleChoice.id ? bundleChoice.name.trim() : '');
+	let bundlesQuery = $derived(selectedOrgId ? getBundles(selectedOrgId) : null);
+	let bundles = $derived(bundlesQuery?.current ?? []);
+	let bundle = $derived(bundles.find((b) => b.id === bundleId) ?? null);
+	let bundleItems = $derived(bundles.map((b) => ({ id: b.id, name: bundleLabel(b) })));
+	$effect(() => {
+		// The linked case arrives by id; its name follows once the list is in.
+		if (bundle && bundleChoice?.id === bundle.id && !bundleChoice.name) {
+			bundleChoice = { id: bundle.id, name: bundleLabel(bundle) };
+		}
+	});
+	// The case's org, read once from the link, so the form opens on it.
+	let linkedQuery = $derived(linkedBundleId ? getBundles() : null);
+	let linkedOrgApplied = false;
+	$effect(() => {
+		const linked = linkedQuery?.current?.find((b) => b.id === linkedBundleId);
+		if (linkedOrgApplied || !linked) return;
+		linkedOrgApplied = true;
+		if (orgs.some((o) => o.id === linked.template.organizationId)) {
+			selectedOrgId = linked.template.organizationId;
+		}
+	});
+	$effect(() => {
+		// A case of the org left behind is no choice in the new one.
+		if (bundleId && bundlesQuery?.ready && !bundle && (!linkedBundleId || linkedOrgApplied)) {
+			bundleChoice = null;
+		}
+	});
+	function bundleLabel(b: (typeof bundles)[number]) {
+		return b.tag ? `${b.template.name} (${b.tag})` : b.template.name;
+	}
 
 	let categoriesQuery = $derived(getCategories());
 	let categories = $derived(categoriesQuery.current ?? []);
@@ -393,6 +436,8 @@
 				organizationId: selectedOrgId,
 				assignAssetTags: nextTag !== null && assignTags,
 				locationId,
+				bundleId: bundleId || undefined,
+				newBundleName: newBundleName || undefined,
 				rows: filled.map((r) => ({
 					cableType: r.cableType.trim() || null,
 					connectorA: r.connectorA.trim() || null,
@@ -428,6 +473,12 @@
 			];
 			if (newProducts > 0) {
 				parts.push(plural(newProducts, ['# new catalog entry', '# new catalog entries']));
+			}
+			const into = bundle ? bundleLabel(bundle) : newBundleName;
+			if (into) parts.push(`In ${into}`);
+			// The next drawer goes into the same case, which now exists.
+			if (newBundleName && result.bundleId) {
+				bundleChoice = { id: result.bundleId, name: newBundleName };
 			}
 			toast.success(parts.join(' · '));
 			// Batch entry is inherently "and another": the form resets and stays put.
@@ -485,14 +536,37 @@
 								{locations}
 								ownerOrgId={selectedOrgId}
 								bind:value={locationId}
-								disabled={!selectedOrgId}
+								disabled={!selectedOrgId || !!bundle?.locationId}
 							/>
+							{#if bundle?.locationId}
+								<p class="text-sm text-muted-foreground">
+									The case has a location of its own ({bundle.location?.name}); the cables go there.
+								</p>
+							{/if}
 							{#if selectedOrgId && locationsQuery?.ready && ownLocations.length === 0}
 								<p class="text-sm text-muted-foreground">
 									No locations yet. Create one in
 									<a class="underline" href={resolve(`orgs/${selectedOrgId}/locations`)}
 										>Locations</a
 									>.
+								</p>
+							{/if}
+						</div>
+
+						<div class="space-y-2 sm:col-span-2">
+							<Label for="bundle"
+								>Into a bundle <span class="text-muted-foreground">(optional)</span></Label
+							>
+							<CreatableSelect
+								id="bundle"
+								items={bundleItems}
+								bind:value={bundleChoice}
+								disabled={!selectedOrgId}
+								placeholder="None, loose on the shelf. Type a name for a new one…"
+							/>
+							{#if newBundleName}
+								<p class="text-sm text-muted-foreground">
+									A new bundle "{newBundleName}" is made with these cables.
 								</p>
 							{/if}
 						</div>

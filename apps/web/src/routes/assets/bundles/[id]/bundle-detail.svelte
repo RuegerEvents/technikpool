@@ -741,6 +741,14 @@
 						allLabel="All Categories"
 					/>
 					<Button icon="add" size="sm" onclick={() => (showAddModal = true)}>Add Assets</Button>
+					<!-- A drawer of cables goes in through the batch form, which knows
+					     which case it is for from the link. -->
+					<Button
+						variant="outline"
+						size="sm"
+						href={`${resolve('assets/new/cables')}?bundle=${encodeURIComponent(bundle.id)}`}
+						>Add cables</Button
+					>
 				</div>
 			</div>
 		</Card.Header>
