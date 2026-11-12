@@ -19,6 +19,8 @@ import {
 	requireOrgInventory,
 	requireOrgWrite,
 	requireProductionRead,
+	requireEquipmentWrite,
+	lenderCrewOrgIds,
 	managedOrgIds,
 	userOrgIds,
 	visibleProductionIds
@@ -148,7 +150,7 @@ export const getProductions = query(v.optional(v.string()), async (organizationI
 });
 
 export const getProduction = query(v.string(), async (id: string) => {
-	await requireAuth();
+	const user = await requireAuth();
 	const production = await prisma.production.findUniqueOrThrow({
 		where: { id },
 		include: {
@@ -193,9 +195,10 @@ export const getProduction = query(v.string(), async (id: string) => {
 	});
 	// A VIEWER of the org reads it, so does its crew whatever their rung, and so
 	// does a VIEWER of an org lending to it; every command that changes it asks
-	// for MEMBER of the org on its own.
+	// for MEMBER of the org on its own — save that a lender on its crew plans
+	// its own units (`lenderCrewOrgIds`), which the page needs to know.
 	await requireProductionRead(production);
-	return production;
+	return { ...production, lenderCrewOrgIds: await lenderCrewOrgIds(user.id, production) };
 });
 
 /**
@@ -893,10 +896,10 @@ export const addAssetToProduction = command(addAssetSchema, async (data) => {
 		where: { id: data.productionId },
 		include: { organization: { select: { id: true, name: true, shortName: true } } }
 	});
-	await requireOrgWrite(production.organizationId);
 	requireOpenProduction(production);
 
 	const asset = await prisma.asset.findUniqueOrThrow({ where: { id: data.assetId } });
+	const { asLender } = await requireEquipmentWrite(production, [asset.organizationId]);
 	if (isRetiredStatus(asset.status)) {
 		appError(409, 'asset_retired_no_booking');
 	}
@@ -928,7 +931,8 @@ export const addAssetToProduction = command(addAssetSchema, async (data) => {
 
 	// Another org's unit is only noted (DRAFT) until the list is sent with
 	// `sendLoanRequests` — the lender hears of it then, not unit by unit.
-	const isCrossOrg = production.organizationId !== asset.organizationId;
+	// A lender planning its own unit from the crew is the approval itself.
+	const isCrossOrg = production.organizationId !== asset.organizationId && !asLender;
 	const initialStatus = isCrossOrg ? 'DRAFT' : 'APPROVED';
 
 	// Whatever is attached to it is booked with it — see
@@ -966,7 +970,8 @@ export const addAssetToProduction = command(addAssetSchema, async (data) => {
 				data: {
 					type: 'ADDED_TO_PRODUCTION',
 					productionId: data.productionId,
-					productionName: production.name
+					productionName: production.name,
+					...(asLender ? { addedByLender: true as const } : {})
 				} satisfies AddedToProductionData
 			}
 		});
@@ -1373,13 +1378,15 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 		where: { id: data.productionId },
 		include: { organization: { select: { name: true } } }
 	});
-	await requireOrgWrite(production.organizationId);
 	requireOpenProduction(production);
 
 	const bundle = await prisma.assetBundle.findUniqueOrThrow({
 		where: { id: data.bundleId },
 		include: { assets: true }
 	});
+	const { asLender } = await requireEquipmentWrite(production, [
+		...new Set(bundle.assets.map((a) => a.organizationId))
+	]);
 
 	const existingItems = await prisma.productionItem.findMany({
 		where: { productionId: data.productionId },
@@ -1437,7 +1444,7 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 
 	await prisma.$transaction([
 		...newAssets.map((asset) => {
-			const isCrossOrg = production.organizationId !== asset.organizationId;
+			const isCrossOrg = production.organizationId !== asset.organizationId && !asLender;
 			return prisma.productionItem.create({
 				data: {
 					productionId: data.productionId,
@@ -1463,7 +1470,7 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 	// Another org's units are drafts until sent; their history starts then.
 	await prisma.assetTransaction.createMany({
 		data: newAssets
-			.filter((asset) => asset.organizationId === production.organizationId)
+			.filter((asset) => asLender || asset.organizationId === production.organizationId)
 			.map((asset) => ({
 				assetId: asset.id,
 				userId: user.id,
@@ -1472,7 +1479,8 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 				data: {
 					type: 'ADDED_TO_PRODUCTION',
 					productionId: data.productionId,
-					productionName: production.name
+					productionName: production.name,
+					...(asLender ? { addedByLender: true as const } : {})
 				} satisfies AddedToProductionData
 			}))
 	});
@@ -1484,11 +1492,14 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 export const removeProductionItem = command(v.string(), async (itemId: string) => {
 	// Read before the delete: the row is the only thing that names the org this
 	// has to be authorized against, and afterwards it is gone.
-	const { production } = await prisma.productionItem.findUniqueOrThrow({
+	const { production, asset } = await prisma.productionItem.findUniqueOrThrow({
 		where: { id: itemId },
-		select: { production: { select: { organizationId: true } } }
+		select: {
+			production: { select: { id: true, organizationId: true } },
+			asset: { select: { organizationId: true } }
+		}
 	});
-	await requireOrgWrite(production.organizationId);
+	await requireEquipmentWrite(production, [asset.organizationId]);
 
 	const item = await prisma.productionItem.delete({ where: { id: itemId } });
 	// The accessories were booked because the parent was; they go with it.
@@ -1509,9 +1520,12 @@ export const syncAssetAccessoriesInProduction = command(
 	async ({ productionId, assetId }) => {
 		const parentItem = await prisma.productionItem.findUniqueOrThrow({
 			where: { productionId_assetId: { productionId, assetId } },
-			include: { production: { select: { organizationId: true, cancelledAt: true } } }
+			include: {
+				production: { select: { id: true, organizationId: true, cancelledAt: true } },
+				asset: { select: { organizationId: true } }
+			}
 		});
-		await requireOrgWrite(parentItem.production.organizationId);
+		await requireEquipmentWrite(parentItem.production, [parentItem.asset.organizationId]);
 		requireOpenProduction(parentItem.production);
 		const currentAccessories = await prisma.asset.findMany({
 			where: { parentAssetId: assetId },
@@ -1559,9 +1573,15 @@ export const removeBundleFromProduction = command(
 	async (data) => {
 		const production = await prisma.production.findUniqueOrThrow({
 			where: { id: data.productionId },
-			select: { organizationId: true }
+			select: { id: true, organizationId: true }
 		});
-		await requireOrgWrite(production.organizationId);
+		const owners = await prisma.productionItem.findMany({
+			where: { productionId: data.productionId, sourceBundleId: data.bundleId },
+			select: { asset: { select: { organizationId: true } } }
+		});
+		await requireEquipmentWrite(production, [
+			...new Set(owners.map((item) => item.asset.organizationId))
+		]);
 
 		await prisma.productionItem.deleteMany({
 			where: { productionId: data.productionId, sourceBundleId: data.bundleId }
@@ -1582,7 +1602,6 @@ export const syncBundleInProduction = command(syncBundleSchema, async (data) => 
 		where: { id: data.productionId },
 		include: { organization: { select: { id: true, name: true } } }
 	});
-	await requireOrgWrite(production.organizationId);
 	requireOpenProduction(production);
 
 	const bundle = await prisma.assetBundle.findUniqueOrThrow({
@@ -1591,8 +1610,15 @@ export const syncBundleInProduction = command(syncBundleSchema, async (data) => 
 	});
 
 	const currentItems = await prisma.productionItem.findMany({
-		where: { productionId: data.productionId, sourceBundleId: data.bundleId }
+		where: { productionId: data.productionId, sourceBundleId: data.bundleId },
+		include: { asset: { select: { organizationId: true } } }
 	});
+	const { asLender } = await requireEquipmentWrite(production, [
+		...new Set([
+			...bundle.assets.map((a) => a.organizationId),
+			...currentItems.map((i) => i.asset.organizationId)
+		])
+	]);
 
 	const currentItemAssetIds = new Set(currentItems.map((i) => i.assetId));
 	const bundleAssetIds = new Set(bundle.assets.map((a) => a.id));
@@ -1643,7 +1669,7 @@ export const syncBundleInProduction = command(syncBundleSchema, async (data) => 
 	await prisma.$transaction([
 		...toRemove.map((item) => prisma.productionItem.delete({ where: { id: item.id } })),
 		...toAdd.map((asset) => {
-			const isCrossOrg = production.organizationId !== asset.organizationId;
+			const isCrossOrg = production.organizationId !== asset.organizationId && !asLender;
 			return prisma.productionItem.create({
 				data: {
 					productionId: data.productionId,
@@ -1664,7 +1690,9 @@ export const syncBundleInProduction = command(syncBundleSchema, async (data) => 
 			: [])
 	]);
 
-	const ownAdded = toAdd.filter((asset) => asset.organizationId === production.organizationId);
+	const ownAdded = toAdd.filter(
+		(asset) => asLender || asset.organizationId === production.organizationId
+	);
 	if (ownAdded.length > 0) {
 		await prisma.assetTransaction.createMany({
 			data: ownAdded.map((asset) => ({
@@ -1675,7 +1703,8 @@ export const syncBundleInProduction = command(syncBundleSchema, async (data) => 
 				data: {
 					type: 'ADDED_TO_PRODUCTION',
 					productionId: data.productionId,
-					productionName: production.name
+					productionName: production.name,
+					...(asLender ? { addedByLender: true as const } : {})
 				} satisfies AddedToProductionData
 			}))
 		});

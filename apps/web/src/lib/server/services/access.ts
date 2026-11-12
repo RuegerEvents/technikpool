@@ -126,6 +126,8 @@ export function requireOrgOwner(
  *
  * Seeing a production is all a lender gets: every command that changes one asks
  * for MEMBER of the org that runs it, and its billing asks for ADMIN of that org.
+ * The one exception is a lender on its crew, who plans its own units there
+ * (`requireEquipmentWrite`).
  *
  * What a list does with a production this says no to is the caller's business,
  * but it must never *drop* it: a unit booked by someone else's production is
@@ -320,5 +322,64 @@ export async function scopedOrgIds(userId: string, organizationId?: string): Pro
 	if (!organizationId) return orgIds;
 	if (orgIds.includes(organizationId)) return [organizationId];
 	if (await isSystemAdmin(userId)) return [organizationId];
+	appError(403, 'unauthorized');
+}
+
+/** A lender's units count as lent once approved: out, back, or still to go. */
+const LOAN_STANDING_STATUSES = ['APPROVED', 'CHECKED_OUT', 'RETURNED'];
+
+/**
+ * The orgs whose own units this user may plan on someone else's production:
+ * those they are MEMBER+ of that already lend to it (an approved unit is on
+ * it), when they are on its crew. They pack for the job themselves, so a
+ * cable more of their own needs nobody's approval but theirs. Other orgs'
+ * units and the production's own stay with the production's org.
+ */
+export async function lenderCrewOrgIds(
+	userId: string,
+	production: { id: string; organizationId: string }
+) {
+	const productionId = production.id;
+	const crew = await prisma.productionCrew.findFirst({
+		where: { productionId, userId },
+		select: { id: true }
+	});
+	if (!crew) return [];
+	const writable = await writableOrgIds(userId);
+	if (writable.length === 0) return [];
+	const lending = await prisma.organization.findMany({
+		where: {
+			id: { in: writable.filter((id) => id !== production.organizationId) },
+			assets: {
+				some: {
+					productionItems: { some: { productionId, status: { in: LOAN_STANDING_STATUSES } } }
+				}
+			}
+		},
+		select: { id: true }
+	});
+	return lending.map((org) => org.id);
+}
+
+/**
+ * The gate for changing a production's equipment. MEMBER+ of the production's
+ * org (or a system admin) changes anything, as `requireOrgWrite`; otherwise
+ * every unit touched has to belong to one of `lenderCrewOrgIds`. Says which
+ * of the two it was: what a lender adds is approved at once, since the lender
+ * is who would approve it.
+ */
+export async function requireEquipmentWrite(
+	production: { id: string; organizationId: string },
+	ownerOrgIds: string[]
+): Promise<{ user: { id: string }; asLender: boolean }> {
+	const user = await requireAuth();
+	if (await isSystemAdmin(user.id)) return { user, asLender: false };
+	const role = await orgRole(user.id, production.organizationId);
+	if (role && roleAtLeast(role, ROLE_FOR.write)) return { user, asLender: false };
+	const lenders = new Set(await lenderCrewOrgIds(user.id, production));
+	if (ownerOrgIds.length > 0 && ownerOrgIds.every((id) => lenders.has(id))) {
+		return { user, asLender: true };
+	}
+	if (!role) appError(403, 'not_org_member');
 	appError(403, 'unauthorized');
 }

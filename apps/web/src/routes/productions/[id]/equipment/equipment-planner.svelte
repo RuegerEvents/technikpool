@@ -548,7 +548,7 @@
 			<h1 class="text-2xl font-semibold tracking-tight">Equipment</h1>
 		</div>
 		<div class="flex items-center gap-3">
-			{#if !data.production.cancelledAt}
+			{#if !data.production.cancelledAt && !data.asLender}
 				<Button variant="outline" size="sm" onclick={() => (copyEquipmentOpen = true)}
 					>Copy equipment from…</Button
 				>
@@ -556,13 +556,21 @@
 			<span class="rounded-full bg-muted px-3 py-1 text-sm font-semibold text-muted-foreground">
 				{totalBooked} device{totalBooked !== 1 ? 's' : ''} booked
 			</span>
-			{#if draftCount > 0 && !data.production.cancelledAt}
+			{#if draftCount > 0 && !data.production.cancelledAt && !data.asLender}
 				<Button size="sm" onclick={() => (loanRequestOpen = true)}
 					>{plural(draftCount, ['Request # device…', 'Request # devices…'])}</Button
 				>
 			{/if}
 		</div>
 	</div>
+
+	{#if data.asLender && !data.production.cancelledAt}
+		<!-- See `lenderCrewOrgIds`: a lender on the crew plans its own units only. -->
+		<p class="shrink-0 rounded-lg border px-4 py-3 text-sm text-muted-foreground">
+			You lend to this production and are on its crew, so you plan your own organization's equipment
+			here. What you add is approved at once.
+		</p>
+	{/if}
 
 	{#if data.production.cancelledAt}
 		<!-- The server refuses every booking onto it; say so before the first try. -->
@@ -921,9 +929,11 @@
 	</div>
 {/if}
 
-<CopyEquipmentModal
-	{productionId}
-	organizationId={data.production.organizationId}
-	bind:open={copyEquipmentOpen}
-/>
-<LoanRequestModal {productionId} {lenders} bind:open={loanRequestOpen} />
+{#if !data.asLender}
+	<CopyEquipmentModal
+		{productionId}
+		organizationId={data.production.organizationId}
+		bind:open={copyEquipmentOpen}
+	/>
+	<LoanRequestModal {productionId} {lenders} bind:open={loanRequestOpen} />
+{/if}

@@ -492,7 +492,11 @@ Ausgabe) and the scanner's session both check a lent unit out and back in. Rules
 
 - **The lender hands over by scanning.** A MEMBER+ of the unit's org may check it out to
   another org's production without any right there, but only if the production has it booked
-  and approved (`not_approved` otherwise). `productionTargets` lists those productions with
+  and approved — or, once a loan stands (the production holds an approved unit of that org),
+  any further unit of its own: packing finds a cable nobody booked, and the lender is who would
+  have approved it. Such units go out `CHECKED_OUT` at once, their history marked
+  `addedByLender`, and the lender's handout list offers the name search for them
+  (`books` in `handoutScope`). Without a loan it is `not_approved`. `productionTargets` lists those productions with
   `checkoutRole: 'lender'`. Taking it back is the ordinary scan onto a location.
 - **The borrower's two steps are columns, not statuses**: `ProductionItem.receivedAt` and
   `returnReportedAt`. Every "is it out?" list keeps asking `CHECKED_OUT`, so none of them had
@@ -651,7 +655,11 @@ leave the server's `error(4xx, …)` as the backstop it is.
   customer included, no billing. `productionReadWhere(…, { lent: true })` adds those to a list
   (productions list, calendars); leave it off wherever the list means "our own work" (checkout
   targets, awaiting approvals). `getProductionAudience` shows the owning org who else can see
-  a production and why. Prices go through
+  a production and why. Changing a production's equipment asks for MEMBER+ of its org
+  (`requireEquipmentWrite`), with one exception: someone on its **crew** who is MEMBER+ of an org
+  already lending to it (an approved unit on it, `lenderCrewOrgIds`) plans that org's own units —
+  planner, add, remove, syncs — and what they add is `APPROVED` at once, history marked
+  `addedByLender`. Prices go through
   `readableOrgIds` / `readsOrgRecords`.
 - Org `OWNER` role = can manage that org's members
 - System admins bypass org membership checks

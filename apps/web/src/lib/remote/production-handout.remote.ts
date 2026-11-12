@@ -112,10 +112,12 @@ export const setProductionHandoutLine = command(
 
 /** Units not on the list, found by name — see `searchHandoutCandidates`. */
 export const searchHandoutAdditions = query(
-	v.object({ productionId: v.string(), text: v.string() }),
-	async ({ productionId, text }) => {
+	v.object({ productionId: v.string(), organizationId: side, text: v.string() }),
+	async ({ productionId, organizationId, text }) => {
 		const user = await requireAuth();
-		return await withCheckoutErrors(() => searchHandoutCandidates(user.id, productionId, text));
+		return await withCheckoutErrors(() =>
+			searchHandoutCandidates(user.id, productionId, text, organizationId)
+		);
 	}
 );
 
@@ -135,7 +137,8 @@ export const handOutAdditions = command(
 				user.id,
 				productionId,
 				{ productId, organizationId: ownerId, locationId },
-				count
+				count,
+				organizationId
 			)
 		);
 		await refreshHandout(user.id, productionId, organizationId, affected);

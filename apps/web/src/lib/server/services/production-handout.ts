@@ -170,14 +170,28 @@ async function handoutScope(userId: string, productionId: string, organizationId
 	];
 	if (sides.length === 0) throw new CheckoutError('forbidden', 'No access to this production');
 	const side = sides.find((s) => s.organizationId === organizationId) ?? sides[0];
+	// A lender adds its own units once a loan stands: the production holds an
+	// approved one of its units already (see `assertLenderMayHandOver`).
+	const lends =
+		!side.own &&
+		(await prisma.productionItem.count({
+			where: {
+				productionId,
+				status: { in: ['APPROVED', 'CHECKED_OUT', 'RETURNED'] },
+				asset: { organizationId: side.organizationId }
+			}
+		})) > 0;
 	return {
 		production,
 		sides,
 		side,
 		organizationIds: side.own ? (admin ? undefined : writable) : [side.organizationId],
 		byLender: side.own,
-		/** May put units on the production that it has not booked — see `kitAdditions`. */
-		books: side.own && (admin || writable.includes(production.organizationId))
+		/**
+		 * May put units on the production that it has not booked — see
+		 * `kitAdditions`: the production's own org, or a lender with a loan on it.
+		 */
+		books: (side.own && (admin || writable.includes(production.organizationId))) || lends
 	};
 }
 
@@ -658,9 +672,10 @@ function freeForProduction(production: Scope['production']) {
 export async function searchHandoutCandidates(
 	userId: string,
 	productionId: string,
-	text: string
+	text: string,
+	organizationId?: string
 ): Promise<HandoutCandidate[]> {
-	const scope = await handoutScope(userId, productionId);
+	const scope = await handoutScope(userId, productionId, organizationId);
 	const words = text.trim().split(/\s+/).filter(Boolean);
 	if (!scope.books || scope.production.cancelledAt || words.join('').length < 2) return [];
 	const assets = await prisma.asset.findMany({
@@ -738,10 +753,14 @@ export async function handOutCandidates(
 	userId: string,
 	productionId: string,
 	group: { productId: string; organizationId: string; locationId: string },
-	count: number
+	count: number,
+	organizationId?: string
 ) {
-	const scope = await handoutScope(userId, productionId);
+	const scope = await handoutScope(userId, productionId, organizationId);
 	if (!scope.books) throw new CheckoutError('forbidden', 'No access to this production');
+	if (scope.organizationIds && !scope.organizationIds.includes(group.organizationId)) {
+		throw new CheckoutError('forbidden', 'Not a unit of this side');
+	}
 	const free = await prisma.asset.findMany({
 		where: {
 			productId: group.productId,

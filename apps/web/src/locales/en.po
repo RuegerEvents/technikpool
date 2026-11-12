@@ -1962,9 +1962,8 @@ msgstr "Asset created"
 msgid "Checked in to <0/>"
 msgstr "Checked in to <0/>"
 
-#: src/routes/assets/[id]/asset-detail.svelte
-msgid "Checked out for <0/>"
-msgstr "Checked out for <0/>"
+#~ msgid "Checked out for <0/>"
+#~ msgstr "Checked out for <0/>"
 
 #: src/routes/assets/[id]/asset-detail.svelte
 msgid "Returned from <0/> <1>to <0/></1>"
@@ -1974,9 +1973,8 @@ msgstr "Returned from <0/> <1>to <0/></1>"
 msgid "Requested for <0/> <1>by <0/></1>"
 msgstr "Requested for <0/> <1>by <0/></1>"
 
-#: src/routes/assets/[id]/asset-detail.svelte
-msgid "Added to <0/>"
-msgstr "Added to <0/>"
+#~ msgid "Added to <0/>"
+#~ msgstr "Added to <0/>"
 
 #~ msgid "Approved for <0/>"
 #~ msgstr "Approved for <0/>"
@@ -13917,3 +13915,20 @@ msgstr "{0}: inspection overdue"
 #: src/routes/share/[id]/[signature]/+page.svelte
 msgid "{0}: inspected, valid until {1}"
 msgstr "{0}: inspected, valid until {1}"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "(added by the lender)"
+msgstr "(added by the lender)"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Checked out for <0/> <1/>"
+msgstr "Checked out for <0/> <1/>"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Added to <0/> <1/>"
+msgstr "Added to <0/> <1/>"
+
+#: src/routes/productions/[id]/equipment/equipment-planner.svelte
+msgid "You lend to this production and are on its crew, so you plan your own organization's equipment here. What you add is approved at once."
+msgstr "You lend to this production and are on its crew, so you plan your own organization's equipment here. What you add is approved at once."

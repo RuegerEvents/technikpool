@@ -6,10 +6,14 @@ import { orgLabel } from '#lib/utils.js';
 import { getAwaitingApprovals, getProduction, getProductionAudience } from './productions.remote';
 import {
 	productionReadWhere,
+	lenderCrewOrgIds,
 	requireAuth,
+	requireEquipmentWrite,
 	requireOrgWrite,
 	requireProductionRead,
-	userOrgIds
+	userOrgIds,
+	writableOrgIds,
+	isSystemAdmin
 } from '#lib/server/services/access.js';
 import { BOOKABLE_ASSET_WHERE } from '#lib/asset-status.js';
 import { accessoryIdsOf } from '#lib/server/services/accessories.js';
@@ -29,7 +33,6 @@ const HERE_STATUSES = ['DRAFT', ...ACTIVE_STATUSES] as const;
 // per-Asset add/remove flow with per-Product-x-org-x-location quantities.
 export const getEquipmentEditorData = query(v.string(), async (productionId: string) => {
 	const user = await requireAuth();
-	const orgIds = await userOrgIds(user.id);
 
 	const production = await prisma.production.findUniqueOrThrow({
 		where: { id: productionId },
@@ -43,6 +46,14 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 		}
 	});
 	await requireProductionRead(production);
+	// Someone who only lends to it, from its crew, plans their own units and
+	// nothing else (see `requireEquipmentWrite`).
+	const plansAll =
+		(await isSystemAdmin(user.id)) ||
+		(await writableOrgIds(user.id)).includes(production.organizationId);
+	const lenderOrgIds = plansAll ? [] : await lenderCrewOrgIds(user.id, production);
+	const asLender = lenderOrgIds.length > 0;
+	const orgIds = asLender ? lenderOrgIds : await userOrgIds(user.id);
 
 	// Accessories are not bookable on their own: they follow whatever they are
 	// attached to, and a row for "8× Omega Bracket" next to the fixtures they
@@ -248,6 +259,8 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 
 	return {
 		production,
+		/** Plans only its own units, approved as it adds them: no drafts, no copying. */
+		asLender,
 		groups: [...groups.values()].sort((a, b) => naturalCompare(a.productName, b.productName)),
 		bundles: bundles.sort((a, b) => naturalCompare(a.name, b.name))
 	};
@@ -263,13 +276,11 @@ const setQuantitySchema = v.object({
 });
 
 export const setProductionQuantity = command(setQuantitySchema, async (data) => {
-	const user = await requireAuth();
-
 	const production = await prisma.production.findUniqueOrThrow({
 		where: { id: data.productionId },
 		include: { organization: { select: { id: true, name: true } } }
 	});
-	await requireOrgWrite(production.organizationId);
+	const { user, asLender } = await requireEquipmentWrite(production, [data.organizationId]);
 	requireOpenProduction(production);
 
 	// A unit booked as part of a bundle belongs to that bundle's row, not to
@@ -342,8 +353,9 @@ export const setProductionQuantity = command(setQuantitySchema, async (data) => 
 		}
 
 		const toAdd = candidates.slice(0, delta);
-		const isCrossOrg = production.organizationId !== data.organizationId;
-		// Another org's units are only noted until the list is sent.
+		// Another org's units are only noted until the list is sent — unless
+		// the lender plans them itself, which is the approval.
+		const isCrossOrg = production.organizationId !== data.organizationId && !asLender;
 		const status = isCrossOrg ? 'DRAFT' : 'APPROVED';
 
 		// What is bolted to a unit ships with it. These get real ProductionItem
@@ -389,7 +401,8 @@ export const setProductionQuantity = command(setQuantitySchema, async (data) => 
 								data: {
 									type: 'ADDED_TO_PRODUCTION',
 									productionId: data.productionId,
-									productionName: production.name
+									productionName: production.name,
+									...(asLender ? { addedByLender: true as const } : {})
 								} satisfies AddedToProductionData
 							}))
 						})

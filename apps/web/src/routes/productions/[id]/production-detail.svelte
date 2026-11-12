@@ -180,6 +180,12 @@
 	);
 	let canEdit = $derived(!!role && roleAtLeast(role, ROLE_FOR.write));
 	let canPlan = $derived(canEdit && !cancelled);
+	// A lender on the crew plans its own units here, nothing else
+	// (`lenderCrewOrgIds`): Manage Equipment, Remove and the syncs on those.
+	let plansOwn = $derived(!canEdit && !cancelled && production.lenderCrewOrgIds.length > 0);
+	function ownsAsLender(organizationId: string) {
+		return production.lenderCrewOrgIds.includes(organizationId);
+	}
 
 	let loanRequestOpen = $state(false);
 	let draftLenderList = $derived(draftLenders(production.items));
@@ -1281,11 +1287,13 @@
 						<span class="ml-1 text-base font-normal text-muted-foreground">{unitCount}</span>
 					{/if}
 				</h2>
-				{#if canPlan}
+				{#if canPlan || plansOwn}
 					<div class="flex flex-wrap gap-2">
-						<Button variant="outline" onclick={() => (copyEquipmentOpen = true)}
-							>Copy equipment from…</Button
-						>
+						{#if canPlan}
+							<Button variant="outline" onclick={() => (copyEquipmentOpen = true)}
+								>Copy equipment from…</Button
+							>
+						{/if}
 						<Button href={resolve(`productions/${productionId}/equipment`)}>Manage Equipment</Button
 						>
 					</div>
@@ -1379,9 +1387,13 @@
 								{@const divergence =
 									section.kind === 'bundle' ? bundleDivergence.get(section.bundleId) : null}
 								{@const divergentAccessories = divergentAccessoryCount(section.items)}
-								{@const accessoryChanges = canPlan
-									? section.items.filter(accessoriesChanged).map((i) => i.assetId)
-									: []}
+								{@const accessoryChanges = section.items
+									.filter(
+										(i) =>
+											(canPlan || (plansOwn && ownsAsLender(i.asset.organizationId))) &&
+											accessoriesChanged(i)
+									)
+									.map((i) => i.assetId)}
 								{@const sectionLocations = distinct(
 									section.items.map((i) => i.asset.location.name)
 								)}
@@ -1433,7 +1445,7 @@
 											{#if section.kind === 'bundle'}
 												<ProductThumb path={section.imagePath} alt={section.bundleName} />
 												<span class="font-medium">{section.bundleName}</span>
-												{#if canPlan && divergence}
+												{#if divergence && (canPlan || (plansOwn && section.items.every( (i) => ownsAsLender(i.asset.organizationId) )))}
 													<span
 														class="rounded bg-yellow-100 px-1.5 py-0.5 text-xs font-medium text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
 														title="{divergence.addedCount > 0
@@ -1623,7 +1635,7 @@
 															Credentials
 														</button>
 													{/if}
-													{#if canPlan && accessoriesChanged(item)}
+													{#if (canPlan || (plansOwn && ownsAsLender(item.asset.organizationId))) && accessoriesChanged(item)}
 														<span
 															class="rounded bg-yellow-100 px-1.5 py-0.5 text-xs font-medium text-yellow-800 dark:bg-yellow-900 dark:text-yellow-300"
 															>Accessories changed</span
@@ -1665,7 +1677,7 @@
 												</td>
 											{/each}
 											<td class="px-1 py-2 text-right">
-												{#if canEdit}
+												{#if canEdit || ownsAsLender(item.asset.organizationId)}
 													<Button
 														icon="close"
 														variant="ghost"

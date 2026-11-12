@@ -26,6 +26,8 @@ export type CheckedOutData = {
 	type: 'CHECKED_OUT';
 	productionId: string;
 	productionName: string;
+	/** Put on another org's production by its lender while packing, not booked by the borrower. */
+	addedByLender?: true;
 };
 
 /**
@@ -58,6 +60,8 @@ export type AddedToProductionData = {
 	type: 'ADDED_TO_PRODUCTION';
 	productionId: string;
 	productionName: string;
+	/** Planned onto another org's production by its lender, from the crew — approved at once. */
+	addedByLender?: true;
 };
 
 export type ApprovedData = {

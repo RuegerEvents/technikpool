@@ -1435,6 +1435,9 @@
 														? ''
 														: 'underline underline-offset-2'}">{tx.productionName}</a
 												>
+												{#if tx.addedByLender}
+													<span class="text-muted-foreground">(added by the lender)</span>
+												{/if}
 											{:else if tx?.type === 'CHECKOUT_UNDONE'}
 												Checkout undone for
 												<a
@@ -1481,6 +1484,9 @@
 														? ''
 														: 'underline underline-offset-2'}">{tx.productionName}</a
 												>
+												{#if tx.addedByLender}
+													<span class="text-muted-foreground">(added by the lender)</span>
+												{/if}
 											{:else if tx?.type === 'APPROVED'}
 												Approved for
 												<a

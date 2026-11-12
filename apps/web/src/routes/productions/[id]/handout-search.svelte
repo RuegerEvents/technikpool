@@ -28,7 +28,7 @@
 	});
 
 	let resultsQuery = $derived(
-		term.length >= 2 ? searchHandoutAdditions({ productionId, text: term }) : null
+		term.length >= 2 ? searchHandoutAdditions({ productionId, organizationId, text: term }) : null
 	);
 	let results = $derived(resultsQuery?.current ?? []);
 	const counts = new SvelteMap<string, number>();
@@ -50,7 +50,7 @@
 				`${plural(done.count, ['Handed out: 1×', 'Handed out: #×'])} ${makerAndName(result.manufacturerName, result.productName)}`
 			);
 			counts.delete(result.key);
-			await searchHandoutAdditions({ productionId, text: term }).refresh();
+			await searchHandoutAdditions({ productionId, organizationId, text: term }).refresh();
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 		} finally {

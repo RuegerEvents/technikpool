@@ -241,23 +241,46 @@ export async function productionTargets(userId: string) {
 /** What a lender may still hand over: approved, out already, or back and going out again. */
 const HANDOVER_STATUSES = ['APPROVED', 'CHECKED_OUT', 'RETURNED'];
 
-function assertLenderMayHandOver(
+/**
+ * A lender hands over what the production booked and it approved — and, once a
+ * loan stands, more of its own: a cable grabbed while packing has nobody else
+ * to approve it, since the lender is who would. "A loan stands" means the
+ * production already holds an approved unit of the same org, so the borrower
+ * asked for something from it once and any rental terms were agreed then.
+ * Returns the units that go on as such additions, for their history.
+ */
+async function assertLenderMayHandOver(
+	productionId: string,
 	items: { assetId: string; status: string }[],
-	assetIds: string[],
+	assets: { id: string; organizationId: string }[],
 	assetTag?: string,
 	standIns: Map<string, unknown> = new Map()
-) {
-	for (const assetId of assetIds) {
-		if (standIns.has(assetId)) continue;
-		const item = items.find((i) => i.assetId === assetId);
-		if (!item || !HANDOVER_STATUSES.includes(item.status)) {
-			throw new CheckoutError(
-				'not_approved',
-				'Not booked and approved on this production — only the production’s own org can add it',
-				assetTag
-			);
-		}
+): Promise<Set<string>> {
+	const unbooked = assets.filter((asset) => {
+		if (standIns.has(asset.id)) return false;
+		const item = items.find((i) => i.assetId === asset.id);
+		return !item || !HANDOVER_STATUSES.includes(item.status);
+	});
+	if (unbooked.length === 0) return new Set();
+	const orgIds = [...new Set(unbooked.map((a) => a.organizationId))];
+	const lending = await prisma.productionItem.findMany({
+		where: {
+			productionId,
+			status: { in: HANDOVER_STATUSES },
+			asset: { organizationId: { in: orgIds } }
+		},
+		select: { asset: { select: { organizationId: true } } },
+		distinct: ['assetId']
+	});
+	const lends = new Set(lending.map((i) => i.asset.organizationId));
+	if (unbooked.some((a) => !lends.has(a.organizationId))) {
+		throw new CheckoutError(
+			'not_approved',
+			'Not booked and approved on this production — only the production’s own org can add it',
+			assetTag
+		);
 	}
+	return new Set(unbooked.map((a) => a.id));
 }
 
 /**
@@ -563,9 +586,10 @@ export async function performScan(
 		? undefined
 		: (await findStandIns(production.id, [asset], touchedIds)).get(asset.id);
 	// Accessories follow the unit they hang off, booked or not.
-	if (!role.asProduction && !standIn) {
-		assertLenderMayHandOver(existingItems, [asset.id], input.assetTag);
-	}
+	const addedByLender =
+		!role.asProduction && !standIn
+			? await assertLenderMayHandOver(production.id, existingItems, [asset], input.assetTag)
+			: new Set<string>();
 
 	const lent = asset.organizationId !== production.organizationId;
 	const kit =
@@ -600,7 +624,12 @@ export async function performScan(
 				userId,
 				productionId: input.targetId,
 				action: 'CHECKED_OUT',
-				data: { type: 'CHECKED_OUT', productionId: production.id, productionName: production.name }
+				data: {
+					type: 'CHECKED_OUT',
+					productionId: production.id,
+					productionName: production.name,
+					...(addedByLender.has(assetId) ? { addedByLender: true } : {})
+				}
 			}))
 		});
 	});
@@ -1034,9 +1063,15 @@ export async function performBulkCheckout(
 		assets.filter((a) => selected.has(a.id) && !existingItems.some((i) => i.assetId === a.id)),
 		assetIds
 	);
-	if (!role.asProduction) {
-		assertLenderMayHandOver(existingItems, input.assetIds, undefined, standIns);
-	}
+	const addedByLender = role.asProduction
+		? new Set<string>()
+		: await assertLenderMayHandOver(
+				production.id,
+				existingItems,
+				assets.filter((a) => selected.has(a.id)),
+				undefined,
+				standIns
+			);
 	const kits = await bookedKits(
 		production.id,
 		assets.map((a) => a.bundleId)
@@ -1078,7 +1113,8 @@ export async function performBulkCheckout(
 				data: {
 					type: 'CHECKED_OUT',
 					productionId: production.id,
-					productionName: production.name
+					productionName: production.name,
+					...(addedByLender.has(asset.id) ? { addedByLender: true } : {})
 				}
 			}
 		});
