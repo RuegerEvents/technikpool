@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { EQUIPMENT_VIEWS } from '#lib/equipment-views.js';
 	import { CableColorDot } from '#lib/components/ui/cable-color/index.js';
 	import { naturalCompare } from '#lib/sort.js';
 	import { rowLinkClick } from '#lib/row-link.js';
@@ -83,7 +84,6 @@
 	let bundle = $derived(await getBundle(bundleId));
 	// A case that went out as a whole is at its production, not on its shelf.
 	let bundlePlace = $derived(sharedPlace(bundle.assets));
-	let allAssets = $derived(await getAssets());
 	let categories = $derived(await getCategories());
 	let locations = $derived(await getPlaceableLocations());
 
@@ -127,7 +127,7 @@
 				tag: copies === 1 ? copyDraft.tag.trim() || undefined : undefined,
 				locationId: copyDraft.locationId || undefined,
 				reuseExistingAssets: copyFromStock || undefined
-			});
+			}).updates(...EQUIPMENT_VIEWS);
 			copyOpen = false;
 			// Both numbers, because they mean different things to whoever counts the
 			// shelf afterwards.
@@ -200,7 +200,7 @@
 							caption: bundleDraft.caption,
 							details: bundleDraft.details,
 							categoryId: bundleDraft.categoryId
-						})
+						}).updates(...EQUIPMENT_VIEWS)
 					: Promise.resolve(),
 				updateBundle({
 					bundleId,
@@ -209,7 +209,7 @@
 						? Number(bundleDraft.netPurchasePrice)
 						: null,
 					locationId: bundleDraft.locationId || null
-				})
+				}).updates(...EQUIPMENT_VIEWS)
 			]);
 			toast.success('Bundle updated');
 			editingBundle = false;
@@ -239,7 +239,9 @@
 		if (!mainAssetId) return;
 		converting = true;
 		try {
-			const result = await convertBundleToAccessories({ bundleId, mainAssetId });
+			const result = await convertBundleToAccessories({ bundleId, mainAssetId }).updates(
+				...EQUIPMENT_VIEWS
+			);
 			toast.success(
 				`Bundle converted — ${plural(result.accessories, ['1 accessory', '# accessories'])} attached`
 			);
@@ -267,7 +269,9 @@
 	async function handleDelete() {
 		deleting = true;
 		try {
-			const result = await deleteBundle({ bundleId, assets: deleteAssets });
+			const result = await deleteBundle({ bundleId, assets: deleteAssets }).updates(
+				...EQUIPMENT_VIEWS
+			);
 			// An empty case has no tally worth reporting — "0 units are back in the
 			// pool" is a sentence about nothing.
 			toast.success(
@@ -297,7 +301,9 @@
 			: [...featuredProductIds, productId];
 		featuringProductId = productId;
 		try {
-			await setBundleFeaturedProducts({ templateId: bundle.templateId, productIds: next });
+			await setBundleFeaturedProducts({ templateId: bundle.templateId, productIds: next }).updates(
+				...EQUIPMENT_VIEWS
+			);
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 		} finally {
@@ -317,7 +323,7 @@
 	async function handleRegenerateImage() {
 		regeneratingImage = true;
 		try {
-			await regenerateBundleImage(bundleId);
+			await regenerateBundleImage(bundleId).updates(...EQUIPMENT_VIEWS);
 			toast.success('Bundle image regenerated');
 		} catch (err) {
 			toast.error(getErrorMessage(err));
@@ -374,6 +380,10 @@
 	// tick away for the rare case, not mixed into every search.
 	let otherOrgs = $state(false);
 	let bundleOrgId = $derived(bundle.template.organizationId);
+
+	// Only for the picker. Every unit of every org is the heaviest query there
+	// is, and awaiting it on open held the whole page back for it.
+	let allAssets = $derived(showAddModal ? await getAssets() : []);
 
 	let availableToAdd = $derived.by(() => {
 		const bundleAssetIds = new Set(bundle.assets.map((a) => a.id));
@@ -487,7 +497,7 @@
 	async function handleRemoveInner(innerBundleId: string) {
 		working = true;
 		try {
-			await removeInnerBundle({ bundleId, innerBundleId });
+			await removeInnerBundle({ bundleId, innerBundleId }).updates(...EQUIPMENT_VIEWS);
 			toast.success('Bundle taken out');
 		} catch (err) {
 			toast.error(getErrorMessage(err));
@@ -542,7 +552,7 @@
 				bundleIds: pickedKitIds.length > 0 ? pickedKitIds : undefined,
 				allowTypeChange: changeType || undefined,
 				moveFromOtherBundles: movedFrom.length + movedKitsFrom.length > 0 || undefined
-			});
+			}).updates(...EQUIPMENT_VIEWS);
 			toast.success(
 				pickedIds.length > 0
 					? plural(pickedIds.length, ['Device added to bundle', '# devices added to bundle'])
@@ -561,7 +571,7 @@
 	async function handleRemove(assetId: string) {
 		working = true;
 		try {
-			await removeAssetFromBundle({ bundleId, assetId });
+			await removeAssetFromBundle({ bundleId, assetId }).updates(...EQUIPMENT_VIEWS);
 			toast.success('Asset removed from bundle');
 		} catch (err) {
 			toast.error(getErrorMessage(err));

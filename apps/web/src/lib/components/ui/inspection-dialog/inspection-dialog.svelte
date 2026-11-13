@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { EQUIPMENT_VIEWS } from '#lib/equipment-views.js';
 	// Recording an inspection of one type: one unit from its page or the
 	// inspections list, or a whole selection from the Devices list. The next due
 	// date is never entered here — it follows from the result and the unit's
@@ -86,7 +87,7 @@
 				result,
 				inspectorName: isExternal ? inspectorName || undefined : undefined,
 				notes: notes || undefined
-			});
+			}).updates(...EQUIPMENT_VIEWS);
 			if (isExternal && inspectorName.trim()) {
 				try {
 					localStorage.setItem(INSPECTOR_KEY, inspectorName.trim());

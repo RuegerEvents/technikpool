@@ -3,6 +3,8 @@ import { query, command, requested } from '$app/server';
 import { prisma } from '#lib/server/auth.js';
 import type { Prisma } from '#lib/prisma/client.js';
 import * as v from 'valibot';
+import { ORG_SUMMARY_SELECT } from '#lib/server/services/org-summary.js';
+import { NO_TIMESTAMPS, shareRepeated } from '#lib/server/services/share-repeated.js';
 import { getNextAssetTag, getOrgEquipmentValue } from './orgs.remote';
 import type { FieldChange } from '#lib/types/asset-transaction.js';
 import {
@@ -55,7 +57,6 @@ import {
 	redrawPreviewsOf
 } from '#lib/server/services/bundle-image.js';
 import { assertAdditionsFitType, bundleTypeSpec } from '#lib/server/services/bundle-spec.js';
-import { getProduction } from '#lib/remote/productions.remote.js';
 import {
 	CABLE_TYPE_DEFAULTS,
 	CABLE_TYPE_SUGGESTIONS,
@@ -78,6 +79,7 @@ import {
 import { PORT_REQUIREMENTS } from '#lib/ports.js';
 import { getConnectors, getConnectorUsage } from '#lib/remote/connectors.remote.js';
 import { getKnownAddresses } from '#lib/remote/addresses.remote.js';
+import { refreshEquipmentViews, type EquipmentChange } from './equipment-views';
 import { initialInspection } from '#lib/server/services/inspections.js';
 import {
 	ASSET_ORDER_BY,
@@ -138,12 +140,22 @@ const PARENT_SELECT = {
 // be drawn, because the answer is part of the picture — see bundle-image.ts.
 const FEATURED_PRODUCTS_SELECT = { select: { id: true } } as const;
 
+// A unit's product, maker, category and shelf as a list carries them: without
+// the timestamps no list shows. See `shareRepeated` for the other half.
+const LIST_PRODUCT = {
+	omit: NO_TIMESTAMPS,
+	include: {
+		manufacturer: { omit: NO_TIMESTAMPS },
+		category: { omit: NO_TIMESTAMPS },
+		...CABLE_ENDS
+	}
+} as const;
+const LIST_LOCATION = { omit: NO_TIMESTAMPS } as const;
+
 const ACCESSORIES_INCLUDE = {
 	where: ACTIVE_ASSET_WHERE,
 	include: {
-		product: {
-			include: { manufacturer: true, category: true, ...CABLE_ENDS }
-		}
+		product: LIST_PRODUCT
 	},
 	orderBy: ASSET_ORDER_BY
 } as const;
@@ -174,11 +186,9 @@ export const getAssets = query(v.optional(v.string()), async (organizationId?: s
 	const assets = await prisma.asset.findMany({
 		where: { organizationId: { in: queryOrgIds }, ...ACTIVE_ASSET_WHERE },
 		include: {
-			product: {
-				include: { manufacturer: true, category: true, ...CABLE_ENDS }
-			},
-			location: true,
-			organization: true,
+			product: LIST_PRODUCT,
+			location: LIST_LOCATION,
+			organization: { select: ORG_SUMMARY_SELECT },
 			bundle: {
 				select: { id: true, imagePath: true, template: { select: { name: true, caption: true } } }
 			},
@@ -191,7 +201,8 @@ export const getAssets = query(v.optional(v.string()), async (organizationId?: s
 	// Stale previews are redrawn behind the read — see `assetImageForRead`.
 	for (const asset of assets) assetImageForRead(asset);
 	const withCheckedOutTo = checkedOutTo(await productionVisibility(user.id));
-	return assets.map((asset) => withCheckedOutTo(assetWithCableNames(asset)));
+	// One object per product, shelf and org, however many units name it.
+	return shareRepeated(assets.map((asset) => withCheckedOutTo(assetWithCableNames(asset))));
 });
 
 /**
@@ -211,7 +222,7 @@ export const getProductUnits = query(v.string(), async (productId: string) => {
 			...ACTIVE_ASSET_WHERE
 		},
 		include: {
-			organization: true,
+			organization: { select: ORG_SUMMARY_SELECT },
 			location: true,
 			bundle: {
 				select: { id: true, imagePath: true, template: { select: { name: true, caption: true } } }
@@ -236,11 +247,9 @@ export const getRetiredAssets = query(v.optional(v.string()), async (organizatio
 	const assets = await prisma.asset.findMany({
 		where: { organizationId: { in: queryOrgIds }, ...RETIRED_ASSET_WHERE },
 		include: {
-			product: {
-				include: { manufacturer: true, category: true, ...CABLE_ENDS }
-			},
-			location: true,
-			organization: true,
+			product: LIST_PRODUCT,
+			location: LIST_LOCATION,
+			organization: { select: ORG_SUMMARY_SELECT },
 			bundle: {
 				select: { id: true, imagePath: true, template: { select: { name: true, caption: true } } }
 			},
@@ -253,7 +262,9 @@ export const getRetiredAssets = query(v.optional(v.string()), async (organizatio
 		orderBy: ASSET_ORDER_BY
 	});
 	// A retired unit can't be out, so it is never checked out to anything.
-	return assets.map((asset) => ({ ...assetWithCableNames(asset), checkedOutTo: null }));
+	return shareRepeated(
+		assets.map((asset) => ({ ...assetWithCableNames(asset), checkedOutTo: null }))
+	);
 });
 
 export const getAsset = query(v.string(), async (assetId: string) => {
@@ -274,7 +285,7 @@ export const getAsset = query(v.string(), async (assetId: string) => {
 				}
 			},
 			location: true,
-			organization: true,
+			organization: { select: ORG_SUMMARY_SELECT },
 			bundle: {
 				select: { id: true, imagePath: true, template: { select: { name: true, caption: true } } }
 			},
@@ -350,8 +361,7 @@ export const updateManufacturer = command(updateManufacturerSchema, async (input
 	const manufacturer = await updateManufacturerRecord(user.id, input);
 	await Promise.all([
 		getManufacturers().refresh(),
-		getProducts().refresh(),
-		getProductCatalog().refresh()
+		refreshEquipmentViews({ products: true, allOrgs: true })
 	]);
 	return manufacturer;
 });
@@ -366,12 +376,9 @@ export const mergeManufacturers = command(mergeManufacturersSchema, async (input
 	const { target, source, movedProducts } = await mergeManufacturersRecord(user.id, input);
 	await Promise.all([
 		getManufacturers().refresh(),
-		getProducts().refresh(),
 		getProducts(target.id).refresh(),
 		getProducts(source.id).refresh(),
-		getProductCatalog().refresh(),
-		getAssets().refresh(),
-		getInventorySummary().refresh()
+		refreshEquipmentViews({ products: true, allOrgs: true, inventory: true })
 	]);
 	return { movedProducts };
 });
@@ -716,14 +723,7 @@ export const mergeLocations = command(mergeLocationsSchema, async ({ sourceId, t
 		getPlaceableLocations().refresh(),
 		getDefaultLocations().refresh(),
 		getKnownAddresses().refresh(),
-		getAssets().refresh(),
-		getBundles().refresh(),
-		getBundleTemplates().refresh(),
-		...affectedOrgIds.flatMap((orgId) => [
-			getAssets(orgId).refresh(),
-			getBundles(orgId).refresh(),
-			getBundleTemplates(orgId).refresh()
-		])
+		refreshEquipmentViews({ organizationIds: affectedOrgIds, bundles: true })
 	]);
 	return moved;
 });
@@ -831,12 +831,54 @@ export const getCableVocabulary = query(async () => {
  */
 export const getProductCatalog = query(v.optional(v.string()), async (organizationId?: string) => {
 	const user = await requireAuth();
-	const queryOrgIds = await scopedOrgIds(user.id, organizationId);
-	const priceOrgIds = await priceVisibleOrgIds(user.id, queryOrgIds);
+	return catalogRows(user.id, organizationId);
+});
+
+/**
+ * One product as the catalogue lists it, for its own page. The page used to
+ * await the whole catalogue to pick one row out of it — 482 products with their
+ * prices, ports and counts before anything was on screen. Null once it is gone
+ * (merged away, deleted), which the page answers itself.
+ */
+export const getCatalogProduct = query(v.string(), async (productId: string) => {
+	const user = await requireAuth();
+	const [row] = await catalogRows(user.id, undefined, { id: productId });
+	return row ?? null;
+});
+
+/**
+ * Active units per product across the user's orgs — the counts the catalogue
+ * carries, without the catalogue. The product page's merge dialog says how many
+ * units the other product brings along.
+ */
+export const getProductUnitCounts = query(async () => {
+	const user = await requireAuth();
+	const queryOrgIds = await scopedOrgIds(user.id, undefined);
+	const rows = await prisma.asset.groupBy({
+		by: ['productId'],
+		where: { organizationId: { in: queryOrgIds }, ...ACTIVE_ASSET_WHERE },
+		_count: { _all: true }
+	});
+	return Object.fromEntries(rows.map((r) => [r.productId, r._count._all])) as Record<
+		string,
+		number
+	>;
+});
+
+/** The catalogue's rows — all of them, or the products `where` picks. */
+async function catalogRows(
+	userId: string,
+	organizationId: string | undefined,
+	where: Prisma.ProductWhereInput = {}
+) {
+	const queryOrgIds = await scopedOrgIds(userId, organizationId);
+	const priceOrgIds = await priceVisibleOrgIds(userId, queryOrgIds);
+	const productIds = where.id ? { productId: where.id as string } : {};
 
 	const assetScope = { organizationId: { in: queryOrgIds }, ...ACTIVE_ASSET_WHERE };
 
 	const products = await prisma.product.findMany({
+		where,
 		include: {
 			manufacturer: true,
 			category: { include: { inspectionTypes: { select: { typeId: true } } } },
@@ -866,7 +908,7 @@ export const getProductCatalog = query(v.optional(v.string()), async (organizati
 	// relation twice with two different filters.
 	const accessoryCounts = await prisma.asset.groupBy({
 		by: ['productId'],
-		where: { ...assetScope, parentAssetId: { not: null } },
+		where: { ...assetScope, ...productIds, parentAssetId: { not: null } },
 		_count: { _all: true }
 	});
 	const accessoryCountOf = new Map(accessoryCounts.map((r) => [r.productId, r._count._all]));
@@ -879,13 +921,14 @@ export const getProductCatalog = query(v.optional(v.string()), async (organizati
 			by: ['productId'],
 			where: {
 				organizationId: { in: queryOrgIds },
+				...productIds,
 				...RETIRED_ASSET_WHERE
 			},
 			_count: { _all: true }
 		}),
 		prisma.asset.groupBy({
 			by: ['productId'],
-			where: { organizationId: { notIn: queryOrgIds } },
+			where: { organizationId: { notIn: queryOrgIds }, ...productIds },
 			_count: { _all: true }
 		})
 	]);
@@ -902,7 +945,7 @@ export const getProductCatalog = query(v.optional(v.string()), async (organizati
 		owningOrgIds: assets.map((a) => a.organizationId),
 		prices: orgPrices
 	}));
-});
+}
 
 /** One way of a loom as a form sends it. */
 const cableWaySchema = v.object({
@@ -1023,7 +1066,7 @@ async function resolveProductRef(
 			}));
 		manufacturerId = m.id;
 		await getManufacturers().refresh();
-		await getProducts().refresh();
+		// The product lists come with the caller's `refreshEquipmentViews({ products: true })`.
 	}
 
 	const cable = data.newProductCable ? normalizeCable(data.newProductCable) : null;
@@ -1094,20 +1137,26 @@ async function resolveProductRef(
 	return productId;
 }
 
-/** What a listing shows once an org has gained units of some products. */
-async function refreshAfterUnitsCreated(organizationId: string, productIds: string[]) {
-	await getAssets(organizationId).refresh();
-	await getAssets().refresh();
-	await getInventorySummary(organizationId).refresh();
-	await getInventorySummary().refresh();
+/**
+ * What a listing shows once an org has gained units of some products — as far
+ * as the calling page holds it (`.updates(...EQUIPMENT_VIEWS)`, see
+ * `refreshEquipmentViews`). The device list, the inventory counts and the
+ * catalogue are the heaviest queries there are, and refreshing them all sent
+ * each one back with every batch of new cables.
+ */
+async function refreshAfterUnitsCreated(
+	organizationId: string,
+	productIds: string[],
+	change: Omit<EquipmentChange, 'organizationIds' | 'inventory' | 'productIds'> = {}
+) {
+	await refreshEquipmentViews({
+		organizationIds: [organizationId],
+		inventory: true,
+		productIds: [...new Set(productIds)],
+		...change
+	});
 	// An open form shows the next number in its blank tag fields.
 	await getNextAssetTag(organizationId).refresh();
-	// The product just gained a unit, so what its fleet carries may have moved.
-	await Promise.all(
-		[...new Set(productIds)].map((productId) =>
-			getProductAccessoryProfile({ productId, organizationId }).refresh()
-		)
-	);
 }
 
 const createAssetsSchema = v.object({
@@ -1223,15 +1272,14 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 		})
 	);
 
-	await refreshAfterUnitsCreated(data.organizationId, [productId]);
-	if (accessoryProfile) {
-		await Promise.all([
-			...assets.map((a) => getAsset(a.id).refresh()),
-			// A unit taken off the shelf has its own page, and it has just changed
-			// parent, kit and possibly shelf on it.
-			...reusedAccessoryIds.flatMap((id) => [getAsset(id).refresh(), getAssetHistory(id).refresh()])
-		]);
-	}
+	await refreshAfterUnitsCreated(data.organizationId, [productId], {
+		bundles: !!(parent?.bundleId ?? bundle?.id),
+		// A product named in the form is created on the way — see `resolveProductRef`.
+		products: true,
+		// A unit taken off the shelf has its own page, and it has just changed
+		// parent, kit and possibly shelf on it. The new units nobody holds yet.
+		assetIds: reusedAccessoryIds
+	});
 	// If these were accessories, the parent's product now carries one more of them.
 	if (parent) {
 		await getAsset(parent.id).refresh();
@@ -1245,12 +1293,16 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 	if (touchedBundleId) {
 		if (bundle) await getBundleTypeSpec(bundle.templateId).refresh();
 		await getBundle(touchedBundleId).refresh();
-		await getBundles(data.organizationId).refresh();
-		await getBundleTemplates(data.organizationId).refresh();
-		await getBundleTemplates().refresh();
 	}
 
-	return assets.map(withProductCableNames);
+	// The new units as the form shows them, read once after the transaction:
+	// creating them in bulk returns none of their relations.
+	const rows = await prisma.asset.findMany({
+		where: { id: { in: assets.map((a) => a.id) } },
+		include: { product: LIST_PRODUCT, location: LIST_LOCATION }
+	});
+	const byId = new Map(rows.map((row) => [row.id, row]));
+	return assets.map((a) => withProductCableNames(byId.get(a.id)!));
 });
 
 // ── Cables, by the box ───────────────────────────────────────────────────────
@@ -1441,36 +1493,17 @@ export const createCableBatch = command(createCableBatchSchema, async (data) => 
 		});
 		return { created, made };
 	});
-	if (made) {
-		await getBundleTypeSpec(made.templateId).refresh();
-		await getBundles(data.organizationId).refresh();
-		await getBundles().refresh();
-		await getBundleTemplates(data.organizationId).refresh();
-		await getBundleTemplates().refresh();
-	}
+	if (made) await getBundleTypeSpec(made.templateId).refresh();
 	if (bundle) {
 		await getBundleTypeSpec(bundle.templateId).refresh();
 		await getBundle(bundle.id).refresh();
-		await getBundles(data.organizationId).refresh();
-		await getBundles().refresh();
-		await getBundleTemplates(data.organizationId).refresh();
-		await getBundleTemplates().refresh();
 	}
-
-	const manufacturerIds = new Set(data.rows.map((row) => row.manufacturerId));
 	await refreshAfterUnitsCreated(
 		data.organizationId,
-		resolved.map((r) => r.productId)
+		resolved.map((r) => r.productId),
+		{ bundles: !!(bundle ?? made), products: true, cables: true }
 	);
-	await Promise.all([
-		getProducts().refresh(),
-		...[...manufacturerIds].map((id) => getProducts(id).refresh()),
-		getProductCatalog().refresh(),
-		getProductCatalog(data.organizationId).refresh(),
-		getCableVocabulary().refresh(),
-		getConnectorUsage().refresh(),
-		...(connectors.created.length > 0 ? [getConnectors().refresh()] : [])
-	]);
+	if (connectors.created.length > 0) await getConnectors().refresh();
 
 	return {
 		created: created.length,
@@ -1670,7 +1703,7 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 			include: {
 				product: { include: { manufacturer: true } },
 				location: true,
-				organization: true,
+				organization: { select: ORG_SUMMARY_SELECT },
 				bundle: { select: { id: true, template: { select: { name: true, caption: true } } } }
 			}
 		});
@@ -1700,20 +1733,14 @@ export const updateAsset = command(updateAssetSchema, async (input) => {
 	await getAsset(input.assetId).refresh();
 	await getAssetHistory(input.assetId).refresh();
 	if (asset.parentAssetId) await getAsset(asset.parentAssetId).refresh();
-	for (const id of asset.accessories.map((a) => a.id)) await getAsset(id).refresh();
-	await getAssets(asset.organizationId).refresh();
-	await getAssets().refresh();
-	await getRetiredAssets(asset.organizationId).refresh();
-	await getRetiredAssets().refresh();
-	await getInventorySummary(asset.organizationId).refresh();
-	await getInventorySummary().refresh();
+	await refreshEquipmentViews({
+		organizationIds: [asset.organizationId],
+		assetIds: asset.accessories.map((a) => a.id),
+		inventory: true,
+		bundles: !!(retiring && asset.bundleId)
+	});
 	await getLocations(asset.organizationId).refresh();
-	if (retiring && asset.bundleId) {
-		await getBundles(asset.organizationId).refresh();
-		await getBundle(asset.bundleId).refresh();
-		await getBundleTemplates(asset.organizationId).refresh();
-		await getBundleTemplates().refresh();
-	}
+	if (retiring && asset.bundleId) await getBundle(asset.bundleId).refresh();
 
 	return updated;
 });
@@ -1858,27 +1885,15 @@ export const bulkUpdateAssetStatus = command(bulkUpdateAssetStatusSchema, async 
 
 	const bundleIds = [...new Set(unbundling.map((a) => a.bundleId as string))];
 
-	await Promise.all([
-		...changing.flatMap((a) => [getAsset(a.id).refresh(), getAssetHistory(a.id).refresh()]),
-		...organizationIds.flatMap((id) => [
-			getAssets(id).refresh(),
-			getRetiredAssets(id).refresh(),
-			getInventorySummary(id).refresh()
-		]),
-		getAssets().refresh(),
-		getRetiredAssets().refresh(),
-		getInventorySummary().refresh(),
-		...bundleIds.flatMap((id) => [getBundle(id).refresh()]),
-		...(bundleIds.length > 0
-			? [
-					...organizationIds.flatMap((id) => [
-						getBundles(id).refresh(),
-						getBundleTemplates(id).refresh()
-					]),
-					getBundleTemplates().refresh()
-				]
-			: [])
-	]);
+	// A unit page and its history only where the page holds them: a bulk change
+	// of forty units used to send forty of each back.
+	await refreshEquipmentViews({
+		assetIds: changing.map((a) => a.id),
+		organizationIds,
+		bundleIds,
+		inventory: true,
+		bundles: bundleIds.length > 0
+	});
 
 	return {
 		updated: changing.length,
@@ -1976,19 +1991,13 @@ export const deleteAsset = command(v.string(), async (assetId: string) => {
 	await prisma.asset.delete({ where: { id: assetId } });
 
 	if (parentAssetId) await getAsset(parentAssetId).refresh();
-	await getAssets(organizationId).refresh();
-	await getAssets().refresh();
-	await getRetiredAssets(organizationId).refresh();
-	await getRetiredAssets().refresh();
-	await getInventorySummary(organizationId).refresh();
-	await getInventorySummary().refresh();
+	await refreshEquipmentViews({
+		organizationIds: [organizationId],
+		inventory: true,
+		bundles: !!bundleId
+	});
 	await getLocations(organizationId).refresh();
-	if (bundleId) {
-		await getBundle(bundleId).refresh();
-		await getBundles(organizationId).refresh();
-		await getBundleTemplates(organizationId).refresh();
-		await getBundleTemplates().refresh();
-	}
+	if (bundleId) await getBundle(bundleId).refresh();
 });
 
 const updateProductSchema = v.object({
@@ -2082,6 +2091,8 @@ async function refreshProductViews(changed: { cable: boolean; connectorsCreated:
 	await Promise.all([
 		requested(getProducts, 100).refreshAll(),
 		requested(getProductCatalog, 100).refreshAll(),
+		requested(getCatalogProduct, 100).refreshAll(),
+		requested(getProductUnitCounts, 100).refreshAll(),
 		requested(getAssets, 100).refreshAll(),
 		requested(getAsset, 100).refreshAll(),
 		requested(getInventorySummary, 100).refreshAll()
@@ -2097,15 +2108,7 @@ async function refreshProductViews(changed: { cable: boolean; connectorsCreated:
 export const deleteProduct = command(v.string(), async (productId: string) => {
 	const user = await requireAuth();
 	const product = await deleteProductRecord(user.id, productId);
-	const orgIds = await userOrgIds(user.id);
-	await Promise.all([
-		getProducts().refresh(),
-		getProducts(product.manufacturerId).refresh(),
-		getProductCatalog().refresh(),
-		getCableVocabulary().refresh(),
-		getConnectorUsage().refresh(),
-		...orgIds.map((id) => getProductCatalog(id).refresh())
-	]);
+	await refreshEquipmentViews({ products: true, cables: true });
 
 	return { id: product.id };
 });
@@ -2176,15 +2179,7 @@ export const duplicateProduct = command(duplicateProductSchema, async (input) =>
 		select: { id: true }
 	});
 
-	const orgIds = await userOrgIds(user.id);
-	await Promise.all([
-		getProducts().refresh(),
-		getProducts(source.manufacturerId).refresh(),
-		getProductCatalog().refresh(),
-		getCableVocabulary().refresh(),
-		getConnectorUsage().refresh(),
-		...orgIds.map((id) => getProductCatalog(id).refresh())
-	]);
+	await refreshEquipmentViews({ products: true, cables: true });
 
 	return { id: copy.id };
 });
@@ -2223,32 +2218,19 @@ export const mergeProducts = command(mergeProductsSchema, async (input) => {
 		});
 	}
 
-	await Promise.all([
-		getProducts().refresh(),
-		getProducts(target.manufacturerId).refresh(),
-		getProducts(source.manufacturerId).refresh(),
-		getProductCatalog().refresh(),
-		getCableVocabulary().refresh(),
-		getConnectorUsage().refresh(),
-		getAssets().refresh(),
-		getRetiredAssets().refresh(),
-		getInventorySummary().refresh(),
-		...orgIds.flatMap((id) => [
-			getProductCatalog(id).refresh(),
-			getAssets(id).refresh(),
-			getRetiredAssets(id).refresh(),
-			getInventorySummary(id).refresh()
-		]),
-		...moving.flatMap((a) => [getAsset(a.id).refresh(), getAssetHistory(a.id).refresh()]),
-		...[...profiles.values()].map((key) => getProductAccessoryProfile(key).refresh()),
-		...[...new Set(moving.map((a) => a.bundleId).filter((id) => id !== null))].map((id) =>
-			getBundle(id as string).refresh()
-		)
-	]);
-	if (moving.some((a) => a.bundleId)) {
-		await getBundleTemplates().refresh();
-		await Promise.all(orgIds.map((id) => getBundleTemplates(id).refresh()));
-	}
+	const bundleIds = [...new Set(moving.flatMap((a) => a.bundleId ?? []))];
+	await getProducts(target.manufacturerId).refresh();
+	await getProducts(source.manufacturerId).refresh();
+	await refreshEquipmentViews({
+		organizationIds: orgIds,
+		assetIds: moving.map((a) => a.id),
+		bundleIds,
+		productIds: [...new Set([...profiles.values()].map((key) => key.productId))],
+		products: true,
+		cables: true,
+		inventory: true,
+		bundles: bundleIds.length > 0
+	});
 
 	return { movedAssets: moving.length, ...inherited };
 });
@@ -2310,8 +2292,7 @@ export const setOrgProductPrice = command(
 
 		await Promise.all([
 			getOrgProductPrices(organizationId).refresh(),
-			getProductCatalog().refresh(),
-			getProductCatalog(organizationId).refresh(),
+			refreshEquipmentViews({ products: true }),
 			getOrgEquipmentValue(organizationId).refresh()
 		]);
 	}
@@ -2487,26 +2468,20 @@ export const getBundleTemplates = query(v.optional(v.string()), async (organizat
 	const templates = await prisma.bundleTemplate.findMany({
 		where: { organizationId: { in: queryOrgIds } },
 		include: {
-			organization: true,
+			organization: { select: ORG_SUMMARY_SELECT },
 			category: true,
 			featuredProducts: FEATURED_PRODUCTS_SELECT,
 			instances: {
 				include: {
-					location: true,
+					location: LIST_LOCATION,
 					// The kit it sits in, which the overview names in place of a shelf.
 					parentBundle: {
 						select: { id: true, tag: true, template: { select: { name: true, caption: true } } }
 					},
 					assets: {
 						include: {
-							product: {
-								include: {
-									manufacturer: true,
-									category: true,
-									...CABLE_ENDS
-								}
-							},
-							location: true,
+							product: LIST_PRODUCT,
+							location: LIST_LOCATION,
 							...CHECKED_OUT_TO_INCLUDE
 						},
 						orderBy: ASSET_ORDER_BY
@@ -2528,13 +2503,15 @@ export const getBundleTemplates = query(v.optional(v.string()), async (organizat
 	}
 	const priceOrgIds = await priceVisibleOrgIds(user.id, queryOrgIds);
 	const withCheckedOutTo = checkedOutTo(await productionVisibility(user.id));
-	return templates.map((template) => ({
-		...template,
-		instances: template.instances.map((bundle) => ({
-			...maskBundlePrice(bundle, template.organizationId, priceOrgIds),
-			assets: bundle.assets.map((asset) => withCheckedOutTo(withProductCableNames(asset)))
+	return shareRepeated(
+		templates.map((template) => ({
+			...template,
+			instances: template.instances.map((bundle) => ({
+				...maskBundlePrice(bundle, template.organizationId, priceOrgIds),
+				assets: bundle.assets.map((asset) => withCheckedOutTo(withProductCableNames(asset)))
+			}))
 		}))
-	}));
+	);
 });
 
 /**
@@ -2567,15 +2544,17 @@ export const getBundles = query(v.optional(v.string()), async (organizationId?: 
 		where: { template: { organizationId: { in: queryOrgIds } } },
 		include: {
 			template: {
-				include: { organization: true, category: true, featuredProducts: FEATURED_PRODUCTS_SELECT }
+				include: {
+					organization: { select: ORG_SUMMARY_SELECT },
+					category: true,
+					featuredProducts: FEATURED_PRODUCTS_SELECT
+				}
 			},
-			location: true,
+			location: LIST_LOCATION,
 			assets: {
 				include: {
-					product: {
-						include: { manufacturer: true, category: true, ...CABLE_ENDS }
-					},
-					location: true,
+					product: LIST_PRODUCT,
+					location: LIST_LOCATION,
 					...CHECKED_OUT_TO_INCLUDE
 				},
 				orderBy: ASSET_ORDER_BY
@@ -2586,10 +2565,12 @@ export const getBundles = query(v.optional(v.string()), async (organizationId?: 
 	for (const bundle of bundles) bundleImageForRead(bundle);
 	const priceOrgIds = await priceVisibleOrgIds(user.id, queryOrgIds);
 	const withCheckedOutTo = checkedOutTo(await productionVisibility(user.id));
-	return bundles.map((bundle) => ({
-		...maskBundlePrice(bundle, bundle.template.organizationId, priceOrgIds),
-		assets: bundle.assets.map((asset) => withCheckedOutTo(withProductCableNames(asset)))
-	}));
+	return shareRepeated(
+		bundles.map((bundle) => ({
+			...maskBundlePrice(bundle, bundle.template.organizationId, priceOrgIds),
+			assets: bundle.assets.map((asset) => withCheckedOutTo(withProductCableNames(asset)))
+		}))
+	);
 });
 
 export const getBundle = query(v.string(), async (id: string) => {
@@ -2598,16 +2579,18 @@ export const getBundle = query(v.string(), async (id: string) => {
 		where: { id },
 		include: {
 			template: {
-				include: { organization: true, category: true, featuredProducts: FEATURED_PRODUCTS_SELECT }
+				include: {
+					organization: { select: ORG_SUMMARY_SELECT },
+					category: true,
+					featuredProducts: FEATURED_PRODUCTS_SELECT
+				}
 			},
-			location: true,
+			location: LIST_LOCATION,
 			assets: {
 				include: {
-					product: {
-						include: { manufacturer: true, category: true, ...CABLE_ENDS }
-					},
-					organization: true,
-					location: true,
+					product: LIST_PRODUCT,
+					organization: { select: ORG_SUMMARY_SELECT },
+					location: LIST_LOCATION,
 					...CHECKED_OUT_TO_INCLUDE
 				},
 				orderBy: ASSET_ORDER_BY
@@ -2677,9 +2660,10 @@ export const regenerateBundleImage = command(v.string(), async (bundleId) => {
 	const imagePath = await ensureBundleImage(bundle, true);
 	await Promise.all([
 		getBundle(bundleId).refresh(),
-		getBundles(bundle.template.organizationId).refresh(),
-		getBundleTemplates(bundle.template.organizationId).refresh(),
-		getBundleTemplates().refresh()
+		refreshEquipmentViews({
+			organizationIds: [bundle.template.organizationId],
+			bundles: true
+		})
 	]);
 	return { imagePath };
 });
@@ -2713,14 +2697,11 @@ export const createBundleInstance = command(createBundleInstanceSchema, async (d
 		await getBundleTypeSpec(from.templateId).refresh();
 	}
 	await getBundleTypeSpec(templateId).refresh();
-	await getBundleTemplates(data.organizationId).refresh();
-	await getBundleTemplates().refresh();
-	await getBundles(data.organizationId).refresh();
-	await getBundles().refresh();
-	if ((data.assetIds ?? []).length > 0) {
-		await getAssets(data.organizationId).refresh();
-		await getAssets().refresh();
-	}
+	await refreshEquipmentViews({
+		organizationIds: [data.organizationId],
+		assetIds: data.assetIds ?? [],
+		bundles: true
+	});
 	return bundle;
 });
 
@@ -2752,12 +2733,10 @@ export const updateBundleTemplate = command(updateBundleTemplateSchema, async (i
 	const updated = await prisma.bundleTemplate.update({
 		where: { id: input.templateId },
 		data,
-		include: { organization: true, category: true }
+		include: { organization: { select: ORG_SUMMARY_SELECT }, category: true }
 	});
 
-	await getBundleTemplates(template.organizationId).refresh();
-	await getBundleTemplates().refresh();
-	await getBundles(template.organizationId).refresh();
+	await refreshEquipmentViews({ organizationIds: [template.organizationId], bundles: true });
 	return updated;
 });
 
@@ -2815,10 +2794,7 @@ export const setBundleFeaturedProducts = command(
 
 		await Promise.all([
 			...instances.map((bundle) => getBundle(bundle.id).refresh()),
-			getBundles(template.organizationId).refresh(),
-			getBundles().refresh(),
-			getBundleTemplates(template.organizationId).refresh(),
-			getBundleTemplates().refresh()
+			refreshEquipmentViews({ organizationIds: [template.organizationId], bundles: true })
 		]);
 		return { featuredProductIds: wanted };
 	}
@@ -2861,7 +2837,10 @@ export const updateBundle = command(updateBundleSchema, async (input) => {
 		const result = await tx.assetBundle.update({
 			where: { id: input.bundleId },
 			data,
-			include: { template: { include: { organization: true, category: true } }, location: true }
+			include: {
+				template: { include: { organization: { select: ORG_SUMMARY_SELECT }, category: true } },
+				location: true
+			}
 		});
 		if (input.locationId) {
 			// The kits inside follow the kit they sit in.
@@ -2886,11 +2865,12 @@ export const updateBundle = command(updateBundleSchema, async (input) => {
 		return result;
 	});
 
-	await getBundles(bundle.template.organizationId).refresh();
-	await getBundles().refresh();
 	await getBundle(input.bundleId).refresh();
-	await getAssets(bundle.template.organizationId).refresh();
-	await getAssets().refresh();
+	await refreshEquipmentViews({
+		organizationIds: [bundle.template.organizationId],
+		assetIds: bundle.assets.map((a) => a.id),
+		bundles: true
+	});
 	return updated;
 });
 
@@ -2967,13 +2947,8 @@ async function refreshBundleViews(
 	}
 	const orgId = bundle.template.organizationId;
 	await getBundleTypeSpec(bundle.templateId).refresh();
-	await getBundleTemplates(orgId).refresh();
-	await getBundleTemplates().refresh();
-	await getBundles(orgId).refresh();
-	await getBundles().refresh();
 	await getBundle(bundle.id).refresh();
-	await getAssets(orgId).refresh();
-	await getAssets().refresh();
+	await refreshEquipmentViews({ organizationIds: [orgId], bundles: true });
 }
 
 // ── Deleting a bundle ────────────────────────────────────────────────────────
@@ -3134,19 +3109,14 @@ export const deleteBundle = command(deleteBundleSchema, async ({ bundleId, asset
 	// Deliberately no `getBundle(bundleId).refresh()`: that query throws on a row
 	// that is gone, and it would fail the command after the write went through.
 	await Promise.all([
-		getBundles(organizationId).refresh(),
-		getBundles().refresh(),
-		getBundleTemplates(organizationId).refresh(),
-		getBundleTemplates().refresh(),
 		...(templateGone ? [] : [getBundleTypeSpec(templateId).refresh()]),
-		getAssets(organizationId).refresh(),
-		getAssets().refresh(),
-		getRetiredAssets(organizationId).refresh(),
-		getRetiredAssets().refresh(),
-		getInventorySummary(organizationId).refresh(),
-		getInventorySummary().refresh(),
 		getLocations(organizationId).refresh(),
-		...productionIds.map((productionId) => getProduction(productionId).refresh())
+		refreshEquipmentViews({
+			organizationIds: [organizationId],
+			productionIds,
+			bundles: true,
+			inventory: true
+		})
 	]);
 
 	return {
@@ -3169,10 +3139,7 @@ export const deleteBundleTemplate = command(v.string(), async (templateId: strin
 
 	await prisma.bundleTemplate.delete({ where: { id: templateId } });
 	await Promise.all([
-		getBundleTemplates(template.organizationId).refresh(),
-		getBundleTemplates().refresh(),
-		getBundles(template.organizationId).refresh(),
-		getBundles().refresh()
+		refreshEquipmentViews({ organizationIds: [template.organizationId], bundles: true })
 	]);
 	return { id: templateId };
 });
@@ -3800,10 +3767,6 @@ export const duplicateBundle = command(duplicateBundleSchema, async (data) => {
 	);
 
 	await Promise.all([
-		getBundles(organizationId).refresh(),
-		getBundles().refresh(),
-		getBundleTemplates(organizationId).refresh(),
-		getBundleTemplates().refresh(),
 		// A second case is what turns the type's composition into a spec the next
 		// one has to match.
 		getBundleTypeSpec(source.templateId).refresh(),
@@ -3815,20 +3778,21 @@ export const duplicateBundle = command(duplicateBundleSchema, async (data) => {
 		...[...new Set([1, copies])].map((n) =>
 			getBundleCopyPlan({ bundleId: data.bundleId, copies: n }).refresh()
 		),
-		getAssets(organizationId).refresh(),
-		getAssets().refresh(),
-		getInventorySummary(organizationId).refresh(),
-		getInventorySummary().refresh(),
 		// Units that came off the shelf changed kit and possibly shelf, and the
-		// products involved have less loose stock than they did.
-		...result.touched.flatMap((id) => [getAsset(id).refresh(), getAssetHistory(id).refresh()]),
-		// A kit that came off the shelf now sits in the copy.
-		...result.touchedKits.map((id) => getBundle(id).refresh()),
-		...[
-			...new Set(
-				[source, ...source.childBundles].flatMap((kit) => kit.assets.map((a) => a.productId))
-			)
-		].map((productId) => getProductAccessoryProfile({ productId, organizationId }).refresh())
+		// products involved have less loose stock than they did. A kit that came
+		// off the shelf now sits in the copy.
+		refreshEquipmentViews({
+			organizationIds: [organizationId],
+			assetIds: result.touched,
+			bundleIds: result.touchedKits,
+			productIds: [
+				...new Set(
+					[source, ...source.childBundles].flatMap((kit) => kit.assets.map((a) => a.productId))
+				)
+			],
+			bundles: true,
+			inventory: true
+		})
 	]);
 
 	return {
@@ -3948,12 +3912,6 @@ export const convertBundleToAccessories = command(
 		await Promise.all([
 			getAsset(main.id).refresh(),
 			getAssetHistory(main.id).refresh(),
-			getAssets(main.organizationId).refresh(),
-			getAssets().refresh(),
-			getBundles(main.organizationId).refresh(),
-			getBundles().refresh(),
-			getBundleTemplates(main.organizationId).refresh(),
-			getBundleTemplates().refresh(),
 			...(outer
 				? [getBundle(outer.id).refresh(), getBundleTypeSpec(outer.templateId).refresh()]
 				: []),
@@ -3961,11 +3919,12 @@ export const convertBundleToAccessories = command(
 				productId: main.productId,
 				organizationId: main.organizationId
 			}).refresh(),
-			...newlyAttached.flatMap((asset) => [
-				getAsset(asset.id).refresh(),
-				getAssetHistory(asset.id).refresh()
-			]),
-			...productionIds.map((productionId) => getProduction(productionId).refresh())
+			refreshEquipmentViews({
+				organizationIds: [main.organizationId],
+				assetIds: newlyAttached.map((asset) => asset.id),
+				productionIds,
+				bundles: true
+			})
 		]);
 
 		return { assetId: main.id, accessories: bundle.assets.length - 1 };
@@ -3992,15 +3951,16 @@ async function refreshAccessoryPair(
 		getAsset(parentId).refresh(),
 		getAssetHistory(childId).refresh(),
 		getAssetHistory(parentId).refresh(),
-		getAssets(organizationId).refresh(),
-		getAssets().refresh(),
 		// What the parent's product carries changed for the whole fleet's worth of
 		// it, which is what the "add to every unit" offer is computed from.
 		getProductAccessoryProfile({ productId: parentProductId, organizationId }).refresh(),
-		...[...new Set(bundleIds.filter((id) => id !== null))].flatMap((id) => [
-			getBundle(id as string).refresh(),
-			getBundles(organizationId).refresh()
-		])
+		...[...new Set(bundleIds.filter((id) => id !== null))].map((id) =>
+			getBundle(id as string).refresh()
+		),
+		refreshEquipmentViews({
+			organizationIds: [organizationId],
+			bundles: bundleIds.some((id) => id !== null)
+		})
 	]);
 }
 
@@ -4365,38 +4325,30 @@ export const addProductAccessories = command(addProductAccessoriesSchema, async 
 		return { createdIds: created, reusedIds: reused };
 	});
 
+	const touchedBundles = [
+		...new Set(todo.map(({ unit }) => unit.bundleId).filter((id) => id !== null))
+	] as string[];
 	await Promise.all([
-		getAssets(data.organizationId).refresh(),
-		getAssets().refresh(),
-		getInventorySummary(data.organizationId).refresh(),
-		getInventorySummary().refresh(),
-		getProductAccessoryProfile({
-			productId: data.parentProductId,
-			organizationId: data.organizationId
-		}).refresh(),
+		refreshEquipmentViews({
+			organizationIds: [data.organizationId],
+			// A reused unit has its own page, and it has just changed parent, kit
+			// and possibly shelf on all of them.
+			assetIds: [...todo.map(({ unit }) => unit.id), ...reusedIds],
+			bundleIds: touchedBundles,
+			productIds: [data.parentProductId],
+			bundles: touchedBundles.length > 0,
+			inventory: true,
+			// A product named in the form is created on the way — see `resolveProductRef`.
+			products: true
+		}),
 		// The dialog that asked for this counted the shelf; it has just been spent.
 		getAccessoryFanoutPlan({
 			organizationId: data.organizationId,
 			parentProductId: data.parentProductId,
 			productId: accessoryProductId,
 			perUnit: data.perUnit
-		}).refresh(),
-		...todo.flatMap(({ unit }) => [
-			getAsset(unit.id).refresh(),
-			getAssetHistory(unit.id).refresh()
-		]),
-		// A reused unit has its own page, and it has just changed parent, kit and
-		// possibly shelf on all of them.
-		...reusedIds.flatMap((id) => [getAsset(id).refresh(), getAssetHistory(id).refresh()]),
-		...[...new Set(todo.map(({ unit }) => unit.bundleId).filter((id) => id !== null))].map((id) =>
-			getBundle(id as string).refresh()
-		)
+		}).refresh()
 	]);
-	if (todo.some(({ unit }) => unit.bundleId)) {
-		await getBundles(data.organizationId).refresh();
-		await getBundleTemplates(data.organizationId).refresh();
-		await getBundleTemplates().refresh();
-	}
 
 	return {
 		created: createdIds.length,
@@ -4707,9 +4659,10 @@ export const importAssets = command(importAssetsSchema, async (data): Promise<Im
 	}
 
 	if (created > 0) {
-		await refreshAfterUnitsCreated(data.organizationId, [...productCache.values()]);
+		await refreshAfterUnitsCreated(data.organizationId, [...productCache.values()], {
+			products: true
+		});
 		await getManufacturers().refresh();
-		await getProducts().refresh();
 	}
 
 	return { created, skipped, errors };

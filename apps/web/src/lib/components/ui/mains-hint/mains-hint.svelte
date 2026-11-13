@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { EQUIPMENT_VIEWS } from '#lib/equipment-views.js';
 	// A product with a mains connector — Schuko, C13/C14, powerCON, TRUE1, CEE —
 	// is electrical equipment, which needs electrical (DGUV V3) inspections.
 	// Where such a product isn't marked as needing them, this says so and offers
@@ -34,7 +35,7 @@
 				productId,
 				typeId: INSPECTION_TYPE_IDS.electrical,
 				required: true
-			});
+			}).updates(...EQUIPMENT_VIEWS);
 			toast.success(plural(result.changed, ['Saved · 1 unit changed', 'Saved · # units changed']));
 		} catch (err) {
 			toast.error(getErrorMessage(err));

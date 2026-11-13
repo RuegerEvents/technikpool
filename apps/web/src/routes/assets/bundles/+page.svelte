@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { EQUIPMENT_VIEWS } from '#lib/equipment-views.js';
 	import { categoryLabel } from '#lib/category.js';
 	import { getErrorMessage, orgLabel } from '#lib/utils.js';
 	import * as Card from '#lib/components/ui/card/index.js';
@@ -35,7 +36,7 @@
 	async function handleDeleteTemplate(templateId: string, name: string) {
 		deletingTemplateId = templateId;
 		try {
-			await deleteBundleTemplate(templateId);
+			await deleteBundleTemplate(templateId).updates(...EQUIPMENT_VIEWS);
 			toast.success(`Bundle type "${name}" deleted`);
 		} catch (err) {
 			toast.error(getErrorMessage(err));

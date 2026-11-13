@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { EQUIPMENT_VIEWS } from '#lib/equipment-views.js';
 	import * as Card from '#lib/components/ui/card/index.js';
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { Input } from '#lib/components/ui/input/index.js';
@@ -96,7 +97,7 @@
 				categoryId: c.id,
 				typeId: type.id,
 				required
-			});
+			}).updates(...EQUIPMENT_VIEWS);
 			toast.success(plural(result.changed, ['Saved · 1 unit changed', 'Saved · # units changed']));
 		} catch (err) {
 			toast.error(getErrorMessage(err));

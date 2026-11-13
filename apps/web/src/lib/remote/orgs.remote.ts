@@ -5,7 +5,7 @@ import { sendMail } from '#lib/server/mail.js';
 import { appBaseUrl } from '#lib/server/app-url.js';
 import { addedToOrgEmail } from '#lib/server/emails/added-to-org.js';
 import * as v from 'valibot';
-import { ORG_ROLES, type OrgRole } from '#lib/roles.js';
+import { ORG_ROLES, roleAtLeast, type OrgRole } from '#lib/roles.js';
 import {
 	isSystemAdmin,
 	readsOrgRecords,
@@ -24,6 +24,34 @@ import { getKnownAddresses } from './addresses.remote';
 import { getRentalTerms } from './rental-terms.remote';
 import { reconcileSchedules } from '#lib/server/services/inspections.js';
 
+/**
+ * The org as a member may see it. Bank details, tax numbers and the billing
+ * templates are for whoever bills (ADMIN+, like offers and invoices); everyone
+ * else gets them blank — the row used to reach every member, a DEVICE_VIEWER
+ * included, whatever the page showed.
+ */
+function orgForRole<O extends Record<string, unknown>>(
+	org: O,
+	role: OrgRole,
+	systemAdmin: boolean
+): O {
+	if (systemAdmin || roleAtLeast(role, 'ADMIN')) return org;
+	return {
+		...org,
+		taxNumber: null,
+		vatId: null,
+		bankAccountHolder: null,
+		iban: null,
+		bic: null,
+		bankName: null,
+		billingEmail: null,
+		offerIntroTemplate: null,
+		offerClosingTemplate: null,
+		invoiceIntroTemplate: null,
+		invoiceClosingTemplate: null
+	};
+}
+
 export const getMyOrgs = query(async () => {
 	const user = await requireAuth();
 
@@ -32,8 +60,9 @@ export const getMyOrgs = query(async () => {
 		include: { organization: true }
 	});
 
+	const systemAdmin = await isSystemAdmin(user.id);
 	return memberships.map((m) => ({
-		...m.organization,
+		...orgForRole(m.organization, m.role, systemAdmin),
 		role: m.role
 	}));
 });
@@ -55,7 +84,7 @@ export const getOrg = query(v.string(), async (orgId: string) => {
 		appError(403, 'not_org_member');
 	}
 
-	return membership.organization;
+	return orgForRole(membership.organization, membership.role, await isSystemAdmin(user.id));
 });
 
 export const getOrgUsers = query(async () => {

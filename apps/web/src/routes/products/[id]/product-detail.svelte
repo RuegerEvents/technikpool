@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { EQUIPMENT_VIEWS } from '#lib/equipment-views.js';
 	import { rowLinkClick } from '#lib/row-link.js';
 	import { BackButton } from '#lib/components/ui/back-button/index.js';
 	// One catalog product: everything about it that can be changed — the same
@@ -21,7 +22,8 @@
 	import {
 		getCategories,
 		getManufacturers,
-		getProductCatalog,
+		getCatalogProduct,
+		getProductUnitCounts,
 		getProducts,
 		getProductUnits
 	} from '#lib/remote/assets.remote.js';
@@ -49,19 +51,23 @@
 
 	let { productId, isAdmin, userId }: Props = $props();
 
-	// The unfiltered catalog rather than a query of its own: it is what every
-	// product mutation already refreshes, so this page stays current without a
-	// refresh call anywhere new. The units are the one exception — a system admin
-	// sees every org's here, which no shared list carries. Nothing on this page
-	// changes a unit, and the query is fetched afresh whenever the page opens.
-	let catalog = $derived(await getProductCatalog());
-	let product = $derived(catalog.find((p) => p.id === productId) ?? null);
+	// The product's catalogue row on its own, not the whole catalogue it used to
+	// be picked out of. Every product mutation refreshes it where a page holds it
+	// (`PRODUCT_VIEWS`, `EQUIPMENT_VIEWS`). The units are the one exception — a
+	// system admin sees every org's here, which no shared list carries. Nothing on
+	// this page changes a unit, and the query is fetched afresh whenever the page
+	// opens.
+	let product = $derived(await getCatalogProduct(productId));
 	let units = $derived(await getProductUnits(productId));
 	let orgs = $derived(await getMyOrgs());
 	let categories = $derived(await getCategories());
 	let manufacturers = $derived(await getManufacturers());
-	let allProducts = $derived(await getProducts());
-	let unitCounts = $derived(new Map(catalog.map((p) => [p.id, p.assetCount])));
+	// Not awaited: only the merge and duplicate pickers use it.
+	let allProductsQuery = $derived(getProducts());
+	let allProducts = $derived(allProductsQuery.current ?? []);
+	// Not awaited: only the merge dialog reads it, for the product it absorbs.
+	let unitCountsQuery = $derived(getProductUnitCounts());
+	let unitCounts = $derived(new Map(Object.entries(unitCountsQuery.current ?? {})));
 	let severalOrgs = $derived(new Set(units.map((a) => a.organizationId)).size > 1);
 
 	// What happens to the product as a whole sits up by its name; the card below
@@ -90,7 +96,7 @@
 				productId,
 				typeId,
 				months
-			});
+			}).updates(...EQUIPMENT_VIEWS);
 			toast.success(plural(result.changed, ['Saved · 1 unit changed', 'Saved · # units changed']));
 		} catch (err) {
 			input.value = stored?.toString() ?? '';
@@ -112,7 +118,7 @@
 				productId: product.id,
 				typeId,
 				required: choice === 'yes' ? true : choice === 'no' ? false : null
-			});
+			}).updates(...EQUIPMENT_VIEWS);
 			toast.success(plural(result.changed, ['Saved · 1 unit changed', 'Saved · # units changed']));
 		} catch (err) {
 			// Refused (someone else's units): show what is stored, not the choice.

@@ -1179,3 +1179,80 @@ export async function packTodos(userId: string): Promise<PackTodo[]> {
 		(a, b) => (a.startDate?.getTime() ?? 0) - (b.startDate?.getTime() ?? 0)
 	);
 }
+
+// ---------------------------------------------------------------------------
+// What is still out after the event
+
+export interface ReturnTodo {
+	productionId: string;
+	productionName: string;
+	endDate: Date | null;
+	/** The org whose units these are — the side the take-back list opens on. */
+	organizationId: string;
+	organizationName: string;
+	count: number;
+}
+
+/**
+ * Units of this user's orgs still checked out to a production that is over —
+ * own productions and those lent to alike, since forgetting to book a unit
+ * back happens on both sides. One row per production and owning org, oldest
+ * first. A unit the borrower has reported sent back is left out: the
+ * dashboard's handovers already ask for that one.
+ */
+export async function returnTodos(userId: string): Promise<ReturnTodo[]> {
+	const writable = await writableOrgIds(userId);
+	if (writable.length === 0) return [];
+	const today = new Date();
+	today.setHours(0, 0, 0, 0);
+
+	const [items, canSee] = await Promise.all([
+		prisma.productionItem.findMany({
+			where: {
+				status: 'CHECKED_OUT',
+				returnReportedAt: null,
+				asset: { organizationId: { in: writable } },
+				production: {
+					OR: [{ endDate: { lt: today } }, { endDate: null, startDate: { lt: today } }]
+				}
+			},
+			select: {
+				asset: {
+					select: {
+						organizationId: true,
+						organization: { select: { name: true, shortName: true } }
+					}
+				},
+				production: {
+					select: {
+						id: true,
+						name: true,
+						startDate: true,
+						endDate: true,
+						organizationId: true,
+						organization: { select: { name: true, shortName: true } }
+					}
+				}
+			}
+		}),
+		productionVisibility(userId)
+	]);
+
+	const rows = new Map<string, ReturnTodo>();
+	for (const item of items) {
+		const key = `${item.production.id}|${item.asset.organizationId}`;
+		const row = rows.get(key) ?? {
+			productionId: item.production.id,
+			productionName: visibleProductionName(item.production, canSee),
+			endDate: item.production.endDate ?? item.production.startDate,
+			organizationId: item.asset.organizationId,
+			organizationName: item.asset.organization.shortName || item.asset.organization.name,
+			count: 0
+		};
+		row.count += 1;
+		rows.set(key, row);
+	}
+	return [...rows.values()].sort(
+		(a, b) => (a.endDate?.getTime() ?? 0) - (b.endDate?.getTime() ?? 0)
+	);
+}

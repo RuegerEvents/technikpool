@@ -38,14 +38,9 @@ import {
 	requireInspectionType,
 	setScheduleInterval
 } from '#lib/server/services/inspections.js';
-import {
-	getAsset,
-	getAssetHistory,
-	getAssets,
-	getCategories,
-	getProductCatalog
-} from '#lib/remote/assets.remote.js';
+import { getCategories } from '#lib/remote/assets.remote.js';
 import { getDashboardStats } from '#lib/remote/productions.remote.js';
+import { refreshEquipmentViews } from './equipment-views';
 import {
 	myQualifications,
 	orgQualifications,
@@ -229,14 +224,10 @@ async function refreshInspectionViews(assetIds: string[], statusChanged: string[
 			).map((a) => a.organizationId)
 		: [];
 	await Promise.all([
-		...assetIds.flatMap((id) => [
-			getAsset(id).refresh(),
-			getAssetHistory(id).refresh(),
-			getAssetInspections(id).refresh()
-		]),
-		...(statusChanged.length > 0
-			? [...orgIds.map((id) => getAssets(id).refresh()), getAssets().refresh()]
-			: []),
+		...assetIds.map((id) => getAssetInspections(id).refresh()),
+		// The unit pages and the device lists only as far as the page holds them
+		// (`.updates(...EQUIPMENT_VIEWS)`); the lists only when a status moved.
+		refreshEquipmentViews({ assetIds, organizationIds: orgIds }),
 		getOverdueAssets().refresh(),
 		getOverdueInspectionCount().refresh(),
 		getDashboardStats().refresh()
@@ -404,14 +395,9 @@ export const setProductInspectionInterval = command(productIntervalSchema, async
 
 /** After a change to who needs inspecting: the catalog, and every unit list. */
 async function refreshRequirementViews(changedAssetIds: string[]) {
-	const user = await requireAuth();
-	const orgIds = await userOrgIds(user.id);
 	await Promise.all([
-		getProductCatalog().refresh(),
-		...orgIds.map((id) => getProductCatalog(id).refresh()),
 		getCategories().refresh(),
-		...changedAssetIds.flatMap((id) => [getAsset(id).refresh(), getAssetHistory(id).refresh()]),
-		getAssets().refresh(),
+		refreshEquipmentViews({ assetIds: changedAssetIds, products: true, allOrgs: true }),
 		getOverdueAssets().refresh(),
 		getOverdueInspectionCount().refresh(),
 		getDashboardStats().refresh()

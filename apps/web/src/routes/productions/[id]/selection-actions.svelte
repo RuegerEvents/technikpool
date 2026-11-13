@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { EQUIPMENT_VIEWS } from '#lib/equipment-views.js';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
@@ -87,7 +88,7 @@
 				mode,
 				assetIds: selected.map((i) => i.asset.id),
 				done: true
-			});
+			}).updates(...EQUIPMENT_VIEWS);
 			toast.success(mode === 'checkout' ? `Handed out: ${count}` : `Taken back: ${count}`);
 			onDone();
 		} catch (err) {

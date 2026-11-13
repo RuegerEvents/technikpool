@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { EQUIPMENT_VIEWS } from '#lib/equipment-views.js';
 	import { matchesSearch } from '#lib/search.js';
 	import { getErrorMessage, plural } from '#lib/utils.js';
 	import {
@@ -44,7 +45,7 @@
 			await updateManufacturer({
 				manufacturerId: manufacturer.id,
 				name: draft.name
-			});
+			}).updates(...EQUIPMENT_VIEWS);
 			delete drafts[manufacturer.id];
 			await getManufacturers().refresh();
 			toast.success('Manufacturer updated');
@@ -66,7 +67,7 @@
 			const result = await mergeManufacturers({
 				targetManufacturerId: mergeTargetId,
 				sourceManufacturerId: mergeSource.id
-			});
+			}).updates(...EQUIPMENT_VIEWS);
 			mergeSource = null;
 			mergeOpen = false;
 			mergeTargetId = '';

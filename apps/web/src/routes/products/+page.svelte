@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { EQUIPMENT_VIEWS } from '#lib/equipment-views.js';
 	import { searchMatcher } from '#lib/search.js';
 	import { productLabel } from '#lib/product-label.js';
 	import { categoryLabel } from '#lib/category.js';
@@ -240,7 +241,10 @@
 		saving = true;
 		try {
 			// Refreshes getBundles itself.
-			await updateBundle({ bundleId: bundle.id, netPurchasePrice: bundlePriceDraft ?? null });
+			await updateBundle({
+				bundleId: bundle.id,
+				netPurchasePrice: bundlePriceDraft ?? null
+			}).updates(...EQUIPMENT_VIEWS);
 			return true;
 		} catch (err) {
 			toast.error(getErrorMessage(err));

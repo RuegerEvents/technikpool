@@ -14,7 +14,7 @@
 	import { plural, orgLabel } from '#lib/utils.js';
 	import { browser } from '$app/env';
 	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
-	import { Hourglass, PackageOpen, ReceiptText } from '@lucide/svelte';
+	import { Hourglass, PackageOpen, PackageX, ReceiptText } from '@lucide/svelte';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
 
@@ -122,6 +122,8 @@
 	let showArchive = $state(false);
 
 	function isArchived(p: Production): boolean {
+		// Still holding units of ours: not done with, however long ago it ended.
+		if (returnOrgId(p)) return false;
 		const cutoff = new Date();
 		cutoff.setMonth(cutoff.getMonth() - 1);
 		const ref = p.endDate ?? p.startDate;
@@ -177,6 +179,35 @@
 		);
 	}
 
+	function outCount(p: Production, orgId: string): number {
+		return (
+			p.items?.filter((i) => i.status === 'CHECKED_OUT' && i.asset.organizationId === orgId)
+				.length ?? 0
+		);
+	}
+
+	/**
+	 * Once a production is over, the org of ours whose units are still out on it
+	 * — the side its take-back list opens on. Own productions and lent ones
+	 * alike, so a forgotten take-back shows here instead of a "Pack".
+	 */
+	function returnOrgId(p: Production): string | null {
+		const end = p.endDate ?? p.startDate;
+		if (!end || dayKey(end) >= todayKey()) return null;
+		return (
+			[p.organizationId, ...p.lentBy].find(
+				(id) => orgs.some((o) => o.id === id && canWrite(o)) && outCount(p, id) > 0
+			) ?? null
+		);
+	}
+
+	function openTakeBack(e: MouseEvent, p: Production, orgId: string) {
+		e.preventDefault();
+		e.stopPropagation();
+		// eslint-disable-next-line svelte/no-navigation-without-resolve
+		goto(`${resolve(`productions/${p.id}/checkin`)}?org=${encodeURIComponent(orgId)}`);
+	}
+
 	function openPack(e: MouseEvent, p: Production, orgId: string) {
 		// Inside a row that is a link itself.
 		e.preventDefault();
@@ -193,7 +224,7 @@
 
 	function prodRowClass(p: Production): string {
 		const s = prodStatus(p);
-		if (s === 'past' || s === 'cancelled') return 'opacity-40';
+		if ((s === 'past' || s === 'cancelled') && !returnOrgId(p)) return 'opacity-40';
 		if (s === 'active') return 'bg-primary/5';
 		return '';
 	}
@@ -280,8 +311,11 @@
 							<span class="text-muted-foreground">Items Booked</span>
 							<span class="font-medium">{prod.items?.length ?? 0}</span>
 						</div>
+						{@const returnOrg = returnOrgId(prod)}
 						{@const packOrg = packOrgId(prod)}
-						{#if packOrg}
+						{#if returnOrg}
+							{@render takeBackButton(prod, returnOrg)}
+						{:else if packOrg}
 							{@render packButton(prod, packOrg)}
 						{/if}
 					</Card.Content>
@@ -306,8 +340,11 @@
 					{#if isLentTo(prod)}
 						<span class="ml-2">{@render lentBadge()}</span>
 					{/if}
+					{@const returnOrg = returnOrgId(prod)}
 					{@const packOrg = packOrgId(prod)}
-					{#if packOrg}
+					{#if returnOrg}
+						<span class="ml-2">{@render takeBackButton(prod, returnOrg)}</span>
+					{:else if packOrg}
 						<span class="ml-2">{@render packButton(prod, packOrg)}</span>
 					{/if}
 				{:else if key === 'org'}
@@ -367,6 +404,18 @@
 	>
 		<PackageOpen aria-hidden="true" class="size-3.5" />
 		{n > 0 ? `Pack (${n})` : 'Pack'}
+	</button>
+{/snippet}
+
+{#snippet takeBackButton(prod: Production, orgId: string)}
+	<button
+		type="button"
+		class="inline-flex items-center gap-1 rounded-md border border-amber-500/40 bg-amber-500/10 px-2 py-0.5 align-middle text-xs font-medium text-amber-700 transition-colors hover:bg-amber-500/20 dark:text-amber-400"
+		title="The event is over and units of yours are still out: the take-back list"
+		onclick={(e) => openTakeBack(e, prod, orgId)}
+	>
+		<PackageX aria-hidden="true" class="size-3.5" />
+		Take back ({outCount(prod, orgId)})
 	</button>
 {/snippet}
 

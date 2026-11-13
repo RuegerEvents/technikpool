@@ -90,6 +90,24 @@ describe('matchesSearch', () => {
 		expect(matchesSearch('4000012', 'Titan Tube', '40000121')).toBe(true);
 	});
 
+	it('finds an inventory number exactly, never one a digit or two off', () => {
+		expect(matchesSearch('40000115', 'Titan Tube', '40000115')).toBe(true);
+		expect(matchesSearch('40000115', 'Titan Tube', '40000116')).toBe(false);
+		expect(matchesSearch('40000115', 'Titan Tube', '40000105')).toBe(false);
+		expect(matchesSearch('40000115', 'Titan Tube', '40000215')).toBe(false);
+		expect(matchesSearch('4000011', 'Titan Tube', '40000125')).toBe(false);
+		expect(matchesSearch('0115', 'Titan Tube', '40000115')).toBe(true);
+	});
+
+	it('finds an inventory number by its last digits', () => {
+		expect(matchesSearch('115', 'Titan Tube', '40000115')).toBe(true);
+		expect(matchesSearch('15', 'Titan Tube', '40000115')).toBe(true);
+		expect(matchesSearch('115', 'Titan Tube', '40001150')).toBe(false);
+		// A short number is still a length on a name, not part of one.
+		expect(matchesSearch('10', 'Schuko 10 m', '40000999')).toBe(true);
+		expect(matchesSearch('1m', 'Schuko 10 m', '40000001')).toBe(false);
+	});
+
 	it('needs every word', () => {
 		expect(matchesSearch('schuko xlr', 'Schuko 10 m')).toBe(false);
 	});

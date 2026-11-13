@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { EQUIPMENT_VIEWS } from '#lib/equipment-views.js';
 	import { CableColorDot } from '#lib/components/ui/cable-color/index.js';
 	// The warehouse as a board: one column per location of an org, its kits and
 	// its loose units on cards, and a card dragged into another column is moved
@@ -63,6 +64,9 @@
 	type Show = 'all' | 'here' | 'out';
 	const SHOWS: Show[] = ['all', 'here', 'out'];
 	let show = $state<Show>(SHOWS.find((v) => v === params.get('show')) ?? 'all');
+	// What is out on a production in a column of that production's own, instead
+	// of greyed at the bottom of the shelf it goes back to.
+	let byProduction = $state(params.get('productions') === '1');
 
 	$effect(() => {
 		const url = new URL(page.url.href);
@@ -70,7 +74,8 @@
 			org: org?.id ?? '',
 			q: search.trim(),
 			category: categoryId,
-			show: show === 'all' ? '' : show
+			show: show === 'all' ? '' : show,
+			productions: byProduction ? '1' : ''
 		};
 		for (const [key, value] of Object.entries(values)) {
 			if (value) url.searchParams.set(key, value);
@@ -95,10 +100,23 @@
 		/** Of those, the ones out on a production right now. */
 		out: Asset[];
 	};
-	type Column = { id: string; name: string; owner: string | null; cards: Card[]; total: number };
+	type Column = {
+		id: string;
+		name: string;
+		owner: string | null;
+		/** A production's column (`byProduction`): no shelf, nothing is dropped on it. */
+		production: { id: string | null } | null;
+		cards: Card[];
+		total: number;
+	};
 
 	function isOut(asset: Asset) {
 		return !!asset.checkedOutTo;
+	}
+
+	/** A unit with the accessories that hang off it — every device a card stands for. */
+	function deviceCount(units: Asset[]) {
+		return units.reduce((sum, u) => sum + 1 + u.accessories.length, 0);
 	}
 
 	function unitMatches(a: Asset) {
@@ -122,28 +140,47 @@
 		// units (a friend storing our things), named with that org.
 		const byId: Record<string, Column> = {};
 		for (const l of locations) {
-			byId[l.id] = { id: l.id, name: l.name, owner: null, cards: [], total: 0 };
+			byId[l.id] = { id: l.id, name: l.name, owner: null, production: null, cards: [], total: 0 };
+		}
+		/** The column a unit is shown in: its shelf, or the production it is out on. */
+		function columnIdOf(a: Asset) {
+			if (!byProduction || !a.checkedOutTo) return a.locationId;
+			// A production this user may not open has no id; its name stands in.
+			return `production:${a.checkedOutTo.productionId ?? a.checkedOutTo.name}`;
 		}
 		for (const a of topLevel) {
-			byId[a.locationId] ??= {
-				id: a.locationId,
-				name: a.location.name,
-				owner: a.location.organizationId,
-				cards: [],
-				total: 0
-			};
+			const id = columnIdOf(a);
+			byId[id] ??=
+				id === a.locationId
+					? {
+							id,
+							name: a.location.name,
+							owner: a.location.organizationId,
+							production: null,
+							cards: [],
+							total: 0
+						}
+					: {
+							id,
+							name: a.checkedOutTo!.name,
+							owner: null,
+							production: { id: a.checkedOutTo!.productionId },
+							cards: [],
+							total: 0
+						};
 		}
 		const cards: Record<string, Card> = {};
 		for (const a of topLevel) {
-			const column = byId[a.locationId];
-			column.total += 1;
+			const columnId = columnIdOf(a);
+			const column = byId[columnId];
+			column.total += deviceCount([a]);
 			if (show === 'here' && isOut(a)) continue;
 			if (show === 'out' && !isOut(a)) continue;
 			const kind = a.bundle ? 'bundle' : 'product';
 			// Out units of a product get a card of their own, under the ones here.
 			const key = a.bundle
-				? `${a.locationId}|b|${a.bundle.id}`
-				: `${a.locationId}|p|${a.productId}|${isOut(a) ? 'out' : 'here'}`;
+				? `${columnId}|b|${a.bundle.id}`
+				: `${columnId}|p|${a.productId}|${isOut(a) ? 'out' : 'here'}`;
 			let card = cards[key];
 			if (!card) {
 				card = {
@@ -163,6 +200,8 @@
 			if (isOut(a)) card.out.push(a);
 		}
 		for (const column of Object.values(byId)) {
+			// A production's column with nothing left after the filters is no column.
+			if (column.production && column.cards.length === 0) delete byId[column.id];
 			column.cards = column.cards
 				// A kit is found by its name or by anything in it.
 				.filter((card) =>
@@ -177,9 +216,9 @@
 						naturalCompare(a.title, b.title)
 				);
 		}
-		return Object.values(byId).sort(
-			(a, b) => Number(!!a.owner) - Number(!!b.owner) || naturalCompare(a.name, b.name)
-		);
+		// Shelves first, other orgs' shelves next, productions last.
+		const rank = (c: Column) => (c.production ? 2 : c.owner ? 1 : 0);
+		return Object.values(byId).sort((a, b) => rank(a) - rank(b) || naturalCompare(a.name, b.name));
 	});
 
 	function allOut(card: Card) {
@@ -233,7 +272,7 @@
 				assetIds: picked.map((u) => u.id),
 				targetType: 'location',
 				targetId: move.targetId
-			});
+			}).updates(...EQUIPMENT_VIEWS);
 			toast.success(
 				`${plural(picked.length, ['1 device moved to', '# devices moved to'])} ${target?.name ?? ''}`
 			);
@@ -328,6 +367,10 @@
 			<option value="here">Only available</option>
 			<option value="out">Only out on a production</option>
 		</select>
+		<label class="flex h-10 cursor-pointer items-center gap-2 text-sm text-muted-foreground">
+			<input type="checkbox" bind:checked={byProduction} class="h-4 w-4 rounded border" />
+			Show productions separately
+		</label>
 	</div>
 
 	{#if !assetsQuery?.ready || !locationsQuery?.ready}
@@ -364,7 +407,19 @@
 					>
 						<header class="flex shrink-0 items-baseline justify-between gap-2 border-b px-3 py-2">
 							<h2 class="min-w-0 truncate text-sm font-semibold">
-								{column.name}{#if column.owner && ownerName(column.owner)}<span
+								{#if column.production}
+									<span class="block text-xs font-normal text-amber-700 dark:text-amber-400"
+										>Out on a production</span
+									>
+									{#if column.production.id}
+										<a
+											href={resolve(`productions/${column.production.id}`)}
+											class="underline-offset-2 hover:underline">{column.name}</a
+										>
+									{:else}
+										{column.name}
+									{/if}
+								{:else}{column.name}{/if}{#if column.owner && ownerName(column.owner)}<span
 										class="font-normal text-muted-foreground"
 									>
 										· at {ownerName(column.owner)}</span
@@ -377,7 +432,8 @@
 								{@const here = movable(card)}
 								{@const open = expanded.has(card.key)}
 								<article
-									class="rounded-md border bg-background shadow-xs {allOut(card)
+									class="rounded-md border bg-background shadow-xs {allOut(card) &&
+									!column.production
 										? 'opacity-60'
 										: ''} {mayMove && here.length > 0 ? 'cursor-grab' : ''}"
 									draggable={mayMove && here.length > 0}
@@ -409,10 +465,10 @@
 												{/if}
 												{#if card.kind === 'bundle'}
 													<span class="block text-xs text-muted-foreground">
-														Bundle · {plural(card.units.length, ['1 device', '# devices'])}
+														Bundle · {plural(deviceCount(card.units), ['1 device', '# devices'])}
 													</span>
 												{/if}
-												{#if card.out.length > 0}
+												{#if card.out.length > 0 && !column.production}
 													<span class="block text-xs text-amber-700 dark:text-amber-400">
 														{allOut(card) ? 'Out' : `${card.out.length} out`}: {[
 															...new Set(card.out.map((u) => u.checkedOutTo?.name))
@@ -426,7 +482,9 @@
 										<ul class="border-t px-2 py-1">
 											{#each card.units as unit (unit.id)}
 												<li
-													class="flex items-center justify-between gap-2 py-0.5 text-xs {isOut(unit)
+													class="flex items-center justify-between gap-2 py-0.5 text-xs {isOut(
+														unit
+													) && !column.production
 														? 'text-muted-foreground'
 														: ''}"
 												>
@@ -446,7 +504,7 @@
 															>
 														{/if}
 													</a>
-													{#if isOut(unit)}
+													{#if isOut(unit) && !column.production}
 														<span class="shrink-0 text-amber-700 dark:text-amber-400">out</span>
 													{/if}
 												</li>

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { EQUIPMENT_VIEWS } from '#lib/equipment-views.js';
 	import { SvelteMap } from 'svelte/reactivity';
 	import { toast } from 'svelte-sonner';
 	import { Button } from '#lib/components/ui/button/index.js';
@@ -45,7 +46,7 @@
 				ownerId: result.organizationId,
 				locationId: result.locationId,
 				count
-			});
+			}).updates(...EQUIPMENT_VIEWS);
 			toast.success(
 				`${plural(done.count, ['Handed out: 1×', 'Handed out: #×'])} ${makerAndName(result.manufacturerName, result.productName)}`
 			);

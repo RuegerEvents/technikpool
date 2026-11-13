@@ -3669,7 +3669,7 @@ msgstr "Select none"
 #~ msgid "Removed \"{0}\" from production"
 #~ msgstr "Removed \"{0}\" from production"
 
-#. 0: plural(card.units.length, ['1 device', '# devices'])
+#. 0: plural(deviceCount(card.units), ['1 device', '# devices'])
 #: src/routes/assets/by-location/+page.svelte
 msgid "Bundle · {0}"
 msgstr "Bundle · {0}"
@@ -9966,6 +9966,7 @@ msgid "Found"
 msgstr "Found"
 
 #: src/lib/stocktake-labels.svelte.ts
+#: src/routes/assets/by-location/+page.svelte
 msgid "Out on a production"
 msgstr "Out on a production"
 
@@ -14828,3 +14829,31 @@ msgstr "{0} days"
 #: src/routes/orgs/[id]/billing/+page.svelte
 msgid "Default"
 msgstr "Default"
+
+#: src/routes/+page.svelte
+#: src/routes/+page.svelte
+msgid "Still to take back"
+msgstr "Still to take back"
+
+#: src/routes/+page.svelte
+msgid "Event over, units still out"
+msgstr "Event over, units still out"
+
+#: src/routes/+page.svelte
+msgid "1 unit still out"
+msgid_plural "# units still out"
+msgstr[0] "1 unit still out"
+msgstr[1] "# units still out"
+
+#: src/routes/productions/+page.svelte
+msgid "The event is over and units of yours are still out: the take-back list"
+msgstr "The event is over and units of yours are still out: the take-back list"
+
+#. 0: outCount(prod, orgId)
+#: src/routes/productions/+page.svelte
+msgid "<0/> Take back ({0})"
+msgstr "<0/> Take back ({0})"
+
+#: src/routes/assets/by-location/+page.svelte
+msgid "<0/> Show productions separately"
+msgstr "<0/> Show productions separately"

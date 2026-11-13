@@ -23,7 +23,7 @@ const scanAssetSchema = v.object({
 export const scanAsset = command(scanAssetSchema, async (input) => {
 	const user = await requireAuth();
 	const { result, affected } = await withCheckoutErrors(() => performScan(user.id, input));
-	await refreshAffected(user.id, affected);
+	await refreshAffected(affected);
 	// The Scan page shows product pictures. Added here rather than in
 	// performScan, whose result is also /api/v1's ScanResult as it stands.
 	const ids = [result.asset.id, ...(result.group?.units.map((u) => u.id) ?? [])];
@@ -55,6 +55,6 @@ const checkoutAssetsSchema = v.object({
 export const checkoutAssets = command(checkoutAssetsSchema, async (input) => {
 	const user = await requireAuth();
 	const { result, affected } = await withCheckoutErrors(() => performBulkCheckout(user.id, input));
-	await refreshAffected(user.id, affected);
+	await refreshAffected(affected);
 	return result;
 });

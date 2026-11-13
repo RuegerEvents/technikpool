@@ -17,6 +17,9 @@
  * - **One slip of the finger.** A word of five letters or more may be one
  *   letter off ("powrcon"), one of eight or more two ("schuckozuleitung") —
  *   compared against the start of each word, so a half-typed word still counts.
+ * - **Never a digit.** A number off by one digit is another unit, so an
+ *   inventory number is found exactly, as typed so far, or by its last digits
+ *   ("115" for 40000115).
  *
  * Callers pass everything a row is known by — name, caption, maker, both
  * cable ends, tag — so a cable is found by what is printed after its arrow.
@@ -99,6 +102,9 @@ function tokenMatches(word: string, token: string) {
 	// One or two letters are the start of a word, never any "c" in the middle.
 	if (word.length < 3) return token.startsWith(word);
 	if (token.includes(word)) return true;
+	// A digit off is another inventory number, not a typo: "40000115" found
+	// 40000116, 40000105 and dozens more while it was allowed two of them.
+	if (/\d/.test(word)) return false;
 	const max = slack(word.length);
 	if (max === 0 || token.length < word.length - max) return false;
 	// Against the start of the word as well: the query word may be half-typed.
@@ -118,13 +124,17 @@ function numberWord(word: string) {
 /**
  * A length with its unit ("2m") is exactly that; a bare one ("10") is that
  * number with or without a unit, so "10" still finds "Schuko 10 m" but "1m"
- * not "10 m". `nameDigits` says whether the digits of a name count ("RUTX50"
+ * not "10 m" — or the end of an inventory number ("115" for 40000115). `nameDigits` says whether the digits of a name count ("RUTX50"
  * for "50"): only right behind the name's letters, never on their own.
  */
 function numberMatches(word: string, unit: string, token: Token, nameDigits: boolean) {
 	if (token.attached && !nameDigits) return false;
 	if (token.text === word) return true;
-	return !unit && token.text.startsWith(word) && UNIT.test(token.text.slice(word.length));
+	if (unit) return false;
+	// The last digits of an inventory or serial number: "115" is how 40000115 is
+	// looked for. Only a long run of digits, so "10" never finds a 4100.
+	if (/^\d{5,}$/.test(token.text)) return token.text.endsWith(word);
+	return token.text.startsWith(word) && UNIT.test(token.text.slice(word.length));
 }
 
 /**

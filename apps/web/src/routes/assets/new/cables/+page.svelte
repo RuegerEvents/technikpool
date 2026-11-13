@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { EQUIPMENT_VIEWS } from '#lib/equipment-views.js';
 	import { naturalCompare } from '#lib/sort.js';
 	import { productLabel } from '#lib/product-label.js';
 	import * as Card from '#lib/components/ui/card/index.js';
@@ -458,7 +459,7 @@
 						),
 					quantity: r.quantity
 				}))
-			});
+			}).updates(...EQUIPMENT_VIEWS);
 
 			const products = new Set(result.rows.map((r) => r.productId)).size;
 			const newProducts = new Set(

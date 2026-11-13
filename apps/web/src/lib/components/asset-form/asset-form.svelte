@@ -1,4 +1,5 @@
 <script lang="ts" module>
+	import { EQUIPMENT_VIEWS } from '#lib/equipment-views.js';
 	/**
 	 * A product already in the catalogue, picked instead of typed. `reset` takes
 	 * this where it would otherwise take a name, so a picker that lists products
@@ -480,7 +481,7 @@
 					assetTag: noTag ? undefined : item.assetTag.trim() || undefined,
 					noAssetTag: noTag || undefined
 				}))
-			});
+			}).updates(...EQUIPMENT_VIEWS);
 			onCreated(created);
 		} catch (err) {
 			toast.error(getErrorMessage(err));

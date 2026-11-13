@@ -7,11 +7,11 @@ import {
 	handoutSummary,
 	packIntoCase,
 	packTodos,
+	returnTodos,
 	scanIntoHandout,
 	searchHandoutCandidates,
 	setHandoutDone,
-	setHandoutLineCount,
-	type HandoutMode
+	setHandoutLineCount
 } from '#lib/server/services/production-handout.js';
 import type { AffectedRecords } from '#lib/server/services/checkout.js';
 import { refreshAffected, withCheckoutErrors } from './checkout-shared';
@@ -43,24 +43,27 @@ export const getPackTodos = query(async () => {
 	return await packTodos(user.id);
 });
 
+/** What is still out after the event — see `returnTodos`. */
+export const getReturnTodos = query(async () => {
+	const user = await requireAuth();
+	return await returnTodos(user.id);
+});
+
 export const getHandoutSummary = query(v.string(), async (productionId) => {
 	const user = await requireAuth();
 	return await handoutSummary(user.id, productionId);
 });
 
-/** A tick in one list moves the other too: what went out is what comes back. */
-async function refreshHandout(
-	userId: string,
-	productionId: string,
-	organizationId: string,
-	affected: AffectedRecords
-) {
-	await Promise.all([
-		refreshAffected(userId, affected),
-		...(['checkout', 'checkin'] as HandoutMode[]).map((m) =>
-			getProductionHandout({ productionId, mode: m, organizationId }).refresh()
-		)
-	]);
+/**
+ * A tick in one list moves the other too: what went out is what comes back.
+ * Both lists are among the `EQUIPMENT_VIEWS` the page names, and refreshed for
+ * the productions the service touched.
+ */
+async function refreshHandout(productionId: string, affected: AffectedRecords) {
+	await refreshAffected({
+		...affected,
+		productionIds: [...new Set([...affected.productionIds, productionId])]
+	});
 }
 
 export const scanProductionHandout = command(
@@ -72,14 +75,14 @@ export const scanProductionHandout = command(
 		/** The case open for packing — see "Pack cases" in CLAUDE.md. */
 		packInto: v.optional(v.nullable(v.string()))
 	}),
-	async ({ productionId, mode, organizationId, code, packInto }) => {
+	async ({ productionId, mode, code, packInto }) => {
 		const user = await requireAuth();
 		const { result, affected } = await withCheckoutErrors(() =>
 			scanIntoHandout(user.id, productionId, mode, code, {
 				packInto: mode === 'checkout' ? (packInto ?? null) : null
 			})
 		);
-		await refreshHandout(user.id, productionId, organizationId, affected);
+		await refreshHandout(productionId, affected);
 		return result;
 	}
 );
@@ -92,12 +95,12 @@ export const setProductionHandoutDone = command(
 		assetIds: v.array(v.string()),
 		done: v.boolean()
 	}),
-	async ({ productionId, mode, organizationId, assetIds, done }) => {
+	async ({ productionId, mode, assetIds, done }) => {
 		const user = await requireAuth();
 		const { result, affected } = await withCheckoutErrors(() =>
 			setHandoutDone(user.id, productionId, mode, assetIds, done)
 		);
-		await refreshHandout(user.id, productionId, organizationId, affected);
+		await refreshHandout(productionId, affected);
 		return result;
 	}
 );
@@ -110,12 +113,12 @@ export const setProductionHandoutLine = command(
 		key: v.string(),
 		count: v.pipe(v.number(), v.integer(), v.minValue(0))
 	}),
-	async ({ productionId, mode, organizationId, key, count }) => {
+	async ({ productionId, mode, key, count }) => {
 		const user = await requireAuth();
 		const { result, affected } = await withCheckoutErrors(() =>
 			setHandoutLineCount(user.id, productionId, mode, key, count, { extras: true })
 		);
-		await refreshHandout(user.id, productionId, organizationId, affected);
+		await refreshHandout(productionId, affected);
 		return result;
 	}
 );
@@ -142,7 +145,7 @@ export const packProductionCase = command(
 				organizationId || undefined
 			)
 		);
-		await refreshHandout(user.id, productionId, organizationId, affected);
+		await refreshHandout(productionId, affected);
 		return result;
 	}
 );
@@ -178,7 +181,7 @@ export const handOutAdditions = command(
 				organizationId
 			)
 		);
-		await refreshHandout(user.id, productionId, organizationId, affected);
+		await refreshHandout(productionId, affected);
 		return result;
 	}
 );

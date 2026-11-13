@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { EQUIPMENT_VIEWS } from '#lib/equipment-views.js';
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { Input } from '#lib/components/ui/input/index.js';
 	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
@@ -72,7 +73,7 @@
 				organizationId: r.organizationId,
 				productId: group.productId,
 				netPurchasePrice
-			});
+			}).updates(...EQUIPMENT_VIEWS);
 			priceDrafts.delete(group.key);
 			await query.refresh();
 			await onSaved?.();

@@ -25,7 +25,7 @@ const originalPrisma = new PrismaClient({ adapter });
 type ModelName = Prisma.ModelName;
 
 // Define your model prefixes as an object
-const prefixes: Partial<Record<ModelName, string>> = {
+const prefixes = {
 	Account: 'acct',
 	Address: 'addr',
 	Asset: 'asset',
@@ -79,7 +79,28 @@ const prefixes: Partial<Record<ModelName, string>> = {
 	BillingDismissal: 'bdis',
 	CableColorBand: 'ccol',
 	UserDefaultLocation: 'udl'
-};
+} as const satisfies Partial<Record<ModelName, string>>;
+
+const ID_ALPHABET = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+
+/**
+ * An id in the extension's own format (`asset_` + 24 characters), for rows
+ * created in bulk whose ids are needed afterwards: `createMany` returns none, and
+ * the extension leaves `createManyAndReturn` without one. A row that brings its
+ * id keeps it.
+ */
+export function newId(model: keyof typeof prefixes & ModelName): string {
+	let id = '';
+	// Six bits per byte, and the two values past the alphabet thrown away, so
+	// every symbol is equally likely — what nanoid does for the extension.
+	while (id.length < 24) {
+		for (const byte of crypto.getRandomValues(new Uint8Array(32))) {
+			const index = byte & 63;
+			if (index < ID_ALPHABET.length && id.length < 24) id += ID_ALPHABET[index];
+		}
+	}
+	return `${prefixes[model]}_${id}`;
+}
 
 // Extend the client with prefixed IDs
 const prefixedPrisma = extendPrismaClient(originalPrisma, {

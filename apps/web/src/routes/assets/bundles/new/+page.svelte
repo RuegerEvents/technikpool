@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { EQUIPMENT_VIEWS } from '#lib/equipment-views.js';
 	import { CameraScanButton } from '#lib/components/ui/camera-scan/index.js';
 	import { naturalCompare } from '#lib/sort.js';
 	import { makerAndName, withCaption } from '#lib/product-label.js';
@@ -207,7 +208,7 @@
 				assetIds: selectedIds,
 				bundleIds: selectedKitIds.length > 0 ? selectedKitIds : undefined,
 				moveFromOtherBundles: movedFrom.length > 0 || undefined
-			});
+			}).updates(...EQUIPMENT_VIEWS);
 			toast.success('Bundle created!');
 			goto(resolve(`assets/bundles/${bundle.id}`));
 		} catch (err) {

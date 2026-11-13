@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { EQUIPMENT_VIEWS } from '#lib/equipment-views.js';
 	import { CableColorDot } from '#lib/components/ui/cable-color/index.js';
 	import { BackButton } from '#lib/components/ui/back-button/index.js';
 	import { CameraScanButton } from '#lib/components/ui/camera-scan/index.js';
@@ -207,7 +208,7 @@
 		if (!ok) return;
 		deletingInspectionId = inspection.id;
 		try {
-			await deleteInspection(inspection.id);
+			await deleteInspection(inspection.id).updates(...EQUIPMENT_VIEWS);
 			toast.success('Inspection deleted');
 		} catch (err) {
 			toast.error(getErrorMessage(err));
@@ -221,7 +222,10 @@
 	// somebody's accessory, has none of its own, and isn't in another kit. The
 	// same guards `attachAccessory` enforces — this list only saves the round
 	// trip that would end in the error message.
-	let orgAssets = $derived(await getAssets(asset.organizationId));
+	// Not awaited: the org's whole device list is the heaviest query there is,
+	// and the page should not wait for it. The picker fills in when it is here.
+	let orgAssetsQuery = $derived(getAssets(asset.organizationId));
+	let orgAssets = $derived(orgAssetsQuery.current ?? []);
 	let attachCandidates = $derived(
 		orgAssets
 			.filter(
@@ -253,7 +257,8 @@
 	// and the useful answer there is not "type its name in" but "you know this
 	// product, register one of it". Picking one drops straight into the create
 	// dialog with both pickers filled.
-	let catalogue = $derived(await getProducts());
+	let catalogueQuery = $derived(getProducts());
+	let catalogue = $derived(catalogueQuery.current ?? []);
 	let productSuggestions = $derived(catalogue.map((p) => ({ id: p.id, name: productLabel(p) })));
 
 	let attachSelection = $state<{ id: string | null; name: string } | null>(null);
@@ -263,7 +268,9 @@
 		if (!attachSelection?.id) return;
 		attaching = true;
 		try {
-			await attachAccessory({ parentId: assetId, assetId: attachSelection.id });
+			await attachAccessory({ parentId: assetId, assetId: attachSelection.id }).updates(
+				...EQUIPMENT_VIEWS
+			);
 			attachSelection = null;
 			toast.success('Accessory attached');
 		} catch (err) {
@@ -276,7 +283,7 @@
 	async function handleDetach(id: string) {
 		attaching = true;
 		try {
-			await detachAccessory(id);
+			await detachAccessory(id).updates(...EQUIPMENT_VIEWS);
 			toast.success('Accessory detached');
 		} catch (err) {
 			toast.error(getErrorMessage(err));
@@ -466,7 +473,7 @@
 				perUnit: standing.count,
 				noAssetTag: standing.tagged ? undefined : true,
 				reuseExisting
-			});
+			}).updates(...EQUIPMENT_VIEWS);
 			closeFanout();
 			if (created === 0 && reused === 0) {
 				toast.info('Every unit already has that — nothing to do');
@@ -515,7 +522,7 @@
 	async function handleDelete() {
 		deleting = true;
 		try {
-			await deleteAsset(assetId);
+			await deleteAsset(assetId).updates(...EQUIPMENT_VIEWS);
 			confirmingDelete = false;
 			toast.success('Asset deleted');
 			await goto(resolve('assets'), { replace: true });
@@ -571,7 +578,7 @@
 							locationId: assetDraft.locationId,
 							...(purchaseDate !== storedPurchaseDate ? { purchaseDate } : {})
 						}
-			);
+			).updates(...EQUIPMENT_VIEWS);
 			toast.success('Asset updated');
 			editingAsset = false;
 		} catch (err) {
@@ -645,7 +652,7 @@
 					organizationId: asset.organizationId,
 					productId: asset.product.id,
 					netPurchasePrice: productDraft.netPurchasePrice ?? null
-				});
+				}).updates(...EQUIPMENT_VIEWS);
 			}
 			toast.success('Product updated');
 			productModalOpen = false;

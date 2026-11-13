@@ -1,9 +1,11 @@
 import {
 	getAsset,
 	getAssets,
+	getCatalogProduct,
 	getInventorySummary,
 	getProductCatalog,
-	getProducts
+	getProducts,
+	getProductUnitCounts
 } from '#lib/remote/assets.remote.js';
 
 /**
@@ -15,6 +17,8 @@ import {
 export const PRODUCT_VIEWS = [
 	getProducts,
 	getProductCatalog,
+	getCatalogProduct,
+	getProductUnitCounts,
 	getAssets,
 	getAsset,
 	getInventorySummary

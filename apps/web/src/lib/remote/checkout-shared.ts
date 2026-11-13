@@ -1,55 +1,22 @@
-import { getAsset, getAssets, getBundle, getBundles, getBundleTemplates } from './assets.remote';
-import { getProduction } from './productions.remote';
-import { getLicenses, getLicenseStatus } from './licenses.remote';
-import { getHandoverTodos } from './production-checks.remote';
-import { getHandoutSummary, getPackTodos } from './production-handout.remote';
-import { visibleProductionIds } from '#lib/server/services/access.js';
 import { CheckoutError, type AffectedRecords } from '#lib/server/services/checkout.js';
 import { appError, type AppErrorCode } from '#lib/errors.js';
+import { refreshEquipmentViews } from './equipment-views';
 
 // Shared by the remote files that book equipment (checkout.remote.ts,
 // production-handout.remote.ts). Not a remote file itself: those may export
 // remote functions only.
 
 /**
- * Invalidate the queries backing whatever the service just changed. The service
- * itself is framework-agnostic and only reports which records it touched.
+ * Refresh what the calling page holds of whatever the service just changed —
+ * the page names it with `.updates(...EQUIPMENT_VIEWS)`. The service itself is
+ * framework-agnostic and only reports which records it touched.
  */
-export async function refreshAffected(userId: string, affected: AffectedRecords) {
-	// A unit scanned back onto a shelf is returned from whatever production held
-	// it, which may be one this user cannot open — see `visibleProductionIds`.
-	const productionIds = await visibleProductionIds(userId, affected.productionIds);
-	await Promise.all([
-		...affected.assetIds.map((id) => getAsset(id).refresh()),
-		...affected.organizationIds.map((id) => getAssets(id).refresh()),
-		// The Devices list without an org filter reads the argument-less variant,
-		// which is a cache entry of its own — refreshing only the per-org ones left
-		// a bulk move looking undone until the page was reloaded.
-		getAssets().refresh(),
-		...affected.bundleIds.map((id) => getBundle(id).refresh()),
-		// Only when a unit of a bundle moved — the org-wide bundle lists are heavy
-		// queries and most scans don't touch one. The templates are what the
-		// Devices page groups by bundle with, which is its default view.
-		...(affected.bundleIds.length > 0
-			? [
-					...affected.organizationIds.map((id) => getBundles(id).refresh()),
-					getBundles().refresh(),
-					...affected.organizationIds.map((id) => getBundleTemplates(id).refresh()),
-					getBundleTemplates().refresh()
-				]
-			: []),
-		...productionIds.map((id) => getProduction(id).refresh()),
-		...productionIds.map((id) => getHandoutSummary(id).refresh()),
-		// A licence's holder is whichever production it is checked out to, and
-		// checking it out is also what lets that production's crew see the key.
-		...affected.assetIds.map((id) => getLicenseStatus(id).refresh()),
-		...affected.organizationIds.map((id) => getLicenses(id).refresh()),
-		getLicenses().refresh(),
-		// A lent unit going out or coming back opens or closes a handover.
-		...(affected.productionIds.length > 0
-			? [getHandoverTodos().refresh(), getPackTodos().refresh()]
-			: [])
-	]);
+export async function refreshAffected(affected: AffectedRecords) {
+	await refreshEquipmentViews({
+		...affected,
+		// Only when a unit of a kit moved — most scans don't touch one.
+		bundles: affected.bundleIds.length > 0
+	});
 }
 
 /**

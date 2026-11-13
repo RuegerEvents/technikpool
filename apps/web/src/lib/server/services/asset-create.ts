@@ -1,11 +1,10 @@
-import { prisma } from '#lib/server/auth.js';
+import { newId, prisma } from '#lib/server/auth.js';
 import type { Prisma } from '#lib/prisma/client.js';
 import { appError } from '#lib/errors.js';
 import { productLabel } from '#lib/product-label.js';
 import { ACTIVE_ASSET_WHERE, BOOKABLE_ASSET_WHERE } from '#lib/asset-status.js';
 import { tagAllocator } from '#lib/server/services/tag-counter.js';
 import { kitHoldingTag } from '#lib/server/services/asset-lookup.js';
-import { CABLE_ENDS } from '#lib/server/services/cable-ends.js';
 import { initialInspection, type InitialInspection } from '#lib/server/services/inspections.js';
 import { assertAdditionsFitType } from '#lib/server/services/bundle-spec.js';
 
@@ -50,6 +49,7 @@ export type AssetTx = Pick<
 	| 'asset'
 	| 'organization'
 	| 'assetTransaction'
+	| 'assetInspectionSchedule'
 	| 'product'
 	| 'inspectionType'
 	| 'orgInspectionInterval'
@@ -128,64 +128,85 @@ export async function createUnitsInTx(tx: AssetTx, args: CreateUnitsArgs) {
 	const kitHolder = await kitHoldingTag(typedTags);
 	if (kitHolder) appError(409, 'asset_tag_in_use', [kitHolder.tag, kitHolder.name]);
 
-	const created = await Promise.all(
-		// `tags.next()` is called synchronously inside the map, before anything
-		// is awaited, so the tags land in row order rather than completion order.
-		// With the org's numbering off it refuses a unit that brought no tag.
-		args.units.map((unit) => {
-			let resolvedTag: string | null;
-			if (unit.noAssetTag) {
-				resolvedTag = null;
-			} else if (unit.assetTag?.trim()) {
-				const tag = unit.assetTag.trim();
-				if (!tag.startsWith(prefix)) appError(400, 'asset_tag_prefix_mismatch', [tag, prefix]);
-				resolvedTag = tag;
-			} else {
-				resolvedTag = tags.next();
-			}
-
-			return tx.asset.create({
-				data: {
-					organizationId: args.organizationId,
-					productId: unit.productId,
-					locationId: args.locationId,
-					serialNumber: unit.serialNumber || null,
-					assetTag: resolvedTag,
-					status: 'AVAILABLE',
-					parentAssetId: parent?.id ?? null,
-					bundleId: parent?.bundleId ?? args.bundleId ?? null,
-					// Snapshot of the org's intervals, not a live reference — see OrgInspectionInterval.
-					...inspection(unit.productId),
-					transactions: {
-						create: [
-							{ userId: args.userId, action: 'CREATED', data: { type: 'CREATED' } },
-							// Two entries rather than one: the unit was created, and it was
-							// attached. Detaching it later leaves the first one true.
-							...(parent
-								? [
-										{
-											userId: args.userId,
-											action: 'ACCESSORY_ATTACHED',
-											data: {
-												type: 'ACCESSORY_ATTACHED',
-												parentAssetId: parent.id,
-												parentLabel: assetLabel(parent)
-											}
-										}
-									]
-								: [])
-						]
-					}
-				},
-				include: {
-					product: {
-						include: { manufacturer: true, category: true, ...CABLE_ENDS }
-					},
-					location: true
-				}
-			});
-		})
+	// In bulk: one statement for the units, one for their history, one for their
+	// inspection schedules, whatever the count. It was a `create` per unit, each
+	// with its product, maker, category, connectors, ways and shelf read back —
+	// some four hundred round trips, one after the other, for forty cables. The
+	// ids are made here so the history and the schedules can point at them, and
+	// the tags are drawn in row order before anything is written.
+	const rows = args.units.map((unit) => {
+		let resolvedTag: string | null;
+		if (unit.noAssetTag) {
+			resolvedTag = null;
+		} else if (unit.assetTag?.trim()) {
+			const tag = unit.assetTag.trim();
+			if (!tag.startsWith(prefix)) appError(400, 'asset_tag_prefix_mismatch', [tag, prefix]);
+			resolvedTag = tag;
+		} else {
+			// With the org's numbering off it refuses a unit that brought no tag.
+			resolvedTag = tags.next();
+		}
+		// Snapshot of the org's intervals, not a live reference — see OrgInspectionInterval.
+		const { inspectionSchedules, nextInspectionDue } = inspection(unit.productId);
+		return {
+			data: {
+				id: newId('Asset'),
+				organizationId: args.organizationId,
+				productId: unit.productId,
+				locationId: args.locationId,
+				serialNumber: unit.serialNumber || null,
+				assetTag: resolvedTag,
+				status: 'AVAILABLE' as const,
+				parentAssetId: parent?.id ?? null,
+				bundleId: parent?.bundleId ?? args.bundleId ?? null,
+				nextInspectionDue
+			},
+			schedules: inspectionSchedules?.create ?? []
+		};
+	});
+	// One insert, in row order: the org's unit numbers (`orgIndex`, a BEFORE
+	// INSERT trigger) follow the rows as they did one by one.
+	await tx.asset.createMany({ data: rows.map((row) => row.data) });
+	await tx.assetTransaction.createMany({
+		data: rows.flatMap(({ data }) => [
+			{ assetId: data.id, userId: args.userId, action: 'CREATED', data: { type: 'CREATED' } },
+			// Two entries rather than one: the unit was created, and it was
+			// attached. Detaching it later leaves the first one true.
+			...(parent
+				? [
+						{
+							assetId: data.id,
+							userId: args.userId,
+							action: 'ACCESSORY_ATTACHED',
+							data: {
+								type: 'ACCESSORY_ATTACHED',
+								parentAssetId: parent.id,
+								parentLabel: assetLabel(parent)
+							}
+						}
+					]
+				: [])
+		])
+	});
+	const schedules = rows.flatMap(({ data, schedules }) =>
+		schedules.map((schedule) => ({ ...schedule, assetId: data.id }))
 	);
+	if (schedules.length > 0) await tx.assetInspectionSchedule.createMany({ data: schedules });
+
+	// What the accessory fan-out labels a parent with, read once per product.
+	const products = await tx.product.findMany({
+		where: { id: { in: [...new Set(rows.map((row) => row.data.productId))] } },
+		select: { id: true, name: true, manufacturer: { select: { name: true } } }
+	});
+	const productById = new Map(products.map((p) => [p.id, p]));
+	const created = rows.map(({ data }) => ({
+		id: data.id,
+		productId: data.productId,
+		locationId: data.locationId,
+		bundleId: data.bundleId,
+		assetTag: data.assetTag,
+		product: productById.get(data.productId)!
+	}));
 
 	// In the same transaction as the units themselves: a fixture that reaches
 	// the pool without the brackets every other one of its kind has is worse

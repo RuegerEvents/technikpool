@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { EQUIPMENT_VIEWS } from '#lib/equipment-views.js';
 	import { searchMatcher } from '#lib/search.js';
 	import { CableColorDot } from '#lib/components/ui/cable-color/index.js';
 	import { cableColorTerms } from '#lib/cable-colors.svelte.js';
@@ -123,7 +124,7 @@
 		if (!assetTag) return;
 		savingQuickTag = true;
 		try {
-			await updateAsset({ assetId: quickTagTarget.id, assetTag });
+			await updateAsset({ assetId: quickTagTarget.id, assetTag }).updates(...EQUIPMENT_VIEWS);
 			toast.success('Asset tag saved');
 			quickTagOpen = false;
 		} catch (err) {

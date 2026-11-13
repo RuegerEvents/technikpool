@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { EQUIPMENT_VIEWS } from '#lib/equipment-views.js';
 	import { getErrorMessage, orgLabel, plural } from '#lib/utils.js';
 	import { getPlaceableLocations } from '#lib/remote/assets.remote.js';
 	import { checkoutAssets, getAllProductions, scanAsset } from '#lib/remote/checkout.remote.js';
@@ -92,7 +93,7 @@
 				assetIds: [...offerChecked],
 				targetType: offer.targetType,
 				targetId: offer.targetId
-			});
+			}).updates(...EQUIPMENT_VIEWS);
 			sessionLog = [
 				{
 					id: crypto.randomUUID(),
@@ -238,7 +239,9 @@
 		if (!t || processing || targetType !== 'location') return;
 		processing = true;
 		try {
-			const result = await scanAsset({ assetTag: t, targetType: 'location', targetId });
+			const result = await scanAsset({ assetTag: t, targetType: 'location', targetId }).updates(
+				...EQUIPMENT_VIEWS
+			);
 			if (result.group && result.group.units.some((u) => !u.done)) {
 				groupOffers = [...groupOffers, { ...result.group, targetType: 'location', targetId }];
 			}

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { EQUIPMENT_VIEWS } from '#lib/equipment-views.js';
 	import { getErrorMessage, orgLabel } from '#lib/utils.js';
 	import { canManageInventory } from '#lib/roles.js';
 	import { Button } from '#lib/components/ui/button/index.js';
@@ -300,7 +301,7 @@
 				organizationId: selectedOrgId,
 				locationId: selectedLocationId,
 				rows
-			});
+			}).updates(...EQUIPMENT_VIEWS);
 			step = 'results';
 		} catch (err) {
 			toast.error(getErrorMessage(err));

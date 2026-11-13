@@ -136,7 +136,10 @@
 		}
 	}
 
-	let allBundles = $derived(await getBundles());
+	// Not awaited: every kit of every org, only to say which booked kits have
+	// changed since. Until it is here, none is reported as changed.
+	let allBundlesQuery = $derived(getBundles());
+	let allBundles = $derived(allBundlesQuery.current ?? []);
 	// The user's rung in the org that runs this production, asked the way the
 	// server asks it (`requireOrgRole`): a system admin clears every rung. The
 	// page only offers what that rung may do — a VIEWER reads, and every button

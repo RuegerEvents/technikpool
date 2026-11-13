@@ -9,6 +9,7 @@ import { bookingReviewedEmail } from '#lib/server/emails/booking-reviewed.js';
 import { addedAsCrewEmail } from '#lib/server/emails/added-as-crew.js';
 import { productionCancelledEmail } from '#lib/server/emails/production-cancelled.js';
 import * as v from 'valibot';
+import { ORG_SUMMARY_SELECT } from '#lib/server/services/org-summary.js';
 import {
 	isSystemAdmin,
 	LENDING_ITEM_STATUS,
@@ -742,7 +743,7 @@ export const updateProductionAddress = command(updateProductionAddressSchema, as
 			return await tx.production.update({
 				where: { id: input.productionId },
 				data: { venueName, addressId: null },
-				include: { address: true, organization: true }
+				include: { address: true, organization: { select: ORG_SUMMARY_SELECT } }
 			});
 		}
 
@@ -772,7 +773,7 @@ export const updateProductionAddress = command(updateProductionAddressSchema, as
 		return await tx.production.update({
 			where: { id: input.productionId },
 			data: { venueName, addressId },
-			include: { address: true, organization: true }
+			include: { address: true, organization: { select: ORG_SUMMARY_SELECT } }
 		});
 	});
 
@@ -1246,7 +1247,7 @@ export const getPendingApprovals = query(v.string(), async (organizationId: stri
 		},
 		include: {
 			asset: { include: { product: true } },
-			production: { include: { organization: true } },
+			production: { include: { organization: { select: ORG_SUMMARY_SELECT } } },
 			loanRequest: {
 				select: {
 					id: true,
@@ -1803,7 +1804,7 @@ export const getCalendarData = query(async () => {
 		where: { organizationId: { in: orgIds }, parentAssetId: null, ...ACTIVE_ASSET_WHERE },
 		include: {
 			product: { include: { manufacturer: true } },
-			organization: true,
+			organization: { select: ORG_SUMMARY_SELECT },
 			bundle: { select: { id: true, template: { select: { name: true } } } },
 			productionItems: {
 				where: {

@@ -9,6 +9,7 @@
 </script>
 
 <script lang="ts">
+	import { EQUIPMENT_VIEWS } from '#lib/equipment-views.js';
 	// Everything about one catalog product that can be changed, as one card with
 	// one Save: name, manufacturer, category, cable or license, picture, the
 	// connectors built into it, and each managed org's price. Merging a duplicate
@@ -357,7 +358,7 @@
 					organizationId: orgId,
 					productId: product.id,
 					netPurchasePrice: priceDrafts[orgId] ?? null
-				});
+				}).updates(...EQUIPMENT_VIEWS);
 			}
 			await onSaved?.();
 			return true;
@@ -432,7 +433,7 @@
 			const { movedAssets } = await mergeProducts({
 				targetProductId: survivor.id,
 				sourceProductId: absorbed.id
-			});
+			}).updates(...EQUIPMENT_VIEWS);
 			// The survivor may have just inherited an image, a panel or a price, so
 			// the drafts have to be seeded again from what exists now.
 			draftFor = '';
@@ -487,7 +488,7 @@
 		onBeforeDelete?.();
 		deleting = true;
 		try {
-			await deleteProduct(deletedId);
+			await deleteProduct(deletedId).updates(...EQUIPMENT_VIEWS);
 			draftFor = '';
 			pricesFor = '';
 			deleteOpen = false;
@@ -533,7 +534,9 @@
 		if (isDirty && !(await save())) return;
 		duplicating = true;
 		try {
-			const { id } = await duplicateProduct({ productId: product.id, name: duplicateName });
+			const { id } = await duplicateProduct({ productId: product.id, name: duplicateName }).updates(
+				...EQUIPMENT_VIEWS
+			);
 			duplicateOpen = false;
 			toast.success('Product duplicated');
 			await goto(resolve(`products/${id}`));

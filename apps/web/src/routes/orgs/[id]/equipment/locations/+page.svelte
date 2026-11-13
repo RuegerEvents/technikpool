@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { EQUIPMENT_VIEWS } from '#lib/equipment-views.js';
 	import { getErrorMessage, orgLabel, plural } from '#lib/utils.js';
 	import * as Card from '#lib/components/ui/card/index.js';
 	import { Button } from '#lib/components/ui/button/index.js';
@@ -115,7 +116,9 @@
 		if (!mergeSource || !mergeTargetId) return;
 		merging = true;
 		try {
-			await mergeLocations({ sourceId: mergeSource.id, targetId: mergeTargetId });
+			await mergeLocations({ sourceId: mergeSource.id, targetId: mergeTargetId }).updates(
+				...EQUIPMENT_VIEWS
+			);
 			toast.success('Locations merged');
 			mergeSource = null;
 		} catch (err) {

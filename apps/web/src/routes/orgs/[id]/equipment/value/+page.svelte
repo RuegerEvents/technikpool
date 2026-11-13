@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { EQUIPMENT_VIEWS } from '#lib/equipment-views.js';
 	import { categoryLabel } from '#lib/category.js';
 	import { naturalCompare } from '#lib/sort.js';
 	import { makerAndName } from '#lib/product-label.js';
@@ -47,7 +48,9 @@
 		saving.add(productId);
 		try {
 			// The command refreshes getOrgEquipmentValue itself.
-			await setOrgProductPrice({ organizationId: orgId, productId, netPurchasePrice });
+			await setOrgProductPrice({ organizationId: orgId, productId, netPurchasePrice }).updates(
+				...EQUIPMENT_VIEWS
+			);
 		} catch (err) {
 			drafts.set(productId, raw);
 			toast.error(getErrorMessage(err));

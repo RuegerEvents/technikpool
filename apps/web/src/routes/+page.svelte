@@ -18,7 +18,7 @@
 	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
 	import { getStocktakes } from '#lib/remote/stocktakes.remote.js';
 	import { getHandoverTodos } from '#lib/remote/production-checks.remote.js';
-	import { getPackTodos } from '#lib/remote/production-handout.remote.js';
+	import { getPackTodos, getReturnTodos } from '#lib/remote/production-handout.remote.js';
 	import { getBillingTodos } from '#lib/remote/billing.remote.js';
 	import { BillingTodoActions } from '#lib/components/billing-todo/index.js';
 	import StocktakeProgress from '#lib/components/stocktake-progress.svelte';
@@ -38,7 +38,8 @@
 		ReceiptText,
 		PackageCheck,
 		PackageOpen,
-		Undo2
+		Undo2,
+		PackageX
 	} from '@lucide/svelte';
 
 	let { data } = $props();
@@ -86,6 +87,9 @@
 	// Our units another org's production has booked, starting within the week.
 	let packQuery = $derived(active ? getPackTodos() : null);
 	let toPack = $derived(packQuery?.current ?? []);
+	// Our units still out on a production that is over — forgotten take-backs.
+	let returnQuery = $derived(active ? getReturnTodos() : null);
+	let toReturn = $derived(returnQuery?.current ?? []);
 	// Productions our orgs still have to invoice — to a customer, or to the
 	// org we lent to. See services/billing-todos.ts.
 	let billingQuery = $derived(active ? getBillingTodos() : null);
@@ -114,6 +118,7 @@
 			!!awaitingQuery?.ready &&
 			!!handoverQuery?.ready &&
 			!!packQuery?.ready &&
+			!!returnQuery?.ready &&
 			!!billingQuery?.ready
 	);
 	let attention = $derived.by(() => {
@@ -183,6 +188,16 @@
 				label: 'To pack for others',
 				hint: 'Lent out, starting within a week',
 				href: '#pack',
+				tone: 'amber'
+			});
+		const returnCount = toReturn.reduce((sum, p) => sum + p.count, 0);
+		if (returnCount > 0)
+			items.push({
+				key: 'return',
+				count: returnCount,
+				label: 'Still to take back',
+				hint: 'Event over, units still out',
+				href: '#return',
 				tone: 'amber'
 			});
 		if (toBill.length > 0)
@@ -763,6 +778,41 @@
 										</div>
 										<span class="shrink-0 text-xs text-muted-foreground"
 											>{formatDate(p.startDate)}</span
+										>
+									</a>
+								{/each}
+							</div>
+						</Card.Root>
+					</section>
+				{/if}
+
+				<!-- Our units still checked out to a production that is over: the
+				     take-back that was forgotten, or is still to come. -->
+				{#if toReturn.length > 0}
+					<section id="return" class="scroll-mt-20">
+						<h2 class="mb-3 text-lg font-semibold">Still to take back</h2>
+						<Card.Root class="gap-0 overflow-hidden py-0">
+							<div class="divide-y">
+								{#each toReturn as p (`${p.productionId}:${p.organizationId}`)}
+									<!-- resolve() takes a path only; the query is the owner's side. -->
+									<!-- eslint-disable svelte/no-navigation-without-resolve -->
+									<a
+										href={`${resolve(`productions/${p.productionId}/checkin`)}?org=${encodeURIComponent(p.organizationId)}`}
+										class="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-muted/40"
+									>
+										<!-- eslint-enable svelte/no-navigation-without-resolve -->
+										<PackageX aria-hidden="true" class="size-4 shrink-0 text-amber-500" />
+										<div class="min-w-0 flex-1">
+											<p class="truncate text-sm font-medium">{p.productionName}</p>
+											<p class="truncate text-xs text-muted-foreground">
+												{p.organizationName} · {plural(p.count, [
+													'1 unit still out',
+													'# units still out'
+												])}
+											</p>
+										</div>
+										<span class="shrink-0 text-xs text-muted-foreground"
+											>{formatDate(p.endDate)}</span
 										>
 									</a>
 								{/each}

@@ -56,6 +56,30 @@ export const createProduction = command(schema, async (data) => {
 });
 ```
 
+**A `.refresh()` inside a command runs that query on the server and ships its result in the
+response, whether any page shows it or not.** For a heavy list (`getAssets`, `getBundles`,
+`getBundleTemplates`, `getInventorySummary`, `getProducts`, `getProductCatalog`) that is
+megabytes per click: one tick on the take-back list sent 2.2 MB, which over a slow line took
+over ten seconds. So the page names what it holds and the server refreshes only that:
+`command(…).updates(...EQUIPMENT_VIEWS)` on the client (`#lib/equipment-views.ts`) with
+`refreshEquipmentViews(change)` on the server (`src/lib/remote/equipment-views.ts`), and the same
+for products with `PRODUCT_VIEWS` / `refreshProductViews`. The server side handles every
+query in the list (refresh or `ignore()`), because one the client names and the server
+leaves alone fails on the client. Every command that touches units, kits, the catalogue,
+inspections or a stocktake's corrections goes through it — **a new one does too, and every call
+site passes the list**; a call without it refreshes nothing on that page. Light, single-record
+queries (`getBundleTypeSpec`, `getLocations`, a product's own manufacturer list) are still
+refreshed directly.
+
+**What a list query returns is sent once per row.** Never `organization: true` where units, kits or
+productions are listed: the row carries the org's IBAN, tax number and billing templates, and went
+to every member, a DEVICE_VIEWER included — use `ORG_SUMMARY_SELECT`
+(`services/org-summary.ts`). `getMyOrgs`/`getOrg` blank those fields below ADMIN (`orgForRole`).
+The heavy lists carry products and shelves as `LIST_PRODUCT` / `LIST_LOCATION` (no timestamps)
+and return through `shareRepeated` (`services/share-repeated.ts`), which makes rows naming the
+same product, shelf or org share one object, so devalue writes it once: the device list went
+from 627 to 248 KB on 234 units.
+
 Auth guard pattern used in every remote file:
 
 ```ts

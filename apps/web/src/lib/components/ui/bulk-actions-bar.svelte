@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { EQUIPMENT_VIEWS } from '#lib/equipment-views.js';
 	import { LocationSelect } from '#lib/components/ui/location-select/index.js';
 	import { getErrorMessage, orgLabel, plural } from '#lib/utils.js';
 	import { Button } from '#lib/components/ui/button/index.js';
@@ -89,7 +90,7 @@
 				assetIds: [...selectedIds],
 				targetType,
 				targetId
-			});
+			}).updates(...EQUIPMENT_VIEWS);
 			toast.success(
 				`${result.count} asset${result.count !== 1 ? 's' : ''} checked out to ${result.targetName}`
 			);
@@ -124,7 +125,7 @@
 			const result = await bulkUpdateAssetStatus({
 				assetIds: [...selectedIds],
 				status: newStatus
-			});
+			}).updates(...EQUIPMENT_VIEWS);
 			const label = assetStatusLabel(result.status);
 			toast.success(
 				result.updated === 0

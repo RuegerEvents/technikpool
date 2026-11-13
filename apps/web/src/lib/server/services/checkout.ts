@@ -201,6 +201,64 @@ const RETURNED_FROM_SELECT = {
 	organization: { select: { name: true, shortName: true } }
 } as const;
 
+/**
+ * Puts units on a shelf inside `tx`: the move, its history, and for those out
+ * on a production the return — booking closed, out of its pack case, history,
+ * and the visual check that a return without a reported defect counts as.
+ * Shared by the single scan and the batch, in a fixed number of statements.
+ */
+async function bookOntoLocation(
+	tx: Prisma.TransactionClient,
+	userId: string,
+	location: { id: string; name: string },
+	assetIds: string[],
+	checkedOutItems: {
+		id: string;
+		assetId: string;
+		production: { id: string; name: string };
+	}[]
+) {
+	await tx.asset.updateMany({
+		where: { id: { in: assetIds } },
+		data: { locationId: location.id }
+	});
+	await tx.assetTransaction.createMany({
+		data: assetIds.map((assetId) => ({
+			assetId,
+			userId,
+			action: 'LOCATION_ASSIGNED',
+			data: { type: 'LOCATION_ASSIGNED', locationId: location.id, locationName: location.name }
+		}))
+	});
+	if (checkedOutItems.length === 0) return;
+	// Back is out of its case: the case is empty once all of it is back.
+	await tx.productionItem.updateMany({
+		where: { id: { in: checkedOutItems.map((item) => item.id) } },
+		data: { status: 'RETURNED', packedInItemId: null }
+	});
+	await tx.assetTransaction.createMany({
+		data: checkedOutItems.map((item) => ({
+			assetId: item.assetId,
+			userId,
+			productionId: item.production.id,
+			action: 'RETURNED',
+			data: {
+				type: 'RETURNED',
+				fromProductionId: item.production.id,
+				fromProductionName: item.production.name,
+				toLocationId: location.id,
+				toLocationName: location.name
+			}
+		}))
+	});
+	// Booked back without a defect reported: looked at and found fine.
+	await recordReturnChecks(
+		tx,
+		userId,
+		checkedOutItems.map((item) => item.assetId)
+	);
+}
+
 // Deduped: the parent and each of its accessories were on the same production,
 // and the scanner reports one return, not five. Named by `visibleProductionName`,
 // because the production a unit comes back from may be another org's.
@@ -711,49 +769,7 @@ export async function performScan(
 		});
 
 		await prisma.$transaction(async (tx) => {
-			await tx.asset.updateMany({
-				where: { id: { in: touchedIds } },
-				data: { locationId: input.targetId }
-			});
-
-			await tx.assetTransaction.createMany({
-				data: touchedIds.map((assetId) => ({
-					assetId,
-					userId,
-					action: 'LOCATION_ASSIGNED',
-					data: { type: 'LOCATION_ASSIGNED', locationId: location.id, locationName: location.name }
-				}))
-			});
-
-			for (const item of checkedOutItems) {
-				// Back is out of its case: the case is empty once all of it is back.
-				await tx.productionItem.update({
-					where: { id: item.id },
-					data: { status: 'RETURNED', packedInItemId: null }
-				});
-				await tx.assetTransaction.create({
-					data: {
-						assetId: item.assetId,
-						userId,
-						productionId: item.production.id,
-						action: 'RETURNED',
-						data: {
-							type: 'RETURNED',
-							fromProductionId: item.production.id,
-							fromProductionName: item.production.name,
-							toLocationId: location.id,
-							toLocationName: location.name
-						}
-					}
-				});
-			}
-
-			// Booked back without a defect reported: looked at and found fine.
-			await recordReturnChecks(
-				tx,
-				userId,
-				checkedOutItems.map((i) => i.assetId)
-			);
+			await bookOntoLocation(tx, userId, location, touchedIds, checkedOutItems);
 
 			// A bundle's location follows the assets inside it.
 			if (asset.bundleId) {
@@ -1223,75 +1239,53 @@ export async function performBulkCheckout(
 		// Only move a bundle's location when the whole bundle is in this batch —
 		// a half-moved bundle isn't anywhere in particular.
 		const bundleIds = [...new Set(assets.map((a) => a.bundleId).filter(Boolean))] as string[];
-		const movedBundleIds: string[] = [];
-		for (const bundleId of bundleIds) {
-			const bundleAssets = await prisma.asset.findMany({
-				where: { bundleId },
-				select: { id: true }
-			});
-			if (bundleAssets.every((ba) => assetIds.includes(ba.id))) movedBundleIds.push(bundleId);
-		}
+		const picked = new Set(assetIds);
+		const bundleMembers = bundleIds.length
+			? await prisma.asset.findMany({
+					where: { bundleId: { in: bundleIds } },
+					select: { id: true, bundleId: true }
+				})
+			: [];
+		const movedBundleIds = bundleIds.filter((bundleId) =>
+			bundleMembers.every((m) => m.bundleId !== bundleId || picked.has(m.id))
+		);
 
-		for (const asset of assets) {
-			if (!(await canPlaceAt(userId, location, asset.organizationId))) {
+		// Asked once per owning org, not once per unit.
+		for (const organizationId of new Set(assets.map((a) => a.organizationId))) {
+			if (!(await canPlaceAt(userId, location, organizationId))) {
 				throw new CheckoutError(
 					'wrong_organization',
 					'Location belongs to a different organisation'
 				);
 			}
+		}
 
-			const checkedOutItems = await prisma.productionItem.findMany({
-				where: { assetId: asset.id, status: 'CHECKED_OUT' },
-				include: { production: { select: RETURNED_FROM_SELECT } }
-			});
+		const checkedOutItems = await prisma.productionItem.findMany({
+			where: { assetId: { in: assets.map((a) => a.id) }, status: 'CHECKED_OUT' },
+			include: { production: { select: RETURNED_FROM_SELECT } }
+		});
 
-			await prisma.$transaction(async (tx) => {
-				await tx.asset.update({ where: { id: asset.id }, data: { locationId: input.targetId } });
-				await tx.assetTransaction.create({
-					data: {
-						assetId: asset.id,
-						userId,
-						action: 'LOCATION_ASSIGNED',
-						data: {
-							type: 'LOCATION_ASSIGNED',
-							locationId: location.id,
-							locationName: location.name
-						}
-					}
+		// One transaction for the batch, a handful of statements whatever its
+		// size. It was one per unit, each with its own reads and writes — a kit
+		// of forty went through some two hundred round trips — and a failure
+		// halfway left the first half moved.
+		await prisma.$transaction(async (tx) => {
+			await bookOntoLocation(
+				tx,
+				userId,
+				location,
+				assets.map((a) => a.id),
+				checkedOutItems
+			);
+			if (movedBundleIds.length > 0) {
+				await tx.assetBundle.updateMany({
+					where: { id: { in: movedBundleIds } },
+					data: { locationId: input.targetId }
 				});
-				for (const item of checkedOutItems) {
-					await tx.productionItem.update({
-						where: { id: item.id },
-						data: { status: 'RETURNED', packedInItemId: null }
-					});
-					await tx.assetTransaction.create({
-						data: {
-							assetId: asset.id,
-							userId,
-							productionId: item.production.id,
-							action: 'RETURNED',
-							data: {
-								type: 'RETURNED',
-								fromProductionId: item.production.id,
-								fromProductionName: item.production.name,
-								toLocationId: location.id,
-								toLocationName: location.name
-							}
-						}
-					});
-				}
-				if (checkedOutItems.length > 0) await recordReturnChecks(tx, userId, [asset.id]);
-			});
+			}
+		});
 
-			mergeAffected(affected, { productionIds: checkedOutItems.map((i) => i.production.id) });
-		}
-
-		if (movedBundleIds.length > 0) {
-			await prisma.assetBundle.updateMany({
-				where: { id: { in: movedBundleIds } },
-				data: { locationId: input.targetId }
-			});
-		}
+		mergeAffected(affected, { productionIds: checkedOutItems.map((i) => i.production.id) });
 		// Every bundle a unit left, moved or not: the bundle views place a case by
 		// where its units are, so a half-moved one reads differently too.
 		mergeAffected(affected, { bundleIds });

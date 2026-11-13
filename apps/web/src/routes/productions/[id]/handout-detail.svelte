@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { EQUIPMENT_VIEWS } from '#lib/equipment-views.js';
 	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
 	import * as Card from '#lib/components/ui/card/index.js';
@@ -123,7 +124,7 @@
 				organizationId,
 				caseAssetId,
 				...selection
-			});
+			}).updates(...EQUIPMENT_VIEWS);
 			return count;
 		} catch (err) {
 			toast.error(getErrorMessage(err));
@@ -273,7 +274,9 @@
 		if (!defectTarget) return;
 		reportingDefect = true;
 		try {
-			await reportDefect({ assetId: defectTarget.assetId, notes: defectNotes });
+			await reportDefect({ assetId: defectTarget.assetId, notes: defectNotes }).updates(
+				...EQUIPMENT_VIEWS
+			);
 			defectsReported.add(defectTarget.assetId);
 			toast.success('Defect reported · the unit is in maintenance');
 			defectOpen = false;
@@ -311,7 +314,13 @@
 	async function apply(assetIds: string[], done: boolean) {
 		if (assetIds.length === 0) return;
 		try {
-			await setProductionHandoutDone({ productionId, mode, organizationId, assetIds, done });
+			await setProductionHandoutDone({
+				productionId,
+				mode,
+				organizationId,
+				assetIds,
+				done
+			}).updates(...EQUIPMENT_VIEWS);
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 		}
@@ -325,7 +334,7 @@
 				organizationId,
 				key: line.key,
 				count: n
-			});
+			}).updates(...EQUIPMENT_VIEWS);
 		} catch (err) {
 			toast.error(getErrorMessage(err));
 		}
@@ -376,7 +385,7 @@
 			organizationId,
 			code: value,
 			packInto: mode === 'checkout' ? (openCase?.assetId ?? null) : null
-		});
+		}).updates(...EQUIPMENT_VIEWS);
 		if (result.packCase) {
 			return mode === 'checkout' ? caseScanned(result.packCase) : caseReturned(result.packCase);
 		}
@@ -452,7 +461,7 @@
 						organizationId,
 						assetIds: rest.map((u) => u.id),
 						done: true
-					});
+					}).updates(...EQUIPMENT_VIEWS);
 				}
 			};
 		}

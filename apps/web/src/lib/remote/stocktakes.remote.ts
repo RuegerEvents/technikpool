@@ -26,7 +26,7 @@ import {
 	tickStocktakeItems,
 	untickStocktakeItem
 } from '#lib/server/services/stocktake.js';
-import { getAsset, getAssets, getAssetHistory } from './assets.remote';
+import { refreshEquipmentViews } from './equipment-views';
 
 // The web's door to stocktakes. The rules are in services/stocktake.ts, shared
 // with /api/v1; this file turns its errors into the app's codes and refreshes
@@ -257,9 +257,11 @@ export const applyStocktakeAction = command(
 		const result = await withStocktakeErrors(() => applyAction(user.id, stocktakeId, action));
 		await Promise.all([
 			getStocktake(stocktakeId).refresh(),
-			...result.assetIds.flatMap((id) => [getAsset(id).refresh(), getAssetHistory(id).refresh()]),
-			getAssets(result.organizationId).refresh(),
-			getAssets().refresh()
+			refreshEquipmentViews({
+				assetIds: result.assetIds,
+				organizationIds: [result.organizationId],
+				inventory: true
+			})
 		]);
 		return { changed: result.changed };
 	}

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { EQUIPMENT_VIEWS } from '#lib/equipment-views.js';
 	import { matchesSearch } from '#lib/search.js';
 	// The inspection quick mode of /products: the whole catalog as one table,
 	// filtered by category and by whether a product needs one inspection type, so
@@ -122,7 +123,7 @@
 				productIds,
 				typeId,
 				required: valueOf(choice)
-			});
+			}).updates(...EQUIPMENT_VIEWS);
 			if (result.refused.length > 0) {
 				toast.warning(
 					`${plural(result.refused.length, [

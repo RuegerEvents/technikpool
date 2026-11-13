@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { EQUIPMENT_VIEWS } from '#lib/equipment-views.js';
 	// The inspection types, shared by every organization and kept by system
 	// admins like categories. Which products need a type is set per category
 	// and product; an org's interval per type in its settings. The default
@@ -75,7 +76,7 @@
 				typeId: t.id,
 				name: draft.name,
 				...fields(draft)
-			});
+			}).updates(...EQUIPMENT_VIEWS);
 			drafts.delete(t.id);
 			toast.success(
 				result.unitsChanged > 0

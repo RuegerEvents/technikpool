@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { EQUIPMENT_VIEWS } from '#lib/equipment-views.js';
 	import { CableColorDot } from '#lib/components/ui/cable-color/index.js';
 	import { matchesSearch } from '#lib/search.js';
 	import { naturalCompare } from '#lib/sort.js';
@@ -568,7 +569,10 @@
 		if (!pendingAction) return;
 		working = true;
 		try {
-			const { changed } = await applyStocktakeAction({ stocktakeId, action: pendingAction });
+			const { changed } = await applyStocktakeAction({
+				stocktakeId,
+				action: pendingAction
+			}).updates(...EQUIPMENT_VIEWS);
 			toast.success(plural(changed, ['# unit changed', '# units changed']));
 			pendingAction = null;
 		} catch (err) {

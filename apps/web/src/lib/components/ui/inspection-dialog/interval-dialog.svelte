@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { EQUIPMENT_VIEWS } from '#lib/equipment-views.js';
 	// A unit's own interval of one inspection type, for a selection of units —
 	// the exception to what their org gives them for the product. Empty drops
 	// it, so they follow the org again. Their due dates follow from the interval
@@ -45,7 +46,7 @@
 				assetIds,
 				typeId: pickedTypeId,
 				intervalMonths: months ? Number(months) : null
-			});
+			}).updates(...EQUIPMENT_VIEWS);
 			toast.success(
 				result.updated === 0
 					? 'Already set — nothing changed'
