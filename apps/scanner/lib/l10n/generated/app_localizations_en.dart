@@ -1717,4 +1717,127 @@ class SEn extends S {
   String historySwapLoose(String partner) {
     return 'With $partner, now loose';
   }
+
+  @override
+  String packCase(String title) {
+    return 'Case $title';
+  }
+
+  @override
+  String packCaseInside(String number) {
+    return 'in case $number';
+  }
+
+  @override
+  String get packCaseOpenNote => 'open';
+
+  @override
+  String get packLoose => 'Loose';
+
+  @override
+  String packOpenBanner(String title) {
+    return 'Packing into case $title';
+  }
+
+  @override
+  String get packOpenHint =>
+      'What you scan goes into it and out with it. Scan another case to switch.';
+
+  @override
+  String get packClose => 'Close case';
+
+  @override
+  String get packOpen => 'Pack into this case';
+
+  @override
+  String packOpened(String title) {
+    return 'Case $title is open';
+  }
+
+  @override
+  String get packScanNext => 'What you scan now goes into it.';
+
+  @override
+  String get packChoiceTitle => 'Another case';
+
+  @override
+  String packChoiceQuestion(String open, String scanned) {
+    return 'Case $open is open. Does case $scanned go into it, or do you want to pack case $scanned now?';
+  }
+
+  @override
+  String get packChoiceInto => 'Put it in';
+
+  @override
+  String get packChoiceSwitch => 'Open it instead';
+
+  @override
+  String packNested(String inner, String outer) {
+    return 'Case $inner is in case $outer';
+  }
+
+  @override
+  String packInto(String number) {
+    return 'Into case $number';
+  }
+
+  @override
+  String packTakeOut(String number) {
+    return 'Take out of case $number';
+  }
+
+  @override
+  String packReturned(String title) {
+    return 'Returned: case $title';
+  }
+
+  @override
+  String get packReturnedQuestion =>
+      'The case is back. Is all of this back in it? Untick what is missing; it stays out.';
+
+  @override
+  String get packNothingElse => 'Nothing else is in it.';
+
+  @override
+  String packStaysOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count entries stay out',
+      one: '1 entry stays out',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get packAllBack => 'Everything in it is back.';
+
+  @override
+  String get errorNotAPackCase => 'That is no pack case on this production.';
+
+  @override
+  String get errorPackCircle =>
+      'A case cannot go into itself or into something packed inside it.';
+
+  @override
+  String bundleNumberFromCase(String number) {
+    return 'Number: $number';
+  }
+
+  @override
+  String bundleExtraCases(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count more containers in it — the lowest unit number is its case',
+      one: '1 more container in it — the lowest unit number is its case',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String caseOfKit(String kit) {
+    return 'Case of $kit';
+  }
 }

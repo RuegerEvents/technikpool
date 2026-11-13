@@ -79,7 +79,10 @@ class AssetDetailView extends StatelessWidget {
         if (asset.currentProduction != null)
           _row(context, l10n.checkedOutTo, asset.currentProduction!.name),
         if (asset.kit case final kit?)
-          _row(context, l10n.lookupKit, [kit.name, ?kit.tag].join(' · ')),
+          // A container in a kit is its case: its tag stands for the kit.
+          asset.isBundleCase == true
+              ? _row(context, l10n.lookupKit, l10n.caseOfKit(kit.name))
+              : _row(context, l10n.lookupKit, [kit.name, ?kit.tag].join(' · ')),
         // A kit member or an accessory belongs to a case that can be checked.
         // A unit that *has* accessories can be too, but the detail doesn't
         // say so; scanning it on the case-check screen opens it all the same.

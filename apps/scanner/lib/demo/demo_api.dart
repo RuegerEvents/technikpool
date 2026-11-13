@@ -157,6 +157,10 @@ class DemoBackend {
     }
     // ['', 'api', 'v1', 'productions', id, 'handout', mode, sub?]
     final segments = path.split('/');
+    // ['', 'api', 'v1', 'productions', id, 'packing', caseAssetId?, 'label'?]
+    if (segments.length >= 6 && segments[3] == 'productions' && segments[5] == 'packing') {
+      return _packingRoute(options, method, segments);
+    }
     if (segments.length >= 7 && segments[3] == 'productions' && segments[5] == 'handout') {
       return _handoutRoute(options, method, segments);
     }
@@ -1036,7 +1040,9 @@ class DemoBackend {
     for (final a in list) {
       if (a.assetTag != null || a.bundleId != null || a.parentAssetId != null) continue;
       if (_units.any((u) => u.parentAssetId == a.id)) continue;
-      final key = '${a.product.id}|${a.location.id}|${a.organization.id}';
+      if (_isPackCase(a)) continue;
+      final key =
+          '${a.product.id}|${a.location.id}|${a.organization.id}|${_caseOf(a, production)?.assetId ?? ''}';
       byKey.putIfAbsent(key, () => []).add(a);
     }
     return [
@@ -1054,6 +1060,7 @@ class DemoBackend {
           total: units.length,
           done: units.where(done).length,
           floor: 0,
+          packCase: _caseOf(units.first, production),
         ),
     ];
   }
@@ -1211,9 +1218,11 @@ class DemoBackend {
         _handOut(asset, p);
       case (HandoutMode.checkout, false):
         _checkedOutTo.remove(asset.id);
+        _packedIn[p.id]?.remove(asset.id);
         _log(asset, 'CHECKOUT_UNDONE', p.name);
       default:
         _checkedOutTo.remove(asset.id);
+        _packedIn[p.id]?.remove(asset.id);
         (_returnedFrom[p.id] ??= {}).add(asset.id);
         _log(asset, 'RETURNED', p.name);
     }
@@ -1273,6 +1282,15 @@ class DemoBackend {
           final swap = partner == null ? null : _swap(asset, partner, production: production);
           if (partner != null) _booked[production.id]?.remove(partner.id);
           _handOut(_assets.firstWhere((a) => a.id == asset.id, orElse: () => asset), production);
+          // A pack case is opened by the client; anything else goes into the
+          // open one — see packScanned in services/production-handout.ts.
+          final packCase = _isPackCase(asset) ? _caseRef(asset) : null;
+          final packInto = body['packInto'] as String?;
+          final into = packCase == null && packInto != null ? byId[packInto] : null;
+          if (into != null && _isPackCase(into)) {
+            if (!_isOut(into, production)) _handOut(into, production);
+            (_packedIn[production.id] ??= {})[asset.id] = into.id;
+          }
           return _ok(
             options,
             ScanResult(
@@ -1281,6 +1299,8 @@ class DemoBackend {
               targetName: production.name,
               returnedFrom: const [],
               swap: swap,
+              packCase: packCase,
+              packedInto: into != null && _isPackCase(into) ? into.id : null,
             ),
           );
         }
@@ -1290,6 +1310,8 @@ class DemoBackend {
             ((_booked[production.id]?.contains(asset.id) ?? false) ? production : null);
         if (from != null) {
           (_returnedFrom[from.id] ??= {}).add(asset.id);
+          // Back is out of its case; a case's contents stay in it until they are.
+          _packedIn[from.id]?.remove(asset.id);
           _log(asset, 'RETURNED', from.name);
         }
         return _ok(
@@ -1299,6 +1321,7 @@ class DemoBackend {
             action: ScanResultAction.locationAssigned,
             targetName: asset.location.name,
             returnedFrom: from == null ? const [] : [from.name],
+            packCase: _isPackCase(asset) ? _caseRef(asset) : null,
           ),
         );
       case ('POST', 'ticks'):
@@ -1441,10 +1464,195 @@ class DemoBackend {
             done: _handoutDone(asset, p, mode),
             received: _received.contains(asset.id),
             returnReported: _returnReported.contains(asset.id),
+            packCase: _caseOf(asset, p),
+            isPackCase: _isPackCase(asset),
           ),
       ],
       lines: _lines(list, p, (a) => _handoutDone(a, p, mode)),
       othersCount: 0,
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Pack cases — mirrors packIntoCase in services/production-handout.ts. What
+  // is in which case, per production, by asset id.
+
+  final _packedIn = <String, Map<String, String>>{};
+
+  static const _containerProducts = {'prd_demo_transflex'};
+
+  /// A container in no kit is a pack case; in a kit it would be the kit's case.
+  bool _isPackCase(Asset a) =>
+      _containerProducts.contains(a.product.id) && a.bundleId == null;
+
+  PackCaseRef _caseRef(Asset a) => PackCaseRef(
+    assetId: a.id,
+    name: withCaption(a.product.name, a.product.caption),
+    tag: a.assetTag,
+    orgIndex: a.orgIndex ?? 0,
+  );
+
+  /// The case [a] is listed under on [p]: its own for a case, else the one it
+  /// is in — with the cases around it, outermost first.
+  PackCase? _caseOf(Asset a, Production p) {
+    final packed = _packedIn[p.id] ?? const <String, String>{};
+    final byId = {for (final u in _units) u.id: u};
+    final head = _isPackCase(a) ? a : byId[packed[a.id]];
+    if (head == null) return null;
+    final path = <PackCaseRef>[];
+    final seen = {head.id};
+    for (
+      var at = byId[packed[head.id]];
+      at != null && seen.add(at.id);
+      at = byId[packed[at.id]]
+    ) {
+      path.insert(0, _caseRef(at));
+    }
+    final ref = _caseRef(head);
+    return PackCase(
+      assetId: ref.assetId,
+      name: ref.name,
+      tag: ref.tag,
+      orgIndex: ref.orgIndex,
+      path: path,
+    );
+  }
+
+  Response<dynamic> _packingRoute(
+    RequestOptions options,
+    String method,
+    List<String> parts,
+  ) {
+    final production = DemoData.productions.where((p) => p.id == parts[4]).firstOrNull;
+    if (production == null) {
+      return _error(options, 403, 'forbidden', 'No access to this production');
+    }
+    final byId = {for (final a in _units) a.id: a};
+    if (method == 'GET' && parts.length == 8 && parts[7] == 'label') {
+      final c = byId[parts[6]];
+      if (c == null || !_isPackCase(c)) {
+        return _error(
+          options,
+          409,
+          'not_a_pack_case',
+          'That is no pack case on this production',
+        );
+      }
+      return _packLabel(options, production, c);
+    }
+    if (method != 'POST' || parts.length != 6) {
+      return _error(options, 404, 'not_found', 'Not available in the demo');
+    }
+    final body = options.data is Map ? options.data as Map : const {};
+    final packed = _packedIn[production.id] ??= {};
+    final ids = [...(body['assetIds'] as List? ?? const []).whereType<String>()];
+    // A nested model arrives as itself: a generated toJson is shallow.
+    final rawLine = body['line'];
+    final line = rawLine is ProductionListLineCount
+        ? rawLine
+        : rawLine is Map
+        ? ProductionListLineCount.fromJson(rawLine.cast<String, Object?>())
+        : null;
+    if (line != null) {
+      final key = line.key;
+      final count = line.count;
+      final found = _lines(
+        _handoutList(production, HandoutMode.checkout),
+        production,
+        (a) => _isOut(a, production),
+      ).where((l) => l.key == key).firstOrNull;
+      if (found != null) {
+        // The units already out first, then the rest — see pickToPack.
+        final units = [for (final id in found.assetIds) byId[id]!];
+        ids.addAll(
+          [
+            ...units.where((a) => _isOut(a, production)),
+            ...units.where((a) => !_isOut(a, production)),
+          ].take(count).map((a) => a.id),
+        );
+      }
+    }
+    final caseId = body['caseAssetId'] as String?;
+    if (caseId == null) {
+      for (final id in ids) {
+        packed.remove(id);
+      }
+      return _ok(options, HandoverResult(count: ids.length));
+    }
+    final target = byId[caseId];
+    if (target == null || !_isPackCase(target)) {
+      return _error(
+        options,
+        409,
+        'not_a_pack_case',
+        'That is no pack case on this production',
+      );
+    }
+    // Never a case into itself or into something it holds.
+    final seen = <String>{};
+    for (String? at = caseId; at != null && seen.add(at); at = packed[at]) {
+      if (ids.contains(at)) {
+        return _error(
+          options,
+          409,
+          'pack_circle',
+          'A case cannot go into itself or into something it holds',
+        );
+      }
+    }
+    if (!_isOut(target, production)) _handOut(target, production);
+    for (final id in ids) {
+      final asset = byId[id];
+      if (asset == null) continue;
+      if (!_isOut(asset, production)) _handOut(asset, production);
+      packed[id] = caseId;
+    }
+    return _ok(options, HandoverResult(count: ids.length));
+  }
+
+  Response<dynamic> _packLabel(RequestOptions options, Production p, Asset c) {
+    final small = options.queryParameters['size'] == 'small';
+    String field(String text) => text.replaceAll(RegExp(r'[\^~]'), ' ');
+    final (width, height) = small ? (80.0, 55.0) : (101.6, 152.4);
+    final number = c.assetTag ?? '#${c.orgIndex ?? 0}';
+    final inside = [
+      for (final MapEntry(:key, :value) in (_packedIn[p.id] ?? const {}).entries)
+        if (value == c.id) _units.firstWhere((u) => u.id == key),
+    ];
+    final zpl =
+        StringBuffer('^XA^CI28^PW${(width * 8).round()}^LL${(height * 8).round()}^LH0,0')
+          ..write('^FO32,32^A0N,96,96^FDKiste ${field(number)}^FS')
+          ..write('^FO32,140^A0N,34,34^FD${field('${p.name} · ${c.product.name}')}^FS');
+    if (c.assetTag != null) zpl.write('^FO32,200^BXN,14,200^FD${field(c.assetTag!)}^FS');
+    if (!small) {
+      var y = 420;
+      for (final unit in inside.take(16)) {
+        final name = _isPackCase(unit)
+            ? 'Kiste ${unit.assetTag ?? '#${unit.orgIndex ?? 0}'} (${unit.product.name})'
+            : unit.product.name;
+        zpl.write('^FO32,$y^A0N,30,30^FD1× ${field(name)}^FS');
+        y += 40;
+      }
+    }
+    zpl.write('^XZ');
+    final text = zpl.toString();
+    return _ok(
+      options,
+      CaseLabel(
+        size: small ? CaseLabelSize.small : CaseLabelSize.large,
+        zpl: text,
+        labelCount: 1,
+        widthMm: width,
+        heightMm: height,
+        dpmm: 8,
+        previewUrl: Uri.https('labelary.com', '/viewer.html', {
+          'density': '8',
+          'width': '$width',
+          'height': '$height',
+          'units': 'mm',
+          'zpl': text,
+        }).toString(),
+      ),
     );
   }
 

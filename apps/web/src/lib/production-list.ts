@@ -1,4 +1,7 @@
 import { naturalCompare } from '#lib/sort.js';
+import { compareCases, type ListCase } from '#lib/pack-cases.js';
+
+export type { ListCase };
 
 // The shape of a production's list (check, handout, return), shared by the
 // server that builds it and the page that draws it. The server half is
@@ -35,6 +38,11 @@ export interface ListLine {
 	done: number;
 	/** The lowest count this user can bring the line to: ticks of others stay. */
 	floor: number;
+	/**
+	 * The pack case its units are in. Part of the key, so a line splits when
+	 * only some of its units go into a case. Absent on lists built before cases.
+	 */
+	packCase?: ListCase | null;
 }
 
 /**
@@ -70,6 +78,8 @@ type ListedUnit = {
 	productName: string;
 	group: ListGroup;
 	kit: ListKit | null;
+	/** The pack case it is listed under — see `ListCase`. Absent on a list without cases. */
+	packCase?: ListCase | null;
 };
 
 export type ListRow<U> =
@@ -81,34 +91,28 @@ export type ListRow<U> =
 export interface ListSection<U> {
 	key: string;
 	group: ListGroup;
+	/**
+	 * A pack case's section: the case's own row first, then what is packed in
+	 * it. Null for the sections of what is loose, by shelf or lender as before.
+	 */
+	packCase: ListCase | null;
+	/** How many cases the case sits in; 0 for a case in none, and for loose sections. */
+	depth: number;
 	rows: ListRow<U>[];
 }
 
-/**
- * The list as the page draws it: sections in order, and within each the
- * counted lines slotted in among the units by name. The units that make up a
- * line are left out — the line stands for them. `items` arrive sorted by
- * section, each unit followed by its accessories.
- */
-export function listSections<U extends ListedUnit>(items: U[], lines: ListLine[]) {
-	const counted = new Set(lines.flatMap((l) => l.assetIds));
-	const sections = new Map<string, ListSection<U>>();
-	const section = (group: ListGroup) => {
-		const key = groupKey(group);
-		let s = sections.get(key);
-		if (!s) sections.set(key, (s = { key, group, rows: [] }));
-		return s;
-	};
+const NO_GROUP: ListGroup = { kind: 'none', name: null };
 
-	// Blocks of a unit and its accessories, so a line never lands between them;
-	// a kit is one block, headed by its name, holding all of its units.
+/**
+ * The rows of one section: blocks of a unit and its accessories, so a line
+ * never lands between them — a kit is one block, headed by its name, holding
+ * all of its units — and the counted lines slotted in among them by name.
+ */
+function rowsOf<U extends ListedUnit>(units: U[], lines: ListLine[], counted: Set<string>) {
 	type Block = { id: string | null; kitId: string | null; name: string; rows: ListRow<U>[] };
-	const blocks = new Map<string, Block[]>();
-	for (const unit of items) {
+	const list: Block[] = [];
+	for (const unit of units) {
 		if (counted.has(unit.assetId)) continue;
-		const key = groupKey(unit.group);
-		section(unit.group);
-		const list = blocks.get(key) ?? [];
 		const last = list.at(-1);
 		if (unit.accessoryOf && last?.id === unit.accessoryOf) {
 			last.rows.push({ kind: 'unit', unit });
@@ -135,25 +139,98 @@ export function listSections<U extends ListedUnit>(items: U[], lines: ListLine[]
 				rows: [{ kind: 'unit', unit }]
 			});
 		}
-		blocks.set(key, list);
 	}
 	for (const line of lines) {
-		const key = groupKey(line.group);
-		section(line.group);
-		const list = blocks.get(key) ?? [];
 		const at = list.findIndex((b) => naturalCompare(b.name, line.productName) > 0);
-		const block = {
+		const block: Block = {
 			id: null,
 			kitId: null,
 			name: line.productName,
-			rows: [{ kind: 'line', line } as ListRow<U>]
+			rows: [{ kind: 'line', line }]
 		};
 		if (at === -1) list.push(block);
 		else list.splice(at, 0, block);
-		blocks.set(key, list);
+	}
+	return list.flatMap((b) => b.rows);
+}
+
+/**
+ * The list as the page draws it: first a section per pack case, a case inside
+ * another right after it (`depth` says how far in), each headed by the case's
+ * own row; then what is loose, in sections by shelf and lender as always.
+ * Within each, the counted lines are slotted in among the units by name, and
+ * the units that make up a line are left out — the line stands for them.
+ * `items` arrive sorted by section, each unit followed by its accessories.
+ */
+export function listSections<U extends ListedUnit>(
+	items: U[],
+	lines: (ListLine & { packCase?: ListCase | null })[]
+): ListSection<U>[] {
+	const counted = new Set(lines.flatMap((l) => l.assetIds));
+
+	// The cases, the ones around them included, so a case inside one this list
+	// has nothing of still reads as inside it.
+	const cases = new Map<string, { packCase: ListCase; units: U[]; lines: ListLine[] }>();
+	const caseEntry = (c: ListCase) => {
+		c.path.forEach((ref, i) => {
+			if (!cases.has(ref.assetId)) {
+				cases.set(ref.assetId, {
+					packCase: { ...ref, path: c.path.slice(0, i) },
+					units: [],
+					lines: []
+				});
+			}
+		});
+		let entry = cases.get(c.assetId);
+		if (!entry) cases.set(c.assetId, (entry = { packCase: c, units: [], lines: [] }));
+		return entry;
+	};
+	const looseUnits: U[] = [];
+	const looseLines: ListLine[] = [];
+	for (const unit of items) {
+		if (unit.packCase) caseEntry(unit.packCase).units.push(unit);
+		else looseUnits.push(unit);
+	}
+	for (const line of lines) {
+		if (line.packCase) caseEntry(line.packCase).lines.push(line);
+		else looseLines.push(line);
 	}
 
-	return [...sections.values()]
-		.sort((a, b) => compareGroups(a.group, b.group))
-		.map((s) => ({ ...s, rows: (blocks.get(s.key) ?? []).flatMap((b) => b.rows) }));
+	const caseSections: ListSection<U>[] = [...cases.values()]
+		.sort((a, b) => compareCases(a.packCase, b.packCase))
+		.map(({ packCase, units, lines }) => {
+			const own = units.filter((u) => u.assetId === packCase.assetId);
+			const rest = units.filter((u) => u.assetId !== packCase.assetId);
+			return {
+				key: `case:${packCase.assetId}`,
+				group: own[0]?.group ?? NO_GROUP,
+				packCase,
+				depth: packCase.path.length,
+				rows: rowsOf([...own, ...rest], lines, counted)
+			};
+		});
+
+	const groups = new Map<string, { group: ListGroup; units: U[]; lines: ListLine[] }>();
+	const groupEntry = (group: ListGroup) => {
+		const key = groupKey(group);
+		let entry = groups.get(key);
+		if (!entry) groups.set(key, (entry = { group, units: [], lines: [] }));
+		return entry;
+	};
+	for (const unit of looseUnits) {
+		// A unit a line stands for makes no section of its own.
+		if (!counted.has(unit.assetId)) groupEntry(unit.group).units.push(unit);
+	}
+	for (const line of looseLines) groupEntry(line.group).lines.push(line);
+	const looseSections: ListSection<U>[] = [...groups.entries()]
+		.sort(([, a], [, b]) => compareGroups(a.group, b.group))
+		.map(([key, { group, units, lines }]) => ({
+			key,
+			group,
+			packCase: null,
+			depth: 0,
+			rows: rowsOf(units, lines, counted)
+		}));
+
+	return [...caseSections, ...looseSections];
 }

@@ -71,7 +71,9 @@ abstract class CaseCheckClient {
   /// the server never talks to a printer.
   ///
   /// `large` is a 4×6″ shipping label, `small` an 80×55 mm one with no.
-  /// contents list. A case without a tag prints without a code. Anyone who.
+  /// contents list. A kit's code is its own tag, else the tag of its case.
+  /// (the container unit in it, `BundleDetail.caseUnitId`); a case with.
+  /// neither prints without a code. Anyone who.
   /// sees the equipment may print one.
   @GET('/api/v1/case-checks/{kind}/{id}/label')
   Future<CaseLabel> getCaseLabel({

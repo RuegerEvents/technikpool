@@ -385,6 +385,7 @@ export const ProductScalarFieldEnum = {
 	lengthCm: 'lengthCm',
 	isLicense: 'isLicense',
 	notInterchangeable: 'notInterchangeable',
+	isContainer: 'isContainer',
 	createdById: 'createdById',
 	createdAt: 'createdAt',
 	updatedAt: 'updatedAt'
@@ -558,7 +559,8 @@ export const ProductionItemScalarFieldEnum = {
 	returnReportedAt: 'returnReportedAt',
 	returnReportedById: 'returnReportedById',
 	loanRequestId: 'loanRequestId',
-	freeOfCharge: 'freeOfCharge'
+	freeOfCharge: 'freeOfCharge',
+	packedInItemId: 'packedInItemId'
 } as const;
 
 export type ProductionItemScalarFieldEnum =

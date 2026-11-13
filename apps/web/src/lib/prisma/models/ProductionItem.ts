@@ -37,6 +37,7 @@ export type ProductionItemMinAggregateOutputType = {
 	returnReportedById: string | null;
 	loanRequestId: string | null;
 	freeOfCharge: boolean | null;
+	packedInItemId: string | null;
 };
 
 export type ProductionItemMaxAggregateOutputType = {
@@ -52,6 +53,7 @@ export type ProductionItemMaxAggregateOutputType = {
 	returnReportedById: string | null;
 	loanRequestId: string | null;
 	freeOfCharge: boolean | null;
+	packedInItemId: string | null;
 };
 
 export type ProductionItemCountAggregateOutputType = {
@@ -67,6 +69,7 @@ export type ProductionItemCountAggregateOutputType = {
 	returnReportedById: number;
 	loanRequestId: number;
 	freeOfCharge: number;
+	packedInItemId: number;
 	_all: number;
 };
 
@@ -83,6 +86,7 @@ export type ProductionItemMinAggregateInputType = {
 	returnReportedById?: true;
 	loanRequestId?: true;
 	freeOfCharge?: true;
+	packedInItemId?: true;
 };
 
 export type ProductionItemMaxAggregateInputType = {
@@ -98,6 +102,7 @@ export type ProductionItemMaxAggregateInputType = {
 	returnReportedById?: true;
 	loanRequestId?: true;
 	freeOfCharge?: true;
+	packedInItemId?: true;
 };
 
 export type ProductionItemCountAggregateInputType = {
@@ -113,6 +118,7 @@ export type ProductionItemCountAggregateInputType = {
 	returnReportedById?: true;
 	loanRequestId?: true;
 	freeOfCharge?: true;
+	packedInItemId?: true;
 	_all?: true;
 };
 
@@ -205,6 +211,7 @@ export type ProductionItemGroupByOutputType = {
 	returnReportedById: string | null;
 	loanRequestId: string | null;
 	freeOfCharge: boolean;
+	packedInItemId: string | null;
 	_count: ProductionItemCountAggregateOutputType | null;
 	_min: ProductionItemMinAggregateOutputType | null;
 	_max: ProductionItemMaxAggregateOutputType | null;
@@ -239,6 +246,7 @@ export type ProductionItemWhereInput = {
 	returnReportedById?: Prisma.StringNullableFilter<'ProductionItem'> | string | null;
 	loanRequestId?: Prisma.StringNullableFilter<'ProductionItem'> | string | null;
 	freeOfCharge?: Prisma.BoolFilter<'ProductionItem'> | boolean;
+	packedInItemId?: Prisma.StringNullableFilter<'ProductionItem'> | string | null;
 	production?: Prisma.XOR<Prisma.ProductionScalarRelationFilter, Prisma.ProductionWhereInput>;
 	asset?: Prisma.XOR<Prisma.AssetScalarRelationFilter, Prisma.AssetWhereInput>;
 	sourceBundle?: Prisma.XOR<
@@ -254,6 +262,11 @@ export type ProductionItemWhereInput = {
 		Prisma.LoanRequestNullableScalarRelationFilter,
 		Prisma.LoanRequestWhereInput
 	> | null;
+	packedIn?: Prisma.XOR<
+		Prisma.ProductionItemNullableScalarRelationFilter,
+		Prisma.ProductionItemWhereInput
+	> | null;
+	packedItems?: Prisma.ProductionItemListRelationFilter;
 };
 
 export type ProductionItemOrderByWithRelationInput = {
@@ -269,12 +282,15 @@ export type ProductionItemOrderByWithRelationInput = {
 	returnReportedById?: Prisma.SortOrderInput | Prisma.SortOrder;
 	loanRequestId?: Prisma.SortOrderInput | Prisma.SortOrder;
 	freeOfCharge?: Prisma.SortOrder;
+	packedInItemId?: Prisma.SortOrderInput | Prisma.SortOrder;
 	production?: Prisma.ProductionOrderByWithRelationInput;
 	asset?: Prisma.AssetOrderByWithRelationInput;
 	sourceBundle?: Prisma.AssetBundleOrderByWithRelationInput;
 	receivedBy?: Prisma.UserOrderByWithRelationInput;
 	returnReportedBy?: Prisma.UserOrderByWithRelationInput;
 	loanRequest?: Prisma.LoanRequestOrderByWithRelationInput;
+	packedIn?: Prisma.ProductionItemOrderByWithRelationInput;
+	packedItems?: Prisma.ProductionItemOrderByRelationAggregateInput;
 };
 
 export type ProductionItemWhereUniqueInput = Prisma.AtLeast<
@@ -295,6 +311,7 @@ export type ProductionItemWhereUniqueInput = Prisma.AtLeast<
 		returnReportedById?: Prisma.StringNullableFilter<'ProductionItem'> | string | null;
 		loanRequestId?: Prisma.StringNullableFilter<'ProductionItem'> | string | null;
 		freeOfCharge?: Prisma.BoolFilter<'ProductionItem'> | boolean;
+		packedInItemId?: Prisma.StringNullableFilter<'ProductionItem'> | string | null;
 		production?: Prisma.XOR<Prisma.ProductionScalarRelationFilter, Prisma.ProductionWhereInput>;
 		asset?: Prisma.XOR<Prisma.AssetScalarRelationFilter, Prisma.AssetWhereInput>;
 		sourceBundle?: Prisma.XOR<
@@ -310,6 +327,11 @@ export type ProductionItemWhereUniqueInput = Prisma.AtLeast<
 			Prisma.LoanRequestNullableScalarRelationFilter,
 			Prisma.LoanRequestWhereInput
 		> | null;
+		packedIn?: Prisma.XOR<
+			Prisma.ProductionItemNullableScalarRelationFilter,
+			Prisma.ProductionItemWhereInput
+		> | null;
+		packedItems?: Prisma.ProductionItemListRelationFilter;
 	},
 	'id' | 'productionId_assetId'
 >;
@@ -327,6 +349,7 @@ export type ProductionItemOrderByWithAggregationInput = {
 	returnReportedById?: Prisma.SortOrderInput | Prisma.SortOrder;
 	loanRequestId?: Prisma.SortOrderInput | Prisma.SortOrder;
 	freeOfCharge?: Prisma.SortOrder;
+	packedInItemId?: Prisma.SortOrderInput | Prisma.SortOrder;
 	_count?: Prisma.ProductionItemCountOrderByAggregateInput;
 	_max?: Prisma.ProductionItemMaxOrderByAggregateInput;
 	_min?: Prisma.ProductionItemMinOrderByAggregateInput;
@@ -353,6 +376,7 @@ export type ProductionItemScalarWhereWithAggregatesInput = {
 	returnReportedById?: Prisma.StringNullableWithAggregatesFilter<'ProductionItem'> | string | null;
 	loanRequestId?: Prisma.StringNullableWithAggregatesFilter<'ProductionItem'> | string | null;
 	freeOfCharge?: Prisma.BoolWithAggregatesFilter<'ProductionItem'> | boolean;
+	packedInItemId?: Prisma.StringNullableWithAggregatesFilter<'ProductionItem'> | string | null;
 };
 
 export type ProductionItemCreateInput = {
@@ -368,6 +392,8 @@ export type ProductionItemCreateInput = {
 	receivedBy?: Prisma.UserCreateNestedOneWithoutItemsReceivedInput;
 	returnReportedBy?: Prisma.UserCreateNestedOneWithoutReturnsReportedInput;
 	loanRequest?: Prisma.LoanRequestCreateNestedOneWithoutItemsInput;
+	packedIn?: Prisma.ProductionItemCreateNestedOneWithoutPackedItemsInput;
+	packedItems?: Prisma.ProductionItemCreateNestedManyWithoutPackedInInput;
 };
 
 export type ProductionItemUncheckedCreateInput = {
@@ -383,6 +409,8 @@ export type ProductionItemUncheckedCreateInput = {
 	returnReportedById?: string | null;
 	loanRequestId?: string | null;
 	freeOfCharge?: boolean;
+	packedInItemId?: string | null;
+	packedItems?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutPackedInInput;
 };
 
 export type ProductionItemUpdateInput = {
@@ -398,6 +426,8 @@ export type ProductionItemUpdateInput = {
 	receivedBy?: Prisma.UserUpdateOneWithoutItemsReceivedNestedInput;
 	returnReportedBy?: Prisma.UserUpdateOneWithoutReturnsReportedNestedInput;
 	loanRequest?: Prisma.LoanRequestUpdateOneWithoutItemsNestedInput;
+	packedIn?: Prisma.ProductionItemUpdateOneWithoutPackedItemsNestedInput;
+	packedItems?: Prisma.ProductionItemUpdateManyWithoutPackedInNestedInput;
 };
 
 export type ProductionItemUncheckedUpdateInput = {
@@ -413,6 +443,8 @@ export type ProductionItemUncheckedUpdateInput = {
 	returnReportedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	loanRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	packedInItemId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	packedItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutPackedInNestedInput;
 };
 
 export type ProductionItemCreateManyInput = {
@@ -428,6 +460,7 @@ export type ProductionItemCreateManyInput = {
 	returnReportedById?: string | null;
 	loanRequestId?: string | null;
 	freeOfCharge?: boolean;
+	packedInItemId?: string | null;
 };
 
 export type ProductionItemUpdateManyMutationInput = {
@@ -452,6 +485,7 @@ export type ProductionItemUncheckedUpdateManyInput = {
 	returnReportedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	loanRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	packedInItemId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 };
 
 export type ProductionItemListRelationFilter = {
@@ -462,6 +496,11 @@ export type ProductionItemListRelationFilter = {
 
 export type ProductionItemOrderByRelationAggregateInput = {
 	_count?: Prisma.SortOrder;
+};
+
+export type ProductionItemNullableScalarRelationFilter = {
+	is?: Prisma.ProductionItemWhereInput | null;
+	isNot?: Prisma.ProductionItemWhereInput | null;
 };
 
 export type ProductionItemProductionIdAssetIdCompoundUniqueInput = {
@@ -482,6 +521,7 @@ export type ProductionItemCountOrderByAggregateInput = {
 	returnReportedById?: Prisma.SortOrder;
 	loanRequestId?: Prisma.SortOrder;
 	freeOfCharge?: Prisma.SortOrder;
+	packedInItemId?: Prisma.SortOrder;
 };
 
 export type ProductionItemMaxOrderByAggregateInput = {
@@ -497,6 +537,7 @@ export type ProductionItemMaxOrderByAggregateInput = {
 	returnReportedById?: Prisma.SortOrder;
 	loanRequestId?: Prisma.SortOrder;
 	freeOfCharge?: Prisma.SortOrder;
+	packedInItemId?: Prisma.SortOrder;
 };
 
 export type ProductionItemMinOrderByAggregateInput = {
@@ -512,6 +553,7 @@ export type ProductionItemMinOrderByAggregateInput = {
 	returnReportedById?: Prisma.SortOrder;
 	loanRequestId?: Prisma.SortOrder;
 	freeOfCharge?: Prisma.SortOrder;
+	packedInItemId?: Prisma.SortOrder;
 };
 
 export type ProductionItemCreateNestedManyWithoutReceivedByInput = {
@@ -944,6 +986,120 @@ export type ProductionItemUncheckedUpdateManyWithoutProductionNestedInput = {
 	deleteMany?: Prisma.ProductionItemScalarWhereInput | Prisma.ProductionItemScalarWhereInput[];
 };
 
+export type ProductionItemCreateNestedOneWithoutPackedItemsInput = {
+	create?: Prisma.XOR<
+		Prisma.ProductionItemCreateWithoutPackedItemsInput,
+		Prisma.ProductionItemUncheckedCreateWithoutPackedItemsInput
+	>;
+	connectOrCreate?: Prisma.ProductionItemCreateOrConnectWithoutPackedItemsInput;
+	connect?: Prisma.ProductionItemWhereUniqueInput;
+};
+
+export type ProductionItemCreateNestedManyWithoutPackedInInput = {
+	create?:
+		| Prisma.XOR<
+				Prisma.ProductionItemCreateWithoutPackedInInput,
+				Prisma.ProductionItemUncheckedCreateWithoutPackedInInput
+		  >
+		| Prisma.ProductionItemCreateWithoutPackedInInput[]
+		| Prisma.ProductionItemUncheckedCreateWithoutPackedInInput[];
+	connectOrCreate?:
+		| Prisma.ProductionItemCreateOrConnectWithoutPackedInInput
+		| Prisma.ProductionItemCreateOrConnectWithoutPackedInInput[];
+	createMany?: Prisma.ProductionItemCreateManyPackedInInputEnvelope;
+	connect?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[];
+};
+
+export type ProductionItemUncheckedCreateNestedManyWithoutPackedInInput = {
+	create?:
+		| Prisma.XOR<
+				Prisma.ProductionItemCreateWithoutPackedInInput,
+				Prisma.ProductionItemUncheckedCreateWithoutPackedInInput
+		  >
+		| Prisma.ProductionItemCreateWithoutPackedInInput[]
+		| Prisma.ProductionItemUncheckedCreateWithoutPackedInInput[];
+	connectOrCreate?:
+		| Prisma.ProductionItemCreateOrConnectWithoutPackedInInput
+		| Prisma.ProductionItemCreateOrConnectWithoutPackedInInput[];
+	createMany?: Prisma.ProductionItemCreateManyPackedInInputEnvelope;
+	connect?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[];
+};
+
+export type ProductionItemUpdateOneWithoutPackedItemsNestedInput = {
+	create?: Prisma.XOR<
+		Prisma.ProductionItemCreateWithoutPackedItemsInput,
+		Prisma.ProductionItemUncheckedCreateWithoutPackedItemsInput
+	>;
+	connectOrCreate?: Prisma.ProductionItemCreateOrConnectWithoutPackedItemsInput;
+	upsert?: Prisma.ProductionItemUpsertWithoutPackedItemsInput;
+	disconnect?: Prisma.ProductionItemWhereInput | boolean;
+	delete?: Prisma.ProductionItemWhereInput | boolean;
+	connect?: Prisma.ProductionItemWhereUniqueInput;
+	update?: Prisma.XOR<
+		Prisma.XOR<
+			Prisma.ProductionItemUpdateToOneWithWhereWithoutPackedItemsInput,
+			Prisma.ProductionItemUpdateWithoutPackedItemsInput
+		>,
+		Prisma.ProductionItemUncheckedUpdateWithoutPackedItemsInput
+	>;
+};
+
+export type ProductionItemUpdateManyWithoutPackedInNestedInput = {
+	create?:
+		| Prisma.XOR<
+				Prisma.ProductionItemCreateWithoutPackedInInput,
+				Prisma.ProductionItemUncheckedCreateWithoutPackedInInput
+		  >
+		| Prisma.ProductionItemCreateWithoutPackedInInput[]
+		| Prisma.ProductionItemUncheckedCreateWithoutPackedInInput[];
+	connectOrCreate?:
+		| Prisma.ProductionItemCreateOrConnectWithoutPackedInInput
+		| Prisma.ProductionItemCreateOrConnectWithoutPackedInInput[];
+	upsert?:
+		| Prisma.ProductionItemUpsertWithWhereUniqueWithoutPackedInInput
+		| Prisma.ProductionItemUpsertWithWhereUniqueWithoutPackedInInput[];
+	createMany?: Prisma.ProductionItemCreateManyPackedInInputEnvelope;
+	set?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[];
+	disconnect?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[];
+	delete?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[];
+	connect?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[];
+	update?:
+		| Prisma.ProductionItemUpdateWithWhereUniqueWithoutPackedInInput
+		| Prisma.ProductionItemUpdateWithWhereUniqueWithoutPackedInInput[];
+	updateMany?:
+		| Prisma.ProductionItemUpdateManyWithWhereWithoutPackedInInput
+		| Prisma.ProductionItemUpdateManyWithWhereWithoutPackedInInput[];
+	deleteMany?: Prisma.ProductionItemScalarWhereInput | Prisma.ProductionItemScalarWhereInput[];
+};
+
+export type ProductionItemUncheckedUpdateManyWithoutPackedInNestedInput = {
+	create?:
+		| Prisma.XOR<
+				Prisma.ProductionItemCreateWithoutPackedInInput,
+				Prisma.ProductionItemUncheckedCreateWithoutPackedInInput
+		  >
+		| Prisma.ProductionItemCreateWithoutPackedInInput[]
+		| Prisma.ProductionItemUncheckedCreateWithoutPackedInInput[];
+	connectOrCreate?:
+		| Prisma.ProductionItemCreateOrConnectWithoutPackedInInput
+		| Prisma.ProductionItemCreateOrConnectWithoutPackedInInput[];
+	upsert?:
+		| Prisma.ProductionItemUpsertWithWhereUniqueWithoutPackedInInput
+		| Prisma.ProductionItemUpsertWithWhereUniqueWithoutPackedInInput[];
+	createMany?: Prisma.ProductionItemCreateManyPackedInInputEnvelope;
+	set?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[];
+	disconnect?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[];
+	delete?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[];
+	connect?: Prisma.ProductionItemWhereUniqueInput | Prisma.ProductionItemWhereUniqueInput[];
+	update?:
+		| Prisma.ProductionItemUpdateWithWhereUniqueWithoutPackedInInput
+		| Prisma.ProductionItemUpdateWithWhereUniqueWithoutPackedInInput[];
+	updateMany?:
+		| Prisma.ProductionItemUpdateManyWithWhereWithoutPackedInInput
+		| Prisma.ProductionItemUpdateManyWithWhereWithoutPackedInInput[];
+	deleteMany?: Prisma.ProductionItemScalarWhereInput | Prisma.ProductionItemScalarWhereInput[];
+};
+
 export type ProductionItemCreateNestedManyWithoutLoanRequestInput = {
 	create?:
 		| Prisma.XOR<
@@ -1042,6 +1198,8 @@ export type ProductionItemCreateWithoutReceivedByInput = {
 	sourceBundle?: Prisma.AssetBundleCreateNestedOneWithoutProductionItemsInput;
 	returnReportedBy?: Prisma.UserCreateNestedOneWithoutReturnsReportedInput;
 	loanRequest?: Prisma.LoanRequestCreateNestedOneWithoutItemsInput;
+	packedIn?: Prisma.ProductionItemCreateNestedOneWithoutPackedItemsInput;
+	packedItems?: Prisma.ProductionItemCreateNestedManyWithoutPackedInInput;
 };
 
 export type ProductionItemUncheckedCreateWithoutReceivedByInput = {
@@ -1056,6 +1214,8 @@ export type ProductionItemUncheckedCreateWithoutReceivedByInput = {
 	returnReportedById?: string | null;
 	loanRequestId?: string | null;
 	freeOfCharge?: boolean;
+	packedInItemId?: string | null;
+	packedItems?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutPackedInInput;
 };
 
 export type ProductionItemCreateOrConnectWithoutReceivedByInput = {
@@ -1085,6 +1245,8 @@ export type ProductionItemCreateWithoutReturnReportedByInput = {
 	sourceBundle?: Prisma.AssetBundleCreateNestedOneWithoutProductionItemsInput;
 	receivedBy?: Prisma.UserCreateNestedOneWithoutItemsReceivedInput;
 	loanRequest?: Prisma.LoanRequestCreateNestedOneWithoutItemsInput;
+	packedIn?: Prisma.ProductionItemCreateNestedOneWithoutPackedItemsInput;
+	packedItems?: Prisma.ProductionItemCreateNestedManyWithoutPackedInInput;
 };
 
 export type ProductionItemUncheckedCreateWithoutReturnReportedByInput = {
@@ -1099,6 +1261,8 @@ export type ProductionItemUncheckedCreateWithoutReturnReportedByInput = {
 	returnReportedAt?: Date | string | null;
 	loanRequestId?: string | null;
 	freeOfCharge?: boolean;
+	packedInItemId?: string | null;
+	packedItems?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutPackedInInput;
 };
 
 export type ProductionItemCreateOrConnectWithoutReturnReportedByInput = {
@@ -1160,6 +1324,7 @@ export type ProductionItemScalarWhereInput = {
 	returnReportedById?: Prisma.StringNullableFilter<'ProductionItem'> | string | null;
 	loanRequestId?: Prisma.StringNullableFilter<'ProductionItem'> | string | null;
 	freeOfCharge?: Prisma.BoolFilter<'ProductionItem'> | boolean;
+	packedInItemId?: Prisma.StringNullableFilter<'ProductionItem'> | string | null;
 };
 
 export type ProductionItemUpsertWithWhereUniqueWithoutReturnReportedByInput = {
@@ -1202,6 +1367,8 @@ export type ProductionItemCreateWithoutAssetInput = {
 	receivedBy?: Prisma.UserCreateNestedOneWithoutItemsReceivedInput;
 	returnReportedBy?: Prisma.UserCreateNestedOneWithoutReturnsReportedInput;
 	loanRequest?: Prisma.LoanRequestCreateNestedOneWithoutItemsInput;
+	packedIn?: Prisma.ProductionItemCreateNestedOneWithoutPackedItemsInput;
+	packedItems?: Prisma.ProductionItemCreateNestedManyWithoutPackedInInput;
 };
 
 export type ProductionItemUncheckedCreateWithoutAssetInput = {
@@ -1216,6 +1383,8 @@ export type ProductionItemUncheckedCreateWithoutAssetInput = {
 	returnReportedById?: string | null;
 	loanRequestId?: string | null;
 	freeOfCharge?: boolean;
+	packedInItemId?: string | null;
+	packedItems?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutPackedInInput;
 };
 
 export type ProductionItemCreateOrConnectWithoutAssetInput = {
@@ -1271,6 +1440,8 @@ export type ProductionItemCreateWithoutSourceBundleInput = {
 	receivedBy?: Prisma.UserCreateNestedOneWithoutItemsReceivedInput;
 	returnReportedBy?: Prisma.UserCreateNestedOneWithoutReturnsReportedInput;
 	loanRequest?: Prisma.LoanRequestCreateNestedOneWithoutItemsInput;
+	packedIn?: Prisma.ProductionItemCreateNestedOneWithoutPackedItemsInput;
+	packedItems?: Prisma.ProductionItemCreateNestedManyWithoutPackedInInput;
 };
 
 export type ProductionItemUncheckedCreateWithoutSourceBundleInput = {
@@ -1285,6 +1456,8 @@ export type ProductionItemUncheckedCreateWithoutSourceBundleInput = {
 	returnReportedById?: string | null;
 	loanRequestId?: string | null;
 	freeOfCharge?: boolean;
+	packedInItemId?: string | null;
+	packedItems?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutPackedInInput;
 };
 
 export type ProductionItemCreateOrConnectWithoutSourceBundleInput = {
@@ -1342,6 +1515,8 @@ export type ProductionItemCreateWithoutProductionInput = {
 	receivedBy?: Prisma.UserCreateNestedOneWithoutItemsReceivedInput;
 	returnReportedBy?: Prisma.UserCreateNestedOneWithoutReturnsReportedInput;
 	loanRequest?: Prisma.LoanRequestCreateNestedOneWithoutItemsInput;
+	packedIn?: Prisma.ProductionItemCreateNestedOneWithoutPackedItemsInput;
+	packedItems?: Prisma.ProductionItemCreateNestedManyWithoutPackedInInput;
 };
 
 export type ProductionItemUncheckedCreateWithoutProductionInput = {
@@ -1356,6 +1531,8 @@ export type ProductionItemUncheckedCreateWithoutProductionInput = {
 	returnReportedById?: string | null;
 	loanRequestId?: string | null;
 	freeOfCharge?: boolean;
+	packedInItemId?: string | null;
+	packedItems?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutPackedInInput;
 };
 
 export type ProductionItemCreateOrConnectWithoutProductionInput = {
@@ -1401,6 +1578,172 @@ export type ProductionItemUpdateManyWithWhereWithoutProductionInput = {
 	>;
 };
 
+export type ProductionItemCreateWithoutPackedItemsInput = {
+	id?: string;
+	sourceParentAssetId?: string | null;
+	status?: string;
+	receivedAt?: Date | string | null;
+	returnReportedAt?: Date | string | null;
+	freeOfCharge?: boolean;
+	production: Prisma.ProductionCreateNestedOneWithoutItemsInput;
+	asset: Prisma.AssetCreateNestedOneWithoutProductionItemsInput;
+	sourceBundle?: Prisma.AssetBundleCreateNestedOneWithoutProductionItemsInput;
+	receivedBy?: Prisma.UserCreateNestedOneWithoutItemsReceivedInput;
+	returnReportedBy?: Prisma.UserCreateNestedOneWithoutReturnsReportedInput;
+	loanRequest?: Prisma.LoanRequestCreateNestedOneWithoutItemsInput;
+	packedIn?: Prisma.ProductionItemCreateNestedOneWithoutPackedItemsInput;
+};
+
+export type ProductionItemUncheckedCreateWithoutPackedItemsInput = {
+	id?: string;
+	productionId: string;
+	assetId: string;
+	sourceBundleId?: string | null;
+	sourceParentAssetId?: string | null;
+	status?: string;
+	receivedAt?: Date | string | null;
+	receivedById?: string | null;
+	returnReportedAt?: Date | string | null;
+	returnReportedById?: string | null;
+	loanRequestId?: string | null;
+	freeOfCharge?: boolean;
+	packedInItemId?: string | null;
+};
+
+export type ProductionItemCreateOrConnectWithoutPackedItemsInput = {
+	where: Prisma.ProductionItemWhereUniqueInput;
+	create: Prisma.XOR<
+		Prisma.ProductionItemCreateWithoutPackedItemsInput,
+		Prisma.ProductionItemUncheckedCreateWithoutPackedItemsInput
+	>;
+};
+
+export type ProductionItemCreateWithoutPackedInInput = {
+	id?: string;
+	sourceParentAssetId?: string | null;
+	status?: string;
+	receivedAt?: Date | string | null;
+	returnReportedAt?: Date | string | null;
+	freeOfCharge?: boolean;
+	production: Prisma.ProductionCreateNestedOneWithoutItemsInput;
+	asset: Prisma.AssetCreateNestedOneWithoutProductionItemsInput;
+	sourceBundle?: Prisma.AssetBundleCreateNestedOneWithoutProductionItemsInput;
+	receivedBy?: Prisma.UserCreateNestedOneWithoutItemsReceivedInput;
+	returnReportedBy?: Prisma.UserCreateNestedOneWithoutReturnsReportedInput;
+	loanRequest?: Prisma.LoanRequestCreateNestedOneWithoutItemsInput;
+	packedItems?: Prisma.ProductionItemCreateNestedManyWithoutPackedInInput;
+};
+
+export type ProductionItemUncheckedCreateWithoutPackedInInput = {
+	id?: string;
+	productionId: string;
+	assetId: string;
+	sourceBundleId?: string | null;
+	sourceParentAssetId?: string | null;
+	status?: string;
+	receivedAt?: Date | string | null;
+	receivedById?: string | null;
+	returnReportedAt?: Date | string | null;
+	returnReportedById?: string | null;
+	loanRequestId?: string | null;
+	freeOfCharge?: boolean;
+	packedItems?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutPackedInInput;
+};
+
+export type ProductionItemCreateOrConnectWithoutPackedInInput = {
+	where: Prisma.ProductionItemWhereUniqueInput;
+	create: Prisma.XOR<
+		Prisma.ProductionItemCreateWithoutPackedInInput,
+		Prisma.ProductionItemUncheckedCreateWithoutPackedInInput
+	>;
+};
+
+export type ProductionItemCreateManyPackedInInputEnvelope = {
+	data:
+		Prisma.ProductionItemCreateManyPackedInInput | Prisma.ProductionItemCreateManyPackedInInput[];
+	skipDuplicates?: boolean;
+};
+
+export type ProductionItemUpsertWithoutPackedItemsInput = {
+	update: Prisma.XOR<
+		Prisma.ProductionItemUpdateWithoutPackedItemsInput,
+		Prisma.ProductionItemUncheckedUpdateWithoutPackedItemsInput
+	>;
+	create: Prisma.XOR<
+		Prisma.ProductionItemCreateWithoutPackedItemsInput,
+		Prisma.ProductionItemUncheckedCreateWithoutPackedItemsInput
+	>;
+	where?: Prisma.ProductionItemWhereInput;
+};
+
+export type ProductionItemUpdateToOneWithWhereWithoutPackedItemsInput = {
+	where?: Prisma.ProductionItemWhereInput;
+	data: Prisma.XOR<
+		Prisma.ProductionItemUpdateWithoutPackedItemsInput,
+		Prisma.ProductionItemUncheckedUpdateWithoutPackedItemsInput
+	>;
+};
+
+export type ProductionItemUpdateWithoutPackedItemsInput = {
+	id?: Prisma.StringFieldUpdateOperationsInput | string;
+	sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	status?: Prisma.StringFieldUpdateOperationsInput | string;
+	receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+	returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+	freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	production?: Prisma.ProductionUpdateOneRequiredWithoutItemsNestedInput;
+	asset?: Prisma.AssetUpdateOneRequiredWithoutProductionItemsNestedInput;
+	sourceBundle?: Prisma.AssetBundleUpdateOneWithoutProductionItemsNestedInput;
+	receivedBy?: Prisma.UserUpdateOneWithoutItemsReceivedNestedInput;
+	returnReportedBy?: Prisma.UserUpdateOneWithoutReturnsReportedNestedInput;
+	loanRequest?: Prisma.LoanRequestUpdateOneWithoutItemsNestedInput;
+	packedIn?: Prisma.ProductionItemUpdateOneWithoutPackedItemsNestedInput;
+};
+
+export type ProductionItemUncheckedUpdateWithoutPackedItemsInput = {
+	id?: Prisma.StringFieldUpdateOperationsInput | string;
+	productionId?: Prisma.StringFieldUpdateOperationsInput | string;
+	assetId?: Prisma.StringFieldUpdateOperationsInput | string;
+	sourceBundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	status?: Prisma.StringFieldUpdateOperationsInput | string;
+	receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+	receivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+	returnReportedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	loanRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	packedInItemId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+};
+
+export type ProductionItemUpsertWithWhereUniqueWithoutPackedInInput = {
+	where: Prisma.ProductionItemWhereUniqueInput;
+	update: Prisma.XOR<
+		Prisma.ProductionItemUpdateWithoutPackedInInput,
+		Prisma.ProductionItemUncheckedUpdateWithoutPackedInInput
+	>;
+	create: Prisma.XOR<
+		Prisma.ProductionItemCreateWithoutPackedInInput,
+		Prisma.ProductionItemUncheckedCreateWithoutPackedInInput
+	>;
+};
+
+export type ProductionItemUpdateWithWhereUniqueWithoutPackedInInput = {
+	where: Prisma.ProductionItemWhereUniqueInput;
+	data: Prisma.XOR<
+		Prisma.ProductionItemUpdateWithoutPackedInInput,
+		Prisma.ProductionItemUncheckedUpdateWithoutPackedInInput
+	>;
+};
+
+export type ProductionItemUpdateManyWithWhereWithoutPackedInInput = {
+	where: Prisma.ProductionItemScalarWhereInput;
+	data: Prisma.XOR<
+		Prisma.ProductionItemUpdateManyMutationInput,
+		Prisma.ProductionItemUncheckedUpdateManyWithoutPackedInInput
+	>;
+};
+
 export type ProductionItemCreateWithoutLoanRequestInput = {
 	id?: string;
 	sourceParentAssetId?: string | null;
@@ -1413,6 +1756,8 @@ export type ProductionItemCreateWithoutLoanRequestInput = {
 	sourceBundle?: Prisma.AssetBundleCreateNestedOneWithoutProductionItemsInput;
 	receivedBy?: Prisma.UserCreateNestedOneWithoutItemsReceivedInput;
 	returnReportedBy?: Prisma.UserCreateNestedOneWithoutReturnsReportedInput;
+	packedIn?: Prisma.ProductionItemCreateNestedOneWithoutPackedItemsInput;
+	packedItems?: Prisma.ProductionItemCreateNestedManyWithoutPackedInInput;
 };
 
 export type ProductionItemUncheckedCreateWithoutLoanRequestInput = {
@@ -1427,6 +1772,8 @@ export type ProductionItemUncheckedCreateWithoutLoanRequestInput = {
 	returnReportedAt?: Date | string | null;
 	returnReportedById?: string | null;
 	freeOfCharge?: boolean;
+	packedInItemId?: string | null;
+	packedItems?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutPackedInInput;
 };
 
 export type ProductionItemCreateOrConnectWithoutLoanRequestInput = {
@@ -1484,6 +1831,7 @@ export type ProductionItemCreateManyReceivedByInput = {
 	returnReportedById?: string | null;
 	loanRequestId?: string | null;
 	freeOfCharge?: boolean;
+	packedInItemId?: string | null;
 };
 
 export type ProductionItemCreateManyReturnReportedByInput = {
@@ -1498,6 +1846,7 @@ export type ProductionItemCreateManyReturnReportedByInput = {
 	returnReportedAt?: Date | string | null;
 	loanRequestId?: string | null;
 	freeOfCharge?: boolean;
+	packedInItemId?: string | null;
 };
 
 export type ProductionItemUpdateWithoutReceivedByInput = {
@@ -1512,6 +1861,8 @@ export type ProductionItemUpdateWithoutReceivedByInput = {
 	sourceBundle?: Prisma.AssetBundleUpdateOneWithoutProductionItemsNestedInput;
 	returnReportedBy?: Prisma.UserUpdateOneWithoutReturnsReportedNestedInput;
 	loanRequest?: Prisma.LoanRequestUpdateOneWithoutItemsNestedInput;
+	packedIn?: Prisma.ProductionItemUpdateOneWithoutPackedItemsNestedInput;
+	packedItems?: Prisma.ProductionItemUpdateManyWithoutPackedInNestedInput;
 };
 
 export type ProductionItemUncheckedUpdateWithoutReceivedByInput = {
@@ -1526,6 +1877,8 @@ export type ProductionItemUncheckedUpdateWithoutReceivedByInput = {
 	returnReportedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	loanRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	packedInItemId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	packedItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutPackedInNestedInput;
 };
 
 export type ProductionItemUncheckedUpdateManyWithoutReceivedByInput = {
@@ -1540,6 +1893,7 @@ export type ProductionItemUncheckedUpdateManyWithoutReceivedByInput = {
 	returnReportedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	loanRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	packedInItemId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 };
 
 export type ProductionItemUpdateWithoutReturnReportedByInput = {
@@ -1554,6 +1908,8 @@ export type ProductionItemUpdateWithoutReturnReportedByInput = {
 	sourceBundle?: Prisma.AssetBundleUpdateOneWithoutProductionItemsNestedInput;
 	receivedBy?: Prisma.UserUpdateOneWithoutItemsReceivedNestedInput;
 	loanRequest?: Prisma.LoanRequestUpdateOneWithoutItemsNestedInput;
+	packedIn?: Prisma.ProductionItemUpdateOneWithoutPackedItemsNestedInput;
+	packedItems?: Prisma.ProductionItemUpdateManyWithoutPackedInNestedInput;
 };
 
 export type ProductionItemUncheckedUpdateWithoutReturnReportedByInput = {
@@ -1568,6 +1924,8 @@ export type ProductionItemUncheckedUpdateWithoutReturnReportedByInput = {
 	returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
 	loanRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	packedInItemId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	packedItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutPackedInNestedInput;
 };
 
 export type ProductionItemUncheckedUpdateManyWithoutReturnReportedByInput = {
@@ -1582,6 +1940,7 @@ export type ProductionItemUncheckedUpdateManyWithoutReturnReportedByInput = {
 	returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
 	loanRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	packedInItemId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 };
 
 export type ProductionItemCreateManyAssetInput = {
@@ -1596,6 +1955,7 @@ export type ProductionItemCreateManyAssetInput = {
 	returnReportedById?: string | null;
 	loanRequestId?: string | null;
 	freeOfCharge?: boolean;
+	packedInItemId?: string | null;
 };
 
 export type ProductionItemUpdateWithoutAssetInput = {
@@ -1610,6 +1970,8 @@ export type ProductionItemUpdateWithoutAssetInput = {
 	receivedBy?: Prisma.UserUpdateOneWithoutItemsReceivedNestedInput;
 	returnReportedBy?: Prisma.UserUpdateOneWithoutReturnsReportedNestedInput;
 	loanRequest?: Prisma.LoanRequestUpdateOneWithoutItemsNestedInput;
+	packedIn?: Prisma.ProductionItemUpdateOneWithoutPackedItemsNestedInput;
+	packedItems?: Prisma.ProductionItemUpdateManyWithoutPackedInNestedInput;
 };
 
 export type ProductionItemUncheckedUpdateWithoutAssetInput = {
@@ -1624,6 +1986,8 @@ export type ProductionItemUncheckedUpdateWithoutAssetInput = {
 	returnReportedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	loanRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	packedInItemId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	packedItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutPackedInNestedInput;
 };
 
 export type ProductionItemUncheckedUpdateManyWithoutAssetInput = {
@@ -1638,6 +2002,7 @@ export type ProductionItemUncheckedUpdateManyWithoutAssetInput = {
 	returnReportedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	loanRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	packedInItemId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 };
 
 export type ProductionItemCreateManySourceBundleInput = {
@@ -1652,6 +2017,7 @@ export type ProductionItemCreateManySourceBundleInput = {
 	returnReportedById?: string | null;
 	loanRequestId?: string | null;
 	freeOfCharge?: boolean;
+	packedInItemId?: string | null;
 };
 
 export type ProductionItemUpdateWithoutSourceBundleInput = {
@@ -1666,6 +2032,8 @@ export type ProductionItemUpdateWithoutSourceBundleInput = {
 	receivedBy?: Prisma.UserUpdateOneWithoutItemsReceivedNestedInput;
 	returnReportedBy?: Prisma.UserUpdateOneWithoutReturnsReportedNestedInput;
 	loanRequest?: Prisma.LoanRequestUpdateOneWithoutItemsNestedInput;
+	packedIn?: Prisma.ProductionItemUpdateOneWithoutPackedItemsNestedInput;
+	packedItems?: Prisma.ProductionItemUpdateManyWithoutPackedInNestedInput;
 };
 
 export type ProductionItemUncheckedUpdateWithoutSourceBundleInput = {
@@ -1680,6 +2048,8 @@ export type ProductionItemUncheckedUpdateWithoutSourceBundleInput = {
 	returnReportedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	loanRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	packedInItemId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	packedItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutPackedInNestedInput;
 };
 
 export type ProductionItemUncheckedUpdateManyWithoutSourceBundleInput = {
@@ -1694,6 +2064,7 @@ export type ProductionItemUncheckedUpdateManyWithoutSourceBundleInput = {
 	returnReportedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	loanRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	packedInItemId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 };
 
 export type ProductionItemCreateManyProductionInput = {
@@ -1708,6 +2079,7 @@ export type ProductionItemCreateManyProductionInput = {
 	returnReportedById?: string | null;
 	loanRequestId?: string | null;
 	freeOfCharge?: boolean;
+	packedInItemId?: string | null;
 };
 
 export type ProductionItemUpdateWithoutProductionInput = {
@@ -1722,6 +2094,8 @@ export type ProductionItemUpdateWithoutProductionInput = {
 	receivedBy?: Prisma.UserUpdateOneWithoutItemsReceivedNestedInput;
 	returnReportedBy?: Prisma.UserUpdateOneWithoutReturnsReportedNestedInput;
 	loanRequest?: Prisma.LoanRequestUpdateOneWithoutItemsNestedInput;
+	packedIn?: Prisma.ProductionItemUpdateOneWithoutPackedItemsNestedInput;
+	packedItems?: Prisma.ProductionItemUpdateManyWithoutPackedInNestedInput;
 };
 
 export type ProductionItemUncheckedUpdateWithoutProductionInput = {
@@ -1736,10 +2110,75 @@ export type ProductionItemUncheckedUpdateWithoutProductionInput = {
 	returnReportedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	loanRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	packedInItemId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	packedItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutPackedInNestedInput;
 };
 
 export type ProductionItemUncheckedUpdateManyWithoutProductionInput = {
 	id?: Prisma.StringFieldUpdateOperationsInput | string;
+	assetId?: Prisma.StringFieldUpdateOperationsInput | string;
+	sourceBundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	status?: Prisma.StringFieldUpdateOperationsInput | string;
+	receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+	receivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+	returnReportedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	loanRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	packedInItemId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+};
+
+export type ProductionItemCreateManyPackedInInput = {
+	id?: string;
+	productionId: string;
+	assetId: string;
+	sourceBundleId?: string | null;
+	sourceParentAssetId?: string | null;
+	status?: string;
+	receivedAt?: Date | string | null;
+	receivedById?: string | null;
+	returnReportedAt?: Date | string | null;
+	returnReportedById?: string | null;
+	loanRequestId?: string | null;
+	freeOfCharge?: boolean;
+};
+
+export type ProductionItemUpdateWithoutPackedInInput = {
+	id?: Prisma.StringFieldUpdateOperationsInput | string;
+	sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	status?: Prisma.StringFieldUpdateOperationsInput | string;
+	receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+	returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+	freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	production?: Prisma.ProductionUpdateOneRequiredWithoutItemsNestedInput;
+	asset?: Prisma.AssetUpdateOneRequiredWithoutProductionItemsNestedInput;
+	sourceBundle?: Prisma.AssetBundleUpdateOneWithoutProductionItemsNestedInput;
+	receivedBy?: Prisma.UserUpdateOneWithoutItemsReceivedNestedInput;
+	returnReportedBy?: Prisma.UserUpdateOneWithoutReturnsReportedNestedInput;
+	loanRequest?: Prisma.LoanRequestUpdateOneWithoutItemsNestedInput;
+	packedItems?: Prisma.ProductionItemUpdateManyWithoutPackedInNestedInput;
+};
+
+export type ProductionItemUncheckedUpdateWithoutPackedInInput = {
+	id?: Prisma.StringFieldUpdateOperationsInput | string;
+	productionId?: Prisma.StringFieldUpdateOperationsInput | string;
+	assetId?: Prisma.StringFieldUpdateOperationsInput | string;
+	sourceBundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	status?: Prisma.StringFieldUpdateOperationsInput | string;
+	receivedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+	receivedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
+	returnReportedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	loanRequestId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	packedItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutPackedInNestedInput;
+};
+
+export type ProductionItemUncheckedUpdateManyWithoutPackedInInput = {
+	id?: Prisma.StringFieldUpdateOperationsInput | string;
+	productionId?: Prisma.StringFieldUpdateOperationsInput | string;
 	assetId?: Prisma.StringFieldUpdateOperationsInput | string;
 	sourceBundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	sourceParentAssetId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
@@ -1764,6 +2203,7 @@ export type ProductionItemCreateManyLoanRequestInput = {
 	returnReportedAt?: Date | string | null;
 	returnReportedById?: string | null;
 	freeOfCharge?: boolean;
+	packedInItemId?: string | null;
 };
 
 export type ProductionItemUpdateWithoutLoanRequestInput = {
@@ -1778,6 +2218,8 @@ export type ProductionItemUpdateWithoutLoanRequestInput = {
 	sourceBundle?: Prisma.AssetBundleUpdateOneWithoutProductionItemsNestedInput;
 	receivedBy?: Prisma.UserUpdateOneWithoutItemsReceivedNestedInput;
 	returnReportedBy?: Prisma.UserUpdateOneWithoutReturnsReportedNestedInput;
+	packedIn?: Prisma.ProductionItemUpdateOneWithoutPackedItemsNestedInput;
+	packedItems?: Prisma.ProductionItemUpdateManyWithoutPackedInNestedInput;
 };
 
 export type ProductionItemUncheckedUpdateWithoutLoanRequestInput = {
@@ -1792,6 +2234,8 @@ export type ProductionItemUncheckedUpdateWithoutLoanRequestInput = {
 	returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
 	returnReportedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	packedInItemId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	packedItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutPackedInNestedInput;
 };
 
 export type ProductionItemUncheckedUpdateManyWithoutLoanRequestInput = {
@@ -1806,6 +2250,42 @@ export type ProductionItemUncheckedUpdateManyWithoutLoanRequestInput = {
 	returnReportedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
 	returnReportedById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	freeOfCharge?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	packedInItemId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+};
+
+/**
+ * Count Type ProductionItemCountOutputType
+ */
+
+export type ProductionItemCountOutputType = {
+	packedItems: number;
+};
+
+export type ProductionItemCountOutputTypeSelect<
+	ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs
+> = {
+	packedItems?: boolean | ProductionItemCountOutputTypeCountPackedItemsArgs;
+};
+
+/**
+ * ProductionItemCountOutputType without action
+ */
+export type ProductionItemCountOutputTypeDefaultArgs<
+	ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs
+> = {
+	/**
+	 * Select specific fields to fetch from the ProductionItemCountOutputType
+	 */
+	select?: Prisma.ProductionItemCountOutputTypeSelect<ExtArgs> | null;
+};
+
+/**
+ * ProductionItemCountOutputType without action
+ */
+export type ProductionItemCountOutputTypeCountPackedItemsArgs<
+	ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs
+> = {
+	where?: Prisma.ProductionItemWhereInput;
 };
 
 export type ProductionItemSelect<
@@ -1824,12 +2304,16 @@ export type ProductionItemSelect<
 		returnReportedById?: boolean;
 		loanRequestId?: boolean;
 		freeOfCharge?: boolean;
+		packedInItemId?: boolean;
 		production?: boolean | Prisma.ProductionDefaultArgs<ExtArgs>;
 		asset?: boolean | Prisma.AssetDefaultArgs<ExtArgs>;
 		sourceBundle?: boolean | Prisma.ProductionItem$sourceBundleArgs<ExtArgs>;
 		receivedBy?: boolean | Prisma.ProductionItem$receivedByArgs<ExtArgs>;
 		returnReportedBy?: boolean | Prisma.ProductionItem$returnReportedByArgs<ExtArgs>;
 		loanRequest?: boolean | Prisma.ProductionItem$loanRequestArgs<ExtArgs>;
+		packedIn?: boolean | Prisma.ProductionItem$packedInArgs<ExtArgs>;
+		packedItems?: boolean | Prisma.ProductionItem$packedItemsArgs<ExtArgs>;
+		_count?: boolean | Prisma.ProductionItemCountOutputTypeDefaultArgs<ExtArgs>;
 	},
 	ExtArgs['result']['productionItem']
 >;
@@ -1850,12 +2334,14 @@ export type ProductionItemSelectCreateManyAndReturn<
 		returnReportedById?: boolean;
 		loanRequestId?: boolean;
 		freeOfCharge?: boolean;
+		packedInItemId?: boolean;
 		production?: boolean | Prisma.ProductionDefaultArgs<ExtArgs>;
 		asset?: boolean | Prisma.AssetDefaultArgs<ExtArgs>;
 		sourceBundle?: boolean | Prisma.ProductionItem$sourceBundleArgs<ExtArgs>;
 		receivedBy?: boolean | Prisma.ProductionItem$receivedByArgs<ExtArgs>;
 		returnReportedBy?: boolean | Prisma.ProductionItem$returnReportedByArgs<ExtArgs>;
 		loanRequest?: boolean | Prisma.ProductionItem$loanRequestArgs<ExtArgs>;
+		packedIn?: boolean | Prisma.ProductionItem$packedInArgs<ExtArgs>;
 	},
 	ExtArgs['result']['productionItem']
 >;
@@ -1876,12 +2362,14 @@ export type ProductionItemSelectUpdateManyAndReturn<
 		returnReportedById?: boolean;
 		loanRequestId?: boolean;
 		freeOfCharge?: boolean;
+		packedInItemId?: boolean;
 		production?: boolean | Prisma.ProductionDefaultArgs<ExtArgs>;
 		asset?: boolean | Prisma.AssetDefaultArgs<ExtArgs>;
 		sourceBundle?: boolean | Prisma.ProductionItem$sourceBundleArgs<ExtArgs>;
 		receivedBy?: boolean | Prisma.ProductionItem$receivedByArgs<ExtArgs>;
 		returnReportedBy?: boolean | Prisma.ProductionItem$returnReportedByArgs<ExtArgs>;
 		loanRequest?: boolean | Prisma.ProductionItem$loanRequestArgs<ExtArgs>;
+		packedIn?: boolean | Prisma.ProductionItem$packedInArgs<ExtArgs>;
 	},
 	ExtArgs['result']['productionItem']
 >;
@@ -1899,6 +2387,7 @@ export type ProductionItemSelectScalar = {
 	returnReportedById?: boolean;
 	loanRequestId?: boolean;
 	freeOfCharge?: boolean;
+	packedInItemId?: boolean;
 };
 
 export type ProductionItemOmit<
@@ -1915,7 +2404,8 @@ export type ProductionItemOmit<
 	| 'returnReportedAt'
 	| 'returnReportedById'
 	| 'loanRequestId'
-	| 'freeOfCharge',
+	| 'freeOfCharge'
+	| 'packedInItemId',
 	ExtArgs['result']['productionItem']
 >;
 export type ProductionItemInclude<
@@ -1927,6 +2417,9 @@ export type ProductionItemInclude<
 	receivedBy?: boolean | Prisma.ProductionItem$receivedByArgs<ExtArgs>;
 	returnReportedBy?: boolean | Prisma.ProductionItem$returnReportedByArgs<ExtArgs>;
 	loanRequest?: boolean | Prisma.ProductionItem$loanRequestArgs<ExtArgs>;
+	packedIn?: boolean | Prisma.ProductionItem$packedInArgs<ExtArgs>;
+	packedItems?: boolean | Prisma.ProductionItem$packedItemsArgs<ExtArgs>;
+	_count?: boolean | Prisma.ProductionItemCountOutputTypeDefaultArgs<ExtArgs>;
 };
 export type ProductionItemIncludeCreateManyAndReturn<
 	ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs
@@ -1937,6 +2430,7 @@ export type ProductionItemIncludeCreateManyAndReturn<
 	receivedBy?: boolean | Prisma.ProductionItem$receivedByArgs<ExtArgs>;
 	returnReportedBy?: boolean | Prisma.ProductionItem$returnReportedByArgs<ExtArgs>;
 	loanRequest?: boolean | Prisma.ProductionItem$loanRequestArgs<ExtArgs>;
+	packedIn?: boolean | Prisma.ProductionItem$packedInArgs<ExtArgs>;
 };
 export type ProductionItemIncludeUpdateManyAndReturn<
 	ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs
@@ -1947,6 +2441,7 @@ export type ProductionItemIncludeUpdateManyAndReturn<
 	receivedBy?: boolean | Prisma.ProductionItem$receivedByArgs<ExtArgs>;
 	returnReportedBy?: boolean | Prisma.ProductionItem$returnReportedByArgs<ExtArgs>;
 	loanRequest?: boolean | Prisma.ProductionItem$loanRequestArgs<ExtArgs>;
+	packedIn?: boolean | Prisma.ProductionItem$packedInArgs<ExtArgs>;
 };
 
 export type $ProductionItemPayload<
@@ -1960,6 +2455,8 @@ export type $ProductionItemPayload<
 		receivedBy: Prisma.$UserPayload<ExtArgs> | null;
 		returnReportedBy: Prisma.$UserPayload<ExtArgs> | null;
 		loanRequest: Prisma.$LoanRequestPayload<ExtArgs> | null;
+		packedIn: Prisma.$ProductionItemPayload<ExtArgs> | null;
+		packedItems: Prisma.$ProductionItemPayload<ExtArgs>[];
 	};
 	scalars: runtime.Types.Extensions.GetPayloadResult<
 		{
@@ -1975,6 +2472,7 @@ export type $ProductionItemPayload<
 			returnReportedById: string | null;
 			loanRequestId: string | null;
 			freeOfCharge: boolean;
+			packedInItemId: string | null;
 		},
 		ExtArgs['result']['productionItem']
 	>;
@@ -2596,6 +3094,30 @@ export interface Prisma__ProductionItemClient<
 		ExtArgs,
 		GlobalOmitOptions
 	>;
+	packedIn<T extends Prisma.ProductionItem$packedInArgs<ExtArgs> = {}>(
+		args?: Prisma.Subset<T, Prisma.ProductionItem$packedInArgs<ExtArgs>>
+	): Prisma.Prisma__ProductionItemClient<
+		runtime.Types.Result.GetResult<
+			Prisma.$ProductionItemPayload<ExtArgs>,
+			T,
+			'findUniqueOrThrow',
+			GlobalOmitOptions
+		> | null,
+		null,
+		ExtArgs,
+		GlobalOmitOptions
+	>;
+	packedItems<T extends Prisma.ProductionItem$packedItemsArgs<ExtArgs> = {}>(
+		args?: Prisma.Subset<T, Prisma.ProductionItem$packedItemsArgs<ExtArgs>>
+	): Prisma.PrismaPromise<
+		| runtime.Types.Result.GetResult<
+				Prisma.$ProductionItemPayload<ExtArgs>,
+				T,
+				'findMany',
+				GlobalOmitOptions
+		  >
+		| Null
+	>;
 	/**
 	 * Attaches callbacks for the resolution and/or rejection of the Promise.
 	 * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2639,6 +3161,7 @@ export interface ProductionItemFieldRefs {
 	readonly returnReportedById: Prisma.FieldRef<'ProductionItem', 'String'>;
 	readonly loanRequestId: Prisma.FieldRef<'ProductionItem', 'String'>;
 	readonly freeOfCharge: Prisma.FieldRef<'ProductionItem', 'Boolean'>;
+	readonly packedInItemId: Prisma.FieldRef<'ProductionItem', 'String'>;
 }
 
 // Custom InputTypes
@@ -3157,6 +3680,54 @@ export type ProductionItem$loanRequestArgs<
 	 */
 	include?: Prisma.LoanRequestInclude<ExtArgs> | null;
 	where?: Prisma.LoanRequestWhereInput;
+};
+
+/**
+ * ProductionItem.packedIn
+ */
+export type ProductionItem$packedInArgs<
+	ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs
+> = {
+	/**
+	 * Select specific fields to fetch from the ProductionItem
+	 */
+	select?: Prisma.ProductionItemSelect<ExtArgs> | null;
+	/**
+	 * Omit specific fields from the ProductionItem
+	 */
+	omit?: Prisma.ProductionItemOmit<ExtArgs> | null;
+	/**
+	 * Choose, which related nodes to fetch as well
+	 */
+	include?: Prisma.ProductionItemInclude<ExtArgs> | null;
+	where?: Prisma.ProductionItemWhereInput;
+};
+
+/**
+ * ProductionItem.packedItems
+ */
+export type ProductionItem$packedItemsArgs<
+	ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs
+> = {
+	/**
+	 * Select specific fields to fetch from the ProductionItem
+	 */
+	select?: Prisma.ProductionItemSelect<ExtArgs> | null;
+	/**
+	 * Omit specific fields from the ProductionItem
+	 */
+	omit?: Prisma.ProductionItemOmit<ExtArgs> | null;
+	/**
+	 * Choose, which related nodes to fetch as well
+	 */
+	include?: Prisma.ProductionItemInclude<ExtArgs> | null;
+	where?: Prisma.ProductionItemWhereInput;
+	orderBy?:
+		Prisma.ProductionItemOrderByWithRelationInput | Prisma.ProductionItemOrderByWithRelationInput[];
+	cursor?: Prisma.ProductionItemWhereUniqueInput;
+	take?: number;
+	skip?: number;
+	distinct?: Prisma.ProductionItemScalarFieldEnum | Prisma.ProductionItemScalarFieldEnum[];
 };
 
 /**

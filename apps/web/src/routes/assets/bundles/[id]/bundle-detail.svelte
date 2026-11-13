@@ -635,6 +635,25 @@
 								<Tag class="size-3 text-muted-foreground" />{bundle.tag}
 							</span>
 						{/if}
+						{#if bundle.number.fromCase}
+							<!-- No tag of its own: the container in it is its case, and the
+							     case's tag is the kit's number (see #lib/bundle-case.ts). -->
+							<span
+								class="inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs"
+								title="The tag of its case, which stands for the whole kit"
+							>
+								<Tag class="size-3 text-muted-foreground" />Number:
+								<span class="font-mono">{bundle.number.code}</span>
+							</span>
+						{/if}
+						{#if bundle.extraCases > 0}
+							<span class="text-xs text-amber-700 dark:text-amber-400">
+								{plural(bundle.extraCases, [
+									'1 more container in it — the lowest unit number is its case',
+									'# more containers in it — the lowest unit number is its case'
+								])}
+							</span>
+						{/if}
 						{#if bundle.parentBundle}
 							<a
 								href={resolve(`assets/bundles/${bundle.parentBundle.id}`)}

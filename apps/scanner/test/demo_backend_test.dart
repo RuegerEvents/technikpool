@@ -567,7 +567,7 @@ void main() {
       final scan = await api.productionHandout.scanIntoProductionHandout(
         productionId: festival,
         mode: HandoutMode.checkout,
-        body: const ProductionCheckScanRequest(code: '40000001'),
+        body: const HandoutScanRequest(code: '40000001'),
       );
       expect(scan.action, ScanResultAction.checkedOut);
 
@@ -635,7 +635,7 @@ void main() {
       final scan = await api.productionHandout.scanIntoProductionHandout(
         productionId: festival,
         mode: HandoutMode.checkin,
-        body: const ProductionCheckScanRequest(code: '40000006'),
+        body: const HandoutScanRequest(code: '40000006'),
       );
       expect(scan.action, ScanResultAction.locationAssigned);
       expect(scan.returnedFrom, ['Hafenfest Open Air']);
@@ -662,7 +662,7 @@ void main() {
       final scan = await api.productionHandout.scanIntoProductionHandout(
         productionId: festival,
         mode: HandoutMode.checkin,
-        body: const ProductionCheckScanRequest(code: '40000004'),
+        body: const HandoutScanRequest(code: '40000004'),
       );
       expect(scan.returnedFrom, ['Hafenfest Open Air']);
 
@@ -1178,7 +1178,7 @@ void main() {
       final scan = await api.productionHandout.scanIntoProductionHandout(
         productionId: 'prdn_demo_festival',
         mode: HandoutMode.checkout,
-        body: const ProductionCheckScanRequest(code: '40000099'),
+        body: const HandoutScanRequest(code: '40000099'),
       );
       expect(scan.swap?.partnerLabel, '40000013');
       expect(scan.swap?.joined, contains(DemoData.cableKit.tag));
@@ -1238,11 +1238,131 @@ void main() {
       final scan = await api.productionHandout.scanIntoProductionHandout(
         productionId: 'prdn_demo_festival',
         mode: HandoutMode.checkin,
-        body: const ProductionCheckScanRequest(code: '40000099'),
+        body: const HandoutScanRequest(code: '40000099'),
       );
       expect(scan.swap, isNull);
       final spare = await api.inventory.getAssetByTag(tag: '40000099');
       expect(spare.bundleId, isNull);
+    });
+  });
+
+  group('pack cases', () {
+    const festival = 'prdn_demo_festival';
+    const case16 = 'asset_demo_40000016';
+    const case17 = 'asset_demo_40000017';
+
+    Future<ScanResult> scan(
+      String code, {
+      String? into,
+      HandoutMode mode = HandoutMode.checkout,
+    }) => api.productionHandout.scanIntoProductionHandout(
+      productionId: festival,
+      mode: mode,
+      body: HandoutScanRequest(code: code, packInto: into),
+    );
+
+    Future<ProductionHandout> list([HandoutMode mode = HandoutMode.checkout]) =>
+        api.productionHandout.getProductionHandout(productionId: festival, mode: mode);
+
+    test(
+      'a case scanned is booked out and said to be one; what follows goes in',
+      () async {
+        final opened = await scan('40000016');
+        expect(opened.packCase?.assetId, case16);
+        expect(opened.packedInto, isNull);
+
+        final packed = await scan('40000001', into: case16);
+        expect(packed.packedInto, case16);
+        expect(packed.packCase, isNull);
+
+        final handout = await list();
+        final box = handout.items.firstWhere((i) => i.assetId == case16);
+        expect(box.isPackCase, isTrue);
+        expect(box.done, isTrue);
+        expect(box.packCase?.assetId, case16);
+        final head = handout.items.firstWhere((i) => i.assetId == 'asset_demo_40000001');
+        expect(head.packCase?.assetId, case16);
+        expect(head.done, isTrue);
+      },
+    );
+
+    test(
+      'a case goes into a case, never in a circle, and part of a line splits',
+      () async {
+        await scan('40000016');
+        await scan('40000017');
+        await api.productionHandout.packIntoProductionCase(
+          productionId: festival,
+          body: const PackRequest(caseAssetId: case16, assetIds: [case17]),
+        );
+        var handout = await list();
+        final inner = handout.items.firstWhere((i) => i.assetId == case17);
+        expect(inner.packCase?.path.map((r) => r.assetId), [case16]);
+
+        await expectLater(
+          api.productionHandout.packIntoProductionCase(
+            productionId: festival,
+            body: const PackRequest(caseAssetId: case17, assetIds: [case16]),
+          ),
+          throwsA(
+            isA<Object>().having(
+              (e) => (unwrapError(e) as ApiException).code,
+              'code',
+              'pack_circle',
+            ),
+          ),
+        );
+
+        final cables = handout.lines.single;
+        expect(cables.total, 10);
+        await api.productionHandout.packIntoProductionCase(
+          productionId: festival,
+          body: PackRequest(
+            caseAssetId: case17,
+            line: ProductionListLineCount(key: cables.key, count: 3),
+          ),
+        );
+        handout = await list();
+        final inCase = handout.lines.firstWhere((l) => l.packCase != null);
+        final loose = handout.lines.firstWhere((l) => l.packCase == null);
+        expect(inCase.packCase?.assetId, case17);
+        expect(inCase.packCase?.path.map((r) => r.assetId), [case16]);
+        expect(inCase.total, 3);
+        expect(inCase.done, 3);
+        expect(loose.total, 7);
+      },
+    );
+
+    test('the label names the production, the case and what is in it', () async {
+      await scan('40000016');
+      await scan('40000004', into: case16);
+      final label = await api.productionHandout.getPackCaseLabel(
+        productionId: festival,
+        caseAssetId: case16,
+      );
+      expect(label.zpl, contains('Kiste 40000016'));
+      expect(label.zpl, contains('ColorSource PAR'));
+    });
+
+    test('taking a unit back takes it out of its case', () async {
+      await scan('40000016');
+      await scan('40000004', into: case16);
+      final back = await scan('40000016', mode: HandoutMode.checkin);
+      expect(back.packCase?.assetId, case16);
+      var handout = await list(HandoutMode.checkin);
+      expect(
+        handout.items
+            .firstWhere((i) => i.assetId == 'asset_demo_40000004')
+            .packCase
+            ?.assetId,
+        case16,
+      );
+      await scan('40000004', mode: HandoutMode.checkin);
+      handout = await list(HandoutMode.checkin);
+      expect(
+        handout.items.firstWhere((i) => i.assetId == 'asset_demo_40000004').packCase,
+        isNull,
+      );
     });
   });
 }

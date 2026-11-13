@@ -38,7 +38,29 @@ in `checkout.ts`, heute nur für lose gebuchte Geräte) wird auf beide ausgeweit
 - **Abwahl:** pro Produkt „nicht austauschbar“ (kalibriertes Objektiv zu genau dieser Kamera), unter
   `productControl`, mit Eintrag im Katalog-Protokoll.
 
+### 2b. Ganzes Kit statt des gebuchten (nachgetragen)
+
+Gebucht ist Ring 1, gescannt wird das Etikett von Ring 2: **die Buchung wechselt auf Ring 2**, beide
+Kits behalten ihren Inhalt (Stellvertreter auf Kit-Ebene, kein Umbau). Bedingungen wie beim
+Gerätetausch: gleicher Bundle-Typ, gleiche Org, das gescannte Kit ganz verfügbar (nichts unterwegs,
+nicht für dieselben Tage gebucht), Produkt-/Typ-Abwahl respektiert. Hinweis im Scan („Ring 2 statt
+Ring 1“) und Eintrag in der Historie. Gilt auch für innere Kits (anderes PowerCon-Set im FOH Case).
+**Nur solange aus dem gebuchten Kit noch nichts ausgegeben ist** — ist es durch Gerätetausch schon
+angefangen (z. B. A2 per Adapter-Scan in Ring 1), lehnt der Kit-Scan mit Hinweis ab („Ring 1 ist
+schon angefangen – Adapter einzeln scannen“). Gerätetausch (Etikett eines Geräts) und Kit-Tausch
+(Etikett eines Kits) hängen an verschiedenen Etiketten und kommen sich sonst nicht in die Quere;
+ein Gerät, dessen eigenes Kit ebenfalls gebucht ist, geht mit diesem raus statt zu tauschen.
+Umsetzung nach Teil 3, weil beide den Kit-Scan beim Ausgeben anfassen.
+
 ## 3. Pack-Kisten (Transflex & Co.)
+
+**Ein Merkmal „Behälter“ für beide Fälle** (Ergänzung vom 2026-11-13): Ein Behälter-Gerät **in
+einem festen Bundle** ist dessen Kiste, und **seine Inventarnummer ist die Nummer des Bundles**: auf
+dem Kistenetikett, und ihr Scan meint überall das ganze Kit (Ausgabe, Rücknahme, Kisten-Check,
+Inventur, Hineinlegen per Scan). Ein eigener Bundle-Tag bleibt die Ausnahme für Bundles ohne Kiste
+(DMX-Ringe haben gar keinen Code); hat ein Bundle beides, druckt das Etikett den eigenen Tag. Nur die
+leere Kiste bucht man über die Geräteseite oder nach dem Herausnehmen — keine Rückfrage beim Scan.
+Ein Behälter-Gerät **ohne Bundle** ist eine Pack-Kiste wie unten.
 
 Eine Pack-Kiste ist ein **normales Gerät** mit Etikett, dessen Produkt das Merkmal
 **„Pack-Behälter“** trägt. Inhalt hat sie nur **während einer Produktion** (Zuordnung an der

@@ -1721,4 +1721,127 @@ class SDe extends S {
   String historySwapLoose(String partner) {
     return 'Mit $partner, jetzt lose';
   }
+
+  @override
+  String packCase(String title) {
+    return 'Kiste $title';
+  }
+
+  @override
+  String packCaseInside(String number) {
+    return 'in Kiste $number';
+  }
+
+  @override
+  String get packCaseOpenNote => 'offen';
+
+  @override
+  String get packLoose => 'Lose';
+
+  @override
+  String packOpenBanner(String title) {
+    return 'Packen in Kiste $title';
+  }
+
+  @override
+  String get packOpenHint =>
+      'Was du scannst, kommt hinein und geht mit ihr raus. Scanne eine andere Kiste, um zu wechseln.';
+
+  @override
+  String get packClose => 'Kiste zu';
+
+  @override
+  String get packOpen => 'In diese Kiste packen';
+
+  @override
+  String packOpened(String title) {
+    return 'Kiste $title ist offen';
+  }
+
+  @override
+  String get packScanNext => 'Was du jetzt scannst, kommt hinein.';
+
+  @override
+  String get packChoiceTitle => 'Andere Kiste';
+
+  @override
+  String packChoiceQuestion(String open, String scanned) {
+    return 'Kiste $open ist offen. Kommt Kiste $scanned hinein, oder willst du jetzt Kiste $scanned packen?';
+  }
+
+  @override
+  String get packChoiceInto => 'Hineinlegen';
+
+  @override
+  String get packChoiceSwitch => 'Stattdessen öffnen';
+
+  @override
+  String packNested(String inner, String outer) {
+    return 'Kiste $inner steckt in Kiste $outer';
+  }
+
+  @override
+  String packInto(String number) {
+    return 'In Kiste $number';
+  }
+
+  @override
+  String packTakeOut(String number) {
+    return 'Aus Kiste $number nehmen';
+  }
+
+  @override
+  String packReturned(String title) {
+    return 'Zurückgenommen: Kiste $title';
+  }
+
+  @override
+  String get packReturnedQuestion =>
+      'Die Kiste ist zurück. Ist all das wieder darin? Nimm den Haken bei dem weg, was fehlt – es bleibt ausgegeben.';
+
+  @override
+  String get packNothingElse => 'Sonst ist nichts darin.';
+
+  @override
+  String packStaysOut(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Einträge bleiben ausgegeben',
+      one: '1 Eintrag bleibt ausgegeben',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get packAllBack => 'Ihr ganzer Inhalt ist zurück.';
+
+  @override
+  String get errorNotAPackCase => 'Das ist keine Pack-Kiste dieser Produktion.';
+
+  @override
+  String get errorPackCircle =>
+      'Eine Kiste kann nicht in sich selbst oder in etwas, das in ihr steckt.';
+
+  @override
+  String bundleNumberFromCase(String number) {
+    return 'Nummer: $number';
+  }
+
+  @override
+  String bundleExtraCases(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other:
+          '$count weitere Behälter darin – die niedrigste Gerätenummer ist seine Kiste',
+      one: '1 weiterer Behälter darin – die niedrigste Gerätenummer ist seine Kiste',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String caseOfKit(String kit) {
+    return 'Kiste von $kit';
+  }
 }

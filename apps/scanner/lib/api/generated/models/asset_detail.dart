@@ -33,6 +33,7 @@ class AssetDetail {
     this.bundleId,
     this.parentAssetId,
     this.kit,
+    this.isBundleCase,
     this.documents,
     this.inspectionIntervalMonths,
     this.nextInspectionDue,
@@ -87,6 +88,13 @@ class AssetDetail {
   /// keeps compiling.
   ///
   final ListKit? kit;
+
+  /// The unit is its kit's case (a container in it, see.
+  /// `BundleDetail.caseUnitId`): its tag is the kit's number, and.
+  /// scanning it means the whole kit. Show "Case of <kit>". Not.
+  /// required, so an older client keeps compiling.
+  ///
+  final bool? isBundleCase;
 
   /// Most recent transactions first.
   final List<AssetTransaction> history;

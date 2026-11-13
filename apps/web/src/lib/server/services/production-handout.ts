@@ -10,7 +10,18 @@ import {
 	writableOrgIds
 } from './access';
 import { kitByTag, resolveScannedCode, type TaggedKit } from './asset-lookup';
-import { kitAssetsWhere } from '#lib/bundle-nesting.js';
+import { inBookedKit, kitAssetsWhere } from '#lib/bundle-nesting.js';
+import {
+	caseNumber,
+	caseTitle,
+	isPackCaseUnit,
+	packRefusal,
+	pickToPack,
+	type ListCaseRef
+} from '#lib/pack-cases.js';
+import { makerAndName, withCaption } from '#lib/product-label.js';
+import { caseLabelLines, type CaseLabelData } from '#lib/server/case-label-zpl.js';
+import { withAccessories } from './accessories';
 import {
 	CheckoutError,
 	emptyAffected,
@@ -20,7 +31,8 @@ import {
 	performBulkCheckout,
 	performScan,
 	undoCheckout,
-	type AffectedRecords
+	type AffectedRecords,
+	type ScanResult
 } from './checkout';
 import {
 	buildLines,
@@ -29,8 +41,10 @@ import {
 	kitOf,
 	lenderLabel,
 	listItems,
+	loadPacking,
 	nestAndSort,
 	pickForCount,
+	type ListCase,
 	type ListGroup,
 	type ListKit,
 	type ListLine,
@@ -95,6 +109,13 @@ export interface HandoutItem {
 	returnReported: boolean;
 	/** Some inspection of it is overdue. Handing it out warns, never refuses. */
 	inspectionOverdue: boolean;
+	/**
+	 * The pack case it is listed under: the one it travels in, or for a case
+	 * itself, its own — see #lib/pack-cases.ts. Null: loose.
+	 */
+	packCase: ListCase | null;
+	/** Its product is a pack container: scanning it opens it for packing. */
+	isPackCase: boolean;
 }
 
 export interface HandoutView {
@@ -302,12 +323,13 @@ export async function getHandout(
 	const scope = await handoutScope(userId, productionId, organizationId);
 	const { production, sides, side, organizationIds, byLender } = scope;
 	const statuses = statusesFor(mode, production, options);
-	const [listed, total, additions] = await Promise.all([
+	const [listed, total, additions, packing] = await Promise.all([
 		listItems(productionId, statuses, organizationIds),
 		prisma.productionItem.count({
 			where: { productionId, status: { in: statuses } }
 		}),
-		mode === 'checkout' && options.extras ? kitAdditions(scope) : []
+		mode === 'checkout' && options.extras ? kitAdditions(scope) : [],
+		loadPacking(productionId)
 	]);
 	const productionOrgId = production.organizationId;
 
@@ -330,7 +352,9 @@ export async function getHandout(
 			done: false,
 			received: false,
 			returnReported: false,
-			inspectionOverdue: overdue(asset.nextInspectionDue)
+			inspectionOverdue: overdue(asset.nextInspectionDue),
+			packCase: null,
+			isPackCase: false
 		})),
 		...listed.map((item) => {
 			const lent = item.asset.organizationId !== productionOrgId;
@@ -350,7 +374,9 @@ export async function getHandout(
 				done: isDone(item, mode),
 				received: lent && item.receivedAt !== null,
 				returnReported: lent && item.returnReportedAt !== null,
-				inspectionOverdue: overdue(item.asset.nextInspectionDue)
+				inspectionOverdue: overdue(item.asset.nextInspectionDue),
+				packCase: packing.caseOf(item),
+				isPackCase: isPackCaseUnit(item.asset)
 			};
 		})
 	]);
@@ -363,10 +389,13 @@ export async function getHandout(
 		side,
 		sides,
 		items,
-		lines: buildLines(listed, productionOrgId, byLender, (item) => ({
-			done: isDone(item, mode),
-			undoable: true
-		})),
+		lines: buildLines(
+			listed,
+			productionOrgId,
+			byLender,
+			(item) => ({ done: isDone(item, mode), undoable: true }),
+			packing
+		),
 		othersCount: total - listed.length,
 		books: scope.books
 	};
@@ -413,16 +442,21 @@ export async function scanIntoHandout(
 	userId: string,
 	productionId: string,
 	mode: HandoutMode,
-	code: string
+	code: string,
+	options: { packInto?: string | null } = {}
 ) {
 	await handoutScope(userId, productionId);
 	if (mode === 'checkout') {
-		return performScan(userId, {
+		const scanned = await performScan(userId, {
 			assetTag: code,
 			targetType: 'production',
 			targetId: productionId
 		});
+		return packScanned(userId, productionId, scanned, options.packInto ?? null);
 	}
+	// A kit's number — its own tag or its case's — brings the whole kit back.
+	const kit = await kitByTag(code);
+	if (kit) return await takeBackKit(userId, productionId, kit);
 	const match = await resolveScannedCode(userId, code);
 	if (match.kind === 'ambiguous') {
 		throw new CheckoutError(
@@ -432,8 +466,6 @@ export async function scanIntoHandout(
 		);
 	}
 	if (match.kind === 'not_found') {
-		const kit = await kitByTag(code);
-		if (kit) return await takeBackKit(userId, productionId, kit);
 		throw new CheckoutError('asset_not_found', `Tag "${code}" not found`, code);
 	}
 	const asset = await prisma.asset.findUniqueOrThrow({
@@ -481,7 +513,11 @@ export async function scanIntoHandout(
 		targetType: 'location',
 		targetId: asset.locationId
 	});
-	return { result: back.result, affected: mergeAffected(affected, back.affected) };
+	// A pack case is back; what is in it is asked about next (see `packCase`).
+	return {
+		result: { ...back.result, packCase: await packCaseRef(asset.id) },
+		affected: mergeAffected(affected, back.affected)
+	};
 }
 
 /**
@@ -598,18 +634,21 @@ export async function setHandoutLineCount(
 	options: HandoutOptions = {}
 ) {
 	const { production, organizationIds, byLender } = await handoutScope(userId, productionId);
-	const listed = await listItems(
-		productionId,
-		statusesFor(mode, production, options),
-		organizationIds
-	);
+	const [listed, packing] = await Promise.all([
+		listItems(productionId, statusesFor(mode, production, options), organizationIds),
+		loadPacking(productionId)
+	]);
 	const byId = new Map(listed.map((i) => [i.assetId, i]));
 	const state = (assetId: string) => ({
 		done: byId.has(assetId) && isDone(byId.get(assetId)!, mode),
 		undoable: true
 	});
-	const line = buildLines(listed, production.organizationId, byLender, (item) =>
-		state(item.assetId)
+	const line = buildLines(
+		listed,
+		production.organizationId,
+		byLender,
+		(item) => state(item.assetId),
+		packing
 	).find((l) => l.key === key);
 	if (!line) return { result: { done: 0 }, affected: emptyAffected() };
 
@@ -625,6 +664,252 @@ export async function setHandoutLineCount(
 		);
 	}
 	return { result: { done: line.done + add.length - remove.length }, affected };
+}
+
+// ---------------------------------------------------------------------------
+// Pack cases
+//
+// A case is opened on the client — it is whoever packs that has a case open,
+// not the production — so the server only hears where a unit goes: a scan
+// carries the open case (`packInto`), and `packIntoCase` puts units into one,
+// or takes them out. Packing is handing out: what goes into a case, the case
+// included, is checked out with it. See #lib/pack-cases.ts for the rules.
+
+/** The scanned unit as a pack case, or null when its product is none. */
+async function packCaseRef(assetId: string): Promise<ListCaseRef | null> {
+	const asset = await prisma.asset.findUnique({
+		where: { id: assetId },
+		select: {
+			id: true,
+			assetTag: true,
+			orgIndex: true,
+			bundleId: true,
+			product: { select: { name: true, caption: true, isContainer: true } }
+		}
+	});
+	// A container in a bundle is the bundle's case, scanned as the kit.
+	if (!asset || !isPackCaseUnit(asset)) return null;
+	return {
+		assetId: asset.id,
+		name: withCaption(asset.product.name, asset.product.caption),
+		tag: asset.assetTag,
+		orgIndex: asset.orgIndex
+	};
+}
+
+/**
+ * After a scan on the hand-out list: a case is said to be one, so the client
+ * opens it (or asks whether it goes into the one open). Anything else goes
+ * into the open case, a kit's sticker with everything it booked.
+ */
+async function packScanned(
+	userId: string,
+	productionId: string,
+	scanned: { result: ScanResult; affected: AffectedRecords },
+	packInto: string | null
+) {
+	const { result, affected } = scanned;
+	const kitUnits = result.kit ? result.kit.units.map((u) => u.id) : null;
+	if (!kitUnits) {
+		const packCase = await packCaseRef(result.asset.id);
+		if (packCase) return { result: { ...result, packCase }, affected };
+	}
+	const assetIds = kitUnits ?? [result.asset.id];
+	if (!packInto || assetIds.length === 0) return scanned;
+	const step = await packIntoCase(userId, productionId, packInto, { assetIds });
+	return {
+		result: { ...result, packedInto: packInto },
+		affected: mergeAffected(affected, step.affected)
+	};
+}
+
+/** What goes into a case: units by id, and part of a counted line by its key. */
+export interface PackSelection {
+	assetIds?: string[];
+	line?: { key: string; count: number };
+}
+
+const PACKABLE_STATUSES = ['APPROVED', 'CHECKED_OUT'];
+
+/**
+ * Puts units into the case `caseAssetId`, or with null takes them out of
+ * whichever they are in. Accessories go with their unit, a case with what is
+ * in it. Units of the user's side only; the case may be anyone's on the
+ * production. Refused for something that is not a case booked here, and for
+ * a case into itself or into something it holds.
+ */
+export async function packIntoCase(
+	userId: string,
+	productionId: string,
+	caseAssetId: string | null,
+	selection: PackSelection,
+	organizationId?: string
+): Promise<{ result: { count: number }; affected: AffectedRecords }> {
+	const scope = await handoutScope(userId, productionId, organizationId);
+	if (scope.production.cancelledAt) {
+		throw new CheckoutError('production_cancelled', `${scope.production.name} has been cancelled`);
+	}
+	const packing = await loadPacking(productionId);
+
+	const ids = [...(selection.assetIds ?? [])];
+	if (selection.line) {
+		const { key, count } = selection.line;
+		const listed = await listItems(productionId, PACKABLE_STATUSES, scope.organizationIds);
+		const out = new Set(listed.filter((i) => i.status === 'CHECKED_OUT').map((i) => i.assetId));
+		const line = buildLines(
+			listed,
+			scope.production.organizationId,
+			scope.byLender,
+			(item) => ({ done: out.has(item.assetId), undoable: true }),
+			packing
+		).find((l) => l.key === key);
+		if (line) ids.push(...pickToPack(line.assetIds, count, (id) => out.has(id)));
+	}
+	if (ids.length === 0) return { result: { count: 0 }, affected: emptyAffected() };
+
+	const items = await prisma.productionItem.findMany({
+		where: {
+			productionId,
+			assetId: { in: await withAccessories(ids) },
+			status: { in: PACKABLE_STATUSES }
+		},
+		select: { id: true, assetId: true, status: true, asset: { select: { organizationId: true } } }
+	});
+	const sideIds = scope.organizationIds;
+	if (sideIds && items.some((i) => !sideIds.includes(i.asset.organizationId))) {
+		throw new CheckoutError('forbidden', 'Not a unit of this side');
+	}
+
+	const target = caseAssetId ? packing.byAsset.get(caseAssetId) : null;
+	const affected = emptyAffected();
+	if (caseAssetId) {
+		const caseItem = target
+			? await prisma.productionItem.findUnique({
+					where: { id: target.itemId },
+					select: { status: true }
+				})
+			: null;
+		if (!target || !caseItem || !PACKABLE_STATUSES.includes(caseItem.status)) {
+			throw new CheckoutError('not_a_pack_case', 'That is no pack case on this production');
+		}
+		const refusal = packRefusal(
+			items.map((i) => i.id),
+			{ itemId: target.itemId, isPackCase: target.isPackCase },
+			(itemId) => packing.byItem.get(itemId)?.packedInItemId ?? null
+		);
+		if (refusal === 'not_a_case') {
+			throw new CheckoutError('not_a_pack_case', 'That is no pack case on this production');
+		}
+		if (refusal) {
+			throw new CheckoutError(
+				'pack_circle',
+				'A case cannot go into itself or into something it holds'
+			);
+		}
+		// Packed is handed out: what is not out yet goes now, the case as well.
+		const toHandOut = [
+			...items.filter((i) => i.status === 'APPROVED').map((i) => i.assetId),
+			...(caseItem.status === 'APPROVED' ? [target.ref.assetId] : [])
+		];
+		if (toHandOut.length > 0) {
+			const step = await setHandoutDone(userId, productionId, 'checkout', toHandOut, true);
+			mergeAffected(affected, step.affected);
+		}
+	}
+
+	await prisma.productionItem.updateMany({
+		where: { id: { in: items.map((i) => i.id) } },
+		data: { packedInItemId: target?.itemId ?? null }
+	});
+	mergeAffected(affected, { productionIds: [productionId] });
+	return { result: { count: items.length }, affected };
+}
+
+/**
+ * The label for a pack case on this production (Kistenetikett for the
+ * production, not for the case's own contents): "Kiste 3" large, the
+ * production and the case's product under it, the case's tag as the code, and
+ * what is in it now — a case inside as one line ("1× Kiste 5 (Transflex)"),
+ * as a kit inside is one. Rendered by case-label-zpl.ts like any case label.
+ */
+export async function packCaseLabelData(
+	userId: string,
+	productionId: string,
+	caseAssetId: string
+): Promise<CaseLabelData & { logoPath: string | null }> {
+	const { production } = await handoutScope(userId, productionId);
+	const packing = await loadPacking(productionId);
+	const node = packing.byAsset.get(caseAssetId);
+	if (!node?.isPackCase) {
+		throw new CheckoutError('not_a_pack_case', 'That is no pack case on this production');
+	}
+	const [owner, contents] = await Promise.all([
+		prisma.asset.findUniqueOrThrow({
+			where: { id: caseAssetId },
+			select: { organization: { select: { name: true, shortName: true, logoPath: true } } }
+		}),
+		prisma.productionItem.findMany({
+			where: { productionId, packedInItemId: node.itemId, status: { in: PACKABLE_STATUSES } },
+			select: {
+				id: true,
+				assetId: true,
+				sourceBundleId: true,
+				asset: {
+					select: {
+						parentAssetId: true,
+						bundleId: true,
+						bundle: {
+							select: {
+								id: true,
+								parentBundleId: true,
+								template: { select: { name: true, caption: true } },
+								parentBundle: {
+									select: { id: true, template: { select: { name: true, caption: true } } }
+								}
+							}
+						},
+						product: {
+							select: { name: true, isContainer: true, manufacturer: { select: { name: true } } }
+						}
+					}
+				}
+			}
+		})
+	]);
+	const inside = new Set(contents.map((c) => c.assetId));
+	const items = contents
+		.map((c) => {
+			const inner = packing.byItem.get(c.id);
+			// The kit it was booked with, the outer one for a unit of an inner kit.
+			const kit = inBookedKit(c)
+				? c.asset.bundleId === c.sourceBundleId
+					? c.asset.bundle
+					: (c.asset.bundle?.parentBundle ?? null)
+				: null;
+			return {
+				assetId: c.assetId,
+				name: makerAndName(c.asset.product.manufacturer?.name, c.asset.product.name),
+				accessoryOf:
+					c.asset.parentAssetId && inside.has(c.asset.parentAssetId) ? c.asset.parentAssetId : null,
+				innerKit: inner?.isPackCase
+					? { id: c.assetId, name: `Kiste ${caseTitle(inner.ref)}` }
+					: kit
+						? { id: kit.id, name: withCaption(kit.template.name, kit.template.caption) }
+						: null
+			};
+		})
+		// Units by name, each followed by its accessories.
+		.sort((a, b) => naturalCompare(a.name, b.name));
+	const ordered = [...items.filter((i) => !i.accessoryOf), ...items.filter((i) => i.accessoryOf)];
+	const org = owner.organization;
+	return {
+		title: `Kiste ${caseNumber(node.ref)}`,
+		caption: `${production.name} · ${node.ref.name}`,
+		code: node.ref.tag,
+		orgName: org.shortName || org.name,
+		logoPath: org.logoPath,
+		lines: caseLabelLines(ordered)
+	};
 }
 
 // ---------------------------------------------------------------------------

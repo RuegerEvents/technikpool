@@ -178,6 +178,8 @@ String describeError(S l10n, Object error) {
     'stocktake_action_applied' => l10n.errorStocktakeActionApplied,
     'not_a_case' => l10n.errorNotACase,
     'not_approved' => l10n.errorNotApproved,
+    'not_a_pack_case' => l10n.errorNotAPackCase,
+    'pack_circle' => l10n.errorPackCircle,
     'check_closed' => l10n.errorCheckClosed,
     'tick_not_yours' => l10n.errorTickNotYours,
     'receipt_forbidden' => l10n.errorReceiptForbidden,

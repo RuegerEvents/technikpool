@@ -28,6 +28,10 @@ ProductionCheckItem _$ProductionCheckItemFromJson(Map<String, dynamic> json) =>
       kit: json['kit'] == null
           ? null
           : ListKit.fromJson(json['kit'] as Map<String, dynamic>),
+      packCase: json['packCase'] == null
+          ? null
+          : PackCase.fromJson(json['packCase'] as Map<String, dynamic>),
+      isPackCase: json['isPackCase'] as bool?,
     );
 
 Map<String, dynamic> _$ProductionCheckItemToJson(
@@ -43,6 +47,8 @@ Map<String, dynamic> _$ProductionCheckItemToJson(
   'accessoryOf': ?instance.accessoryOf,
   'group': instance.group,
   'kit': ?instance.kit,
+  'packCase': ?instance.packCase,
+  'isPackCase': ?instance.isPackCase,
   'status': instance.status,
   'received': instance.received,
   'returnReported': instance.returnReported,

@@ -169,6 +169,8 @@ export type AppErrorCode =
 	| 'rental_terms_not_accepted'
 	| 'rental_terms_empty'
 	| 'booking_not_approved'
+	| 'pack_not_a_case'
+	| 'pack_circle'
 	// Offers and invoices
 	| 'offer_immutable'
 	| 'offer_already_finalized'

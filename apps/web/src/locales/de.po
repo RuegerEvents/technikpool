@@ -229,6 +229,7 @@ msgstr "Crew"
 #: src/routes/orgs/[id]/rental-terms-card.svelte
 #: src/routes/productions/[id]/copy-equipment-modal.svelte
 #: src/routes/productions/[id]/handout-detail.svelte
+#: src/routes/productions/[id]/handout-detail.svelte
 #: src/routes/productions/[id]/loan-request-modal.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
@@ -1063,6 +1064,7 @@ msgstr "Gerät aus Bundle entfernt"
 #: src/lib/components/ui/staleness-banner/staleness-banner.svelte
 #: src/lib/components/ui/sticker-order-info/sticker-order-info.svelte
 #: src/routes/approval-request-modal.svelte
+#: src/routes/productions/[id]/handout-detail.svelte
 #: src/routes/share/[id]/[signature]/+page.svelte
 msgid "Close"
 msgstr "Schließen"
@@ -2900,6 +2902,7 @@ msgstr "Noch keine Rechnungen."
 
 #: src/routes/invoices/+page.svelte
 #: src/routes/offers/+page.svelte
+#: src/routes/productions/[id]/handout-detail.svelte
 msgid "Number"
 msgstr "Nummer"
 
@@ -10807,6 +10810,7 @@ msgstr "Kundenlink"
 
 #: src/lib/equipment-sheet-download.svelte.ts
 #: src/routes/case-check/+page.svelte
+#: src/routes/productions/[id]/handout-detail.svelte
 msgid "Open"
 msgstr "Öffnen"
 
@@ -11782,6 +11786,7 @@ msgid "Pack ({0})"
 msgstr "Packen ({0})"
 
 #: src/routes/productions/+page.svelte
+#: src/routes/productions/[id]/handout-detail.svelte
 msgid "Pack"
 msgstr "Packen"
 
@@ -14128,7 +14133,7 @@ msgid "A5, list"
 msgstr "A5, Liste"
 
 #. 0: row.kit.parent.name
-#. 0: withCaption(kit.inside.template.name, kit.inside.template.caption)
+#. 0: withCaption( kit.inside.template.name, kit.inside.template.caption )
 #: src/lib/components/production-list/tick-list.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 msgid "in {0}"
@@ -14237,3 +14242,182 @@ msgstr "<0/> Nicht austauschbar"
 #: src/lib/components/ui/product-editor/product-editor.svelte
 msgid "Units of this product stay where they are linked. Otherwise handing out or checking a case with another unit of the same product swaps the two, e.g. the adapters of two DMX rings. Tick it for a calibrated lens that belongs to exactly one camera."
 msgstr "Geräte dieses Produkts bleiben, wo sie verknüpft sind. Sonst tauscht das Ausgeben oder Kiste-Checken mit einem anderen Gerät desselben Produkts die beiden, etwa die Adapter zweier DMX-Ringe. Anhaken für ein kalibriertes Objektiv, das zu genau einer Kamera gehört."
+
+#: src/lib/error-messages.svelte.ts
+msgid "That is no pack case on this production — scan or pick a case that is booked here."
+msgstr "Das ist keine Pack-Kiste dieser Produktion – scanne oder wähle eine Kiste, die hier gebucht ist."
+
+#: src/lib/error-messages.svelte.ts
+msgid "A case cannot go into itself or into something packed inside it."
+msgstr "Eine Kiste kann nicht in sich selbst oder in etwas, das in ihr steckt."
+
+#: src/lib/components/production-list/tick-list.svelte
+msgid "Loose"
+msgstr "Lose"
+
+#. 0: caseNumber(outer)
+#: src/lib/components/production-list/tick-list.svelte
+msgid "in case {0}"
+msgstr "in Kiste {0}"
+
+#: src/lib/components/production-list/tick-list.svelte
+msgid "open"
+msgstr "offen"
+
+#. 0: caseTitle(section.packCase)
+#. 0: title
+#: src/lib/components/production-list/tick-list.svelte
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Case {0}"
+msgstr "Kiste {0}"
+
+#. 0: title; 1: caseNumber(open)
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Case {0} is in case {1}"
+msgstr "Kiste {0} steckt in Kiste {1}"
+
+#. 0: caseNumber(open)
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Case {0} stays open"
+msgstr "Kiste {0} bleibt offen"
+
+#. 0: title; 1: caseNumber(open)
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Case {0} could not go into case {1}"
+msgstr "Kiste {0} konnte nicht in Kiste {1}"
+
+#. 0: title
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Case {0} is open"
+msgstr "Kiste {0} ist offen"
+
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "What you scan now goes into it."
+msgstr "Was du jetzt scannst, kommt hinein."
+
+#. 0: title
+#. 0: title
+#. 0: title
+#: src/routes/productions/[id]/handout-detail.svelte
+#: src/routes/productions/[id]/handout-detail.svelte
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Returned: case {0}"
+msgstr "Zurückgenommen: Kiste {0}"
+
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Nothing else is in it."
+msgstr "Sonst ist nichts darin."
+
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "The case is back. Is all of this back in it? Untick what is missing; it stays out."
+msgstr "Die Kiste ist zurück. Ist all das wieder darin? Nimm den Haken bei dem weg, was fehlt – es bleibt ausgegeben."
+
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "What is in it is still out."
+msgstr "Ihr Inhalt ist noch ausgegeben."
+
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "1 entry stays out"
+msgid_plural "# entries stay out"
+msgstr[0] "1 Eintrag bleibt ausgegeben"
+msgstr[1] "# Einträge bleiben ausgegeben"
+
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Everything in it is back."
+msgstr "Ihr ganzer Inhalt ist zurück."
+
+#. 0: caseNumber(openCase)
+#. 0: caseNumber(openCase)
+#. 0: caseNumber(openCase)
+#. 0: caseNumber(openCase)
+#. 0: caseNumber(openCase)
+#: src/routes/productions/[id]/handout-detail.svelte
+#: src/routes/productions/[id]/handout-detail.svelte
+#: src/routes/productions/[id]/handout-detail.svelte
+#: src/routes/productions/[id]/handout-detail.svelte
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Into case {0}"
+msgstr "In Kiste {0}"
+
+#. 0: caseTitle(openCase)
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Packing into case {0}"
+msgstr "Packen in Kiste {0}"
+
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "What you scan goes into it and out with it. Scan another case to switch."
+msgstr "Was du scannst, kommt hinein und geht mit ihr raus. Scanne eine andere Kiste, um zu wechseln."
+
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Close case"
+msgstr "Kiste zu"
+
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Into the case"
+msgstr "In die Kiste"
+
+#. 0: lineTarget.productName; 1: caseTitle(openCase)
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "How many of {0} go into case {1}? The rest stays where it is."
+msgstr "Wie viele {0} kommen in Kiste {1}? Der Rest bleibt, wo er ist."
+
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Another case"
+msgstr "Andere Kiste"
+
+#. 0: caseTitle(caseChoice.open); 1: caseTitle(caseChoice.scanned); 2: caseNumber(caseChoice.scanned)
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Case {0} is open. Does case {1} go into it, or do you want to pack case {2} now?"
+msgstr "Kiste {0} ist offen. Kommt Kiste {1} hinein, oder willst du jetzt Kiste {2} packen?"
+
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Put it in"
+msgstr "Hineinlegen"
+
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Open it instead"
+msgstr "Stattdessen öffnen"
+
+#. 0: caseNumber(inCase)
+#. 0: caseNumber(inCase)
+#. 0: caseNumber(line.packCase)
+#. 0: caseNumber(line.packCase)
+#: src/routes/productions/[id]/handout-detail.svelte
+#: src/routes/productions/[id]/handout-detail.svelte
+#: src/routes/productions/[id]/handout-detail.svelte
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "Take out of case {0}"
+msgstr "Aus Kiste {0} nehmen"
+
+#. 0: kit.name; 1: caseNumber(openCase)
+#. 0: kit.name; 1: caseNumber(openCase)
+#: src/routes/productions/[id]/handout-detail.svelte
+#: src/routes/productions/[id]/handout-detail.svelte
+msgid "{0} into case {1}"
+msgstr "{0} in Kiste {1}"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Case of <0/>"
+msgstr "Kiste von <0/>"
+
+#: src/lib/components/ui/product-editor/product-editor.svelte
+msgid "<0/> Container"
+msgstr "<0/> Behälter"
+
+#: src/lib/components/ui/product-editor/product-editor.svelte
+msgid "A box things travel in. Inside a bundle it is that bundle's case: its tag is the bundle's number, and scanning it means the whole kit. In no bundle it is a pack case, like a Transflex crate: on a production's hand-out list, what is scanned after it goes into it."
+msgstr "Eine Kiste, in der etwas transportiert wird. In einem Bundle ist er dessen Kiste: sein Etikett ist die Nummer des Bundles, und sein Scan meint das ganze Kit. In keinem Bundle ist er eine Pack-Kiste wie eine Transflex-Box: auf der Ausgabe-Liste einer Produktion kommt hinein, was danach gescannt wird."
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "The tag of its case, which stands for the whole kit"
+msgstr "Das Etikett seiner Kiste, das für das ganze Kit steht"
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "<0/>Number: <1/>"
+msgstr "<0/>Nummer: <1/>"
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "1 more container in it — the lowest unit number is its case"
+msgid_plural "# more containers in it — the lowest unit number is its case"
+msgstr[0] "1 weiterer Behälter darin – die niedrigste Gerätenummer ist seine Kiste"
+msgstr[1] "# weitere Behälter darin – die niedrigste Gerätenummer ist seine Kiste"

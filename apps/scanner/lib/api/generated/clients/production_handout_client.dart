@@ -5,12 +5,15 @@
 import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 
+import '../models/case_label.dart';
+import '../models/case_label_size.dart';
 import '../models/count_result.dart';
 import '../models/handout_addition.dart';
 import '../models/handout_addition_request.dart';
 import '../models/handout_mode.dart';
+import '../models/handout_scan_request.dart';
 import '../models/handover_result.dart';
-import '../models/production_check_scan_request.dart';
+import '../models/pack_request.dart';
 import '../models/production_handout.dart';
 import '../models/production_handout_tick_request.dart';
 import '../models/production_list_line_count.dart';
@@ -55,7 +58,7 @@ abstract class ProductionHandoutClient {
   Future<ScanResult> scanIntoProductionHandout({
     @Path('productionId') required String productionId,
     @Path('mode') required HandoutMode mode,
-    @Body() required ProductionCheckScanRequest body,
+    @Body() required HandoutScanRequest body,
   });
 
   /// Tick or untick units by hand.
@@ -79,6 +82,39 @@ abstract class ProductionHandoutClient {
     @Path('productionId') required String productionId,
     @Path('mode') required HandoutMode mode,
     @Body() required ProductionListLineCount body,
+  });
+
+  /// Put units into a pack case, or take them out.
+  ///
+  /// A pack case is a unit whose product is a container.
+  /// (`CatalogProduct.isContainer`) and that is in no bundle. During one.
+  /// production it holds what is packed into it — units, part of a counted.
+  /// line, whole kits and other cases, nested as deep as need be but never.
+  /// in a circle. Opening a case is up to the client; a scan carries the.
+  /// open one (`HandoutScanRequest.packInto`), and this puts units in by.
+  /// hand. Packing is handing out: what goes in, and the case, is checked.
+  /// out if it was not. Units of the caller's side only. Taking a unit back.
+  /// empties it out of its case, so a case is empty once all is back.
+  /// `409 not_a_pack_case` for anything not a case booked here, `409.
+  /// pack_circle` for a case into itself or into what it holds.
+  @POST('/api/v1/productions/{productionId}/packing')
+  Future<HandoverResult> packIntoProductionCase({
+    @Path('productionId') required String productionId,
+    @Body() required PackRequest body,
+  });
+
+  /// A pack case's label for this production, as ZPL.
+  ///
+  /// Like a case's label (`getCaseLabel`), for a pack case on one.
+  /// production: "Kiste 3" large, the production and the case's product.
+  /// under it, a DataMatrix of the case's tag, and — on the large label —.
+  /// what is in it now, a case or kit inside as one line. German, like the.
+  /// PDFs.
+  @GET('/api/v1/productions/{productionId}/packing/{caseAssetId}/label')
+  Future<CaseLabel> getPackCaseLabel({
+    @Path('productionId') required String productionId,
+    @Path('caseAssetId') required String caseAssetId,
+    @Query('size') CaseLabelSize? size,
   });
 
   /// Find units the hand-out list does not have, by name.

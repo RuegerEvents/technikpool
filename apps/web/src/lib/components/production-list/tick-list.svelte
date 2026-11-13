@@ -3,12 +3,13 @@
 	generics="U extends { assetId: string; assetTag: string | null; productName: string; productCaption: string | null; productImagePath: string | null; accessoryOf: string | null; kit: ListKit | null }"
 >
 	import type { Snippet } from 'svelte';
-	import { Handshake, MapPin, Package } from '@lucide/svelte';
+	import { Box, Handshake, MapPin, Package } from '@lucide/svelte';
 	import { SvelteMap } from 'svelte/reactivity';
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { CountStepper } from '#lib/components/ui/count-stepper/index.js';
 	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
 	import type { ListKit, ListLine, ListSection } from '#lib/production-list.js';
+	import { caseNumber, caseTitle, type ListCase } from '#lib/pack-cases.js';
 
 	// The list a production's equipment is worked through, whatever a tick means
 	// there — checked, handed out, taken back. Units with a tag (or anything
@@ -56,6 +57,12 @@
 		ontickSection: (units: U[], lines: ListLine[]) => void;
 		/** Something to do with one unit besides ticking it, at the row's end. */
 		unitAction?: Snippet<[U]>;
+		/** The same for a counted line, a kit's heading and a pack case's heading. */
+		lineAction?: Snippet<[ListLine]>;
+		kitAction?: Snippet<[ListKit, U[]]>;
+		caseAction?: Snippet<[ListCase]>;
+		/** The case open for packing, whose heading is marked. */
+		openCaseId?: string | null;
 	};
 
 	let {
@@ -69,8 +76,15 @@
 		ontoggle,
 		oncount,
 		ontickSection,
-		unitAction
+		unitAction,
+		lineAction,
+		kitAction,
+		caseAction,
+		openCaseId = null
 	}: Props = $props();
+
+	let anyCase = $derived(sections.some((s) => s.packCase));
+	let firstLoose = $derived(sections.find((s) => !s.packCase)?.key ?? null);
 
 	const wantedDone = new SvelteMap<string, boolean>();
 	const wantedCount = new SvelteMap<string, number>();
@@ -178,10 +192,34 @@
 	</p>
 	{#each sections as section (section.key)}
 		{@const t = tally(section)}
-		<section class="space-y-1.5">
+		{#if anyCase && section.key === firstLoose}
+			<!-- Everything packed in no case, in the sections it always had. -->
+			<h2 class="border-t pt-3 text-sm font-semibold text-muted-foreground">Loose</h2>
+		{/if}
+		<section
+			class="space-y-1.5"
+			style:margin-left={section.depth ? `${section.depth * 1.25}rem` : undefined}
+		>
 			<div class="flex items-center justify-between gap-3">
 				<h3 class="flex min-w-0 items-center gap-1.5 text-sm font-semibold">
-					{#if section.group.kind === 'lender'}
+					{#if section.packCase}
+						{@const outer = section.packCase.path.at(-1)}
+						<Box
+							aria-hidden="true"
+							class="size-4 shrink-0 {section.packCase.assetId === openCaseId
+								? 'text-emerald-600'
+								: 'text-muted-foreground'}"
+						/>
+						<span class="truncate">Case {caseTitle(section.packCase)}</span>
+						{#if outer}
+							<span class="truncate text-xs font-normal text-muted-foreground"
+								>in case {caseNumber(outer)}</span
+							>
+						{/if}
+						{#if section.packCase.assetId === openCaseId}
+							<span class="text-xs font-normal text-emerald-700 dark:text-emerald-400">open</span>
+						{/if}
+					{:else if section.group.kind === 'lender'}
 						<Handshake aria-hidden="true" class="size-4 shrink-0 text-muted-foreground" />
 						<span class="truncate">Lent by {section.group.name}</span>
 					{:else if section.group.kind === 'location'}
@@ -193,14 +231,19 @@
 					{/if}
 					<span class="font-normal text-muted-foreground tabular-nums">{t.done} / {t.total}</span>
 				</h3>
-				{#if enabled && t.done < t.total}
-					<Button
-						variant="ghost"
-						size="sm"
-						disabled={busy}
-						onclick={() => ontickSection(t.openUnits, t.openLines)}>{tickSectionLabel}</Button
-					>
-				{/if}
+				<div class="flex shrink-0 items-center gap-1">
+					{#if section.packCase && caseAction}
+						{@render caseAction(section.packCase)}
+					{/if}
+					{#if enabled && t.done < t.total}
+						<Button
+							variant="ghost"
+							size="sm"
+							disabled={busy}
+							onclick={() => ontickSection(t.openUnits, t.openLines)}>{tickSectionLabel}</Button
+						>
+					{/if}
+				</div>
 			</div>
 			<ul class="divide-y rounded-md border">
 				{#each section.rows as row (row.kind === 'line' ? `line:${row.line.key}` : row.kind === 'kit' ? `kit:${row.kit.id}` : row.unit.assetId)}
@@ -230,6 +273,7 @@
 									onclick={() => ontickSection(k.open, [])}>{tickKitLabel}</Button
 								>
 							{/if}
+							{#if kitAction}{@render kitAction(row.kit, row.units)}{/if}
 						</li>
 					{:else if row.kind === 'line'}
 						{@const line = row.line}
@@ -260,6 +304,7 @@
 							{:else}
 								<span class="text-sm font-medium tabular-nums">{lineDone} / {line.total}</span>
 							{/if}
+							{#if lineAction}{@render lineAction(line)}{/if}
 						</li>
 					{:else}
 						{@const unit = row.unit}

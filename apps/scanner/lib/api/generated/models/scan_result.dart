@@ -5,6 +5,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
 import 'overdue_inspection.dart';
+import 'pack_case_ref.dart';
 import 'scan_group.dart';
 import 'scan_kit.dart';
 import 'scan_result_action.dart';
@@ -24,6 +25,8 @@ class ScanResult {
     this.kit,
     this.overdueInspections,
     this.swap,
+    this.packCase,
+    this.packedInto,
   });
   
   factory ScanResult.fromJson(Map<String, Object?> json) => _$ScanResultFromJson(json);
@@ -44,7 +47,9 @@ class ScanResult {
   ///
   final ScanGroup? group;
 
-  /// Set when the code was a kit's own sticker: every unit in it that the.
+  /// Set when the code was a kit's number — its own tag, or the tag of.
+  /// the container that is its case, which always means the whole kit.
+  /// rather than the box. Every unit in it that the.
   /// caller may book went to the target at once, accessories along. `asset`.
   /// then stands for the kit — the id of its first unit, the kit's name.
   /// and tag — so an older client still reports something true. Ask about.
@@ -66,6 +71,22 @@ class ScanResult {
   /// older client keeps compiling.
   ///
   final ScanSwap? swap;
+
+  /// On a production's handout list: the scanned unit is a pack case.
+  /// It was booked like any unit (on `checkout` even when it was not.
+  /// booked here). Handing out, open it — or, with another case open,.
+  /// ask whether it goes into that one (`packIntoProductionCase`) or.
+  /// is opened instead. Taking back, offer what is still in it to tick:.
+  /// the units listed under it. Null otherwise. Not required, so an.
+  /// older client keeps compiling.
+  ///
+  final PackCaseRef? packCase;
+
+  /// On the handout list: the case (its asset id) the scanned unit, or.
+  /// every unit of a scanned kit, was packed into — the `packInto` of.
+  /// the request. Not required, so an older client keeps compiling.
+  ///
+  final String? packedInto;
 
   Map<String, Object?> toJson() => _$ScanResultToJson(this);
 }

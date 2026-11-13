@@ -9,9 +9,17 @@ export const POST: RequestHandler = ({ locals, params, request }) =>
 	handleApi(async () => {
 		const user = requireApiUser(locals);
 		const mode = handoutMode(params.mode);
-		const code = requireString(await jsonBody(request), 'code').trim();
+		const body = await jsonBody(request);
+		const code = requireString(body, 'code').trim();
+		// The case open on the device, handing out — see HandoutScanRequest.
+		const packInto =
+			mode === 'checkout' && typeof body.packInto === 'string' && body.packInto
+				? body.packInto
+				: null;
 		return withHandoutErrors(async () => {
-			const { result } = await scanIntoHandout(user.id, params.productionId, mode, code);
+			const { result } = await scanIntoHandout(user.id, params.productionId, mode, code, {
+				packInto
+			});
 			return apiJson('ScanResult', toScanResult(result));
 		});
 	});

@@ -194,6 +194,7 @@
 	let captionDraft = $state('');
 	let detailsDraft = $state('');
 	let notInterchangeableDraft = $state(false);
+	let containerDraft = $state(false);
 	let manufacturer = $state<{ id: string | null; name: string } | null>(null);
 	// A cleared field means no manufacturer, the same as picking that entry.
 	let chosenManufacturerId = $derived(manufacturer ? manufacturerIdOf(manufacturer) : null);
@@ -227,6 +228,7 @@
 		captionDraft = product.caption ?? '';
 		detailsDraft = product.details ?? '';
 		notInterchangeableDraft = product.notInterchangeable;
+		containerDraft = product.isContainer;
 		portRows = portDraftsFrom(product.ports);
 	});
 
@@ -264,6 +266,7 @@
 				captionDraft.trim() !== (product.caption ?? '') ||
 				detailsDraft.trim() !== (product.details ?? '') ||
 				notInterchangeableDraft !== product.notInterchangeable ||
+				containerDraft !== product.isContainer ||
 				cableDirty)
 	);
 	let imageDirty = $derived(seeded && draft.imagePath.trim() !== (product.imagePath ?? ''));
@@ -337,7 +340,8 @@
 								isLicense: draft.isLicense,
 								caption: captionDraft,
 								details: detailsDraft,
-								notInterchangeable: notInterchangeableDraft
+								notInterchangeable: notInterchangeableDraft,
+								isContainer: containerDraft
 							}),
 					imagePath: draft.imagePath
 				}).updates(...PRODUCT_VIEWS);
@@ -685,6 +689,22 @@
 				Units of this product stay where they are linked. Otherwise handing out or checking a case
 				with another unit of the same product swaps the two, e.g. the adapters of two DMX rings.
 				Tick it for a calibrated lens that belongs to exactly one camera.
+			</p>
+		</div>
+		<div class="mt-4 space-y-1">
+			<label class="flex cursor-pointer items-center gap-2 text-sm select-none">
+				<input
+					type="checkbox"
+					bind:checked={containerDraft}
+					disabled={identityLocked}
+					class="h-4 w-4 rounded border-input"
+				/>
+				Container
+			</label>
+			<p class="text-xs text-muted-foreground">
+				A box things travel in. Inside a bundle it is that bundle's case: its tag is the bundle's
+				number, and scanning it means the whole kit. In no bundle it is a pack case, like a
+				Transflex crate: on a production's hand-out list, what is scanned after it goes into it.
 			</p>
 		</div>
 		{#if hasPanel}

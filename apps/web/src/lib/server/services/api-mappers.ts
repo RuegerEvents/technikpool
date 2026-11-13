@@ -1,3 +1,4 @@
+import type { ListCase, ListCaseRef } from '#lib/pack-cases.js';
 import type { Schemas } from '#lib/server/api.js';
 import type { TransactionData } from '#lib/types/asset-transaction.js';
 import type { OrgRole } from '#lib/roles.js';
@@ -227,6 +228,7 @@ export function toCatalogProduct(
 	product: ProductRow & {
 		isLicense: boolean;
 		notInterchangeable: boolean;
+		isContainer: boolean;
 		inspectionTypes: { typeId: string; required: boolean }[];
 		category: { inspectionTypes: { typeId: string }[] };
 		ports: {
@@ -255,6 +257,7 @@ export function toCatalogProduct(
 		})),
 		isLicense: product.isLicense,
 		notInterchangeable: product.notInterchangeable,
+		isContainer: product.isContainer,
 		mainsConnectors: extra.mainsConnectors,
 		ports: product.ports.map((p) => ({
 			connector: p.connector.name,
@@ -517,8 +520,19 @@ export function toScanResult(result: ScanResult): Schemas['ScanResult'] {
 		group: toScanGroup(result.group),
 		kit: toScanKit(result.kit),
 		overdueInspections: (result.overdueInspections ?? []).map((o) => ({ ...o })),
-		swap: result.swap ? { ...result.swap } : null
+		swap: result.swap ? { ...result.swap } : null,
+		packCase: result.packCase ? toPackCaseRef(result.packCase) : null,
+		packedInto: result.packedInto ?? null
 	};
+}
+
+function toPackCaseRef(ref: ListCaseRef): Schemas['PackCaseRef'] {
+	return { assetId: ref.assetId, name: ref.name, tag: ref.tag, orgIndex: ref.orgIndex };
+}
+
+/** A unit's or line's pack case — see #lib/pack-cases.ts. */
+export function toPackCase(c: ListCase | null | undefined): Schemas['PackCase'] | null {
+	return c ? { ...toPackCaseRef(c), path: c.path.map(toPackCaseRef) } : null;
 }
 
 function toConfirmEntry(entry: ConfirmEntry): Schemas['StocktakeConfirmEntry'] {
@@ -619,6 +633,8 @@ export function toProductionCheck(check: ProductionCheckView): Schemas['Producti
 			accessoryOf: i.accessoryOf,
 			group: { kind: i.group.kind, name: i.group.name },
 			kit: i.kit && { ...i.kit },
+			packCase: toPackCase(i.packCase),
+			isPackCase: i.isPackCase,
 			status: i.status,
 			received: i.received,
 			returnReported: i.returnReported,
@@ -654,7 +670,8 @@ export function toListLine(line: ListLine): Schemas['ProductionListLine'] {
 		assetIds: line.assetIds,
 		total: line.total,
 		done: line.done,
-		floor: line.floor
+		floor: line.floor,
+		packCase: toPackCase(line.packCase)
 	};
 }
 
@@ -678,6 +695,8 @@ export function toProductionHandout(view: HandoutView): Schemas['ProductionHando
 			group: { kind: i.group.kind, name: i.group.name },
 			kit: i.kit && { ...i.kit },
 			kitAddition: i.kitAddition,
+			packCase: toPackCase(i.packCase),
+			isPackCase: i.isPackCase,
 			status: i.status,
 			done: i.done,
 			received: i.received,
@@ -800,6 +819,9 @@ export function toBundleDetail(
 		assets: BundleUnitRow[];
 		innerBundles: InnerBundleRow[];
 		canEdit: boolean;
+		caseUnitId: string | null;
+		number: { code: string | null; fromCase: boolean };
+		extraCases: number;
 	}
 ): Schemas['BundleDetail'] {
 	const units = bundle.assets.filter((a) => !a.parentAssetId);
@@ -824,7 +846,11 @@ export function toBundleDetail(
 			imageUrl: imageSrc(kit.imagePath),
 			unitCount: kit.unitCount
 		})),
-		canEdit: bundle.canEdit
+		canEdit: bundle.canEdit,
+		caseUnitId: bundle.caseUnitId,
+		number: bundle.number.code,
+		numberFromCase: bundle.number.fromCase,
+		extraCases: bundle.extraCases
 	};
 }
 

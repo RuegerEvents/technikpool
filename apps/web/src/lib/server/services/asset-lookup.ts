@@ -1,5 +1,7 @@
 import { prisma } from '#lib/server/auth.js';
 import { withCaption } from '#lib/product-label.js';
+import { ACTIVE_ASSET_WHERE } from '#lib/asset-status.js';
+import { bundleCaseUnit, unitMeansKit } from '#lib/bundle-case.js';
 import { isSystemAdmin, userOrgIds } from './access';
 
 // Turning a scanned code into one unit, in the one place both the web UI and
@@ -86,17 +88,59 @@ export async function assetsWithSerial(
 }
 
 /**
- * The kit a code is the sticker of, asked once no unit's tag or serial matched
- * it. A kit's tag is unique like a unit's, and is what is stuck on the case — so
- * scanning it means the case and everything in it.
+ * The bundle a code is the number of: the bundle's own tag, or the tag of the
+ * container unit that is its case (#lib/bundle-case.ts). A container in a
+ * bundle means the kit, so callers ask this before taking a code for a unit.
+ * `viaCase` is the case unit when that is how it was found.
  */
-export async function kitByTag(code: string) {
+export async function bundleByCode(
+	code: string
+): Promise<{ bundleId: string; code: string; viaCase: string | null } | null> {
 	const trimmed = code.trim();
 	if (!trimmed) return null;
-	return await prisma.assetBundle.findUnique({
+	const own = await prisma.assetBundle.findUnique({
 		where: { tag: trimmed },
+		select: { id: true }
+	});
+	if (own) return { bundleId: own.id, code: trimmed, viaCase: null };
+	const unit = await prisma.asset.findFirst({
+		where: {
+			assetTag: trimmed,
+			bundleId: { not: null },
+			product: { isContainer: true },
+			...ACTIVE_ASSET_WHERE
+		},
+		select: { id: true, bundleId: true, orgIndex: true }
+	});
+	if (!unit?.bundleId) return null;
+	const caseUnit = await bundleCaseOf(unit.bundleId);
+	return unitMeansKit({ ...unit, isContainer: true }, caseUnit?.id ?? null)
+		? { bundleId: unit.bundleId, code: trimmed, viaCase: unit.id }
+		: null;
+}
+
+/** The bundle's case unit — its lowest-numbered container — or null. */
+export async function bundleCaseOf(bundleId: string) {
+	const units = await prisma.asset.findMany({
+		where: { bundleId, product: { isContainer: true }, ...ACTIVE_ASSET_WHERE },
+		select: { id: true, assetTag: true, orgIndex: true }
+	});
+	return bundleCaseUnit(units.map((u) => ({ ...u, isContainer: true })));
+}
+
+/**
+ * The kit a code is the sticker of: its own tag, or its case's (see
+ * `bundleByCode`). Scanning it means the case and everything in it. `tag` is
+ * the kit's number as scanned — its own tag, else its case's.
+ */
+export async function kitByTag(code: string) {
+	const found = await bundleByCode(code);
+	if (!found) return null;
+	const bundle = await prisma.assetBundle.findUniqueOrThrow({
+		where: { id: found.bundleId },
 		select: { id: true, tag: true, template: { select: { name: true, caption: true } } }
 	});
+	return { ...bundle, tag: bundle.tag ?? found.code };
 }
 
 export type TaggedKit = NonNullable<Awaited<ReturnType<typeof kitByTag>>>;

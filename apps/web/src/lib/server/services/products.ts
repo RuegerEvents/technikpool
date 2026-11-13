@@ -130,6 +130,8 @@ export type ProductUpdateInput = {
 	 * services/unit-swap.ts.
 	 */
 	notInterchangeable?: boolean;
+	/** Its units are pack cases — see "Pack cases" in CLAUDE.md. */
+	isContainer?: boolean;
 	/** What the team calls it, and the longer notes. `''` clears either. */
 	caption?: string;
 	details?: string;
@@ -167,6 +169,7 @@ export async function updateProduct(userId: string, input: ProductUpdateInput) {
 				lengthCm: true,
 				isLicense: true,
 				notInterchangeable: true,
+				isContainer: true,
 				caption: true,
 				details: true,
 				inspectionTypes: { select: { typeId: true, required: true } }
@@ -198,6 +201,10 @@ export async function updateProduct(userId: string, input: ProductUpdateInput) {
 	const interchangeChanged =
 		input.notInterchangeable !== undefined &&
 		input.notInterchangeable !== previousProduct.notInterchangeable;
+	// Whether its units hold what is packed into them changes every
+	// production's lists, so it is identity too.
+	const containerChanged =
+		input.isContainer !== undefined && input.isContainer !== previousProduct.isContainer;
 	const waysChanged = nextWays !== undefined && !sameWays(previousWays, nextWays);
 	const cableChanged =
 		waysChanged ||
@@ -232,6 +239,7 @@ export async function updateProduct(userId: string, input: ProductUpdateInput) {
 		cableChanged ||
 		licenseChanged ||
 		interchangeChanged ||
+		containerChanged ||
 		inspectionChanged;
 
 	// A first picture is a contribution and open to anyone who works in an org
@@ -293,6 +301,7 @@ export async function updateProduct(userId: string, input: ProductUpdateInput) {
 			...(input.notInterchangeable !== undefined
 				? { notInterchangeable: input.notInterchangeable }
 				: {}),
+			...(input.isContainer !== undefined ? { isContainer: input.isContainer } : {}),
 			...(nextCaption !== undefined ? { caption: nextCaption } : {}),
 			...(nextDetails !== undefined ? { details: nextDetails } : {})
 		},
@@ -318,6 +327,7 @@ export async function updateProduct(userId: string, input: ProductUpdateInput) {
 		...(input.notInterchangeable !== undefined
 			? { notInterchangeable: input.notInterchangeable }
 			: {}),
+		...(input.isContainer !== undefined ? { isContainer: input.isContainer } : {}),
 		...(nextCaption !== undefined ? { caption: nextCaption } : {}),
 		...(nextDetails !== undefined ? { details: nextDetails } : {})
 	});
@@ -766,7 +776,11 @@ export async function mergeProducts(
 			: {}),
 		...(source.isLicense && !target.isLicense ? { isLicense: true } : {}),
 		// Likewise "not interchangeable": whoever said so had a reason.
-		...(source.notInterchangeable && !target.notInterchangeable ? { notInterchangeable: true } : {})
+		...(source.notInterchangeable && !target.notInterchangeable
+			? { notInterchangeable: true }
+			: {}),
+		// And a pack container stays one: its units may hold a production's kit.
+		...(source.isContainer && !target.isContainer ? { isContainer: true } : {})
 	};
 
 	await prisma.$transaction(async (tx) => {
@@ -863,6 +877,7 @@ const REVERTIBLE_PRODUCT_FIELDS = [
 	'lengthCm',
 	'isLicense',
 	'notInterchangeable',
+	'isContainer',
 	'caption',
 	'details'
 ] as const;

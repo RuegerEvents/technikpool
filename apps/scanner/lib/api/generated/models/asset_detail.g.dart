@@ -28,6 +28,7 @@ AssetDetail _$AssetDetailFromJson(Map<String, dynamic> json) => AssetDetail(
   kit: json['kit'] == null
       ? null
       : ListKit.fromJson(json['kit'] as Map<String, dynamic>),
+  isBundleCase: json['isBundleCase'] as bool?,
   documents: (json['documents'] as List<dynamic>?)
       ?.map((e) => ProductDocument.fromJson(e as Map<String, dynamic>))
       .toList(),
@@ -57,6 +58,7 @@ Map<String, dynamic> _$AssetDetailToJson(AssetDetail instance) =>
       'parentAssetId': ?instance.parentAssetId,
       'currentProduction': ?instance.currentProduction,
       'kit': ?instance.kit,
+      'isBundleCase': ?instance.isBundleCase,
       'history': instance.history,
       'documents': ?instance.documents,
       'inspectionIntervalMonths': ?instance.inspectionIntervalMonths,

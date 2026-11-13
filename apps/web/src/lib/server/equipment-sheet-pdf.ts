@@ -26,7 +26,12 @@ export type EquipmentSheetLine = {
 	inspection?: { text: string; overdue: boolean } | null;
 };
 
-export type EquipmentSheetGroup = { name: string; lines: EquipmentSheetLine[] };
+export type EquipmentSheetGroup = {
+	name: string;
+	/** How far in it is nested: a pack case inside another one is indented under it. */
+	depth?: number;
+	lines: EquipmentSheetLine[];
+};
 
 /**
  * A list of equipment on the letterhead: the delivery note that travels with
@@ -265,7 +270,14 @@ export async function generateEquipmentSheetPdf(
 			height: GROUP_H,
 			color: rgb(0.97, 0.97, 0.97)
 		});
-		draw(group.name, LEFT + 4, bandBaseline(y, GROUP_H, bold, 7.5), 7.5, bold, muted);
+		draw(
+			group.name,
+			LEFT + 4 + 10 * (group.depth ?? 0),
+			bandBaseline(y, GROUP_H, bold, 7.5),
+			7.5,
+			bold,
+			muted
+		);
 		y -= GROUP_H;
 		for (const line of group.lines) {
 			position++;

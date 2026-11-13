@@ -27,6 +27,10 @@ class BundleDetail {
     required this.units,
     required this.innerBundles,
     required this.canEdit,
+    this.caseUnitId,
+    this.number,
+    this.numberFromCase,
+    this.extraCases,
   });
   
   factory BundleDetail.fromJson(Map<String, Object?> json) => _$BundleDetailFromJson(json);
@@ -60,6 +64,30 @@ class BundleDetail {
 
   /// Whether the caller may change what it holds (ADMIN or above).
   final bool canEdit;
+
+  /// The unit that is the kit's case: the container in it.
+  /// (`CatalogProduct.isContainer`), the lowest-numbered of two.
+  /// Scanning its tag means the whole kit, as the kit's own tag.
+  /// does. Not required, so an older client keeps compiling.
+  ///
+  final String? caseUnitId;
+
+  /// The kit's number: its own `tag`, else its case's tag, else.
+  /// null (a DMX ring). What its label prints. Not required, so an.
+  /// older client keeps compiling.
+  ///
+  final String? number;
+
+  /// `number` is the case's tag — show it as the kit's number. Not.
+  /// required, so an older client keeps compiling.
+  ///
+  final bool? numberFromCase;
+
+  /// More containers in it besides its case; only the lowest unit.
+  /// number counts. Worth a hint. Not required, so an older client.
+  /// keeps compiling.
+  ///
+  final int? extraCases;
 
   Map<String, Object?> toJson() => _$BundleDetailToJson(this);
 }

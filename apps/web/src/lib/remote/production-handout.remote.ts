@@ -5,6 +5,7 @@ import {
 	getHandout,
 	handOutCandidates,
 	handoutSummary,
+	packIntoCase,
 	packTodos,
 	scanIntoHandout,
 	searchHandoutCandidates,
@@ -63,11 +64,20 @@ async function refreshHandout(
 }
 
 export const scanProductionHandout = command(
-	v.object({ productionId: v.string(), mode, organizationId: side, code: v.string() }),
-	async ({ productionId, mode, organizationId, code }) => {
+	v.object({
+		productionId: v.string(),
+		mode,
+		organizationId: side,
+		code: v.string(),
+		/** The case open for packing — see "Pack cases" in CLAUDE.md. */
+		packInto: v.optional(v.nullable(v.string()))
+	}),
+	async ({ productionId, mode, organizationId, code, packInto }) => {
 		const user = await requireAuth();
 		const { result, affected } = await withCheckoutErrors(() =>
-			scanIntoHandout(user.id, productionId, mode, code)
+			scanIntoHandout(user.id, productionId, mode, code, {
+				packInto: mode === 'checkout' ? (packInto ?? null) : null
+			})
 		);
 		await refreshHandout(user.id, productionId, organizationId, affected);
 		return result;
@@ -104,6 +114,33 @@ export const setProductionHandoutLine = command(
 		const user = await requireAuth();
 		const { result, affected } = await withCheckoutErrors(() =>
 			setHandoutLineCount(user.id, productionId, mode, key, count, { extras: true })
+		);
+		await refreshHandout(user.id, productionId, organizationId, affected);
+		return result;
+	}
+);
+
+/** Units into a pack case, or with `caseAssetId: null` out of theirs — see `packIntoCase`. */
+export const packProductionCase = command(
+	v.object({
+		productionId: v.string(),
+		organizationId: side,
+		caseAssetId: v.nullable(v.string()),
+		assetIds: v.optional(v.array(v.string())),
+		line: v.optional(
+			v.object({ key: v.string(), count: v.pipe(v.number(), v.integer(), v.minValue(0)) })
+		)
+	}),
+	async ({ productionId, organizationId, caseAssetId, assetIds, line }) => {
+		const user = await requireAuth();
+		const { result, affected } = await withCheckoutErrors(() =>
+			packIntoCase(
+				user.id,
+				productionId,
+				caseAssetId,
+				{ assetIds, line },
+				organizationId || undefined
+			)
 		);
 		await refreshHandout(user.id, productionId, organizationId, affected);
 		return result;

@@ -793,7 +793,15 @@
 					{asset.location?.name ?? '—'}
 				</Fact>
 				<Fact icon={Package} label="Bundle">
-					{#if asset.bundle}
+					{#if asset.bundle && asset.isBundleCase}
+						<!-- Its tag stands for the whole kit: scanning it books the kit. -->
+						<span
+							>Case of <a
+								href={resolve(`assets/bundles/${asset.bundle.id}`)}
+								class="underline underline-offset-2">{asset.bundle.template.name}</a
+							></span
+						>
+					{:else if asset.bundle}
 						<a
 							href={resolve(`assets/bundles/${asset.bundle.id}`)}
 							class="underline underline-offset-2">{asset.bundle.template.name}</a

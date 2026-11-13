@@ -9,6 +9,13 @@ import {
 	type ListKit,
 	type ListLine
 } from '#lib/production-list.js';
+import {
+	casePaths,
+	isPackCaseUnit,
+	sectionCaseOf,
+	type ListCase,
+	type PackNode
+} from '#lib/pack-cases.js';
 
 // The list a production's equipment is worked through — checked (Prüfen),
 // handed out (Ausgabe) or taken back (Rücknahme). The three differ only in
@@ -20,7 +27,7 @@ import {
 //   into one counted line per product and shelf, as a stocktake counts them,
 //   because nobody can scan them and nobody should tick them twenty times
 
-export type { ListGroup, ListKit, ListLine };
+export type { ListCase, ListGroup, ListKit, ListLine };
 
 const KIT_REF_SELECT = {
 	id: true,
@@ -76,6 +83,7 @@ export const LIST_ITEM_INCLUDE = {
 					name: true,
 					caption: true,
 					imagePath: true,
+					isContainer: true,
 					manufacturer: { select: { name: true } }
 				}
 			},
@@ -98,6 +106,58 @@ export function listItems(productionId: string, statuses: string[], organization
 		include: LIST_ITEM_INCLUDE
 	});
 }
+
+const PACK_NODE_SELECT = {
+	id: true,
+	packedInItemId: true,
+	asset: {
+		select: {
+			id: true,
+			assetTag: true,
+			orgIndex: true,
+			bundleId: true,
+			product: { select: { name: true, caption: true, isContainer: true } }
+		}
+	}
+} satisfies Prisma.ProductionItemSelect;
+
+/**
+ * The production's pack cases and what is in which — see #lib/pack-cases.ts.
+ * Read over every item on it, whoever's, since a lender's units may travel in
+ * the production's case and the other way round. `caseOf` is the case an item
+ * is listed under: its own section for a case, else the one it is packed in.
+ */
+export async function loadPacking(productionId: string) {
+	const rows = await prisma.productionItem.findMany({
+		where: { productionId, status: { in: ['APPROVED', 'CHECKED_OUT', 'RETURNED'] } },
+		select: PACK_NODE_SELECT
+	});
+	const nodes: PackNode[] = rows.map((row) => ({
+		itemId: row.id,
+		packedInItemId: row.packedInItemId,
+		isPackCase: isPackCaseUnit(row.asset),
+		ref: {
+			assetId: row.asset.id,
+			name: withCaption(row.asset.product.name, row.asset.product.caption),
+			tag: row.asset.assetTag,
+			orgIndex: row.asset.orgIndex
+		}
+	}));
+	const byItem = new Map(nodes.map((n) => [n.itemId, n]));
+	const byAsset = new Map(nodes.map((n) => [n.ref.assetId, n]));
+	const cases = casePaths(nodes);
+	return {
+		byItem,
+		byAsset,
+		cases,
+		caseOf(item: { id: string }): ListCase | null {
+			const node = byItem.get(item.id);
+			return node ? sectionCaseOf(node, cases) : null;
+		}
+	};
+}
+
+export type Packing = Awaited<ReturnType<typeof loadPacking>>;
 
 export function lenderLabel(item: ListedItem) {
 	const org = item.asset.organization;
@@ -130,6 +190,7 @@ export function nestAndSort<
 		assetTag: string | null;
 		group: ListGroup;
 		kit: ListKit | null;
+		packCase?: ListCase | null;
 	}
 >(items: T[]) {
 	const byName = (a: T, b: T) =>
@@ -154,19 +215,33 @@ export function nestAndSort<
 		...items
 			.filter((i) => i.accessoryOf === top.assetId && i !== top)
 			.sort(byName)
-			.map((i) => ({ ...i, group: top.group, kit: top.kit }))
+			.map((i) => ({
+				...i,
+				group: top.group,
+				kit: top.kit,
+				// In the case its unit is in: it travels with it.
+				...(top.packCase !== undefined ? { packCase: top.packCase } : {})
+			}))
 	]);
 }
 
 /** Interchangeable with the others of its product on its shelf — see `ListLine`. */
 export function isLoose(item: ListedItem) {
 	const a = item.asset;
-	return !a.assetTag && !a.bundleId && !a.parentAssetId && a.accessories.length === 0;
+	// A pack case heads a section of its own, even one without a tag.
+	return (
+		!a.assetTag &&
+		!a.bundleId &&
+		!a.parentAssetId &&
+		a.accessories.length === 0 &&
+		!a.product.isContainer
+	);
 }
 
-export function lineKey(item: ListedItem) {
+/** Product, shelf, owner and pack case: units under one key are one line. */
+export function lineKey(item: ListedItem, packCase: ListCase | null = null) {
 	const a = item.asset;
-	return `${a.productId}|${a.locationId ?? ''}|${a.organizationId}`;
+	return `${a.productId}|${a.locationId ?? ''}|${a.organizationId}|${packCase?.assetId ?? ''}`;
 }
 
 /**
@@ -175,18 +250,21 @@ export function lineKey(item: ListedItem) {
  *
  * `state` says per unit whether it is done and whether this user may undo it;
  * the units of a line are in a stable order (lowest unit number first), which
- * is the order a count picks them in.
+ * is the order a count picks them in. With `packing`, the units packed into a
+ * case are a line of their own under it.
  */
 export function buildLines(
 	items: ListedItem[],
 	productionOrgId: string,
 	byLender: boolean,
-	state: (item: ListedItem) => { done: boolean; undoable: boolean }
+	state: (item: ListedItem) => { done: boolean; undoable: boolean },
+	packing?: Pick<Packing, 'caseOf'>
 ): ListLine[] {
 	const lines = new Map<string, ListLine & { order: number[] }>();
 	for (const item of items) {
 		if (!isLoose(item)) continue;
-		const key = lineKey(item);
+		const packCase = packing?.caseOf(item) ?? null;
+		const key = lineKey(item, packCase);
 		const lent = item.asset.organizationId !== productionOrgId;
 		const line = lines.get(key) ?? {
 			key,
@@ -200,7 +278,8 @@ export function buildLines(
 			order: [],
 			total: 0,
 			done: 0,
-			floor: 0
+			floor: 0,
+			packCase
 		};
 		const s = state(item);
 		line.assetIds.push(item.assetId);

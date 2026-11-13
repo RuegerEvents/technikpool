@@ -47,6 +47,7 @@ export type ProductMinAggregateOutputType = {
 	lengthCm: number | null;
 	isLicense: boolean | null;
 	notInterchangeable: boolean | null;
+	isContainer: boolean | null;
 	createdById: string | null;
 	createdAt: Date | null;
 	updatedAt: Date | null;
@@ -66,6 +67,7 @@ export type ProductMaxAggregateOutputType = {
 	lengthCm: number | null;
 	isLicense: boolean | null;
 	notInterchangeable: boolean | null;
+	isContainer: boolean | null;
 	createdById: string | null;
 	createdAt: Date | null;
 	updatedAt: Date | null;
@@ -85,6 +87,7 @@ export type ProductCountAggregateOutputType = {
 	lengthCm: number;
 	isLicense: number;
 	notInterchangeable: number;
+	isContainer: number;
 	createdById: number;
 	createdAt: number;
 	updatedAt: number;
@@ -113,6 +116,7 @@ export type ProductMinAggregateInputType = {
 	lengthCm?: true;
 	isLicense?: true;
 	notInterchangeable?: true;
+	isContainer?: true;
 	createdById?: true;
 	createdAt?: true;
 	updatedAt?: true;
@@ -132,6 +136,7 @@ export type ProductMaxAggregateInputType = {
 	lengthCm?: true;
 	isLicense?: true;
 	notInterchangeable?: true;
+	isContainer?: true;
 	createdById?: true;
 	createdAt?: true;
 	updatedAt?: true;
@@ -151,6 +156,7 @@ export type ProductCountAggregateInputType = {
 	lengthCm?: true;
 	isLicense?: true;
 	notInterchangeable?: true;
+	isContainer?: true;
 	createdById?: true;
 	createdAt?: true;
 	updatedAt?: true;
@@ -258,6 +264,7 @@ export type ProductGroupByOutputType = {
 	lengthCm: number | null;
 	isLicense: boolean;
 	notInterchangeable: boolean;
+	isContainer: boolean;
 	createdById: string | null;
 	createdAt: Date;
 	updatedAt: Date;
@@ -297,6 +304,7 @@ export type ProductWhereInput = {
 	lengthCm?: Prisma.IntNullableFilter<'Product'> | number | null;
 	isLicense?: Prisma.BoolFilter<'Product'> | boolean;
 	notInterchangeable?: Prisma.BoolFilter<'Product'> | boolean;
+	isContainer?: Prisma.BoolFilter<'Product'> | boolean;
 	createdById?: Prisma.StringNullableFilter<'Product'> | string | null;
 	createdAt?: Prisma.DateTimeFilter<'Product'> | Date | string;
 	updatedAt?: Prisma.DateTimeFilter<'Product'> | Date | string;
@@ -340,6 +348,7 @@ export type ProductOrderByWithRelationInput = {
 	lengthCm?: Prisma.SortOrderInput | Prisma.SortOrder;
 	isLicense?: Prisma.SortOrder;
 	notInterchangeable?: Prisma.SortOrder;
+	isContainer?: Prisma.SortOrder;
 	createdById?: Prisma.SortOrderInput | Prisma.SortOrder;
 	createdAt?: Prisma.SortOrder;
 	updatedAt?: Prisma.SortOrder;
@@ -378,6 +387,7 @@ export type ProductWhereUniqueInput = Prisma.AtLeast<
 		lengthCm?: Prisma.IntNullableFilter<'Product'> | number | null;
 		isLicense?: Prisma.BoolFilter<'Product'> | boolean;
 		notInterchangeable?: Prisma.BoolFilter<'Product'> | boolean;
+		isContainer?: Prisma.BoolFilter<'Product'> | boolean;
 		createdById?: Prisma.StringNullableFilter<'Product'> | string | null;
 		createdAt?: Prisma.DateTimeFilter<'Product'> | Date | string;
 		updatedAt?: Prisma.DateTimeFilter<'Product'> | Date | string;
@@ -423,6 +433,7 @@ export type ProductOrderByWithAggregationInput = {
 	lengthCm?: Prisma.SortOrderInput | Prisma.SortOrder;
 	isLicense?: Prisma.SortOrder;
 	notInterchangeable?: Prisma.SortOrder;
+	isContainer?: Prisma.SortOrder;
 	createdById?: Prisma.SortOrderInput | Prisma.SortOrder;
 	createdAt?: Prisma.SortOrder;
 	updatedAt?: Prisma.SortOrder;
@@ -452,6 +463,7 @@ export type ProductScalarWhereWithAggregatesInput = {
 	lengthCm?: Prisma.IntNullableWithAggregatesFilter<'Product'> | number | null;
 	isLicense?: Prisma.BoolWithAggregatesFilter<'Product'> | boolean;
 	notInterchangeable?: Prisma.BoolWithAggregatesFilter<'Product'> | boolean;
+	isContainer?: Prisma.BoolWithAggregatesFilter<'Product'> | boolean;
 	createdById?: Prisma.StringNullableWithAggregatesFilter<'Product'> | string | null;
 	createdAt?: Prisma.DateTimeWithAggregatesFilter<'Product'> | Date | string;
 	updatedAt?: Prisma.DateTimeWithAggregatesFilter<'Product'> | Date | string;
@@ -467,6 +479,7 @@ export type ProductCreateInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 	manufacturer?: Prisma.ManufacturerCreateNestedOneWithoutProductsInput;
@@ -500,6 +513,7 @@ export type ProductUncheckedCreateInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdById?: string | null;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
@@ -525,6 +539,7 @@ export type ProductUpdateInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	manufacturer?: Prisma.ManufacturerUpdateOneWithoutProductsNestedInput;
@@ -558,6 +573,7 @@ export type ProductUncheckedUpdateInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -587,6 +603,7 @@ export type ProductCreateManyInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdById?: string | null;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
@@ -602,6 +619,7 @@ export type ProductUpdateManyMutationInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
@@ -620,6 +638,7 @@ export type ProductUncheckedUpdateManyInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -654,6 +673,7 @@ export type ProductCountOrderByAggregateInput = {
 	lengthCm?: Prisma.SortOrder;
 	isLicense?: Prisma.SortOrder;
 	notInterchangeable?: Prisma.SortOrder;
+	isContainer?: Prisma.SortOrder;
 	createdById?: Prisma.SortOrder;
 	createdAt?: Prisma.SortOrder;
 	updatedAt?: Prisma.SortOrder;
@@ -677,6 +697,7 @@ export type ProductMaxOrderByAggregateInput = {
 	lengthCm?: Prisma.SortOrder;
 	isLicense?: Prisma.SortOrder;
 	notInterchangeable?: Prisma.SortOrder;
+	isContainer?: Prisma.SortOrder;
 	createdById?: Prisma.SortOrder;
 	createdAt?: Prisma.SortOrder;
 	updatedAt?: Prisma.SortOrder;
@@ -696,6 +717,7 @@ export type ProductMinOrderByAggregateInput = {
 	lengthCm?: Prisma.SortOrder;
 	isLicense?: Prisma.SortOrder;
 	notInterchangeable?: Prisma.SortOrder;
+	isContainer?: Prisma.SortOrder;
 	createdById?: Prisma.SortOrder;
 	createdAt?: Prisma.SortOrder;
 	updatedAt?: Prisma.SortOrder;
@@ -1461,6 +1483,7 @@ export type ProductCreateWithoutCreatedByInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 	manufacturer?: Prisma.ManufacturerCreateNestedOneWithoutProductsInput;
@@ -1493,6 +1516,7 @@ export type ProductUncheckedCreateWithoutCreatedByInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 	ways?: Prisma.CableWayUncheckedCreateNestedManyWithoutProductInput;
@@ -1565,6 +1589,7 @@ export type ProductScalarWhereInput = {
 	lengthCm?: Prisma.IntNullableFilter<'Product'> | number | null;
 	isLicense?: Prisma.BoolFilter<'Product'> | boolean;
 	notInterchangeable?: Prisma.BoolFilter<'Product'> | boolean;
+	isContainer?: Prisma.BoolFilter<'Product'> | boolean;
 	createdById?: Prisma.StringNullableFilter<'Product'> | string | null;
 	createdAt?: Prisma.DateTimeFilter<'Product'> | Date | string;
 	updatedAt?: Prisma.DateTimeFilter<'Product'> | Date | string;
@@ -1580,6 +1605,7 @@ export type ProductCreateWithoutManufacturerInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 	category: Prisma.CategoryCreateNestedOneWithoutProductsInput;
@@ -1611,6 +1637,7 @@ export type ProductUncheckedCreateWithoutManufacturerInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdById?: string | null;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
@@ -1677,6 +1704,7 @@ export type ProductCreateWithoutConnectorARefInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 	manufacturer?: Prisma.ManufacturerCreateNestedOneWithoutProductsInput;
@@ -1708,6 +1736,7 @@ export type ProductUncheckedCreateWithoutConnectorARefInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdById?: string | null;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
@@ -1746,6 +1775,7 @@ export type ProductCreateWithoutConnectorBRefInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 	manufacturer?: Prisma.ManufacturerCreateNestedOneWithoutProductsInput;
@@ -1777,6 +1807,7 @@ export type ProductUncheckedCreateWithoutConnectorBRefInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdById?: string | null;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
@@ -1871,6 +1902,7 @@ export type ProductCreateWithoutPortsInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 	manufacturer?: Prisma.ManufacturerCreateNestedOneWithoutProductsInput;
@@ -1903,6 +1935,7 @@ export type ProductUncheckedCreateWithoutPortsInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdById?: string | null;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
@@ -1955,6 +1988,7 @@ export type ProductUpdateWithoutPortsInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	manufacturer?: Prisma.ManufacturerUpdateOneWithoutProductsNestedInput;
@@ -1987,6 +2021,7 @@ export type ProductUncheckedUpdateWithoutPortsInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -2011,6 +2046,7 @@ export type ProductCreateWithoutWaysInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 	manufacturer?: Prisma.ManufacturerCreateNestedOneWithoutProductsInput;
@@ -2043,6 +2079,7 @@ export type ProductUncheckedCreateWithoutWaysInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdById?: string | null;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
@@ -2095,6 +2132,7 @@ export type ProductUpdateWithoutWaysInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	manufacturer?: Prisma.ManufacturerUpdateOneWithoutProductsNestedInput;
@@ -2127,6 +2165,7 @@ export type ProductUncheckedUpdateWithoutWaysInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -2151,6 +2190,7 @@ export type ProductCreateWithoutCategoryInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 	manufacturer?: Prisma.ManufacturerCreateNestedOneWithoutProductsInput;
@@ -2182,6 +2222,7 @@ export type ProductUncheckedCreateWithoutCategoryInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdById?: string | null;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
@@ -2248,6 +2289,7 @@ export type ProductCreateWithoutOrgPricesInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 	manufacturer?: Prisma.ManufacturerCreateNestedOneWithoutProductsInput;
@@ -2280,6 +2322,7 @@ export type ProductUncheckedCreateWithoutOrgPricesInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdById?: string | null;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
@@ -2332,6 +2375,7 @@ export type ProductUpdateWithoutOrgPricesInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	manufacturer?: Prisma.ManufacturerUpdateOneWithoutProductsNestedInput;
@@ -2364,6 +2408,7 @@ export type ProductUncheckedUpdateWithoutOrgPricesInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -2388,6 +2433,7 @@ export type ProductCreateWithoutAssetsInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 	manufacturer?: Prisma.ManufacturerCreateNestedOneWithoutProductsInput;
@@ -2420,6 +2466,7 @@ export type ProductUncheckedCreateWithoutAssetsInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdById?: string | null;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
@@ -2472,6 +2519,7 @@ export type ProductUpdateWithoutAssetsInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	manufacturer?: Prisma.ManufacturerUpdateOneWithoutProductsNestedInput;
@@ -2504,6 +2552,7 @@ export type ProductUncheckedUpdateWithoutAssetsInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -2528,6 +2577,7 @@ export type ProductCreateWithoutFeaturedInBundleTemplatesInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 	manufacturer?: Prisma.ManufacturerCreateNestedOneWithoutProductsInput;
@@ -2560,6 +2610,7 @@ export type ProductUncheckedCreateWithoutFeaturedInBundleTemplatesInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdById?: string | null;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
@@ -2620,6 +2671,7 @@ export type ProductCreateWithoutInspectionTypesInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 	manufacturer?: Prisma.ManufacturerCreateNestedOneWithoutProductsInput;
@@ -2652,6 +2704,7 @@ export type ProductUncheckedCreateWithoutInspectionTypesInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdById?: string | null;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
@@ -2704,6 +2757,7 @@ export type ProductUpdateWithoutInspectionTypesInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	manufacturer?: Prisma.ManufacturerUpdateOneWithoutProductsNestedInput;
@@ -2736,6 +2790,7 @@ export type ProductUncheckedUpdateWithoutInspectionTypesInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -2760,6 +2815,7 @@ export type ProductCreateWithoutOrgInspectionIntervalsInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 	manufacturer?: Prisma.ManufacturerCreateNestedOneWithoutProductsInput;
@@ -2792,6 +2848,7 @@ export type ProductUncheckedCreateWithoutOrgInspectionIntervalsInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdById?: string | null;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
@@ -2844,6 +2901,7 @@ export type ProductUpdateWithoutOrgInspectionIntervalsInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	manufacturer?: Prisma.ManufacturerUpdateOneWithoutProductsNestedInput;
@@ -2876,6 +2934,7 @@ export type ProductUncheckedUpdateWithoutOrgInspectionIntervalsInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -2900,6 +2959,7 @@ export type ProductCreateWithoutStocktakeLinesInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 	manufacturer?: Prisma.ManufacturerCreateNestedOneWithoutProductsInput;
@@ -2932,6 +2992,7 @@ export type ProductUncheckedCreateWithoutStocktakeLinesInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdById?: string | null;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
@@ -2984,6 +3045,7 @@ export type ProductUpdateWithoutStocktakeLinesInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	manufacturer?: Prisma.ManufacturerUpdateOneWithoutProductsNestedInput;
@@ -3016,6 +3078,7 @@ export type ProductUncheckedUpdateWithoutStocktakeLinesInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -3040,6 +3103,7 @@ export type ProductCreateWithoutStocktakeCountsInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 	manufacturer?: Prisma.ManufacturerCreateNestedOneWithoutProductsInput;
@@ -3072,6 +3136,7 @@ export type ProductUncheckedCreateWithoutStocktakeCountsInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdById?: string | null;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
@@ -3124,6 +3189,7 @@ export type ProductUpdateWithoutStocktakeCountsInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	manufacturer?: Prisma.ManufacturerUpdateOneWithoutProductsNestedInput;
@@ -3156,6 +3222,7 @@ export type ProductUncheckedUpdateWithoutStocktakeCountsInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -3180,6 +3247,7 @@ export type ProductCreateWithoutDocumentsInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 	manufacturer?: Prisma.ManufacturerCreateNestedOneWithoutProductsInput;
@@ -3212,6 +3280,7 @@ export type ProductUncheckedCreateWithoutDocumentsInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdById?: string | null;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
@@ -3264,6 +3333,7 @@ export type ProductUpdateWithoutDocumentsInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	manufacturer?: Prisma.ManufacturerUpdateOneWithoutProductsNestedInput;
@@ -3296,6 +3366,7 @@ export type ProductUncheckedUpdateWithoutDocumentsInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -3324,6 +3395,7 @@ export type ProductCreateManyCreatedByInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 };
@@ -3338,6 +3410,7 @@ export type ProductUpdateWithoutCreatedByInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	manufacturer?: Prisma.ManufacturerUpdateOneWithoutProductsNestedInput;
@@ -3370,6 +3443,7 @@ export type ProductUncheckedUpdateWithoutCreatedByInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	ways?: Prisma.CableWayUncheckedUpdateManyWithoutProductNestedInput;
@@ -3398,6 +3472,7 @@ export type ProductUncheckedUpdateManyWithoutCreatedByInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 };
@@ -3415,6 +3490,7 @@ export type ProductCreateManyManufacturerInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdById?: string | null;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
@@ -3430,6 +3506,7 @@ export type ProductUpdateWithoutManufacturerInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	category?: Prisma.CategoryUpdateOneRequiredWithoutProductsNestedInput;
@@ -3461,6 +3538,7 @@ export type ProductUncheckedUpdateWithoutManufacturerInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -3489,6 +3567,7 @@ export type ProductUncheckedUpdateManyWithoutManufacturerInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -3507,6 +3586,7 @@ export type ProductCreateManyConnectorARefInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdById?: string | null;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
@@ -3525,6 +3605,7 @@ export type ProductCreateManyConnectorBRefInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdById?: string | null;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
@@ -3540,6 +3621,7 @@ export type ProductUpdateWithoutConnectorARefInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	manufacturer?: Prisma.ManufacturerUpdateOneWithoutProductsNestedInput;
@@ -3571,6 +3653,7 @@ export type ProductUncheckedUpdateWithoutConnectorARefInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -3599,6 +3682,7 @@ export type ProductUncheckedUpdateManyWithoutConnectorARefInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -3614,6 +3698,7 @@ export type ProductUpdateWithoutConnectorBRefInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	manufacturer?: Prisma.ManufacturerUpdateOneWithoutProductsNestedInput;
@@ -3645,6 +3730,7 @@ export type ProductUncheckedUpdateWithoutConnectorBRefInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -3673,6 +3759,7 @@ export type ProductUncheckedUpdateManyWithoutConnectorBRefInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -3691,6 +3778,7 @@ export type ProductCreateManyCategoryInput = {
 	lengthCm?: number | null;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdById?: string | null;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
@@ -3706,6 +3794,7 @@ export type ProductUpdateWithoutCategoryInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	manufacturer?: Prisma.ManufacturerUpdateOneWithoutProductsNestedInput;
@@ -3737,6 +3826,7 @@ export type ProductUncheckedUpdateWithoutCategoryInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -3765,6 +3855,7 @@ export type ProductUncheckedUpdateManyWithoutCategoryInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -3780,6 +3871,7 @@ export type ProductUpdateWithoutFeaturedInBundleTemplatesInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	manufacturer?: Prisma.ManufacturerUpdateOneWithoutProductsNestedInput;
@@ -3812,6 +3904,7 @@ export type ProductUncheckedUpdateWithoutFeaturedInBundleTemplatesInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -3840,6 +3933,7 @@ export type ProductUncheckedUpdateManyWithoutFeaturedInBundleTemplatesInput = {
 	lengthCm?: Prisma.NullableIntFieldUpdateOperationsInput | number | null;
 	isLicense?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	notInterchangeable?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	isContainer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	createdById?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
@@ -3996,6 +4090,7 @@ export type ProductSelect<
 		lengthCm?: boolean;
 		isLicense?: boolean;
 		notInterchangeable?: boolean;
+		isContainer?: boolean;
 		createdById?: boolean;
 		createdAt?: boolean;
 		updatedAt?: boolean;
@@ -4036,6 +4131,7 @@ export type ProductSelectCreateManyAndReturn<
 		lengthCm?: boolean;
 		isLicense?: boolean;
 		notInterchangeable?: boolean;
+		isContainer?: boolean;
 		createdById?: boolean;
 		createdAt?: boolean;
 		updatedAt?: boolean;
@@ -4065,6 +4161,7 @@ export type ProductSelectUpdateManyAndReturn<
 		lengthCm?: boolean;
 		isLicense?: boolean;
 		notInterchangeable?: boolean;
+		isContainer?: boolean;
 		createdById?: boolean;
 		createdAt?: boolean;
 		updatedAt?: boolean;
@@ -4091,6 +4188,7 @@ export type ProductSelectScalar = {
 	lengthCm?: boolean;
 	isLicense?: boolean;
 	notInterchangeable?: boolean;
+	isContainer?: boolean;
 	createdById?: boolean;
 	createdAt?: boolean;
 	updatedAt?: boolean;
@@ -4112,6 +4210,7 @@ export type ProductOmit<
 	| 'lengthCm'
 	| 'isLicense'
 	| 'notInterchangeable'
+	| 'isContainer'
 	| 'createdById'
 	| 'createdAt'
 	| 'updatedAt',
@@ -4251,6 +4350,17 @@ export type $ProductPayload<
 			 * Identity like the name: answers to productControl and is logged.
 			 */
 			notInterchangeable: boolean;
+			/**
+			 * Its units are containers (Behälter): a box things travel in. What one
+			 * means depends on where the unit is. Inside a fixed bundle it is that
+			 * bundle's case, and its tag is the bundle's number — scanning it means the
+			 * whole kit, wherever the bundle's own tag would (see #lib/bundle-case.ts).
+			 * In no bundle it is a pack case: during one production it holds what was
+			 * packed into it (ProductionItem.packedInItemId). See "Containers and pack
+			 * cases" in CLAUDE.md. Identity like the name: answers to productControl
+			 * and is logged.
+			 */
+			isContainer: boolean;
 			/**
 			 * Who added the row. While no org holds a unit of a product there is no
 			 * owner to ask, so this is the only person besides a system admin who may
@@ -4995,6 +5105,7 @@ export interface ProductFieldRefs {
 	readonly lengthCm: Prisma.FieldRef<'Product', 'Int'>;
 	readonly isLicense: Prisma.FieldRef<'Product', 'Boolean'>;
 	readonly notInterchangeable: Prisma.FieldRef<'Product', 'Boolean'>;
+	readonly isContainer: Prisma.FieldRef<'Product', 'Boolean'>;
 	readonly createdById: Prisma.FieldRef<'Product', 'String'>;
 	readonly createdAt: Prisma.FieldRef<'Product', 'DateTime'>;
 	readonly updatedAt: Prisma.FieldRef<'Product', 'DateTime'>;

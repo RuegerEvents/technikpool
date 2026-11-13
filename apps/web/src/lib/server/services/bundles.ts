@@ -1,12 +1,13 @@
 import { prisma } from '#lib/server/auth.js';
 import { appError } from '#lib/errors.js';
 import { BOOKABLE_ASSET_WHERE, isBookableStatus, isRetiredStatus } from '#lib/asset-status.js';
+import { bundleCaseUnit, bundleNumber, extraCases } from '#lib/bundle-case.js';
 import { ROLE_FOR, roleAtLeast } from '#lib/roles.js';
 import { searchMatcher } from '#lib/search.js';
 import { naturalCompare } from '#lib/sort.js';
 import { isSystemAdmin, orgRole, userOrgIds } from './access';
 import { syncAccessories } from './accessories';
-import { resolveScannedCode } from './asset-lookup';
+import { bundleByCode, resolveScannedCode } from './asset-lookup';
 import { assertAdditionsFitType, assertNewInstanceMatchesType } from './bundle-spec';
 import { bundleImageForRead } from './bundle-image';
 import { nestingRefusal } from '#lib/bundle-nesting.js';
@@ -412,8 +413,14 @@ export async function scanIntoBundle(
 	moveFromOtherBundle = false
 ): Promise<BundleScan> {
 	const trimmed = code.trim();
+	// A kit's number — its own tag or its case's — puts the whole kit inside.
+	const numbered = await bundleByCode(trimmed);
+	if (numbered?.bundleId === bundleId) {
+		// This kit's own case: it is in already.
+		return { outcome: 'already_in', assetId: numbered.viaCase, scannedBundle: null };
+	}
 	const kit = await prisma.assetBundle.findUnique({
-		where: { tag: trimmed },
+		where: { id: numbered?.bundleId ?? '' },
 		select: {
 			id: true,
 			template: { select: { name: true, caption: true } },
@@ -631,6 +638,7 @@ const BUNDLE_UNIT_SELECT = {
 			name: true,
 			caption: true,
 			imagePath: true,
+			isContainer: true,
 			manufacturer: { select: { name: true } }
 		}
 	},
@@ -747,5 +755,17 @@ export async function bundleDetail(userId: string, bundleId: string) {
 	const innerBundles = bundle.childBundles
 		.map((kit) => ({ ...kit, unitCount: kit.assets.filter((a) => !a.parentAssetId).length }))
 		.sort((a, b) => naturalCompare(a.template.name, b.template.name));
-	return { ...bundle, innerBundles, canEdit };
+	// Its case, whose tag is the kit's number without one of its own.
+	const cases = bundle.assets
+		.filter((a) => !isRetiredStatus(a.status))
+		.map((a) => ({ ...a, isContainer: a.product.isContainer }));
+	const caseUnit = bundleCaseUnit(cases);
+	return {
+		...bundle,
+		innerBundles,
+		canEdit,
+		caseUnitId: caseUnit?.id ?? null,
+		number: bundleNumber(bundle, caseUnit),
+		extraCases: extraCases(cases)
+	};
 }

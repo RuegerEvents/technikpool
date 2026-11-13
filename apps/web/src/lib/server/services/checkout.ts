@@ -2,6 +2,7 @@ import type { Prisma } from '#lib/prisma/client.js';
 import type { BookingReplacedData, CheckoutUndoneData } from '#lib/types/asset-transaction.js';
 import { bundleLabel, withCaption } from '#lib/product-label.js';
 import { naturalCompare } from '#lib/sort.js';
+import type { ListCaseRef } from '#lib/pack-cases.js';
 import { prisma } from '#lib/server/auth.js';
 import {
 	isSystemAdmin,
@@ -67,6 +68,14 @@ export interface ScanResult {
 	 * product booked here, and the two swapped places — see `findStandIns`.
 	 */
 	swap?: SwapNotice | null;
+	/**
+	 * On a production's handout list: the scanned unit is a pack case — handing
+	 * out opens it for packing, taking back asks about what is in it. Its own
+	 * booking went like any unit's. See services/production-handout.ts.
+	 */
+	packCase?: ListCaseRef | null;
+	/** On the handout list: the case the scanned unit (or kit) was packed into. */
+	packedInto?: string | null;
 }
 
 /**
@@ -139,7 +148,9 @@ export class CheckoutError extends Error {
 			| 'asset_retired'
 			| 'asset_unavailable'
 			| 'production_cancelled'
-			| 'not_approved',
+			| 'not_approved'
+			| 'not_a_pack_case'
+			| 'pack_circle',
 		message: string,
 		/** The scanned tag, where there is one — a message naming it is worth more. */
 		readonly assetTag?: string
@@ -158,7 +169,9 @@ export const CHECKOUT_ERROR_STATUS: Record<CheckoutError['code'], number> = {
 	asset_retired: 409,
 	asset_unavailable: 409,
 	production_cancelled: 409,
-	not_approved: 409
+	not_approved: 409,
+	not_a_pack_case: 409,
+	pack_circle: 409
 };
 
 const RETURNED_FROM_SELECT = {
@@ -586,6 +599,11 @@ export async function performScan(
 	input: ScanInput,
 	options: CheckoutOptions = {}
 ): Promise<{ result: ScanResult; affected: AffectedRecords }> {
+	// A kit's number first — its own tag, or the tag of the container that is
+	// its case, which means the kit rather than the box (#lib/bundle-case.ts).
+	const numberedKit = await kitByTag(input.assetTag);
+	if (numberedKit) return await performKitScan(userId, numberedKit, input);
+
 	const match = await resolveScannedCode(userId, input.assetTag);
 
 	if (match.kind === 'ambiguous') {
@@ -596,8 +614,6 @@ export async function performScan(
 		);
 	}
 	if (match.kind === 'not_found') {
-		const kit = await kitByTag(input.assetTag);
-		if (kit) return await performKitScan(userId, kit, input);
 		throw new CheckoutError('asset_not_found', `Tag "${input.assetTag}" not found`, input.assetTag);
 	}
 
@@ -668,9 +684,10 @@ export async function performScan(
 			});
 
 			for (const item of checkedOutItems) {
+				// Back is out of its case: the case is empty once all of it is back.
 				await tx.productionItem.update({
 					where: { id: item.id },
-					data: { status: 'RETURNED' }
+					data: { status: 'RETURNED', packedInItemId: null }
 				});
 				await tx.assetTransaction.create({
 					data: {
@@ -1197,7 +1214,10 @@ export async function performBulkCheckout(
 					}
 				});
 				for (const item of checkedOutItems) {
-					await tx.productionItem.update({ where: { id: item.id }, data: { status: 'RETURNED' } });
+					await tx.productionItem.update({
+						where: { id: item.id },
+						data: { status: 'RETURNED', packedInItemId: null }
+					});
 					await tx.assetTransaction.create({
 						data: {
 							assetId: asset.id,
@@ -1356,6 +1376,8 @@ export async function undoCheckout(
 				where: { id: { in: items.map((i) => i.id) } },
 				data: {
 					status: 'APPROVED',
+					// Not going after all, so in no case either.
+					packedInItemId: null,
 					receivedAt: null,
 					receivedById: null,
 					returnReportedAt: null,

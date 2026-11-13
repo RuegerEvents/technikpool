@@ -255,6 +255,21 @@ class DemoData {
     ),
   );
 
+  /// A pack case: a container in no kit (CatalogProduct.isContainer on the
+  /// server). On a hand-out list, scanning one opens it, and what is scanned
+  /// next goes into it.
+  static const transflex = Product(
+    id: 'prd_demo_transflex',
+    name: 'Transflex 60×40',
+    manufacturerName: null,
+    category: Category(
+      id: 'catg_demo_rigging',
+      name: 'Rigging',
+      color: '#a3a3a3',
+      sortOrder: 3,
+    ),
+  );
+
   /// Tags run 40000001 upwards — the same shape the sticker printer produces,
   /// so a reviewer typing one is doing exactly what an operator scans.
   static List<Asset> assets() => [
@@ -291,6 +306,10 @@ class DemoData {
     _asset('40000013', _xlrCable, 0, AssetStatus.available, null, kit: true),
     _asset('40000014', _xlrCable, 0, AssetStatus.available, null, kit: true),
     _asset('40000015', _loom, 0, AssetStatus.available, null, kit: true),
+    // Two empty pack cases on the rigging shelf, booked for nothing: scanned
+    // on a hand-out list they go out with the production and are opened.
+    _asset('40000016', transflex, 2, AssetStatus.available, null),
+    _asset('40000017', transflex, 2, AssetStatus.available, null),
   ];
 
   /// Months between DGUV inspections, per product. The server keeps the

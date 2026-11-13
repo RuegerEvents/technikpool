@@ -11,7 +11,7 @@ import {
 	writableOrgIds
 } from './access';
 import { ACTIVE_ASSET_WHERE, isRetiredStatus, type AssetStatus } from '#lib/asset-status.js';
-import { resolveScannedCode } from './asset-lookup';
+import { kitByTag, resolveScannedCode } from './asset-lookup';
 import { orgLocationWhere } from './locations';
 import { syncAccessories } from './accessories';
 import { CABLE_ENDS } from './cable-ends';
@@ -1217,8 +1217,10 @@ export async function scanIntoStocktake(
 	await assertCountingLocation(stocktake.organizationId, input.locationId);
 	const code = input.code.trim();
 
-	const match = await resolveScannedCode(userId, code);
-	if (match.kind === 'ambiguous') {
+	// A kit's number — its own tag or its case's — opens the kit to confirm.
+	const bundle = await kitByTag(code);
+	const match = bundle ? null : await resolveScannedCode(userId, code);
+	if (match?.kind === 'ambiguous') {
 		throw new StocktakeError(
 			'serial_ambiguous',
 			`Serial number "${code}" is on more than one unit — scan the asset tag instead`,
@@ -1226,13 +1228,7 @@ export async function scanIntoStocktake(
 		);
 	}
 
-	if (match.kind === 'not_found') {
-		const bundle = code
-			? await prisma.assetBundle.findUnique({
-					where: { tag: code },
-					select: { id: true, tag: true, template: { select: { name: true, caption: true } } }
-				})
-			: null;
+	if (!match || match.kind === 'not_found') {
 		if (!bundle) throw new StocktakeError('asset_not_found', `Tag "${code}" not found`, code);
 		// The kits inside come along, as in a case check: opening the case
 		// means opening them.

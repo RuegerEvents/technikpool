@@ -16,15 +16,28 @@ import '../state/providers.dart';
 /// at the label, send it. The server renders the ZPL (case-label-zpl.ts on
 /// the web); this device sends it to the printer, which only it can reach.
 class CaseLabelScreen extends ConsumerStatefulWidget {
-  const CaseLabelScreen({
+  CaseLabelScreen({
     super.key,
-    required this.kind,
-    required this.id,
+    required CaseKind kind,
+    required String id,
     required this.name,
-  });
+  }) : load = ((api, size) => api.caseCheck.getCaseLabel(kind: kind, id: id, size: size));
 
-  final CaseKind kind;
-  final String id;
+  /// A pack case's label for one production: the production, the case's
+  /// number and what is in it now — see `getPackCaseLabel`.
+  CaseLabelScreen.packCase({
+    super.key,
+    required String productionId,
+    required String caseAssetId,
+    required this.name,
+  }) : load = ((api, size) => api.productionHandout.getPackCaseLabel(
+         productionId: productionId,
+         caseAssetId: caseAssetId,
+         size: size,
+       ));
+
+  /// Fetches the label of a size from the server.
+  final Future<CaseLabel> Function(ApiClient api, CaseLabelSize size) load;
   final String name;
 
   @override
@@ -73,11 +86,7 @@ class _CaseLabelScreenState extends ConsumerState<CaseLabelScreen> {
     });
     final CaseLabel label;
     try {
-      label = await api.caseCheck.getCaseLabel(
-        kind: widget.kind,
-        id: widget.id,
-        size: size,
-      );
+      label = await widget.load(api, size);
     } catch (error) {
       if (mounted && seq == _seq) {
         setState(() {

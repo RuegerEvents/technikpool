@@ -18,6 +18,7 @@ import '../widgets/accessory_dialog.dart';
 import '../widgets/count_dialog.dart';
 import '../widgets/count_search_sheet.dart';
 import '../widgets/product_thumb.dart';
+import 'case_label_screen.dart';
 
 /// What working through a production's list does with a tick.
 ///
@@ -73,6 +74,8 @@ class _Unit {
     this.note,
     this.noteWarn = false,
     this.optional = false,
+    this.packCase,
+    this.isPackCase = false,
   });
 
   final String assetId;
@@ -96,6 +99,42 @@ class _Unit {
   /// On the list to be ticked if need be, but not owed: left out of the counts
   /// and of "tick all" — a unit already taken back, on the hand-out list.
   final bool optional;
+
+  /// The pack case it is listed under — its own for a case.
+  final PackCase? packCase;
+  final bool isPackCase;
+}
+
+/// "3", or "#12" for a pack case without a tag.
+String _caseNumber(String? tag, int orgIndex) => tag ?? '#$orgIndex';
+
+/// "3 (Transflex 60×40)" — `packCase` puts "Case" in front.
+String _caseTitle(String? tag, int orgIndex, String name) =>
+    '${_caseNumber(tag, orgIndex)} ($name)';
+
+/// Whether [c] is the case [caseAssetId] or sits somewhere inside it.
+bool _withinCase(PackCase? c, String caseAssetId) =>
+    c != null && (c.assetId == caseAssetId || c.path.any((r) => r.assetId == caseAssetId));
+
+/// Cases by their chains, so a case inside another follows right after it.
+/// Mirrors `compareCases` in #lib/pack-cases.ts on the web.
+int _compareCases(PackCase a, PackCase b) {
+  List<PackCaseRef> chain(PackCase c) => [
+    ...c.path,
+    PackCaseRef(assetId: c.assetId, name: c.name, tag: c.tag, orgIndex: c.orgIndex),
+  ];
+  final ca = chain(a);
+  final cb = chain(b);
+  for (var i = 0; i < ca.length && i < cb.length; i++) {
+    var by = naturalCompare(
+      _caseNumber(ca[i].tag, ca[i].orgIndex),
+      _caseNumber(cb[i].tag, cb[i].orgIndex),
+    );
+    if (by == 0) by = naturalCompare(ca[i].name, cb[i].name);
+    if (by == 0) by = ca[i].assetId.compareTo(cb[i].assetId);
+    if (by != 0) return by;
+  }
+  return ca.length.compareTo(cb.length);
 }
 
 /// Rows that stay together when the counted lines are slotted in by name.
@@ -117,18 +156,25 @@ class _KitHead {
   final units = <_Unit>[];
 }
 
-/// What a scan leaves to ask about: the accessories of a unit, or a kit's units.
-typedef _Scanned = ({String? unit, ScanKit? kit});
+/// What a scan leaves to ask about: the accessories of a unit, a kit's units,
+/// or a pack case — to open, or to go through what is in it.
+typedef _Scanned = ({String? unit, ScanKit? kit, PackCaseRef? packCase});
 
 /// A row of a section: a unit, a counted line, or a kit's heading.
 typedef _Row = ({_Unit? unit, ProductionListLine? line, _KitHead? kit});
 
 class _Section {
-  _Section(this.group);
+  _Section(this.group, {this.packCase});
 
   final ProductionCheckGroup group;
+
+  /// A pack case's section: the case's own row first, then what is in it.
+  final PackCase? packCase;
+  int get depth => packCase?.path.length ?? 0;
   final rows = <_Row>[];
 }
+
+const _noGroup = ProductionCheckGroup(kind: ProductionCheckGroupKind.none, name: null);
 
 class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
   final _manualController = TextEditingController();
@@ -156,6 +202,11 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
 
   ProductionCheck? _check;
   ProductionHandout? _handout;
+
+  /// The pack case open on this device (hand-out list only): what is scanned
+  /// goes into it until it is closed or another one is opened. The device's,
+  /// not the production's — two people pack two cases at once.
+  String? _openCaseId;
 
   /// The side a handout list is seen from: everything, or only what one
   /// lending org has to pack. Null is the server's default.
@@ -295,6 +346,8 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
             done: item.tick != null,
             locked: item.tick != null && !item.tick!.mine,
             doneBy: item.tick != null && !item.tick!.mine ? item.tick!.userName : null,
+            packCase: item.packCase,
+            isPackCase: item.isPackCase == true,
             note: _checkNote(l10n, item),
             noteWarn:
                 item.lentBy != null &&
@@ -317,6 +370,8 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
           kit: item.kit,
           done: item.done,
           locked: false,
+          packCase: item.packCase,
+          isPackCase: item.isPackCase == true,
           note: _handoutNote(l10n, item),
           noteWarn:
               item.kitAddition == true ||
@@ -370,22 +425,123 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
     return l10n.productionCheckReceiptOpen;
   }
 
-  /// Sections in the server's order, the counted lines slotted in among the
-  /// units by name, and the units a line stands for left out. Mirrors
+  /// First a section per pack case — a case inside another right after it,
+  /// each headed by the case's own row — then what is loose, in sections in
+  /// the server's order. Within each, the counted lines are slotted in among
+  /// the units by name, and the units a line stands for left out. Mirrors
   /// `listSections` on the web.
   List<_Section> _sections(List<_Unit> units) {
     final counted = {for (final l in _lines) ...l.assetIds};
-    final sections = <String, _Section>{};
-    _Section section(ProductionCheckGroup g) =>
-        sections.putIfAbsent('${g.kind.json}:${g.name ?? ''}', () => _Section(g));
 
-    // Blocks of a unit and its accessories, so a line never lands between them;
-    // a kit is one block, under its heading.
-    final blocks = <_Section, List<_Block>>{};
+    // The cases, the ones around them included, so a case inside one this
+    // list has nothing of still reads as inside it.
+    final cases =
+        <String, ({PackCase c, List<_Unit> units, List<ProductionListLine> lines})>{};
+    ({PackCase c, List<_Unit> units, List<ProductionListLine> lines}) caseEntry(
+      PackCase c,
+    ) {
+      for (var i = 0; i < c.path.length; i++) {
+        final ref = c.path[i];
+        cases.putIfAbsent(
+          ref.assetId,
+          () => (
+            c: PackCase(
+              assetId: ref.assetId,
+              name: ref.name,
+              tag: ref.tag,
+              orgIndex: ref.orgIndex,
+              path: c.path.sublist(0, i),
+            ),
+            units: <_Unit>[],
+            lines: <ProductionListLine>[],
+          ),
+        );
+      }
+      return cases.putIfAbsent(
+        c.assetId,
+        () => (c: c, units: <_Unit>[], lines: <ProductionListLine>[]),
+      );
+    }
+
+    final looseUnits = <_Unit>[];
+    final looseLines = <ProductionListLine>[];
+    for (final unit in units) {
+      if (unit.packCase case final c?) {
+        caseEntry(c).units.add(unit);
+      } else {
+        looseUnits.add(unit);
+      }
+    }
+    for (final line in _lines) {
+      if (line.packCase case final c?) {
+        caseEntry(c).lines.add(line);
+      } else {
+        looseLines.add(line);
+      }
+    }
+
+    final caseSections = cases.values.toList()..sort((a, b) => _compareCases(a.c, b.c));
+    final out = <_Section>[
+      for (final entry in caseSections)
+        _Section(_noGroup, packCase: entry.c)
+          ..rows.addAll(
+            _rowsOf(
+              [
+                ...entry.units.where((u) => u.assetId == entry.c.assetId),
+                ...entry.units.where((u) => u.assetId != entry.c.assetId),
+              ],
+              entry.lines,
+              counted,
+            ),
+          ),
+    ];
+
+    final groups =
+        <
+          String,
+          ({ProductionCheckGroup g, List<_Unit> units, List<ProductionListLine> lines})
+        >{};
+    String keyOf(ProductionCheckGroup g) => '${g.kind.json}:${g.name ?? ''}';
+    for (final unit in looseUnits) {
+      if (counted.contains(unit.assetId)) continue;
+      groups
+          .putIfAbsent(keyOf(unit.group), () => (g: unit.group, units: [], lines: []))
+          .units
+          .add(unit);
+    }
+    for (final line in looseLines) {
+      groups
+          .putIfAbsent(keyOf(line.group), () => (g: line.group, units: [], lines: []))
+          .lines
+          .add(line);
+    }
+    const order = {
+      ProductionCheckGroupKind.location: 0,
+      ProductionCheckGroupKind.none: 1,
+      ProductionCheckGroupKind.lender: 2,
+    };
+    final loose = groups.values.toList()
+      ..sort((a, b) {
+        final byKind = (order[a.g.kind] ?? 3).compareTo(order[b.g.kind] ?? 3);
+        return byKind != 0 ? byKind : naturalCompare(a.g.name ?? '', b.g.name ?? '');
+      });
+    for (final entry in loose) {
+      out.add(_Section(entry.g)..rows.addAll(_rowsOf(entry.units, entry.lines, counted)));
+    }
+    return out;
+  }
+
+  /// The rows of one section: blocks of a unit and its accessories, so a line
+  /// never lands between them — a kit is one block, under its heading — and
+  /// the counted lines slotted in by name.
+  List<_Row> _rowsOf(
+    List<_Unit> units,
+    List<ProductionListLine> lines,
+    Set<String> counted,
+  ) {
+    final list = <_Block>[];
     for (final unit in units) {
       if (counted.contains(unit.assetId)) continue;
-      final s = section(unit.group);
-      final list = blocks.putIfAbsent(s, () => []);
       final last = list.isEmpty ? null : list.last;
       final row = (unit: unit, line: null, kit: null);
       if (unit.accessoryOf != null && last != null && last.id == unit.accessoryOf) {
@@ -405,9 +561,7 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
         list.add(_Block(unit.assetId, unit.productName, [row]));
       }
     }
-    for (final line in _lines) {
-      final s = section(line.group);
-      final list = blocks.putIfAbsent(s, () => []);
+    for (final line in lines) {
       final at = list.indexWhere((b) => naturalCompare(b.name, line.productName) > 0);
       final block = _Block(null, line.productName, [(unit: null, line: line, kit: null)]);
       if (at < 0) {
@@ -416,25 +570,7 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
         list.insert(at, block);
       }
     }
-
-    const order = {
-      ProductionCheckGroupKind.location: 0,
-      ProductionCheckGroupKind.none: 1,
-      ProductionCheckGroupKind.lender: 2,
-    };
-    final out = sections.values.toList()
-      ..sort((a, b) {
-        final byKind = (order[a.group.kind] ?? 3).compareTo(order[b.group.kind] ?? 3);
-        return byKind != 0
-            ? byKind
-            : naturalCompare(a.group.name ?? '', b.group.name ?? '');
-      });
-    for (final s in out) {
-      for (final b in blocks[s] ?? const <_Block>[]) {
-        s.rows.addAll(b.rows);
-      }
-    }
-    return out;
+    return [for (final b in list) ...b.rows];
   }
 
   Future<void> _pickSide(String organizationId) async {
@@ -482,8 +618,10 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
           ? await _scanCheck(api, l10n, code)
           : await _scanHandout(api, l10n, code);
       final unitAssetId = scanned.unit;
-      // The accessory question reads the list, so it needs the fresh one.
-      final ask = unitAssetId != null && _hasAccessories(unitAssetId);
+      // The accessory question reads the list, so it needs the fresh one, and
+      // so does a pack case: to open it, or to ask what came back in it.
+      final ask =
+          unitAssetId != null && _hasAccessories(unitAssetId) || scanned.packCase != null;
       if (_waiting <= 1 || ask) {
         await _fetch(api);
       } else {
@@ -491,8 +629,9 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
       }
       if (mounted) setState(() => _busy = false);
       // Asked inside the queue, so the next scan waits for the answer.
-      if (ask) await _askAccessories(unitAssetId);
+      if (ask && unitAssetId != null) await _askAccessories(unitAssetId);
       if (scanned.kit case final kit?) await _askKit(kit);
+      if (scanned.packCase case final c?) await _caseScanned(c);
     } catch (error) {
       _report(_Tone.bad, describeError(l10n, error), code, ScanTone.error);
     } finally {
@@ -519,7 +658,7 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
         kit.tag,
         ScanTone.ok,
       );
-      return (unit: null, kit: kit);
+      return (unit: null, kit: kit, packCase: null);
     }
     switch (result.result) {
       case ProductionCheckScanResultResult.ticked:
@@ -550,6 +689,7 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
               .firstOrNull
               ?.assetId,
           kit: null,
+          packCase: null,
         );
       case ProductionCheckScanResultResult.already:
         _report(
@@ -569,20 +709,30 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
     return _nothingToAsk;
   }
 
-  static const _Scanned _nothingToAsk = (unit: null, kit: null);
+  static const _Scanned _nothingToAsk = (unit: null, kit: null, packCase: null);
 
   /// Books the scanned unit; answers it when it went where this list books
   /// to, so its accessories can be asked about — or the kit whose sticker it
   /// was, which booked all of it.
   Future<_Scanned> _scanHandout(ApiClient api, S l10n, String code) async {
+    // Handing out, what is scanned goes into the open case.
+    final open = widget.mode == ProductionListMode.checkout ? _openCase : null;
     final result = await api.productionHandout.scanIntoProductionHandout(
       productionId: widget.productionId,
       mode: _handoutMode,
-      body: ProductionCheckScanRequest(code: code),
+      body: HandoutScanRequest(code: code, packInto: open?.assetId),
     );
+    if (result.packCase case final c?) {
+      // Booked like any unit; opened, or asked about, once the list is fresh.
+      _justBooked.add(result.asset.id);
+      return (unit: null, kit: null, packCase: c);
+    }
+    final packedNote = result.packedInto != null && result.packedInto == open?.assetId
+        ? l10n.packInto(_caseNumber(open!.tag, open.orgIndex))
+        : null;
     final overdue = _overdueNames(l10n, result.overdueInspections);
     if (result.kit case final kit?) {
-      final scanned = _kitBooked(l10n, kit, result.action);
+      final scanned = _kitBooked(l10n, kit, result.action, packedNote);
       if (overdue.isNotEmpty) {
         _report(
           _Tone.warn,
@@ -632,6 +782,7 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
         result.asset.assetTag,
         Labels.scanAction(l10n, result.action),
         if (returned.isNotEmpty) l10n.returnedFrom(returned.join(', ')),
+        ?packedNote,
         // It went out in a linked unit's place, and the two swapped.
         if (result.swap case final swap?) swapNotice(l10n, swap),
         if (overdue.isNotEmpty) l10n.inspectionOverdueOf(overdue.join(', ')),
@@ -646,13 +797,13 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
         ),
       );
     }
-    return (unit: foreign ? null : result.asset.id, kit: null);
+    return (unit: foreign ? null : result.asset.id, kit: null, packCase: null);
   }
 
   /// A kit's sticker booked every unit in it that this list has. None of them
   /// here means the kit is not from this production; all of them done before
   /// is said like a second scan of one unit.
-  _Scanned _kitBooked(S l10n, ScanKit kit, ScanResultAction action) {
+  _Scanned _kitBooked(S l10n, ScanKit kit, ScanResultAction action, [String? packedNote]) {
     if (kit.units.isEmpty) {
       _report(
         _Tone.warn,
@@ -680,10 +831,10 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
     _report(
       _Tone.good,
       l10n.kitScanned(kit.name, kit.units.length),
-      [?kit.tag, Labels.scanAction(l10n, action)].join(' · '),
+      [?kit.tag, Labels.scanAction(l10n, action), ?packedNote].join(' · '),
       ScanTone.ok,
     );
-    return (unit: null, kit: kit);
+    return (unit: null, kit: kit, packCase: null);
   }
 
   /// After a kit's sticker: is all of it there? Booked back (or unticked) is
@@ -784,6 +935,226 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
       ),
     );
     ref.scanTone(sound);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Pack cases
+
+  /// The open case as the list has it now; null once it left the list.
+  PackCase? get _openCase {
+    final id = _openCaseId;
+    if (id == null || widget.mode != ProductionListMode.checkout) return null;
+    for (final item in _handout?.items ?? const <ProductionHandoutItem>[]) {
+      if (item.isPackCase == true && item.assetId == id) return item.packCase;
+    }
+    return null;
+  }
+
+  /// The case a unit is packed in — for a case, the one around it.
+  PackCaseRef? _directCase(_Unit unit) {
+    final c = unit.packCase;
+    if (c == null) return null;
+    if (unit.isPackCase) return c.path.isEmpty ? null : c.path.last;
+    return PackCaseRef(assetId: c.assetId, name: c.name, tag: c.tag, orgIndex: c.orgIndex);
+  }
+
+  Future<void> _pack(
+    String? caseAssetId, {
+    List<String>? assetIds,
+    ProductionListLineCount? line,
+  }) => _act((api) async {
+    await api.productionHandout.packIntoProductionCase(
+      productionId: widget.productionId,
+      body: PackRequest(
+        caseAssetId: caseAssetId,
+        assetIds: assetIds,
+        line: line,
+        organizationId: _handout?.side.organizationId,
+      ),
+    );
+    return null;
+  });
+
+  /// Part of a counted line into the open case: how many is asked.
+  Future<void> _packLine(ProductionListLine line) async {
+    final open = _openCase;
+    if (open == null) return;
+    final l10n = S.of(context);
+    final count = await showDialog<int>(
+      context: context,
+      builder: (_) => CountDialog(
+        title: withCaption(
+          productLabel(line.manufacturerName, line.productName),
+          line.productCaption,
+        ),
+        initial: line.total,
+        label: l10n.listHowMany(line.total),
+        imageUrl: line.productImageUrl,
+        max: line.total,
+      ),
+    );
+    if (count == null || count <= 0 || !mounted) return;
+    await _pack(
+      open.assetId,
+      line: ProductionListLineCount(key: line.key, count: count),
+    );
+  }
+
+  void _printCaseLabel(PackCase c) {
+    final l10n = S.of(context);
+    Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => CaseLabelScreen.packCase(
+          productionId: widget.productionId,
+          caseAssetId: c.assetId,
+          name: l10n.packCase(_caseTitle(c.tag, c.orgIndex, c.name)),
+        ),
+      ),
+    );
+  }
+
+  /// A pack case's sticker. Handing out it is opened — or, with another case
+  /// open, asked whether it goes into that one. Taking back, the case is back,
+  /// and what is still in it is asked about: what stays ticked comes back too.
+  Future<void> _caseScanned(PackCaseRef scanned) async {
+    if (!mounted) return;
+    final l10n = S.of(context);
+    final title = _caseTitle(scanned.tag, scanned.orgIndex, scanned.name);
+    if (widget.mode == ProductionListMode.checkin) return _caseReturned(scanned, title);
+
+    final open = _openCase;
+    if (open != null && open.assetId != scanned.assetId) {
+      final into = await showDialog<bool>(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: Text(l10n.packChoiceTitle),
+          content: Text(
+            l10n.packChoiceQuestion(
+              _caseTitle(open.tag, open.orgIndex, open.name),
+              _caseNumber(scanned.tag, scanned.orgIndex),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: Text(l10n.packChoiceSwitch),
+            ),
+            FilledButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: Text(l10n.packChoiceInto),
+            ),
+          ],
+        ),
+      );
+      if (!mounted) return;
+      if (into == true) {
+        await _pack(open.assetId, assetIds: [scanned.assetId]);
+        _report(
+          _Tone.good,
+          l10n.packNested(title, _caseNumber(open.tag, open.orgIndex)),
+          l10n.packOpenBanner(_caseTitle(open.tag, open.orgIndex, open.name)),
+          ScanTone.ok,
+        );
+        return;
+      }
+    }
+    setState(() => _openCaseId = scanned.assetId);
+    _report(_Tone.good, l10n.packOpened(title), l10n.packScanNext, ScanTone.ok);
+  }
+
+  Future<void> _caseReturned(PackCaseRef scanned, String title) async {
+    final l10n = S.of(context);
+    final counted = {for (final l in _lines) ...l.assetIds};
+    final units = [
+      for (final item in _handout?.items ?? const <ProductionHandoutItem>[])
+        if (item.assetId != scanned.assetId &&
+            !item.done &&
+            item.accessoryOf == null &&
+            !counted.contains(item.assetId) &&
+            _withinCase(item.packCase, scanned.assetId))
+          item,
+    ];
+    final lines = [
+      for (final line in _lines)
+        if (_withinCase(line.packCase, scanned.assetId) && line.done < line.total) line,
+    ];
+    if (units.isEmpty && lines.isEmpty) {
+      _report(_Tone.good, l10n.packReturned(title), l10n.packNothingElse, ScanTone.ok);
+      return;
+    }
+    final there = await showDialog<Set<String>>(
+      context: context,
+      builder: (_) => AccessoryDialog(
+        title: l10n.packCase(title),
+        question: l10n.packReturnedQuestion,
+        accessories: [
+          for (final u in units)
+            (
+              assetId: u.assetId,
+              name: withCaption(
+                productLabel(u.manufacturerName, u.productName),
+                u.productCaption,
+              ),
+              assetTag: u.assetTag,
+              imageUrl: u.productImageUrl,
+            ),
+          for (final l in lines)
+            (
+              assetId: 'line:${l.key}',
+              name:
+                  '${l.total - l.done}× ${productLabel(l.manufacturerName, l.productName)}',
+              assetTag: null,
+              imageUrl: l.productImageUrl,
+            ),
+        ],
+      ),
+    );
+    if (there == null || !mounted) return;
+    final back = [
+      for (final u in units)
+        if (there.contains(u.assetId)) u.assetId,
+    ];
+    await _act((api) async {
+      await _tick(api, back);
+      for (final line in lines) {
+        if (there.contains('line:${line.key}')) await _setLine(api, line.key, line.total);
+      }
+      return null;
+    });
+    final missing = units.length + lines.length - there.length;
+    _report(
+      missing > 0 ? _Tone.warn : _Tone.good,
+      l10n.packReturned(title),
+      missing > 0 ? l10n.packStaysOut(missing) : l10n.packAllBack,
+      missing > 0 ? ScanTone.attention : ScanTone.ok,
+    );
+  }
+
+  /// "Into the open case" and "take out of its case", for a row's ⋮ — packing
+  /// is what the hand-out list is for, so it sits on the rows themselves.
+  Widget? _packMenu({
+    required S l10n,
+    required String? inCaseNumber,
+    required bool canGoIn,
+    required VoidCallback onInto,
+    required VoidCallback onTakeOut,
+  }) {
+    final open = _openCase;
+    final into = open != null && canGoIn;
+    if (!into && inCaseNumber == null) return null;
+    return PopupMenuButton<String>(
+      enabled: !_busy,
+      onSelected: (value) => value == 'into' ? onInto() : onTakeOut(),
+      itemBuilder: (_) => [
+        if (into)
+          PopupMenuItem(
+            value: 'into',
+            child: Text(l10n.packInto(_caseNumber(open.tag, open.orgIndex))),
+          ),
+        if (inCaseNumber != null)
+          PopupMenuItem(value: 'out', child: Text(l10n.packTakeOut(inCaseNumber))),
+      ],
+    );
   }
 
   // ---------------------------------------------------------------------------
@@ -1175,6 +1546,7 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
                 null => null,
               },
             ),
+          if (_openCase case final c? when open) _openCaseBanner(l10n, c),
           Expanded(
             child: _loaded
                 ? _list(l10n)
@@ -1280,14 +1652,32 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
             ),
           ),
         for (final section in sections) ...[
-          _sectionHeader(l10n, section, open),
+          // Everything packed in no case, in the sections it always had.
+          if (section.packCase == null &&
+              sections.any((s) => s.packCase != null) &&
+              section == sections.firstWhere((s) => s.packCase == null))
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 16, 16, 0),
+              child: Text(
+                l10n.packLoose,
+                style: TextStyle(color: muted, fontWeight: FontWeight.w600),
+              ),
+            ),
+          if (section.packCase case final c?)
+            _caseHeader(l10n, section, c, open)
+          else
+            _sectionHeader(l10n, section, open),
           for (final row in section.rows)
-            if (row.line case final line?)
-              _lineTile(l10n, line, open)
-            else if (row.kit case final head?)
-              _kitHeader(l10n, head, open)
-            else if (row.unit case final unit?)
-              _unitTile(l10n, unit, open),
+            Padding(
+              // A case inside another sits indented under it.
+              padding: EdgeInsets.only(left: 12.0 * section.depth),
+              child: switch (row) {
+                (line: final line?, unit: _, kit: _) => _lineTile(l10n, line, open),
+                (kit: final head?, unit: _, line: _) => _kitHeader(l10n, head, open),
+                (unit: final unit?, line: _, kit: _) => _unitTile(l10n, unit, open),
+                _ => const SizedBox.shrink(),
+              },
+            ),
         ],
         if (handout != null && handout.othersCount > 0)
           Padding(
@@ -1355,6 +1745,9 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
               icon: Icon(Icons.report_problem_outlined, color: status?.warning),
               onPressed: () => _reportDefect(unit),
             )
+          // Accessories go with the unit they hang off.
+          : widget.mode == ProductionListMode.checkout && open && unit.accessoryOf == null
+          ? _unitPackMenu(l10n, unit)
           : null,
       title: Text(unit.productName, style: const TextStyle(fontWeight: FontWeight.w600)),
       subtitle: Text.rich(
@@ -1415,6 +1808,16 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
               onPressed: complete || _busy ? null : () => _bumpLine(line),
               icon: const Icon(Icons.add),
             ),
+          if (open && widget.mode == ProductionListMode.checkout)
+            ?_packMenu(
+              l10n: l10n,
+              inCaseNumber: line.packCase == null
+                  ? null
+                  : _caseNumber(line.packCase!.tag, line.packCase!.orgIndex),
+              canGoIn: line.packCase?.assetId != _openCase?.assetId,
+              onInto: () => _packLine(line),
+              onTakeOut: () => _pack(null, assetIds: line.assetIds),
+            ),
         ],
       ),
       onTap: open && !_busy ? () => _countLine(line) : null,
@@ -1471,6 +1874,168 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
             )
           else
             const SizedBox(height: 40),
+          if (open && widget.mode == ProductionListMode.checkout)
+            ?_packMenu(
+              l10n: l10n,
+              inCaseNumber: null,
+              canGoIn: head.units.any((u) => u.packCase?.assetId != _openCase?.assetId),
+              onInto: () => _pack(
+                _openCase!.assetId,
+                assetIds: [
+                  for (final u in head.units)
+                    if (u.accessoryOf == null) u.assetId,
+                ],
+              ),
+              onTakeOut: () {},
+            ),
+        ],
+      ),
+    );
+  }
+
+  Widget? _unitPackMenu(S l10n, _Unit unit) {
+    final inCase = _directCase(unit);
+    final open = _openCase;
+    return _packMenu(
+      l10n: l10n,
+      inCaseNumber: inCase == null ? null : _caseNumber(inCase.tag, inCase.orgIndex),
+      canGoIn:
+          open != null && unit.assetId != open.assetId && inCase?.assetId != open.assetId,
+      onInto: () => _pack(_openCase!.assetId, assetIds: [unit.assetId]),
+      onTakeOut: () => _pack(null, assetIds: [unit.assetId]),
+    );
+  }
+
+  /// The open case, on top while the list scrolls: where scans go, and how to
+  /// close it or print its label.
+  Widget _openCaseBanner(S l10n, PackCase c) {
+    final status = Theme.of(context).extension<StatusColors>();
+    final color = status?.success ?? Theme.of(context).colorScheme.primary;
+    return Container(
+      width: double.infinity,
+      margin: const EdgeInsets.fromLTRB(12, 4, 12, 4),
+      padding: const EdgeInsets.fromLTRB(12, 8, 4, 8),
+      decoration: BoxDecoration(
+        border: Border.all(color: color.withValues(alpha: 0.6)),
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Row(
+        children: [
+          Icon(Icons.all_inbox_outlined, color: color),
+          const SizedBox(width: 8),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.packOpenBanner(_caseTitle(c.tag, c.orgIndex, c.name)),
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                Text(
+                  l10n.packOpenHint,
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Theme.of(context).colorScheme.onSurfaceVariant,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          IconButton(
+            tooltip: l10n.caseLabel,
+            onPressed: () => _printCaseLabel(c),
+            icon: const Icon(Icons.print_outlined),
+          ),
+          TextButton(
+            onPressed: () => setState(() => _openCaseId = null),
+            child: Text(l10n.packClose),
+          ),
+        ],
+      ),
+    );
+  }
+
+  /// A pack case's section heading: the case, the one it is in, how much of
+  /// it is done, and in ⋮ opening it for packing, closing it, its label and
+  /// taking it out of the case around it.
+  Widget _caseHeader(S l10n, _Section section, PackCase c, bool open) {
+    var done = 0;
+    var total = 0;
+    for (final row in section.rows) {
+      if (row.line case final l?) {
+        done += _lineCount(l);
+        total += l.total;
+      } else if (row.unit case final u? when !u.optional || u.done) {
+        total += 1;
+        if (u.done) done += 1;
+      }
+    }
+    final muted = Theme.of(context).colorScheme.onSurfaceVariant;
+    final isOpen = _openCase?.assetId == c.assetId;
+    final onList = section.rows.any((r) => r.unit?.assetId == c.assetId);
+    final handingOut = widget.mode == ProductionListMode.checkout && open;
+    final outer = c.path.isEmpty ? null : c.path.last;
+    return Padding(
+      padding: EdgeInsets.fromLTRB(16 + 12.0 * section.depth, 12, 0, 0),
+      child: Row(
+        children: [
+          Icon(
+            Icons.all_inbox_outlined,
+            size: 18,
+            color: isOpen ? Theme.of(context).extension<StatusColors>()?.success : muted,
+          ),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '${l10n.packCase(_caseTitle(c.tag, c.orgIndex, c.name))}  $done/$total',
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (outer != null || isOpen)
+                  Text(
+                    [
+                      if (outer != null)
+                        l10n.packCaseInside(_caseNumber(outer.tag, outer.orgIndex)),
+                      if (isOpen) l10n.packCaseOpenNote,
+                    ].join(' · '),
+                    style: TextStyle(color: muted, fontSize: 12),
+                  ),
+              ],
+            ),
+          ),
+          if (open && done < total)
+            TextButton(
+              onPressed: _busy ? null : () => _tickRows(section.rows),
+              child: Text(l10n.productionCheckTickSection),
+            ),
+          if (!_isCheck && onList)
+            PopupMenuButton<String>(
+              enabled: !_busy,
+              onSelected: (value) => switch (value) {
+                'open' => setState(() => _openCaseId = c.assetId),
+                'close' => setState(() => _openCaseId = null),
+                'label' => _printCaseLabel(c),
+                _ => _pack(null, assetIds: [c.assetId]),
+              },
+              itemBuilder: (_) => [
+                if (handingOut && !isOpen)
+                  PopupMenuItem(value: 'open', child: Text(l10n.packOpen)),
+                if (handingOut && isOpen)
+                  PopupMenuItem(value: 'close', child: Text(l10n.packClose)),
+                PopupMenuItem(value: 'label', child: Text(l10n.caseLabel)),
+                if (handingOut && outer != null)
+                  PopupMenuItem(
+                    value: 'out',
+                    child: Text(l10n.packTakeOut(_caseNumber(outer.tag, outer.orgIndex))),
+                  ),
+              ],
+            )
+          else
+            const SizedBox(width: 8),
         ],
       ),
     );

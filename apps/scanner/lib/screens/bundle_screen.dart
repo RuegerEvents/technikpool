@@ -389,7 +389,9 @@ class _BundleScreenState extends ConsumerState<BundleScreen> {
 
   /// What opens this kit's case check: its own tag, else a unit's.
   String? _caseCode(BundleDetail bundle) =>
-      bundle.tag ?? bundle.units.map((u) => u.assetTag).nonNulls.firstOrNull;
+      bundle.tag ??
+      bundle.number ??
+      bundle.units.map((u) => u.assetTag).nonNulls.firstOrNull;
 
   void _report(_Tone tone, String title, String? detail, ScanTone sound) {
     if (!mounted) return;
@@ -581,7 +583,11 @@ class _BundleScreenState extends ConsumerState<BundleScreen> {
                     const SizedBox(height: 2),
                     Text(
                       [
-                        bundle.tag ?? l10n.bundleNoTag,
+                        // Without a tag of its own, its case's tag is its number.
+                        bundle.tag ??
+                            (bundle.numberFromCase == true && bundle.number != null
+                                ? l10n.bundleNumberFromCase(bundle.number!)
+                                : l10n.bundleNoTag),
                         bundle.categoryName,
                         ?bundle.location?.name,
                       ].join(' · '),
@@ -591,6 +597,11 @@ class _BundleScreenState extends ConsumerState<BundleScreen> {
                       l10n.bundleUnitCount(bundle.unitCount),
                       style: TextStyle(color: muted, fontSize: 12),
                     ),
+                    if ((bundle.extraCases ?? 0) > 0)
+                      Text(
+                        l10n.bundleExtraCases(bundle.extraCases!),
+                        style: TextStyle(color: muted, fontSize: 12),
+                      ),
                     if (!bundle.canEdit)
                       Text(
                         l10n.bundleReadOnly,

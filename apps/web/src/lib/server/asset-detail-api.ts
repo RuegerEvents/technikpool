@@ -16,6 +16,7 @@ import {
 } from '#lib/server/services/api-mappers.js';
 import { productDocuments } from '#lib/server/services/product-documents.js';
 import { KIT_SELECT, kitOf } from '#lib/server/services/production-list.js';
+import { bundleCaseOf } from '#lib/server/services/asset-lookup.js';
 import { DEFAULT_INSPECTION_TYPE_ID } from '#lib/inspection-due.js';
 
 // One unit as `GET /assets/by-tag/{tag}` and `GET /assets/{assetId}` both
@@ -86,6 +87,11 @@ export async function assetDetail(
 		...toAsset(asset),
 		documents: (await productDocuments(asset.productId)).map(toProductDocument),
 		kit: kitOf(asset.bundle),
+		// A container in a bundle is its case: its tag means the whole kit.
+		isBundleCase:
+			asset.bundleId !== null && asset.product.isContainer
+				? (await bundleCaseOf(asset.bundleId))?.id === asset.id
+				: false,
 		inspectionIntervalMonths: electrical?.intervalMonths ?? null,
 		nextInspectionDue: asset.nextInspectionDue?.toISOString() ?? null,
 		inspectionSchedules: asset.inspectionSchedules.map((s) => ({

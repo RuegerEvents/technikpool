@@ -23,6 +23,9 @@ ProductionListLine _$ProductionListLineFromJson(Map<String, dynamic> json) =>
       done: (json['done'] as num).toInt(),
       floor: (json['floor'] as num).toInt(),
       productImageUrl: json['productImageUrl'] as String?,
+      packCase: json['packCase'] == null
+          ? null
+          : PackCase.fromJson(json['packCase'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$ProductionListLineToJson(ProductionListLine instance) =>
@@ -38,4 +41,5 @@ Map<String, dynamic> _$ProductionListLineToJson(ProductionListLine instance) =>
       'total': instance.total,
       'done': instance.done,
       'floor': instance.floor,
+      'packCase': ?instance.packCase,
     };

@@ -1637,7 +1637,9 @@ paths:
         the server never talks to a printer.
 
         `large` is a 4×6″ shipping label, `small` an 80×55 mm one with no
-        contents list. A case without a tag prints without a code. Anyone who
+        contents list. A kit's code is its own tag, else the tag of its case
+        (the container unit in it, `BundleDetail.caseUnitId`); a case with
+        neither prints without a code. Anyone who
         sees the equipment may print one.
       parameters:
         - name: kind
@@ -1991,7 +1993,7 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ProductionCheckScanRequest'
+              $ref: '#/components/schemas/HandoutScanRequest'
       responses:
         '200':
           description: What was booked
@@ -2068,6 +2070,86 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ProductionListLineResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/productions/{productionId}/packing:
+    post:
+      operationId: packIntoProductionCase
+      tags: [productionHandout]
+      summary: Put units into a pack case, or take them out
+      description: |
+        A pack case is a unit whose product is a container
+        (`CatalogProduct.isContainer`) and that is in no bundle. During one
+        production it holds what is packed into it — units, part of a counted
+        line, whole kits and other cases, nested as deep as need be but never
+        in a circle. Opening a case is up to the client; a scan carries the
+        open one (`HandoutScanRequest.packInto`), and this puts units in by
+        hand. Packing is handing out: what goes in, and the case, is checked
+        out if it was not. Units of the caller's side only. Taking a unit back
+        empties it out of its case, so a case is empty once all is back.
+        `409 not_a_pack_case` for anything not a case booked here, `409
+        pack_circle` for a case into itself or into what it holds.
+      parameters:
+        - $ref: '#/components/parameters/ProductionId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PackRequest'
+      responses:
+        '200':
+          description: How many units were moved, accessories included
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HandoverResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/productions/{productionId}/packing/{caseAssetId}/label:
+    get:
+      operationId: getPackCaseLabel
+      tags: [productionHandout]
+      summary: A pack case's label for this production, as ZPL
+      description: |
+        Like a case's label (`getCaseLabel`), for a pack case on one
+        production: "Kiste 3" large, the production and the case's product
+        under it, a DataMatrix of the case's tag, and — on the large label —
+        what is in it now, a case or kit inside as one line. German, like the
+        PDFs.
+      parameters:
+        - $ref: '#/components/parameters/ProductionId'
+        - name: caseAssetId
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: size
+          in: query
+          required: false
+          schema:
+            $ref: '#/components/schemas/CaseLabelSize'
+      responses:
+        '200':
+          description: The label, ready to send
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseLabel'
         '400':
           $ref: '#/components/responses/BadRequest'
         '401':
@@ -3146,6 +3228,16 @@ components:
                 Its units are never swapped for one another in a kit or on a
                 unit (see `ScanSwap`). Not required, so an older client keeps
                 compiling.
+            isContainer:
+              type: boolean
+              description: |
+                Its units are containers (Behälter). One inside a fixed bundle
+                is that bundle's case: its tag is the bundle's number and
+                scanning it means the whole kit (`BundleDetail.caseUnitId`).
+                One in no bundle is a pack case: during a production, what is
+                packed into it is listed under it — see
+                `packIntoProductionCase`. Not required, so an older client
+                keeps compiling.
             mainsConnectors:
               type: array
               description: |
@@ -3228,6 +3320,12 @@ components:
             `true` keeps its units from being swapped for one another when
             handing out or checking a case (see `ScanSwap`) — a calibrated lens
             that belongs to exactly one camera. Identity like the name.
+        isContainer:
+          type: boolean
+          description: |
+            `true` makes its units containers: a bundle's case inside a
+            bundle, a pack case outside one (see `CatalogProduct`). Identity
+            like the name.
         requiresInspection:
           type: [boolean, 'null']
           description: The electrical type. Null follows the category again.
@@ -3520,6 +3618,13 @@ components:
               oneOf:
                 - $ref: '#/components/schemas/ListKit'
                 - type: 'null'
+            isBundleCase:
+              type: boolean
+              description: |
+                The unit is its kit's case (a container in it, see
+                `BundleDetail.caseUnitId`): its tag is the kit's number, and
+                scanning it means the whole kit. Show "Case of <kit>". Not
+                required, so an older client keeps compiling.
             history:
               type: array
               description: Most recent transactions first.
@@ -3709,7 +3814,9 @@ components:
             - type: 'null'
         kit:
           description: |
-            Set when the code was a kit's own sticker: every unit in it that the
+            Set when the code was a kit's number — its own tag, or the tag of
+            the container that is its case, which always means the whole kit
+            rather than the box. Every unit in it that the
             caller may book went to the target at once, accessories along. `asset`
             then stands for the kit — the id of its first unit, the kit's name
             and tag — so an older client still reports something true. Ask about
@@ -3736,6 +3843,94 @@ components:
           oneOf:
             - $ref: '#/components/schemas/ScanSwap'
             - type: 'null'
+        packCase:
+          description: |
+            On a production's handout list: the scanned unit is a pack case.
+            It was booked like any unit (on `checkout` even when it was not
+            booked here). Handing out, open it — or, with another case open,
+            ask whether it goes into that one (`packIntoProductionCase`) or
+            is opened instead. Taking back, offer what is still in it to tick:
+            the units listed under it. Null otherwise. Not required, so an
+            older client keeps compiling.
+          oneOf:
+            - $ref: '#/components/schemas/PackCaseRef'
+            - type: 'null'
+        packedInto:
+          type: [string, 'null']
+          description: |
+            On the handout list: the case (its asset id) the scanned unit, or
+            every unit of a scanned kit, was packed into — the `packInto` of
+            the request. Not required, so an older client keeps compiling.
+
+    PackCaseRef:
+      type: object
+      required: [assetId, name, tag, orgIndex]
+      description: |
+        A pack case: an ordinary unit whose product is a container and that
+        is in no bundle. Show
+        it as "Case 3 (Transflex 60×40)" — its tag, else "#" and its number,
+        then the product.
+      properties:
+        assetId:
+          type: string
+        name:
+          type: string
+          description: The product's name with its caption.
+        tag:
+          type: [string, 'null']
+        orgIndex:
+          type: integer
+          description: The unit's number in its organization.
+
+    PackCase:
+      allOf:
+        - $ref: '#/components/schemas/PackCaseRef'
+        - type: object
+          required: [path]
+          properties:
+            path:
+              type: array
+              description: |
+                The cases around this one, outermost first, ending with the
+                one it sits in. Empty for a case packed in nothing.
+              items:
+                $ref: '#/components/schemas/PackCaseRef'
+
+    HandoutScanRequest:
+      type: object
+      required: [code]
+      properties:
+        code:
+          type: string
+        packInto:
+          type: [string, 'null']
+          description: |
+            `checkout` only: the case open on the device (its asset id). The
+            scanned unit — every unit of a kit's sticker — goes into it, and
+            out with it. A scanned case is never packed this way: it answers
+            `packCase`, and the client asks.
+
+    PackRequest:
+      type: object
+      properties:
+        caseAssetId:
+          type: [string, 'null']
+          description: |
+            The case to pack into (its asset id). Null or left out takes the
+            units out of the case they are in.
+        assetIds:
+          type: array
+          description: Units, a whole kit's included; accessories go with their unit.
+          items:
+            type: string
+        line:
+          description: Part of a counted line — `count` of its units, the ones already out first.
+          oneOf:
+            - $ref: '#/components/schemas/ProductionListLineCount'
+            - type: 'null'
+        organizationId:
+          type: [string, 'null']
+          description: The side the list is seen from, as on the hand-out list.
 
     ScanSwap:
       type: object
@@ -4852,6 +5047,23 @@ components:
           oneOf:
             - $ref: '#/components/schemas/ListKit'
             - type: 'null'
+        packCase:
+          description: |
+            The pack case the unit is listed under: the one it travels in, or
+            for a case itself (`isPackCase`), its own. A client lists a section
+            per case first — a case inside another right after it, `path`
+            saying how far in — the case's own row on top, and everything with
+            no case after them under "loose", in the sections it always had.
+            Not required, so an older client keeps compiling.
+          oneOf:
+            - $ref: '#/components/schemas/PackCase'
+            - type: 'null'
+        isPackCase:
+          type: boolean
+          description: |
+            A pack case: its product is a container (`CatalogProduct.isContainer`)
+            and it is in no bundle.
+            Not required, so an older client keeps compiling.
         status:
           type: string
           enum: [APPROVED, CHECKED_OUT]
@@ -5078,6 +5290,14 @@ components:
         floor:
           type: integer
           description: The lowest count the caller can set — what others ticked stays.
+        packCase:
+          description: |
+            The pack case these units are in. A line splits when only some of
+            its units go into a case: those are a line of their own under it.
+            Not required, so an older client keeps compiling.
+          oneOf:
+            - $ref: '#/components/schemas/PackCase'
+            - type: 'null'
 
     ProductionListLineCount:
       type: object
@@ -5150,6 +5370,23 @@ components:
             Not booked yet: put into a kit after the kit was booked, and listed
             with it. A tick books it and hands it out at once. Not required, so
             an older client keeps compiling.
+        packCase:
+          description: |
+            The pack case the unit is listed under: the one it travels in, or
+            for a case itself (`isPackCase`), its own. A client lists a section
+            per case first — a case inside another right after it, `path`
+            saying how far in — the case's own row on top, and everything with
+            no case after them under "loose", in the sections it always had.
+            Not required, so an older client keeps compiling.
+          oneOf:
+            - $ref: '#/components/schemas/PackCase'
+            - type: 'null'
+        isPackCase:
+          type: boolean
+          description: |
+            A pack case: its product is a container (`CatalogProduct.isContainer`)
+            and it is in no bundle.
+            Not required, so an older client keeps compiling.
         status:
           type: string
           enum: [APPROVED, CHECKED_OUT, RETURNED]
@@ -5450,6 +5687,30 @@ components:
             canEdit:
               type: boolean
               description: Whether the caller may change what it holds (ADMIN or above).
+            caseUnitId:
+              type: [string, 'null']
+              description: |
+                The unit that is the kit's case: the container in it
+                (`CatalogProduct.isContainer`), the lowest-numbered of two.
+                Scanning its tag means the whole kit, as the kit's own tag
+                does. Not required, so an older client keeps compiling.
+            number:
+              type: [string, 'null']
+              description: |
+                The kit's number: its own `tag`, else its case's tag, else
+                null (a DMX ring). What its label prints. Not required, so an
+                older client keeps compiling.
+            numberFromCase:
+              type: boolean
+              description: |
+                `number` is the case's tag — show it as the kit's number. Not
+                required, so an older client keeps compiling.
+            extraCases:
+              type: integer
+              description: |
+                More containers in it besides its case; only the lowest unit
+                number counts. Worth a hint. Not required, so an older client
+                keeps compiling.
 
     BundleCreateRequest:
       type: object

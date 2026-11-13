@@ -11,7 +11,8 @@ import {
 	visibleProductionName,
 	writableOrgIds
 } from './access';
-import { resolveScannedCode } from './asset-lookup';
+import { bundleByCode, bundleCaseOf, kitByTag, resolveScannedCode } from './asset-lookup';
+import { bundleNumber } from '#lib/bundle-case.js';
 import { bundleTypeSpec } from './bundle-spec';
 import type { CaseCheckedData } from '#lib/types/asset-transaction.js';
 import { caseLabelLines, type CaseLabelData } from '#lib/server/case-label-zpl.js';
@@ -117,10 +118,9 @@ export async function findCase(
 	code: string
 ): Promise<{ ref: CaseRef; scannedAssetId: string | null }> {
 	const trimmed = code.trim();
-	const bundle = trimmed
-		? await prisma.assetBundle.findUnique({ where: { tag: trimmed }, select: { id: true } })
-		: null;
-	if (bundle) return { ref: { kind: 'bundle', id: bundle.id }, scannedAssetId: null };
+	// The kit's own tag, or its case's: the case in hand is the kit.
+	const bundle = await bundleByCode(trimmed);
+	if (bundle) return { ref: { kind: 'bundle', id: bundle.bundleId }, scannedAssetId: null };
 
 	const match = await resolveScannedCode(userId, trimmed);
 	if (match.kind === 'ambiguous') {
@@ -208,13 +208,16 @@ async function loadCaseRows(ref: CaseRef) {
 			where: { ...kitAssetsWhere(bundle.id), ...ACTIVE_ASSET_WHERE },
 			select: ITEM_SELECT
 		});
+		// Its number: its own tag, else its case's (#lib/bundle-case.ts), which
+		// the label prints as its code.
+		const number = bundleNumber(bundle, await bundleCaseOf(bundle.id));
 		return {
 			ref,
-			tag: bundle.tag,
-			name: bundleLabel(bundle),
+			tag: number.code,
+			name: bundleLabel({ ...bundle, tag: number.code }),
 			title: bundle.template.name,
 			caption: bundle.template.caption,
-			code: bundle.tag,
+			code: number.code,
 			organizationId: bundle.template.organizationId,
 			templateId: bundle.templateId,
 			innerKits: bundle.childBundles,
@@ -511,12 +514,7 @@ async function swapIntoCase(
 /** What a code outside the case is, for "not in this case" — its name, or null if unknown. */
 export async function describeCode(userId: string, code: string): Promise<string | null> {
 	const trimmed = code.trim();
-	const bundle = trimmed
-		? await prisma.assetBundle.findUnique({
-				where: { tag: trimmed },
-				select: { tag: true, template: { select: { name: true, caption: true } } }
-			})
-		: null;
+	const bundle = await kitByTag(trimmed);
 	if (bundle) return bundleLabel(bundle);
 
 	const match = await resolveScannedCode(userId, trimmed);

@@ -25,6 +25,10 @@ ScanResult _$ScanResultFromJson(Map<String, dynamic> json) => ScanResult(
   swap: json['swap'] == null
       ? null
       : ScanSwap.fromJson(json['swap'] as Map<String, dynamic>),
+  packCase: json['packCase'] == null
+      ? null
+      : PackCaseRef.fromJson(json['packCase'] as Map<String, dynamic>),
+  packedInto: json['packedInto'] as String?,
 );
 
 Map<String, dynamic> _$ScanResultToJson(ScanResult instance) =>
@@ -37,4 +41,6 @@ Map<String, dynamic> _$ScanResultToJson(ScanResult instance) =>
       'kit': ?instance.kit,
       'overdueInspections': ?instance.overdueInspections,
       'swap': ?instance.swap,
+      'packCase': ?instance.packCase,
+      'packedInto': ?instance.packedInto,
     };

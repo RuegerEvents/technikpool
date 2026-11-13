@@ -30,6 +30,7 @@ class CatalogProduct {
     this.cable,
     this.inspections,
     this.notInterchangeable,
+    this.isContainer,
     this.ports,
   });
   
@@ -83,6 +84,16 @@ class CatalogProduct {
   /// compiling.
   ///
   final bool? notInterchangeable;
+
+  /// Its units are containers (Behälter). One inside a fixed bundle.
+  /// is that bundle's case: its tag is the bundle's number and.
+  /// scanning it means the whole kit (`BundleDetail.caseUnitId`).
+  /// One in no bundle is a pack case: during a production, what is.
+  /// packed into it is listed under it — see.
+  /// `packIntoProductionCase`. Not required, so an older client.
+  /// keeps compiling.
+  ///
+  final bool? isContainer;
 
   /// Connectors carrying mains voltage it has — on its panel, at a.
   /// cable end or on a loom's way. A product with one is electrical.

@@ -26,6 +26,10 @@ ProductionHandoutItem _$ProductionHandoutItemFromJson(
       ? null
       : ListKit.fromJson(json['kit'] as Map<String, dynamic>),
   kitAddition: json['kitAddition'] as bool?,
+  packCase: json['packCase'] == null
+      ? null
+      : PackCase.fromJson(json['packCase'] as Map<String, dynamic>),
+  isPackCase: json['isPackCase'] as bool?,
   inspectionOverdue: json['inspectionOverdue'] as bool?,
 );
 
@@ -43,6 +47,8 @@ Map<String, dynamic> _$ProductionHandoutItemToJson(
   'group': instance.group,
   'kit': ?instance.kit,
   'kitAddition': ?instance.kitAddition,
+  'packCase': ?instance.packCase,
+  'isPackCase': ?instance.isPackCase,
   'status': instance.status,
   'done': instance.done,
   'received': instance.received,

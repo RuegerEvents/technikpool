@@ -22,7 +22,11 @@ import {
 } from '#lib/server/services/access.js';
 import { assertProductNameFree } from '#lib/server/services/product-name.js';
 import { tagAllocator } from '#lib/server/services/tag-counter.js';
-import { assetsWithSerial, kitHoldingTag } from '#lib/server/services/asset-lookup.js';
+import {
+	assetsWithSerial,
+	bundleCaseOf,
+	kitHoldingTag
+} from '#lib/server/services/asset-lookup.js';
 import { logCatalogChange } from '#lib/server/services/catalog-log.js';
 import {
 	ACTIVE_ASSET_WHERE,
@@ -31,6 +35,7 @@ import {
 	isRetiredStatus,
 	RETIRED_ASSET_WHERE
 } from '#lib/asset-status.js';
+import { bundleCaseUnit, bundleNumber, extraCases } from '#lib/bundle-case.js';
 import { syncAccessories } from '#lib/server/services/accessories.js';
 import {
 	addToBundle,
@@ -285,7 +290,12 @@ export const getAsset = query(v.string(), async (assetId: string) => {
 	}
 
 	assetImageForRead(asset);
-	return assetWithCableNames(asset);
+	// A container in a bundle is that bundle's case — its tag is the kit's number.
+	const isBundleCase =
+		asset.product.isContainer && asset.bundleId !== null
+			? (await bundleCaseOf(asset.bundleId))?.id === asset.id
+			: false;
+	return { ...assetWithCableNames(asset), isBundleCase };
 });
 
 export const getInventorySummary = query(
@@ -1998,6 +2008,8 @@ const updateProductSchema = v.object({
 	isLicense: v.optional(v.boolean()),
 	/** Its units are never swapped for one another — see services/unit-swap.ts. */
 	notInterchangeable: v.optional(v.boolean()),
+	/** Its units are pack cases — see "Pack cases" in CLAUDE.md. */
+	isContainer: v.optional(v.boolean()),
 	/** What the team calls it, and the longer notes. `''` clears either. */
 	caption: v.optional(v.string()),
 	details: v.optional(v.string())
@@ -2626,10 +2638,24 @@ export const getBundle = query(v.string(), async (id: string) => {
 	// apart from one whose price this user may not see.
 	const pricesVisible = await readsOrgRecords(user.id, bundle.template.organizationId);
 	const withCheckedOutTo = checkedOutTo(await productionVisibility(user.id));
+	// Its case: the container unit in it, whose tag is the kit's number when it
+	// has none of its own (#lib/bundle-case.ts).
+	const cases = bundle.assets
+		.filter((a) => !isRetiredStatus(a.status))
+		.map((a) => ({
+			id: a.id,
+			assetTag: a.assetTag,
+			orgIndex: a.orgIndex,
+			isContainer: a.product.isContainer
+		}));
+	const caseUnit = bundleCaseUnit(cases);
 	return {
 		...(pricesVisible ? bundle : { ...bundle, netPurchasePrice: null }),
 		assets: bundle.assets.map((asset) => withCheckedOutTo(withProductCableNames(asset))),
-		pricesVisible
+		pricesVisible,
+		caseUnitId: caseUnit?.id ?? null,
+		number: bundleNumber(bundle, caseUnit),
+		extraCases: extraCases(cases)
 	};
 });
 

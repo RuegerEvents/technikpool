@@ -4,6 +4,7 @@
 
 import 'package:json_annotation/json_annotation.dart';
 
+import 'pack_case.dart';
 import 'production_check_group.dart';
 
 part 'production_list_line.g.dart';
@@ -22,6 +23,7 @@ class ProductionListLine {
     required this.done,
     required this.floor,
     this.productImageUrl,
+    this.packCase,
   });
   
   factory ProductionListLine.fromJson(Map<String, Object?> json) => _$ProductionListLineFromJson(json);
@@ -45,6 +47,12 @@ class ProductionListLine {
 
   /// The lowest count the caller can set — what others ticked stays.
   final int floor;
+
+  /// The pack case these units are in. A line splits when only some of.
+  /// its units go into a case: those are a line of their own under it.
+  /// Not required, so an older client keeps compiling.
+  ///
+  final PackCase? packCase;
 
   Map<String, Object?> toJson() => _$ProductionListLineToJson(this);
 }

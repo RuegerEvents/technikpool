@@ -322,6 +322,10 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return 'The rental terms cannot be empty. Switch them off instead.';
 		case 'booking_not_pending':
 			return 'This request is no longer open — it was withdrawn or has already been answered.';
+		case 'pack_not_a_case':
+			return 'That is no pack case on this production — scan or pick a case that is booked here.';
+		case 'pack_circle':
+			return 'A case cannot go into itself or into something packed inside it.';
 		case 'booking_not_approved':
 			return `${p0} is not booked and approved on this production — only the production’s own organization can add it.`;
 

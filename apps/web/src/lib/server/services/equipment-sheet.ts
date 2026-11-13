@@ -9,6 +9,8 @@ import { customerRecipient, orgLabel } from '#lib/utils.js';
 import { ACTIVE_ASSET_WHERE, BOOKABLE_ASSET_WHERE } from '#lib/asset-status.js';
 import { ROLE_FOR } from '#lib/roles.js';
 import { compareGroups, groupKey, type ListGroup } from '#lib/production-list.js';
+import { caseNumber, caseTitle, compareCases, type ListCase } from '#lib/pack-cases.js';
+import { loadPacking } from './production-list';
 import {
 	assetImageIsStale,
 	bundleImageIsStale,
@@ -98,6 +100,8 @@ type Production = Awaited<ReturnType<typeof loadProduction>>;
  * org's list the kit it is in.
  */
 type Unit = {
+	/** The production item, for the pack case it is in; absent on an org's list. */
+	id?: string;
 	assetId: string;
 	sourceBundleId: string | null;
 	asset: Prisma.AssetGetPayload<{ include: typeof ASSET_INCLUDE }>;
@@ -245,6 +249,8 @@ async function pricingFor(organizationId: string): Promise<Pricing> {
 
 type PendingLine = EquipmentSheetLine & {
 	group: ListGroup;
+	/** The pack case the line's units travel in; such lines are listed under it. */
+	packCase: ListCase | null;
 	/** Every unit on the line, accessories and kit members included, for its proof of inspection. */
 	units: Unit['asset'][];
 	image: () => Promise<string | null>;
@@ -267,7 +273,16 @@ async function sheetGroups(
 	items: Unit[],
 	grouping: Grouping,
 	report: ReportProgress,
-	{ pricing = null, identifiers = true }: { pricing?: Pricing | null; identifiers?: boolean } = {}
+	{
+		pricing = null,
+		identifiers = true,
+		caseOf = () => null
+	}: {
+		pricing?: Pricing | null;
+		identifiers?: boolean;
+		/** On a production: the pack case a unit is listed under — see #lib/pack-cases.ts. */
+		caseOf?: (item: Unit) => ListCase | null;
+	} = {}
 ): Promise<EquipmentSheetGroup[]> {
 	const bookedIds = new Set(items.map((item) => item.assetId));
 	const accessoriesOf = new Map<string, Unit[]>();
@@ -296,7 +311,11 @@ async function sheetGroups(
 		line.units.push(...units);
 	};
 
-	const bundles = new Map<string, { bundle: Bundle; items: Unit[] }>();
+	// A section is a pack case, or for what is loose the grouping's own.
+	const sectionKey = (packCase: ListCase | null, group: ListGroup) =>
+		packCase ? `case:${packCase.assetId}` : groupKey(group);
+
+	const bundles = new Map<string, { bundle: Bundle; items: Unit[]; packCase: ListCase | null }>();
 	for (const item of loose) {
 		// Booking source, not current membership, and only while the unit is
 		// still in that bundle — the same rule billing uses for a kit line. A
@@ -306,10 +325,13 @@ async function sheetGroups(
 				? item.asset.bundle
 				: (item.asset.bundle?.parentBundle ?? null)
 			: null;
+		const packCase = caseOf(item);
 		if (bundle) {
-			const entry = bundles.get(bundle.id) ?? { bundle, items: [] };
+			// A kit split over two cases is a line in each.
+			const key = `${bundle.id}|${packCase?.assetId ?? ''}`;
+			const entry = bundles.get(key) ?? { bundle, items: [], packCase };
 			entry.items.push(item);
-			bundles.set(bundle.id, entry);
+			bundles.set(key, entry);
 			continue;
 		}
 		const asset = item.asset;
@@ -319,9 +341,10 @@ async function sheetGroups(
 			: null;
 		const group = grouping.ofUnit(item);
 		add(
-			`${groupKey(group)}|product:${asset.productId}|${inkl ?? ''}`,
+			`${sectionKey(packCase, group)}|product:${asset.productId}|${inkl ?? ''}`,
 			() => ({
 				group,
+				packCase,
 				units: [],
 				label: productLabel(asset.product),
 				subtitle: inkl,
@@ -337,13 +360,14 @@ async function sheetGroups(
 			[asset, ...accessories.map((a) => a.asset)]
 		);
 	}
-	for (const { bundle, items: bundleItems } of bundles.values()) {
+	for (const { bundle, items: bundleItems, packCase } of bundles.values()) {
 		const contents = kitContents(bundle.id, bundleItems, contentsOf);
 		const group = grouping.ofBundle(bundle, bundleItems[0]);
 		add(
-			`${groupKey(group)}|bundle:${bundle.templateId}|${contents}`,
+			`${sectionKey(packCase, group)}|bundle:${bundle.templateId}|${contents}`,
 			() => ({
 				group,
+				packCase,
 				units: [],
 				label: bundle.template.name,
 				subtitle: contents,
@@ -376,9 +400,13 @@ async function sheetGroups(
 		})
 	);
 
-	const groups = new Map<string, { group: ListGroup; lines: EquipmentSheetLine[] }>();
+	const groups = new Map<
+		string,
+		{ group: ListGroup; packCase: ListCase | null; lines: EquipmentSheetLine[] }
+	>();
 	for (const {
 		group,
+		packCase,
 		label,
 		subtitle,
 		identifiers,
@@ -387,8 +415,8 @@ async function sheetGroups(
 		imagePath,
 		units
 	} of lines.values()) {
-		const key = groupKey(group);
-		if (!groups.has(key)) groups.set(key, { group, lines: [] });
+		const key = sectionKey(packCase, group);
+		if (!groups.has(key)) groups.set(key, { group, packCase, lines: [] });
 		groups.get(key)!.lines.push({
 			label,
 			subtitle,
@@ -399,15 +427,37 @@ async function sheetGroups(
 			inspection: inspectionProof(units)
 		});
 	}
+	// Cases first, a case inside another right after it; then what is loose,
+	// as the sheet always listed it — and said to be loose once there are cases.
+	const anyCase = [...groups.values()].some((g) => g.packCase);
 	return [...groups.values()]
-		.sort((a, b) => compareGroups(a.group, b.group))
-		.map(({ group, lines }) => ({
-			name: grouping.title(group),
+		.sort((a, b) =>
+			a.packCase && b.packCase
+				? compareCases(a.packCase, b.packCase)
+				: a.packCase
+					? -1
+					: b.packCase
+						? 1
+						: compareGroups(a.group, b.group)
+		)
+		.map(({ group, packCase, lines }) => ({
+			name: packCase
+				? sheetCaseTitle(packCase)
+				: anyCase
+					? `Lose · ${grouping.title(group)}`
+					: grouping.title(group),
+			depth: packCase?.path.length ?? 0,
 			lines: lines.sort(
 				(a, b) =>
 					naturalCompare(a.label, b.label) || naturalCompare(a.subtitle ?? '', b.subtitle ?? '')
 			)
 		}));
+}
+
+/** "Kiste 5 (Transflex 60×40) · in Kiste 3" — German, like the sheet. */
+function sheetCaseTitle(c: ListCase) {
+	const outer = c.path.at(-1);
+	return `Kiste ${caseTitle(c)}${outer ? ` · in Kiste ${caseNumber(outer)}` : ''}`;
 }
 
 /**
@@ -512,7 +562,9 @@ async function deliveryNoteSheet(
 		checkLabel: 'Geprüft',
 		prices: false,
 		empty: 'Dieser Produktion ist noch keine Ausrüstung zugeordnet.',
-		groups: await sheetGroups(production.items, byCategory, report),
+		groups: await sheetGroups(production.items, byCategory, report, {
+			caseOf: await productionCaseOf(productionId)
+		}),
 		// Hand-over: the note travels with the goods and is signed on both sides.
 		// With rental terms, the signature confirms receipt under them (their
 		// § 4); without, the note says in a sentence what they would have.
@@ -565,10 +617,18 @@ async function packingListSheet(
 		checkLabel: 'Gepackt',
 		prices: false,
 		empty: 'Für diese Produktion ist nichts zu packen.',
-		groups: await sheetGroups(items, byShelf(owner.id), report),
+		groups: await sheetGroups(items, byShelf(owner.id), report, {
+			caseOf: await productionCaseOf(productionId)
+		}),
 		closing: [],
 		signatures: ['Gepackt', 'Geprüft']
 	};
+}
+
+/** Which pack case a production's item is listed under. */
+async function productionCaseOf(productionId: string) {
+	const packing = await loadPacking(productionId);
+	return (item: Unit) => (item.id ? packing.caseOf({ id: item.id }) : null);
 }
 
 const FILE_PREFIX: Record<SheetKind, string> = {

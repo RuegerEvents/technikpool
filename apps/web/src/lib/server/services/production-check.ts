@@ -15,14 +15,17 @@ import {
 } from './access';
 import { kitByTag, resolveScannedCode } from './asset-lookup';
 import { inKit as isInKit } from '#lib/bundle-nesting.js';
+import { isPackCaseUnit } from '#lib/pack-cases.js';
 import type { ScanGroup, ScanGroupUnit, ScanKit } from './checkout';
 import {
 	buildLines,
 	groupOf,
 	kitOf,
 	listItems,
+	loadPacking,
 	nestAndSort,
 	pickForCount,
+	type ListCase,
 	type ListGroup,
 	type ListKit,
 	type ListLine,
@@ -119,6 +122,9 @@ export interface ProductionCheckItem {
 	received: boolean;
 	returnReported: boolean;
 	tick: { userName: string; mine: boolean; via: 'scan' | 'manual'; at: Date } | null;
+	/** The pack case it is listed under, as on the handout list. Null: loose. */
+	packCase: ListCase | null;
+	isPackCase: boolean;
 }
 
 export type CheckGroup = ListGroup;
@@ -290,7 +296,7 @@ export async function getProductionCheck(
 	checkId: string
 ): Promise<ProductionCheckView> {
 	const { check, side } = await loadCheck(userId, checkId);
-	const [listed, ticks] = await Promise.all([
+	const [listed, ticks, packing] = await Promise.all([
 		listedItems(check.productionId, side),
 		prisma.productionCheckTick.findMany({
 			where: { checkId },
@@ -303,7 +309,8 @@ export async function getProductionCheck(
 					}
 				}
 			}
-		})
+		}),
+		loadPacking(check.productionId)
 	]);
 	const tickOf = new Map(ticks.map((t) => [t.assetId, t]));
 	const listedIds = new Set(listed.map((i) => i.assetId));
@@ -334,7 +341,9 @@ export async function getProductionCheck(
 							via: tick.via as 'scan' | 'manual',
 							at: tick.createdAt
 						}
-					: null
+					: null,
+				packCase: packing.caseOf(item),
+				isPackCase: isPackCaseUnit(item.asset)
 			};
 		})
 	);
@@ -367,10 +376,16 @@ export async function getProductionCheck(
 		closedAt: check.closedAt,
 		closedBy: check.closedBy ? userLabel(check.closedBy) : null,
 		items,
-		lines: buildLines(listed, productionOrgId, side.own, (item) => {
-			const t = tickOf.get(item.assetId);
-			return { done: !!t, undoable: !t || t.userId === userId };
-		}),
+		lines: buildLines(
+			listed,
+			productionOrgId,
+			side.own,
+			(item) => {
+				const t = tickOf.get(item.assetId);
+				return { done: !!t, undoable: !t || t.userId === userId };
+			},
+			packing
+		),
 		unexpected,
 		canConfirmReceipt:
 			borrower && check.status === 'OPEN'
@@ -459,6 +474,9 @@ export async function scanIntoCheck(
 	const { check, side } = await loadCheck(userId, checkId);
 	requireOpen(check);
 
+	// A kit's number — its own tag or its case's — ticks the whole kit.
+	const kit = await kitByTag(code);
+	if (kit) return await tickKit(userId, checkId, check.productionId, side, kit);
 	const match = await resolveScannedCode(userId, code);
 	if (match.kind === 'ambiguous') {
 		throw new ProductionCheckError(
@@ -468,8 +486,6 @@ export async function scanIntoCheck(
 		);
 	}
 	if (match.kind === 'not_found') {
-		const kit = await kitByTag(code);
-		if (kit) return await tickKit(userId, checkId, check.productionId, side, kit);
 		throw new ProductionCheckError('asset_not_found', `Tag "${code}" not found`, code);
 	}
 
@@ -632,20 +648,25 @@ export async function setCheckLineCount(
 ) {
 	const { check, side } = await loadCheck(userId, checkId);
 	requireOpen(check);
-	const [listed, ticks] = await Promise.all([
+	const [listed, ticks, packing] = await Promise.all([
 		listedItems(check.productionId, side),
 		prisma.productionCheckTick.findMany({
 			where: { checkId },
 			select: { assetId: true, userId: true }
-		})
+		}),
+		loadPacking(check.productionId)
 	]);
 	const tickOf = new Map(ticks.map((t) => [t.assetId, t]));
 	const state = (assetId: string) => {
 		const t = tickOf.get(assetId);
 		return { done: !!t, undoable: !t || t.userId === userId };
 	};
-	const line = buildLines(listed, check.production.organizationId, side.own, (item) =>
-		state(item.assetId)
+	const line = buildLines(
+		listed,
+		check.production.organizationId,
+		side.own,
+		(item) => state(item.assetId),
+		packing
 	).find((l) => l.key === key);
 	if (!line) return { done: 0 };
 

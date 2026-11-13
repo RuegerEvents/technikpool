@@ -598,6 +598,16 @@ model Product {
   /// Identity like the name: answers to productControl and is logged.
   notInterchangeable Boolean @default(false)
 
+  /// Its units are containers (Behälter): a box things travel in. What one
+  /// means depends on where the unit is. Inside a fixed bundle it is that
+  /// bundle's case, and its tag is the bundle's number — scanning it means the
+  /// whole kit, wherever the bundle's own tag would (see #lib/bundle-case.ts).
+  /// In no bundle it is a pack case: during one production it holds what was
+  /// packed into it (ProductionItem.packedInItemId). See "Containers and pack
+  /// cases" in CLAUDE.md. Identity like the name: answers to productControl
+  /// and is logged.
+  isContainer Boolean @default(false)
+
   /// Per inspection type, whether this product's units need it: a row
   /// overrides the category's default (CategoryInspectionType), no row follows it.
   inspectionTypes        ProductInspectionType[]
@@ -987,7 +997,18 @@ model ProductionItem {
   // invoice to the borrower and costs the borrower nothing.
   freeOfCharge  Boolean      @default(false)
 
+  // The pack case this unit travels in on this production: the booking of a
+  // unit whose product is a pack container (Product.isContainer), on the
+  // same production. On the booking, not the unit, because a case holds
+  // contents only for one production. Cases nest without depth limit but
+  // never in a circle (#lib/pack-cases.ts). Cleared when the unit comes back
+  // or its checkout is undone; a deleted case's contents become loose.
+  packedInItemId String?
+  packedIn       ProductionItem?  @relation("PackedIn", fields: [packedInItemId], references: [id], onDelete: SetNull)
+  packedItems    ProductionItem[] @relation("PackedIn")
+
   @@unique([productionId, assetId])
+  @@index([packedInItemId])
 }
 
 // Another org's units are first noted on a production as DRAFT, a list that

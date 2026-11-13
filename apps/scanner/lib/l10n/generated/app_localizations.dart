@@ -2880,6 +2880,168 @@ abstract class S {
   /// In en, this message translates to:
   /// **'With {partner}, now loose'**
   String historySwapLoose(String partner);
+
+  /// No description provided for @packCase.
+  ///
+  /// In en, this message translates to:
+  /// **'Case {title}'**
+  String packCase(String title);
+
+  /// No description provided for @packCaseInside.
+  ///
+  /// In en, this message translates to:
+  /// **'in case {number}'**
+  String packCaseInside(String number);
+
+  /// No description provided for @packCaseOpenNote.
+  ///
+  /// In en, this message translates to:
+  /// **'open'**
+  String get packCaseOpenNote;
+
+  /// No description provided for @packLoose.
+  ///
+  /// In en, this message translates to:
+  /// **'Loose'**
+  String get packLoose;
+
+  /// No description provided for @packOpenBanner.
+  ///
+  /// In en, this message translates to:
+  /// **'Packing into case {title}'**
+  String packOpenBanner(String title);
+
+  /// No description provided for @packOpenHint.
+  ///
+  /// In en, this message translates to:
+  /// **'What you scan goes into it and out with it. Scan another case to switch.'**
+  String get packOpenHint;
+
+  /// No description provided for @packClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close case'**
+  String get packClose;
+
+  /// No description provided for @packOpen.
+  ///
+  /// In en, this message translates to:
+  /// **'Pack into this case'**
+  String get packOpen;
+
+  /// No description provided for @packOpened.
+  ///
+  /// In en, this message translates to:
+  /// **'Case {title} is open'**
+  String packOpened(String title);
+
+  /// No description provided for @packScanNext.
+  ///
+  /// In en, this message translates to:
+  /// **'What you scan now goes into it.'**
+  String get packScanNext;
+
+  /// No description provided for @packChoiceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Another case'**
+  String get packChoiceTitle;
+
+  /// No description provided for @packChoiceQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Case {open} is open. Does case {scanned} go into it, or do you want to pack case {scanned} now?'**
+  String packChoiceQuestion(String open, String scanned);
+
+  /// No description provided for @packChoiceInto.
+  ///
+  /// In en, this message translates to:
+  /// **'Put it in'**
+  String get packChoiceInto;
+
+  /// No description provided for @packChoiceSwitch.
+  ///
+  /// In en, this message translates to:
+  /// **'Open it instead'**
+  String get packChoiceSwitch;
+
+  /// No description provided for @packNested.
+  ///
+  /// In en, this message translates to:
+  /// **'Case {inner} is in case {outer}'**
+  String packNested(String inner, String outer);
+
+  /// No description provided for @packInto.
+  ///
+  /// In en, this message translates to:
+  /// **'Into case {number}'**
+  String packInto(String number);
+
+  /// No description provided for @packTakeOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Take out of case {number}'**
+  String packTakeOut(String number);
+
+  /// No description provided for @packReturned.
+  ///
+  /// In en, this message translates to:
+  /// **'Returned: case {title}'**
+  String packReturned(String title);
+
+  /// No description provided for @packReturnedQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'The case is back. Is all of this back in it? Untick what is missing; it stays out.'**
+  String get packReturnedQuestion;
+
+  /// No description provided for @packNothingElse.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing else is in it.'**
+  String get packNothingElse;
+
+  /// No description provided for @packStaysOut.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 entry stays out} other{{count} entries stay out}}'**
+  String packStaysOut(int count);
+
+  /// No description provided for @packAllBack.
+  ///
+  /// In en, this message translates to:
+  /// **'Everything in it is back.'**
+  String get packAllBack;
+
+  /// No description provided for @errorNotAPackCase.
+  ///
+  /// In en, this message translates to:
+  /// **'That is no pack case on this production.'**
+  String get errorNotAPackCase;
+
+  /// No description provided for @errorPackCircle.
+  ///
+  /// In en, this message translates to:
+  /// **'A case cannot go into itself or into something packed inside it.'**
+  String get errorPackCircle;
+
+  /// No description provided for @bundleNumberFromCase.
+  ///
+  /// In en, this message translates to:
+  /// **'Number: {number}'**
+  String bundleNumberFromCase(String number);
+
+  /// No description provided for @bundleExtraCases.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 more container in it — the lowest unit number is its case} other{{count} more containers in it — the lowest unit number is its case}}'**
+  String bundleExtraCases(int count);
+
+  /// No description provided for @caseOfKit.
+  ///
+  /// In en, this message translates to:
+  /// **'Case of {kit}'**
+  String caseOfKit(String kit);
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

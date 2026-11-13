@@ -80,7 +80,7 @@ async function requireAuth() {
 | `src/lib/remote/stocktakes.remote.ts`         | `getStocktakes`, `getStocktake`, `getStocktakePreview`, `createStocktake`, `scanStocktakeCode`, `tickStocktake`, `setStocktakeCount`, `closeStocktake`, `applyStocktakeAction`, `recountStocktake` …                                      |
 | `src/lib/remote/legal.remote.ts`              | `getLegalSettings`, `saveLegalDocument`, `getDpaOverview`, `acceptDpa` — the operator's legal texts and each org's acceptance of the AVV                                                                                                  |
 | `src/lib/remote/production-checks.remote.ts`  | `getProductionChecks`, `getProductionCheck`, `startProductionCheck`, `scanProductionCheck`, `tickProductionCheck`, `closeCheck`, `confirmCheckReceipt`, `reportCheckReturn`, `getHandoverTodos` — see "Loans: handover and checks"        |
-| `src/lib/remote/production-handout.remote.ts` | `getProductionHandout`, `getHandoutSummary`, `scanProductionHandout`, `setProductionHandoutDone`, `setProductionHandoutLine` — handing out / taking back against the list, see "Loans: handover and checks"                               |
+| `src/lib/remote/production-handout.remote.ts` | `getProductionHandout`, `getHandoutSummary`, `scanProductionHandout`, `setProductionHandoutDone`, `setProductionHandoutLine`, `packProductionCase` — see "Loans" and "Pack cases"                                                         |
 | `src/lib/remote/equipment-sheets.remote.ts`   | `streamEquipmentSheet` — a `query.live` that yields progress, then the delivery note or packing list PDF; see "Delivery note and packing list"                                                                                            |
 | `src/lib/remote/product-documents.remote.ts`  | `getProductDocuments`, `addProductDocument`, `updateProductDocument`, `removeProductDocument` — a product's PDFs, public by design (see `services/product-documents.ts`)                                                                  |
 | `src/lib/remote/rental-terms.remote.ts`       | `getRentalTerms`, `saveRentalTerms`, `setRentalTermsEnabled`, `getLoanRentalTerms` — an org's rental terms (Miet-AGB), see "Rental terms"                                                                                                 |
@@ -325,6 +325,49 @@ for a kit's sticker or in a stocktake (`CheckoutOptions.swap: false`).
   two overlapping bookings (`swapBookingClash`).
 - **Case check**: only a unit the case still lacks (not ticked, not away), only for `canRecord`.
 
+## Containers and pack cases (Behälter, Pack-Kisten)
+
+`Product.isContainer` ("Behälter") marks a box things travel in, edited like the other product
+fields (`productControl`, catalog log, `PATCH /api/v1/products/{id}`). What a container unit means
+depends on where it is:
+
+- **In a fixed bundle it is that bundle's case** (the Flyht Pro WP Safe Box of the Command Wing
+  kit), and **its tag is the bundle's number**: `kitByTag` / `bundleByCode` in
+  `services/asset-lookup.ts` resolve it to the kit, and every scan path asks them _before_ taking a
+  code for a unit — handout, take-back, production check, case check, stocktake, bundle scan-into.
+  Booking only the empty case means taking it out of the bundle first; there is no prompt. A bundle
+  with its own `AssetBundle.tag` keeps it (both codes work, the label prints the own tag); one with
+  neither has no code (DMX rings). Of two containers the lowest unit number is the case
+  (`bundleCaseUnit`, pure in `#lib/bundle-case.ts`); the bundle page hints at the other. Shown as
+  "Number: …" on the bundle pages and "Case of …" on the unit's.
+- **In no bundle it is a pack case** (Transflex crate, `isPackCaseUnit` in `#lib/pack-cases.ts`).
+  It holds contents only during one production, so the assignment is on the booking:
+  `ProductionItem.packedInItemId` points at the case's own `ProductionItem` on the same production
+  (a self-relation, `SetNull` when the case's booking goes). Cases nest without depth limit but
+  never in a circle (`packRefusal`). A fixed bundle may go into a pack case as a whole.
+
+**Packing happens on the handout list** (web and scanner). Opening a case is the client's state, not
+the production's (two people pack two cases): a scan carries the open case
+(`HandoutScanRequest.packInto`); scanning a case answers `ScanResult.packCase`, and with another case
+open the client asks "into it, or open instead?". By hand, `packIntoCase`
+(`POST /api/v1/productions/{id}/packing`) puts units, part of a counted line or whole kits in, or
+with `caseAssetId: null` takes them out. **Packed is handed out**: what goes in, and the case, is
+checked out (even unbooked — the ordinary `performScan` path books own-side units).
+
+- **Lists group by case.** Items and lines carry `packCase` (the case they are listed under — its own
+  for a case — with `path`, the cases around it). `listSections` (web, `#lib/production-list.ts`) and
+  `_sections` (scanner) put a section per case first, nested, headed by the case's own row, then
+  "Loose" in the old sections; check lists too. A counted line's key carries its case, so packing
+  part of one splits it (`pickToPack`: units already out first). Delivery note and packing list group
+  the same way ("Kiste 3 (Transflex 60×40) · in Kiste 1", then "Lose · …").
+- **Take-back**: a case scanned is booked back and its remaining contents (inner cases' too) are
+  offered as a checklist; what is unticked stays out. A unit coming back (or its checkout undone)
+  clears its `packedInItemId`, so a case is empty once all is back.
+- **Label**: `GET /api/v1/productions/{id}/packing/{caseAssetId}/label` — "Kiste 3", the production
+  and the case's product, its contents (an inner case or kit as one line), through the case label's
+  renderer. The scanner prints it from the case heading's ⋮ or the open-case banner.
+- **Billing** is unchanged: a case is a unit, and is billed if its product has a price.
+
 ## Case labels (Kistenetikett)
 
 A kit, or a unit with its accessories (the same "case" as Kiste checken), gets a label for its
@@ -337,7 +380,9 @@ accessories under them read "je 1× … insg. 4×" where every unit carries the 
 never tearing a unit from its accessories
 when the block fits on a label of its own. Rendered as **ZPL** for a 203 dpi printer (a Honeywell PC42E-T in
 its ZPL emulation, ZSim) by `src/lib/server/case-label-zpl.ts`; the logo becomes a 1-bit `^GFA`
-in `case-label-logo.ts`. Two rolls: `large` 4×6″ and `small` 80×55 mm (`LABEL_SIZES`).
+in `case-label-logo.ts`. Two rolls: `large` 4×6″ and `small` 80×55 mm (`LABEL_SIZES`). A kit's code is its own tag, else its case's
+(the container in it, `bundleNumber`); a pack case's per-production label goes through the same
+renderer (see "Containers and pack cases").
 
 **Only the scanner prints**, because the server runs where the warehouse network cannot be
 reached. `GET /api/v1/case-checks/{kind}/{id}/label` hands over the ZPL, and the app writes it

@@ -66,7 +66,9 @@ const ERROR_CODES: Record<CheckoutError['code'], AppErrorCode> = {
 	asset_retired: 'asset_retired_no_booking',
 	asset_unavailable: 'asset_unavailable_no_booking',
 	production_cancelled: 'production_cancelled',
-	not_approved: 'booking_not_approved'
+	not_approved: 'booking_not_approved',
+	not_a_pack_case: 'pack_not_a_case',
+	pack_circle: 'pack_circle'
 };
 
 const STATUS_BY_CODE: Record<CheckoutError['code'], number> = {
@@ -77,7 +79,9 @@ const STATUS_BY_CODE: Record<CheckoutError['code'], number> = {
 	asset_retired: 409,
 	asset_unavailable: 409,
 	production_cancelled: 409,
-	not_approved: 409
+	not_approved: 409,
+	not_a_pack_case: 409,
+	pack_circle: 409
 };
 
 export async function withCheckoutErrors<T>(fn: () => Promise<T>): Promise<T> {

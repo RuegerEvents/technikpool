@@ -28,6 +28,10 @@ BundleDetail _$BundleDetailFromJson(Map<String, dynamic> json) => BundleDetail(
       .map((e) => InnerBundle.fromJson(e as Map<String, dynamic>))
       .toList(),
   canEdit: json['canEdit'] as bool,
+  caseUnitId: json['caseUnitId'] as String?,
+  number: json['number'] as String?,
+  numberFromCase: json['numberFromCase'] as bool?,
+  extraCases: (json['extraCases'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$BundleDetailToJson(BundleDetail instance) =>
@@ -45,4 +49,8 @@ Map<String, dynamic> _$BundleDetailToJson(BundleDetail instance) =>
       'units': instance.units,
       'innerBundles': instance.innerBundles,
       'canEdit': instance.canEdit,
+      'caseUnitId': ?instance.caseUnitId,
+      'number': ?instance.number,
+      'numberFromCase': ?instance.numberFromCase,
+      'extraCases': ?instance.extraCases,
     };

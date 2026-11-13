@@ -19,6 +19,7 @@ class ProductUpdateRequest {
     this.categoryId,
     this.isLicense,
     this.notInterchangeable,
+    this.isContainer,
     this.requiresInspection,
     this.inspections,
     this.cable,
@@ -47,6 +48,12 @@ class ProductUpdateRequest {
   /// that belongs to exactly one camera. Identity like the name.
   ///
   final bool? notInterchangeable;
+
+  /// `true` makes its units containers: a bundle's case inside a.
+  /// bundle, a pack case outside one (see `CatalogProduct`). Identity.
+  /// like the name.
+  ///
+  final bool? isContainer;
 
   /// The electrical type. Null follows the category again.
   final bool? requiresInspection;
