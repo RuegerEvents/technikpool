@@ -8,11 +8,19 @@
 // version and checked against the SHA-256 the manifest lists for every chunk.
 // Idempotent: a chunk already on disk with the right hash is skipped.
 //
+// The chunks are named by their hash and have no extension, so adapter-node
+// served them without a Content-Type, and a reverse proxy that compresses
+// "everything not excluded" (Traefik's compress middleware) gzipped 200 MB of
+// incompressible weights — 16× slower over a real line, until the browser gave
+// up. So each is stored as `<hash>.bin`, which sirv serves as
+// application/octet-stream, and the manifest written here names it that way:
+// imgly fetches `new URL(chunk.name, publicPath)`, nothing else.
+//
 //   node scripts/fetch-imgly-assets.mjs            fails on any error (build)
 //   node scripts/fetch-imgly-assets.mjs --optional warns and exits 0 (dev)
 
 import { createHash } from 'node:crypto';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readdir, readFile, rename, rm, writeFile } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import path from 'node:path';
@@ -56,13 +64,21 @@ async function main() {
 	const chunks = [];
 	for (const key of WANTED) {
 		if (!manifest[key]) throw new Error(`${key} missing from the ${version} manifest`);
-		kept[key] = manifest[key];
-		chunks.push(...manifest[key].chunks);
+		const entry = manifest[key];
+		kept[key] = { ...entry, chunks: entry.chunks.map((c) => ({ ...c, name: `${c.name}.bin` })) };
+		chunks.push(...entry.chunks);
 	}
+
+	// Names of the files this run keeps; anything else in the folder is a
+	// leftover (an older version, or a chunk from before the `.bin` names).
+	const keep = new Set(['resources.json', ...chunks.map((c) => `${c.name}.bin`)]);
 
 	const missing = [];
 	for (const chunk of chunks) {
-		const file = path.join(outDir, chunk.name);
+		const file = path.join(outDir, `${chunk.name}.bin`);
+		const legacy = path.join(outDir, chunk.name);
+		// A checkout fetched before the rename keeps its 200 MB: move, don't refetch.
+		if (!existsSync(file) && existsSync(legacy)) await rename(legacy, file);
 		if (existsSync(file) && sha256(await readFile(file)) === chunk.hash) continue;
 		missing.push(chunk);
 	}
@@ -76,12 +92,16 @@ async function main() {
 			missing.slice(i, i + 6).map(async (chunk) => {
 				const buf = await fetchBuffer(`${base}${chunk.name}`);
 				if (sha256(buf) !== chunk.hash) throw new Error(`${chunk.name}: hash mismatch`);
-				await writeFile(path.join(outDir, chunk.name), buf);
+				await writeFile(path.join(outDir, `${chunk.name}.bin`), buf);
 			})
 		);
 	}
 
 	await writeFile(path.join(outDir, 'resources.json'), JSON.stringify(kept));
+
+	for (const name of await readdir(outDir)) {
+		if (!keep.has(name)) await rm(path.join(outDir, name), { force: true });
+	}
 }
 
 main().catch((err) => {
