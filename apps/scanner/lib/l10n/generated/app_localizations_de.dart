@@ -670,6 +670,21 @@ class SDe extends S {
   String get productModeRegister => 'Neu anlegen';
 
   @override
+  String get productNotInterchangeable => 'Nicht austauschbar';
+
+  @override
+  String get productNotInterchangeableHint =>
+      'Nicht austauschbar: Die Geräte werden bei der Ausgabe und beim Kiste-Checken nie gegeneinander getauscht.';
+
+  @override
+  String get productNotInterchangeableOn =>
+      'Als nicht austauschbar markiert – die Geräte behalten ihren Platz.';
+
+  @override
+  String get productNotInterchangeableOff =>
+      'Wieder austauschbar – ein Gerät, das zur Hand ist, darf den Platz eines anderen einnehmen.';
+
+  @override
   String get productTagHint =>
       'Inventarnummer scannen: sie kommt an das angetippte Gerät, sonst an das nächste ohne Inventarnummer.';
 

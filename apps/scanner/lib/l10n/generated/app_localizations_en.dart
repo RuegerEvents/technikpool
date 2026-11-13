@@ -667,6 +667,21 @@ class SEn extends S {
   String get productModeRegister => 'Register new';
 
   @override
+  String get productNotInterchangeable => 'Not interchangeable';
+
+  @override
+  String get productNotInterchangeableHint =>
+      'Not interchangeable: its units are never swapped for one another when handing out or checking a case.';
+
+  @override
+  String get productNotInterchangeableOn =>
+      'Marked not interchangeable — its units keep their places.';
+
+  @override
+  String get productNotInterchangeableOff =>
+      'Interchangeable again — a unit at hand may take another\'s place.';
+
+  @override
   String get productTagHint =>
       'Scan a sticker: it goes to the unit you tapped, or else to the next one without a tag.';
 

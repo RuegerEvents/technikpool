@@ -1125,6 +1125,22 @@ void main() {
     });
   });
 
+  test('a product can be marked not interchangeable and back', () async {
+    final before = await api.catalog.getProduct(productId: 'prd_demo_xlr');
+    expect(before.notInterchangeable, isFalse);
+    final marked = await api.catalog.updateProduct(
+      productId: 'prd_demo_xlr',
+      body: const ProductUpdateRequest(notInterchangeable: true),
+    );
+    expect(marked.product.notInterchangeable, isTrue);
+    expect((await api.catalog.getProduct(productId: 'prd_demo_xlr')).notInterchangeable, isTrue);
+    final cleared = await api.catalog.updateProduct(
+      productId: 'prd_demo_xlr',
+      body: const ProductUpdateRequest(notInterchangeable: false),
+    );
+    expect(cleared.product.notInterchangeable, isFalse);
+  });
+
   test('counts the inventory by product, with or without kit members', () async {
     final all = await api.inventory.listInventoryProducts();
     final xlr = all.singleWhere((r) => r.product.id == 'prd_demo_xlr');

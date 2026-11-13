@@ -19,14 +19,16 @@ import 'device_new_screen.dart';
 /// giving untagged units their stickers is a mode entered on purpose.
 enum _Mode { view, tag }
 
-enum _MenuAction { assignTags, registerNew }
+enum _MenuAction { assignTags, registerNew, interchangeable }
 
 /// One product's units in one organization. Opens to be looked at; the ⋮
 /// menu holds the two things a scanner is good for here — giving untagged
 /// units the stickers now on them (a mode of this screen, left with the
 /// check mark), and registering new units of the product (the new-device
 /// flow, with this product). Nothing is numbered for either — the tag is
-/// whatever the scan reads.
+/// whatever the scan reads. It also carries the product's one switch that
+/// matters at the shelf: whether its units may be swapped for one another
+/// (`notInterchangeable`, see `ScanSwap`), which is found out while packing.
 class ProductUnitsScreen extends ConsumerStatefulWidget {
   const ProductUnitsScreen({
     super.key,
@@ -63,6 +65,11 @@ class _ProductUnitsScreenState extends ConsumerState<ProductUnitsScreen> {
   /// The last scan's outcome, shown above the list.
   ({bool ok, String text})? _last;
 
+  /// The product's `notInterchangeable`, once read. Null until then, or when
+  /// the catalog could not be asked, which leaves the switch out of the menu.
+  bool? _notInterchangeable;
+  bool _savingInterchangeable = false;
+
   /// One scan after another, never dropped — see SessionScreen._queue.
   Future<void> _queue = Future<void>.value();
   bool _busy = false;
@@ -89,6 +96,16 @@ class _ProductUnitsScreenState extends ConsumerState<ProductUnitsScreen> {
       _loading = true;
       _error = null;
     });
+    // The switch is a side matter: a catalog that cannot be read hides it and
+    // leaves the list alone.
+    unawaited(
+      api.catalog
+          .getProduct(productId: widget.product.id)
+          .then((product) {
+            if (mounted) setState(() => _notInterchangeable = product.notInterchangeable ?? false);
+          })
+          .catchError((Object _) {}),
+    );
     try {
       final page = await api.inventory.listAssets(productId: widget.product.id, limit: 200);
       if (!mounted) return;
@@ -154,6 +171,42 @@ class _ProductUnitsScreenState extends ConsumerState<ProductUnitsScreen> {
     }
     if (!_canEdit(ref.read(currentUserProvider).value)) return;
     _queue = _queue.then((_) => _submit(code.trim()));
+  }
+
+  /// Flips `notInterchangeable`. The server decides who may (`productControl`:
+  /// an ADMIN of every org holding units of it), so a refusal is reported,
+  /// not prevented.
+  Future<void> _toggleInterchangeable() async {
+    final api = ref.read(apiClientProvider);
+    final current = _notInterchangeable;
+    if (api == null || current == null || _savingInterchangeable) return;
+    // Read before the await — see SessionScreen._submit.
+    final l10n = S.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    setState(() => _savingInterchangeable = true);
+    try {
+      final updated = await api.catalog.updateProduct(
+        productId: widget.product.id,
+        body: ProductUpdateRequest(notInterchangeable: !current),
+      );
+      final now = updated.product.notInterchangeable ?? !current;
+      if (mounted) setState(() => _notInterchangeable = now);
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(
+          SnackBar(
+            content: Text(
+              now ? l10n.productNotInterchangeableOn : l10n.productNotInterchangeableOff,
+            ),
+          ),
+        );
+    } catch (error) {
+      messenger
+        ..hideCurrentSnackBar()
+        ..showSnackBar(SnackBar(content: Text(describeError(l10n, error))));
+    } finally {
+      if (mounted) setState(() => _savingInterchangeable = false);
+    }
   }
 
   /// The new-device flow for this product and organization. This screen's
@@ -286,6 +339,7 @@ class _ProductUnitsScreenState extends ConsumerState<ProductUnitsScreen> {
                   _last = null;
                 }),
                 _MenuAction.registerNew => _registerNew(),
+                _MenuAction.interchangeable => _toggleInterchangeable(),
               },
               itemBuilder: (_) => [
                 PopupMenuItem(
@@ -303,6 +357,15 @@ class _ProductUnitsScreenState extends ConsumerState<ProductUnitsScreen> {
                     title: Text(l10n.productModeRegister),
                   ),
                 ),
+                if (_notInterchangeable case final locked?) ...[
+                  const PopupMenuDivider(),
+                  CheckedPopupMenuItem(
+                    value: _MenuAction.interchangeable,
+                    checked: locked,
+                    enabled: !_savingInterchangeable,
+                    child: Text(l10n.productNotInterchangeable),
+                  ),
+                ],
               ],
             ),
         ],
@@ -328,6 +391,23 @@ class _ProductUnitsScreenState extends ConsumerState<ProductUnitsScreen> {
                 style: theme.textTheme.titleSmall,
               ),
             ),
+            if (_notInterchangeable == true)
+              Padding(
+                padding: const EdgeInsets.fromLTRB(16, 4, 16, 4),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.lock_outline, size: 16, color: scheme.onSurfaceVariant),
+                    const SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        l10n.productNotInterchangeableHint,
+                        style: theme.textTheme.bodySmall?.copyWith(color: scheme.onSurfaceVariant),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
             if (_error != null)
               Padding(
                 padding: const EdgeInsets.all(16),

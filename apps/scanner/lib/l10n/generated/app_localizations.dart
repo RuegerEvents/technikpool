@@ -1285,6 +1285,30 @@ abstract class S {
   /// **'Register new'**
   String get productModeRegister;
 
+  /// No description provided for @productNotInterchangeable.
+  ///
+  /// In en, this message translates to:
+  /// **'Not interchangeable'**
+  String get productNotInterchangeable;
+
+  /// No description provided for @productNotInterchangeableHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Not interchangeable: its units are never swapped for one another when handing out or checking a case.'**
+  String get productNotInterchangeableHint;
+
+  /// No description provided for @productNotInterchangeableOn.
+  ///
+  /// In en, this message translates to:
+  /// **'Marked not interchangeable — its units keep their places.'**
+  String get productNotInterchangeableOn;
+
+  /// No description provided for @productNotInterchangeableOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Interchangeable again — a unit at hand may take another\'s place.'**
+  String get productNotInterchangeableOff;
+
   /// No description provided for @productTagHint.
   ///
   /// In en, this message translates to:

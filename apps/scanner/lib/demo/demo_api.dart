@@ -107,6 +107,16 @@ class DemoBackend {
     if (method == 'POST' && path == '/api/v1/products') {
       return _createProduct(options);
     }
+    // ['', 'api', 'v1', 'products', id]
+    if (path.startsWith('/api/v1/products/') && path.split('/').length == 5) {
+      final id = Uri.decodeComponent(path.split('/').last);
+      final product = _catalogue.where((p) => p.id == id).firstOrNull;
+      if (product == null) {
+        return _error(options, 404, 'product_not_found', 'Product not found');
+      }
+      if (method == 'GET') return _ok(options, _catalogProduct(product));
+      if (method == 'PATCH') return _updateProduct(options, product);
+    }
     if (method == 'GET' && path == '/api/v1/manufacturers') {
       return _ok(options, _manufacturers());
     }
@@ -1918,29 +1928,42 @@ class DemoBackend {
     final matches = _catalogue.where((p) => q.isEmpty || _matches(p, q)).toList()
       ..sort((a, b) => naturalCompare(a.name, b.name));
     return CatalogProductPage(
-      items: [
-        for (final p in matches.take(limit))
-          CatalogProduct(
-            id: p.id,
-            name: p.name,
-            manufacturerName: p.manufacturerName,
-            caption: p.caption,
-            category: p.category,
-            imageUrl: p.imageUrl,
-            cable: p.cable,
-            requiresInspection: DemoData.inspectionIntervals.containsKey(p.id),
-            inspectionRequired: DemoData.inspectionIntervals.containsKey(p.id),
-            isLicense: false,
-            mainsConnectors: const [],
-            units: CatalogProductUnits(
-              active: _units.where((a) => a.product.id == p.id).length,
-              tracked: 0,
-              overdue: 0,
-            ),
-          ),
-      ],
+      items: [for (final p in matches.take(limit)) _catalogProduct(p)],
       nextCursor: null,
     );
+  }
+
+  /// Products marked `notInterchangeable` this session; none are to begin with.
+  final _notInterchangeable = <String>{};
+
+  CatalogProduct _catalogProduct(Product p) => CatalogProduct(
+    id: p.id,
+    name: p.name,
+    manufacturerName: p.manufacturerName,
+    caption: p.caption,
+    category: p.category,
+    imageUrl: p.imageUrl,
+    cable: p.cable,
+    requiresInspection: DemoData.inspectionIntervals.containsKey(p.id),
+    inspectionRequired: DemoData.inspectionIntervals.containsKey(p.id),
+    isLicense: false,
+    notInterchangeable: _notInterchangeable.contains(p.id),
+    mainsConnectors: const [],
+    units: CatalogProductUnits(
+      active: _units.where((a) => a.product.id == p.id).length,
+      tracked: 0,
+      overdue: 0,
+    ),
+  );
+
+  /// Only the one switch the app sets; every other field is the web's to edit.
+  Response<dynamic> _updateProduct(RequestOptions options, Product product) {
+    final body = options.data is Map ? options.data as Map : const {};
+    final flag = body['notInterchangeable'];
+    if (flag is bool) {
+      flag ? _notInterchangeable.add(product.id) : _notInterchangeable.remove(product.id);
+    }
+    return _ok(options, ProductUpdated(product: _catalogProduct(product), unitsChanged: 0));
   }
 
   List<Manufacturer> _manufacturers() {
