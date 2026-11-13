@@ -11,6 +11,7 @@ class Error {
   const Error({
     required this.code,
     required this.message,
+    this.params,
   });
   
   factory Error.fromJson(Map<String, Object?> json) => _$ErrorFromJson(json);
@@ -20,6 +21,12 @@ class Error {
 
   /// Human-readable text, safe to show to the operator.
   final String message;
+
+  /// Values a client's own wording of `code` names, by position —.
+  /// the kits of a `kit_*` refusal. Left out where the code needs.
+  /// none.
+  ///
+  final List<String>? params;
 
   Map<String, Object?> toJson() => _$ErrorToJson(this);
 }

@@ -8,8 +8,8 @@ import type { components } from '#lib/api/schema.js';
 export type Schemas = components['schemas'];
 
 /** Every failure on this surface uses the spec's Error envelope. */
-export function apiError(status: number, code: string, message: string) {
-	const body: Schemas['Error'] = { error: { code, message } };
+export function apiError(status: number, code: string, message: string, params?: string[]) {
+	const body: Schemas['Error'] = { error: { code, message, ...(params ? { params } : {}) } };
 	return Response.json(body, { status });
 }
 

@@ -360,6 +360,18 @@ function transactionSwap(data: unknown): Schemas['TransactionSwap'] | null {
 	};
 }
 
+/** The kits of a KIT_REPLACED entry; null for any other. */
+function transactionKitSwap(data: unknown): Schemas['TransactionKitSwap'] | null {
+	const tx = data as TransactionData | null | undefined;
+	if (tx?.type !== 'KIT_REPLACED') return null;
+	return {
+		role: tx.role,
+		kitName: tx.kit.name,
+		otherKitId: tx.otherKit.id,
+		otherKitName: tx.otherKit.name
+	};
+}
+
 export function toAssetTransaction(tx: TransactionRow): Schemas['AssetTransaction'] {
 	return {
 		id: tx.id,
@@ -368,7 +380,8 @@ export function toAssetTransaction(tx: TransactionRow): Schemas['AssetTransactio
 		userName: tx.user?.name ?? tx.user?.email ?? null,
 		productionName: tx.production?.name ?? null,
 		inspection: transactionInspection(tx.data),
-		swap: transactionSwap(tx.data)
+		swap: transactionSwap(tx.data),
+		kitSwap: transactionKitSwap(tx.data)
 	};
 }
 
@@ -521,6 +534,7 @@ export function toScanResult(result: ScanResult): Schemas['ScanResult'] {
 		kit: toScanKit(result.kit),
 		overdueInspections: (result.overdueInspections ?? []).map((o) => ({ ...o })),
 		swap: result.swap ? { ...result.swap } : null,
+		kitSwap: result.kitSwap ? { ...result.kitSwap } : null,
 		packCase: result.packCase ? toPackCaseRef(result.packCase) : null,
 		packedInto: result.packedInto ?? null
 	};

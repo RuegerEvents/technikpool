@@ -11,6 +11,7 @@
 		assetStatusLabel
 	} from '#lib/components/ui/asset-status/index.js';
 	import { toast } from 'svelte-sonner';
+	import { kitSwapNoticeText } from '#lib/swap-notice.svelte.js';
 	import { confirmAction } from '#lib/confirm.svelte.js';
 	import type { Snippet } from 'svelte';
 
@@ -92,6 +93,8 @@
 			toast.success(
 				`${result.count} asset${result.count !== 1 ? 's' : ''} checked out to ${result.targetName}`
 			);
+			// A whole kit picked went out in the place of the booked one of its type.
+			for (const kitSwap of result.kitSwaps) toast.info(kitSwapNoticeText(kitSwap));
 			onClear();
 			targetId = '';
 		} catch (err) {

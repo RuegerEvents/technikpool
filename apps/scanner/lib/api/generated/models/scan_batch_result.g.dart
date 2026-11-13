@@ -13,6 +13,9 @@ ScanBatchResult _$ScanBatchResultFromJson(Map<String, dynamic> json) =>
       swaps: (json['swaps'] as List<dynamic>?)
           ?.map((e) => ScanSwap.fromJson(e as Map<String, dynamic>))
           .toList(),
+      kitSwaps: (json['kitSwaps'] as List<dynamic>?)
+          ?.map((e) => ScanKitSwap.fromJson(e as Map<String, dynamic>))
+          .toList(),
     );
 
 Map<String, dynamic> _$ScanBatchResultToJson(ScanBatchResult instance) =>
@@ -20,4 +23,5 @@ Map<String, dynamic> _$ScanBatchResultToJson(ScanBatchResult instance) =>
       'count': instance.count,
       'targetName': instance.targetName,
       'swaps': ?instance.swaps,
+      'kitSwaps': ?instance.kitSwaps,
     };

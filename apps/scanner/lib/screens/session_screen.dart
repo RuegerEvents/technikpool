@@ -119,6 +119,8 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
             if (returned.isNotEmpty) l10n.returnedFrom(returned.join(', ')),
             // It went out in a linked unit's place, and the two swapped.
             if (result.swap case final swap?) swapNotice(l10n, swap),
+            // A kit's number went out in the booked kit's place.
+            if (result.kitSwap case final swap?) kitSwapNotice(l10n, swap),
           ].join(' · '),
         ),
       );

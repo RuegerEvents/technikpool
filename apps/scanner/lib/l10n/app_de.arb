@@ -490,5 +490,12 @@
   "errorPackCircle": "Eine Kiste kann nicht in sich selbst oder in etwas, das in ihr steckt.",
   "bundleNumberFromCase": "Nummer: {number}",
   "bundleExtraCases": "{count, plural, =1{1 weiterer Behälter darin – die niedrigste Gerätenummer ist seine Kiste} other{{count} weitere Behälter darin – die niedrigste Gerätenummer ist seine Kiste}}",
-  "caseOfKit": "Kiste von {kit}"
+  "caseOfKit": "Kiste von {kit}",
+  "kitSwapIn": "Statt {replaced} · Buchung auf {kit} umgestellt",
+  "actionKitReplaced": "Kit getauscht",
+  "historyKitTookOver": "Buchung von {kit} übernommen",
+  "historyKitReleased": "Stattdessen ging {kit} raus",
+  "errorKitStarted": "{kit} ist schon angefangen – Geräte einzeln scannen.",
+  "errorKitNotInterchangeable": "{kit} ist gebucht, und in {scanned} steckt ein Gerät, das als nicht austauschbar markiert ist – {kit} scannen.",
+  "errorKitUnavailable": "{kit} ist gebucht, und {scanned} ist unterwegs oder für dieselben Tage anderweitig gebucht – {kit} scannen."
 }

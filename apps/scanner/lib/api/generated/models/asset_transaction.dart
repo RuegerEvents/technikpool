@@ -5,6 +5,7 @@
 import 'package:json_annotation/json_annotation.dart';
 
 import 'transaction_inspection.dart';
+import 'transaction_kit_swap.dart';
 import 'transaction_swap.dart';
 
 part 'asset_transaction.g.dart';
@@ -19,6 +20,7 @@ class AssetTransaction {
     this.productionName,
     this.inspection,
     this.swap,
+    this.kitSwap,
   });
   
   factory AssetTransaction.fromJson(Map<String, Object?> json) => _$AssetTransactionFromJson(json);
@@ -44,6 +46,12 @@ class AssetTransaction {
   /// client keeps compiling.
   ///
   final TransactionSwap? swap;
+
+  /// For `KIT_REPLACED`: the kit this unit is in and the other one.
+  /// Null for every other action. Not required, so an older client.
+  /// keeps compiling.
+  ///
+  final TransactionKitSwap? kitSwap;
 
   Map<String, Object?> toJson() => _$AssetTransactionToJson(this);
 }

@@ -40,7 +40,7 @@ export const POST: RequestHandler = ({ locals, request }) =>
 			return apiJson('ScanBatchResult', result);
 		} catch (err) {
 			if (err instanceof CheckoutError) {
-				return apiError(CHECKOUT_ERROR_STATUS[err.code], err.code, err.message);
+				return apiError(CHECKOUT_ERROR_STATUS[err.code], err.code, err.message, err.params);
 			}
 			throw err;
 		}

@@ -20,6 +20,7 @@ import { onProductionSide } from './production-check';
 import { overdueInspections, recordReturnChecks, type OverdueInspection } from './inspections';
 import { bookedWithPlace, seeksSwap } from '#lib/unit-swap.js';
 import { applySwap, loadSwapRows, swapCheck, type SwapNotice, type SwapRow } from './unit-swap';
+import { KitSwapRefused, standInForKit, wholeKitsPicked, type KitSwapNotice } from './kit-swap';
 
 // Scan/checkout behaviour lives here rather than in checkout.remote.ts so the
 // /api/v1 endpoints and the web UI share one implementation. These functions
@@ -69,6 +70,11 @@ export interface ScanResult {
 	 */
 	swap?: SwapNotice | null;
 	/**
+	 * Checking out a kit's number: the kit went out in the place of the booked
+	 * kit of its type, and the booking moved to it — see services/kit-swap.ts.
+	 */
+	kitSwap?: KitSwapNotice | null;
+	/**
 	 * On a production's handout list: the scanned unit is a pack case — handing
 	 * out opens it for packing, taking back asks about what is in it. Its own
 	 * booking went like any unit's. See services/production-handout.ts.
@@ -79,10 +85,13 @@ export interface ScanResult {
 }
 
 /**
- * Whether a unit handed out may swap places with a linked one booked here.
- * Off on take-back and for a kit's sticker, whose units are the kit.
+ * `swap`: whether a unit handed out may swap places with a linked one booked
+ * here. Off on take-back and for a kit's sticker, whose units are the kit.
+ * `kitSwap`: whether a whole kit going out may take the booked kit of its
+ * type's place (services/kit-swap.ts). Follows `swap` unless given, so
+ * take-back never moves a booking.
  */
-export type CheckoutOptions = { swap?: boolean };
+export type CheckoutOptions = { swap?: boolean; kitSwap?: boolean };
 
 export interface ScanKit {
 	id: string;
@@ -150,10 +159,15 @@ export class CheckoutError extends Error {
 			| 'production_cancelled'
 			| 'not_approved'
 			| 'not_a_pack_case'
-			| 'pack_circle',
+			| 'pack_circle'
+			| 'kit_started'
+			| 'kit_not_interchangeable'
+			| 'kit_unavailable',
 		message: string,
 		/** The scanned tag, where there is one — a message naming it is worth more. */
-		readonly assetTag?: string
+		readonly assetTag?: string,
+		/** Values for the message by position, where they are more than the tag. */
+		readonly params?: string[]
 	) {
 		super(message);
 		this.name = 'CheckoutError';
@@ -171,7 +185,10 @@ export const CHECKOUT_ERROR_STATUS: Record<CheckoutError['code'], number> = {
 	production_cancelled: 409,
 	not_approved: 409,
 	not_a_pack_case: 409,
-	pack_circle: 409
+	pack_circle: 409,
+	kit_started: 409,
+	kit_not_interchangeable: 409,
+	kit_unavailable: 409
 };
 
 const RETURNED_FROM_SELECT = {
@@ -565,6 +582,26 @@ async function checkOutInPlaceOf(
 	return null;
 }
 
+/** `standInForKit`, its refusal as this module's error. */
+async function kitStandIn(
+	userId: string,
+	production: { id: string; name: string; startDate: Date | null; endDate: Date | null },
+	kitId: string
+) {
+	try {
+		return await standInForKit(userId, production, kitId);
+	} catch (err) {
+		if (!(err instanceof KitSwapRefused)) throw err;
+		const code =
+			err.reason === 'started'
+				? 'kit_started'
+				: err.reason === 'not_interchangeable'
+					? 'kit_not_interchangeable'
+					: 'kit_unavailable';
+		throw new CheckoutError(code, err.message, undefined, [err.bookedKit, err.scannedKit]);
+	}
+}
+
 /**
  * Nothing is checked out to a cancelled production. Units already out on it
  * still come back through a scan to a location, which never gets here.
@@ -948,11 +985,12 @@ async function performKitScan(
 					include: { production: { select: RETURNED_FROM_SELECT } }
 				})
 			: [];
-	// The kit's own units are the kit: none of them takes another kit's place.
+	// The kit's own units are the kit: none of them takes another unit's
+	// place — the kit as a whole may take the booked kit's.
 	const { result, affected } = await performBulkCheckout(
 		userId,
 		{ ...input, assetIds: ids },
-		{ swap: false }
+		{ swap: false, kitSwap: true }
 	);
 	return {
 		result: {
@@ -962,7 +1000,10 @@ async function performKitScan(
 				returnedFrom: await returnedFromNames(userId, returning)
 			}),
 			...(input.targetType === 'production'
-				? { overdueInspections: await overdueInspections(affected.assetIds) }
+				? {
+						overdueInspections: await overdueInspections(affected.assetIds),
+						kitSwap: result.kitSwaps.find((k) => k.kitId === kit.id) ?? null
+					}
 				: {})
 		},
 		affected
@@ -1114,7 +1155,7 @@ export async function performBulkCheckout(
 	input: BulkCheckoutInput,
 	options: CheckoutOptions = {}
 ): Promise<{
-	result: { count: number; targetName: string; swaps: SwapNotice[] };
+	result: { count: number; targetName: string; swaps: SwapNotice[]; kitSwaps: KitSwapNotice[] };
 	affected: AffectedRecords;
 }> {
 	const [orgIds, systemAdmin] = await Promise.all([writableOrgIds(userId), isSystemAdmin(userId)]);
@@ -1250,12 +1291,30 @@ export async function performBulkCheckout(
 		// where its units are, so a half-moved one reads differently too.
 		mergeAffected(affected, { bundleIds });
 
-		return { result: { count: assets.length, targetName: location.name, swaps: [] }, affected };
+		return {
+			result: { count: assets.length, targetName: location.name, swaps: [], kitSwaps: [] },
+			affected
+		};
 	}
 
 	const production = await prisma.production.findUniqueOrThrow({ where: { id: input.targetId } });
 	const role = await productionCheckoutRole(userId, production, systemAdmin);
 	assertProductionOpen(production);
+
+	// A whole kit going out takes over the booking of the booked one of its
+	// type first, so what follows finds it booked and checks it out.
+	const kitSwaps: KitSwapNotice[] = [];
+	if (options.kitSwap ?? options.swap !== false) {
+		for (const kitId of await wholeKitsPicked(assets, selected)) {
+			const moved = await kitStandIn(userId, production, kitId);
+			if (!moved) continue;
+			kitSwaps.push(moved.notice);
+			mergeAffected(affected, {
+				assetIds: moved.releasedAssetIds,
+				bundleIds: [moved.notice.kitId, moved.notice.replacedKitId]
+			});
+		}
+	}
 
 	const existingItems = await prisma.productionItem.findMany({
 		where: { productionId: input.targetId, assetId: { in: assets.map((a) => a.id) } },
@@ -1335,7 +1394,10 @@ export async function performBulkCheckout(
 
 	mergeAffected(affected, { productionIds: [production.id] });
 
-	return { result: { count: assets.length, targetName: production.name, swaps }, affected };
+	return {
+		result: { count: assets.length, targetName: production.name, swaps, kitSwaps },
+		affected
+	};
 }
 
 /**

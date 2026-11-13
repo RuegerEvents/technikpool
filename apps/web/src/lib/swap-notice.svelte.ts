@@ -15,3 +15,8 @@ export function swapNoticeText(swap: Swap): { title: string; detail: string } {
 			: `${swap.partnerLabel} is now loose`
 	};
 }
+
+/** A whole kit went out in the booked one's place: "Instead of Ring 1 · booking moved to Ring 2". */
+export function kitSwapNoticeText(swap: { replacedKitName: string; kitName: string }): string {
+	return `Instead of ${swap.replacedKitName} · booking moved to ${swap.kitName}`;
+}

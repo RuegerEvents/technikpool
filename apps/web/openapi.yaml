@@ -1163,6 +1163,13 @@ paths:
         `assetTag` also accepts a serial number, on the same terms as
         `getAssetByTag`: the printed tag wins, and a serial resolves only when
         exactly one visible unit carries it.
+
+        A kit's number checked out to a production where another kit of its
+        type is booked takes that kit's booking over (`kitSwap`). Refused with
+        `409 kit_started` when everything booked of the type has begun to go
+        out, and `409 kit_unavailable` when a unit of it is
+        out or booked elsewhere for overlapping days. `params` of the error
+        are the booked kit's and the scanned kit's names.
       requestBody:
         required: true
         content:
@@ -1196,7 +1203,9 @@ paths:
         What follows a scan's `group`: the units picked from it, booked to the
         same target the scan went to. Each unit takes its accessories along, as
         a scan does. A kit's own location only moves when all of it is in the
-        batch.
+        batch. A batch to a production holding a whole kit may take over the
+        booking of the booked kit of its type, as a scan of the kit's number
+        does (`kitSwaps`, and the same `409 kit_*` refusals).
       requestBody:
         required: true
         content:
@@ -1985,6 +1994,9 @@ paths:
         it is kept on, which returns it from the production; one booked here
         and never handed out is checked out first. A unit from elsewhere is
         still put back — `returnedFrom` without this production says so.
+        A kit's number handed out in the place of the booked kit of its type
+        takes that kit's booking over, as `createScan` describes (`kitSwap`,
+        `409 kit_*`). Never taking back.
       parameters:
         - $ref: '#/components/parameters/ProductionId'
         - $ref: '#/components/parameters/HandoutMode'
@@ -2764,6 +2776,14 @@ components:
             message:
               type: string
               description: Human-readable text, safe to show to the operator.
+            params:
+              type: array
+              description: |
+                Values a client's own wording of `code` names, by position —
+                the kits of a `kit_*` refusal. Left out where the code needs
+                none.
+              items:
+                type: string
 
     OAuthError:
       type: object
@@ -3720,6 +3740,33 @@ components:
           oneOf:
             - $ref: '#/components/schemas/TransactionSwap'
             - type: 'null'
+        kitSwap:
+          description: |
+            For `KIT_REPLACED`: the kit this unit is in and the other one.
+            Null for every other action. Not required, so an older client
+            keeps compiling.
+          oneOf:
+            - $ref: '#/components/schemas/TransactionKitSwap'
+            - type: 'null'
+
+    TransactionKitSwap:
+      type: object
+      required: [role, kitName, otherKitId, otherKitName]
+      properties:
+        role:
+          type: string
+          enum: [took_over, released]
+          description: |
+            `took_over`: this unit's kit went out in `otherKit`'s place and
+            took its booking over. `released`: `otherKit` went out instead,
+            and this unit's kit stays home.
+        kitName:
+          type: string
+          description: This unit's kit, with its number, as it read then.
+        otherKitId:
+          type: string
+        otherKitName:
+          type: string
 
     TransactionSwap:
       type: object
@@ -3843,6 +3890,15 @@ components:
           oneOf:
             - $ref: '#/components/schemas/ScanSwap'
             - type: 'null'
+        kitSwap:
+          description: |
+            Checking out a kit's number: the kit went out in the place of the
+            kit of its type booked here, and the booking moved to it. Show it;
+            nothing to confirm. Null otherwise. Not required, so an older
+            client keeps compiling.
+          oneOf:
+            - $ref: '#/components/schemas/ScanKitSwap'
+            - type: 'null'
         packCase:
           description: |
             On a production's handout list: the scanned unit is a pack case.
@@ -3956,6 +4012,27 @@ components:
         partnerTo:
           type: [string, 'null']
           description: Where the other unit went, by name. Null when it is now loose.
+
+    ScanKitSwap:
+      type: object
+      description: |
+        A whole kit standing in for the booked one: ring 1 is booked, ring 2's
+        number is scanned. The booking moves to ring 2 — the same bundle type
+        and organization, wholly free — and both kits keep their contents.
+        Only while nothing of the booked kit has gone out; the lowest-numbered
+        of several. Both kits' units' histories say so (`KIT_REPLACED`).
+      required: [replacedKitId, replacedKitName, kitId, kitName]
+      properties:
+        replacedKitId:
+          type: string
+        replacedKitName:
+          type: string
+          description: The kit that stays home, with its number.
+        kitId:
+          type: string
+        kitName:
+          type: string
+          description: The kit that went out, with its number.
 
     OverdueInspection:
       type: object
@@ -4301,6 +4378,14 @@ components:
             keeps compiling.
           items:
             $ref: '#/components/schemas/ScanSwap'
+        kitSwaps:
+          type: array
+          description: |
+            Checking out: the whole kits that took over the booking of a
+            booked kit of their type — see `ScanKitSwap`. Not required, so an
+            older client keeps compiling.
+          items:
+            $ref: '#/components/schemas/ScanKitSwap'
 
     ScannedAsset:
       type: object

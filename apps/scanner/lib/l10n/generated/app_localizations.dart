@@ -3042,6 +3042,48 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Case of {kit}'**
   String caseOfKit(String kit);
+
+  /// Scan result: a whole kit went out in the place of the kit of its type booked here, and the booking moved to it.
+  ///
+  /// In en, this message translates to:
+  /// **'Instead of {replaced} · booking moved to {kit}'**
+  String kitSwapIn(String replaced, String kit);
+
+  /// The KIT_REPLACED history entry: a whole kit went out in the place of another kit of its type, and the booking moved.
+  ///
+  /// In en, this message translates to:
+  /// **'Kit replaced'**
+  String get actionKitReplaced;
+
+  /// No description provided for @historyKitTookOver.
+  ///
+  /// In en, this message translates to:
+  /// **'Booking taken over from {kit}'**
+  String historyKitTookOver(String kit);
+
+  /// No description provided for @historyKitReleased.
+  ///
+  /// In en, this message translates to:
+  /// **'{kit} went out instead'**
+  String historyKitReleased(String kit);
+
+  /// No description provided for @errorKitStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'{kit} has already been started — scan the units one by one.'**
+  String errorKitStarted(String kit);
+
+  /// No description provided for @errorKitNotInterchangeable.
+  ///
+  /// In en, this message translates to:
+  /// **'{kit} is booked, and {scanned} holds a unit marked not interchangeable — scan {kit} instead.'**
+  String errorKitNotInterchangeable(String kit, String scanned);
+
+  /// No description provided for @errorKitUnavailable.
+  ///
+  /// In en, this message translates to:
+  /// **'{kit} is booked, and {scanned} is out or booked elsewhere at the same time — scan {kit} instead.'**
+  String errorKitUnavailable(String kit, String scanned);
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

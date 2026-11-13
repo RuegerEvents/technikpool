@@ -123,6 +123,24 @@ export type SwappedData = {
 	productionName?: string;
 };
 
+/** A kit, as a kit swap names it: its name and number, as it read at the time. */
+export type KitRef = { id: string; name: string };
+
+/**
+ * A whole kit went out in the place of the booked one of its type, and the
+ * booking moved to it — see services/kit-swap.ts. Written on the units of both
+ * kits: `took_over` on the one that went (`otherKit` is the kit it replaced),
+ * `released` on the one that stays home (`otherKit` went instead).
+ */
+export type KitReplacedData = {
+	type: 'KIT_REPLACED';
+	role: 'took_over' | 'released';
+	productionId: string;
+	productionName: string;
+	kit: KitRef;
+	otherKit: KitRef;
+};
+
 export type AccessoryAttachedData = {
 	type: 'ACCESSORY_ATTACHED';
 	parentAssetId: string;
@@ -243,6 +261,7 @@ export type TransactionData =
 	| BookingCancelledData
 	| BookingReplacedData
 	| SwappedData
+	| KitReplacedData
 	| AccessoryAttachedData
 	| AccessoryDetachedData
 	| CredentialsSetData

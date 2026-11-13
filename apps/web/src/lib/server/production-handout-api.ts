@@ -11,7 +11,7 @@ export async function withHandoutErrors<T>(fn: () => Promise<T>): Promise<T | Re
 		return await fn();
 	} catch (err) {
 		if (err instanceof CheckoutError) {
-			return apiError(CHECKOUT_ERROR_STATUS[err.code], err.code, err.message);
+			return apiError(CHECKOUT_ERROR_STATUS[err.code], err.code, err.message, err.params);
 		}
 		throw err;
 	}

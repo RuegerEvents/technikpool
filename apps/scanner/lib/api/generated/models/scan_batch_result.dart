@@ -4,6 +4,7 @@
 
 import 'package:json_annotation/json_annotation.dart';
 
+import 'scan_kit_swap.dart';
 import 'scan_swap.dart';
 
 part 'scan_batch_result.g.dart';
@@ -14,6 +15,7 @@ class ScanBatchResult {
     required this.count,
     required this.targetName,
     this.swaps,
+    this.kitSwaps,
   });
   
   factory ScanBatchResult.fromJson(Map<String, Object?> json) => _$ScanBatchResultFromJson(json);
@@ -27,6 +29,12 @@ class ScanBatchResult {
   /// keeps compiling.
   ///
   final List<ScanSwap>? swaps;
+
+  /// Checking out: the whole kits that took over the booking of a.
+  /// booked kit of their type — see `ScanKitSwap`. Not required, so an.
+  /// older client keeps compiling.
+  ///
+  final List<ScanKitSwap>? kitSwaps;
 
   Map<String, Object?> toJson() => _$ScanBatchResultToJson(this);
 }

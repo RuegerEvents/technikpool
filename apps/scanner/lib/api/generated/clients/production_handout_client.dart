@@ -54,6 +54,9 @@ abstract class ProductionHandoutClient {
   /// it is kept on, which returns it from the production; one booked here.
   /// and never handed out is checked out first. A unit from elsewhere is.
   /// still put back — `returnedFrom` without this production says so.
+  /// A kit's number handed out in the place of the booked kit of its type.
+  /// takes that kit's booking over, as `createScan` describes (`kitSwap`,.
+  /// `409 kit_*`). Never taking back.
   @POST('/api/v1/productions/{productionId}/handout/{mode}/scans')
   Future<ScanResult> scanIntoProductionHandout({
     @Path('productionId') required String productionId,

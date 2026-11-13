@@ -21,6 +21,11 @@ AssetTransaction _$AssetTransactionFromJson(Map<String, dynamic> json) =>
       swap: json['swap'] == null
           ? null
           : TransactionSwap.fromJson(json['swap'] as Map<String, dynamic>),
+      kitSwap: json['kitSwap'] == null
+          ? null
+          : TransactionKitSwap.fromJson(
+              json['kitSwap'] as Map<String, dynamic>,
+            ),
     );
 
 Map<String, dynamic> _$AssetTransactionToJson(AssetTransaction instance) =>
@@ -32,4 +37,5 @@ Map<String, dynamic> _$AssetTransactionToJson(AssetTransaction instance) =>
       'productionName': ?instance.productionName,
       'inspection': ?instance.inspection,
       'swap': ?instance.swap,
+      'kitSwap': ?instance.kitSwap,
     };

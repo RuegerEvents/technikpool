@@ -625,6 +625,13 @@ export interface paths {
          *     `assetTag` also accepts a serial number, on the same terms as
          *     `getAssetByTag`: the printed tag wins, and a serial resolves only when
          *     exactly one visible unit carries it.
+         *
+         *     A kit's number checked out to a production where another kit of its
+         *     type is booked takes that kit's booking over (`kitSwap`). Refused with
+         *     `409 kit_started` when everything booked of the type has begun to go
+         *     out, and `409 kit_unavailable` when a unit of it is
+         *     out or booked elsewhere for overlapping days. `params` of the error
+         *     are the booked kit's and the scanned kit's names.
          */
         post: operations["createScan"];
         delete?: never;
@@ -647,7 +654,9 @@ export interface paths {
          * @description What follows a scan's `group`: the units picked from it, booked to the
          *     same target the scan went to. Each unit takes its accessories along, as
          *     a scan does. A kit's own location only moves when all of it is in the
-         *     batch.
+         *     batch. A batch to a production holding a whole kit may take over the
+         *     booking of the booked kit of its type, as a scan of the kit's number
+         *     does (`kitSwaps`, and the same `409 kit_*` refusals).
          */
         post: operations["createScanBatch"];
         delete?: never;
@@ -1169,6 +1178,9 @@ export interface paths {
          *     it is kept on, which returns it from the production; one booked here
          *     and never handed out is checked out first. A unit from elsewhere is
          *     still put back — `returnedFrom` without this production says so.
+         *     A kit's number handed out in the place of the booked kit of its type
+         *     takes that kit's booking over, as `createScan` describes (`kitSwap`,
+         *     `409 kit_*`). Never taking back.
          */
         post: operations["scanIntoProductionHandout"];
         delete?: never;
@@ -1572,6 +1584,12 @@ export interface components {
                 code: string;
                 /** @description Human-readable text, safe to show to the operator. */
                 message: string;
+                /**
+                 * @description Values a client's own wording of `code` names, by position —
+                 *     the kits of a `kit_*` refusal. Left out where the code needs
+                 *     none.
+                 */
+                params?: string[];
             };
         };
         OAuthError: {
@@ -2148,6 +2166,25 @@ export interface components {
              *     client keeps compiling.
              */
             swap?: components["schemas"]["TransactionSwap"] | null;
+            /**
+             * @description For `KIT_REPLACED`: the kit this unit is in and the other one.
+             *     Null for every other action. Not required, so an older client
+             *     keeps compiling.
+             */
+            kitSwap?: components["schemas"]["TransactionKitSwap"] | null;
+        };
+        TransactionKitSwap: {
+            /**
+             * @description `took_over`: this unit's kit went out in `otherKit`'s place and
+             *     took its booking over. `released`: `otherKit` went out instead,
+             *     and this unit's kit stays home.
+             * @enum {string}
+             */
+            role: "took_over" | "released";
+            /** @description This unit's kit, with its number, as it read then. */
+            kitName: string;
+            otherKitId: string;
+            otherKitName: string;
         };
         TransactionSwap: {
             partnerAssetId: string;
@@ -2229,6 +2266,13 @@ export interface components {
              */
             swap?: components["schemas"]["ScanSwap"] | null;
             /**
+             * @description Checking out a kit's number: the kit went out in the place of the
+             *     kit of its type booked here, and the booking moved to it. Show it;
+             *     nothing to confirm. Null otherwise. Not required, so an older
+             *     client keeps compiling.
+             */
+            kitSwap?: components["schemas"]["ScanKitSwap"] | null;
+            /**
              * @description On a production's handout list: the scanned unit is a pack case.
              *     It was booked like any unit (on `checkout` even when it was not
              *     booked here). Handing out, open it — or, with another case open,
@@ -2307,6 +2351,21 @@ export interface components {
             joined: string;
             /** @description Where the other unit went, by name. Null when it is now loose. */
             partnerTo: string | null;
+        };
+        /**
+         * @description A whole kit standing in for the booked one: ring 1 is booked, ring 2's
+         *     number is scanned. The booking moves to ring 2 — the same bundle type
+         *     and organization, wholly free — and both kits keep their contents.
+         *     Only while nothing of the booked kit has gone out; the lowest-numbered
+         *     of several. Both kits' units' histories say so (`KIT_REPLACED`).
+         */
+        ScanKitSwap: {
+            replacedKitId: string;
+            /** @description The kit that stays home, with its number. */
+            replacedKitName: string;
+            kitId: string;
+            /** @description The kit that went out, with its number. */
+            kitName: string;
         };
         OverdueInspection: {
             typeId: string;
@@ -2520,6 +2579,12 @@ export interface components {
              *     keeps compiling.
              */
             swaps?: components["schemas"]["ScanSwap"][];
+            /**
+             * @description Checking out: the whole kits that took over the booking of a
+             *     booked kit of their type — see `ScanKitSwap`. Not required, so an
+             *     older client keeps compiling.
+             */
+            kitSwaps?: components["schemas"]["ScanKitSwap"][];
         };
         ScannedAsset: {
             id: string;

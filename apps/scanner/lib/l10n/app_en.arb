@@ -676,5 +676,19 @@
   "bundleExtraCases": "{count, plural, =1{1 more container in it — the lowest unit number is its case} other{{count} more containers in it — the lowest unit number is its case}}",
   "@bundleExtraCases": {"placeholders": {"count": {"type": "int"}}},
   "caseOfKit": "Case of {kit}",
-  "@caseOfKit": {"placeholders": {"kit": {"type": "String"}}}
+  "@caseOfKit": {"placeholders": {"kit": {"type": "String"}}},
+  "kitSwapIn": "Instead of {replaced} · booking moved to {kit}",
+  "@kitSwapIn": {"description": "Scan result: a whole kit went out in the place of the kit of its type booked here, and the booking moved to it.", "placeholders": {"replaced": {"type": "String"}, "kit": {"type": "String"}}},
+  "actionKitReplaced": "Kit replaced",
+  "@actionKitReplaced": {"description": "The KIT_REPLACED history entry: a whole kit went out in the place of another kit of its type, and the booking moved."},
+  "historyKitTookOver": "Booking taken over from {kit}",
+  "@historyKitTookOver": {"placeholders": {"kit": {"type": "String"}}},
+  "historyKitReleased": "{kit} went out instead",
+  "@historyKitReleased": {"placeholders": {"kit": {"type": "String"}}},
+  "errorKitStarted": "{kit} has already been started — scan the units one by one.",
+  "@errorKitStarted": {"placeholders": {"kit": {"type": "String"}}},
+  "errorKitNotInterchangeable": "{kit} is booked, and {scanned} holds a unit marked not interchangeable — scan {kit} instead.",
+  "@errorKitNotInterchangeable": {"placeholders": {"kit": {"type": "String"}, "scanned": {"type": "String"}}},
+  "errorKitUnavailable": "{kit} is booked, and {scanned} is out or booked elsewhere at the same time — scan {kit} instead.",
+  "@errorKitUnavailable": {"placeholders": {"kit": {"type": "String"}, "scanned": {"type": "String"}}}
 }

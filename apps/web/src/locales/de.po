@@ -14421,3 +14421,35 @@ msgid "1 more container in it — the lowest unit number is its case"
 msgid_plural "# more containers in it — the lowest unit number is its case"
 msgstr[0] "1 weiterer Behälter darin – die niedrigste Gerätenummer ist seine Kiste"
 msgstr[1] "# weitere Behälter darin – die niedrigste Gerätenummer ist seine Kiste"
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "{0} has already been started — scan the units one by one."
+msgstr "{0} ist schon angefangen – Geräte einzeln scannen."
+
+#. 0: p0; 1: p1; 2: p0
+#: src/lib/error-messages.svelte.ts
+msgid "{0} is booked, and {1} holds a unit marked not interchangeable — scan {2} instead."
+msgstr "{0} ist gebucht, und in {1} steckt ein Gerät, das als nicht austauschbar markiert ist – {2} scannen."
+
+#. 0: p0; 1: p1; 2: p0
+#: src/lib/error-messages.svelte.ts
+msgid "{0} is booked, and {1} is out or booked elsewhere at the same time — scan {2} instead."
+msgstr "{0} ist gebucht, und {1} ist unterwegs oder für dieselben Tage anderweitig gebucht – {2} scannen."
+
+#. 0: swap.replacedKitName; 1: swap.kitName
+#: src/lib/swap-notice.svelte.ts
+msgid "Instead of {0} · booking moved to {1}"
+msgstr "Statt {0} · Buchung auf {1} umgestellt"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Booking taken over from <0/>"
+msgstr "Buchung übernommen von <0/>"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Released — <0/> went out instead"
+msgstr "Freigegeben – stattdessen ging <0/> raus"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "· for <0/>"
+msgstr "· für <0/>"

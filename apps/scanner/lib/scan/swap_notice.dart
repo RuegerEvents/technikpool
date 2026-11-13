@@ -11,3 +11,8 @@ String swapNotice(S l10n, ScanSwap swap) {
   };
   return '${l10n.swapIn(swap.partnerLabel, swap.joined)} · $moved';
 }
+
+/// A whole kit went out in the place of the kit of its type booked here:
+/// "Instead of Ring 1 · booking moved to Ring 2". See `ScanKitSwap`.
+String kitSwapNotice(S l10n, ScanKitSwap swap) =>
+    l10n.kitSwapIn(swap.replacedKitName, swap.kitName);

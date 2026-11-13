@@ -171,6 +171,9 @@ export type AppErrorCode =
 	| 'booking_not_approved'
 	| 'pack_not_a_case'
 	| 'pack_circle'
+	| 'kit_swap_started'
+	| 'kit_swap_not_interchangeable'
+	| 'kit_swap_unavailable'
 	// Offers and invoices
 	| 'offer_immutable'
 	| 'offer_already_finalized'

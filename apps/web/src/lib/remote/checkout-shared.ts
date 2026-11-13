@@ -68,7 +68,10 @@ const ERROR_CODES: Record<CheckoutError['code'], AppErrorCode> = {
 	production_cancelled: 'production_cancelled',
 	not_approved: 'booking_not_approved',
 	not_a_pack_case: 'pack_not_a_case',
-	pack_circle: 'pack_circle'
+	pack_circle: 'pack_circle',
+	kit_started: 'kit_swap_started',
+	kit_not_interchangeable: 'kit_swap_not_interchangeable',
+	kit_unavailable: 'kit_swap_unavailable'
 };
 
 const STATUS_BY_CODE: Record<CheckoutError['code'], number> = {
@@ -81,7 +84,10 @@ const STATUS_BY_CODE: Record<CheckoutError['code'], number> = {
 	production_cancelled: 409,
 	not_approved: 409,
 	not_a_pack_case: 409,
-	pack_circle: 409
+	pack_circle: 409,
+	kit_started: 409,
+	kit_not_interchangeable: 409,
+	kit_unavailable: 409
 };
 
 export async function withCheckoutErrors<T>(fn: () => Promise<T>): Promise<T> {
@@ -89,7 +95,7 @@ export async function withCheckoutErrors<T>(fn: () => Promise<T>): Promise<T> {
 		return await fn();
 	} catch (err) {
 		if (err instanceof CheckoutError) {
-			appError(STATUS_BY_CODE[err.code], ERROR_CODES[err.code], [err.assetTag ?? '']);
+			appError(STATUS_BY_CODE[err.code], ERROR_CODES[err.code], err.params ?? [err.assetTag ?? '']);
 		}
 		throw err;
 	}

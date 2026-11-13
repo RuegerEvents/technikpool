@@ -156,6 +156,10 @@ class AssetDetailView extends StatelessWidget {
             swap.now == null
                 ? l10n.historySwapLoose(swap.partnerLabel)
                 : l10n.historySwapNow(swap.partnerLabel, swap.now!),
+          if (tx.kitSwap case final kit?)
+            kit.role == TransactionKitSwapRole.released
+                ? l10n.historyKitReleased(kit.otherKitName)
+                : l10n.historyKitTookOver(kit.otherKitName),
           when,
           ?tx.userName,
           ?tx.productionName,

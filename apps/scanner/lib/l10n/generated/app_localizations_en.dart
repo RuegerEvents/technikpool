@@ -1840,4 +1840,37 @@ class SEn extends S {
   String caseOfKit(String kit) {
     return 'Case of $kit';
   }
+
+  @override
+  String kitSwapIn(String replaced, String kit) {
+    return 'Instead of $replaced · booking moved to $kit';
+  }
+
+  @override
+  String get actionKitReplaced => 'Kit replaced';
+
+  @override
+  String historyKitTookOver(String kit) {
+    return 'Booking taken over from $kit';
+  }
+
+  @override
+  String historyKitReleased(String kit) {
+    return '$kit went out instead';
+  }
+
+  @override
+  String errorKitStarted(String kit) {
+    return '$kit has already been started — scan the units one by one.';
+  }
+
+  @override
+  String errorKitNotInterchangeable(String kit, String scanned) {
+    return '$kit is booked, and $scanned holds a unit marked not interchangeable — scan $kit instead.';
+  }
+
+  @override
+  String errorKitUnavailable(String kit, String scanned) {
+    return '$kit is booked, and $scanned is out or booked elsewhere at the same time — scan $kit instead.';
+  }
 }

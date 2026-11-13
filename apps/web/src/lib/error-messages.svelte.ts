@@ -326,6 +326,12 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return 'That is no pack case on this production — scan or pick a case that is booked here.';
 		case 'pack_circle':
 			return 'A case cannot go into itself or into something packed inside it.';
+		case 'kit_swap_started':
+			return `${p0} has already been started — scan the units one by one.`;
+		case 'kit_swap_not_interchangeable':
+			return `${p0} is booked, and ${p1} holds a unit marked not interchangeable — scan ${p0} instead.`;
+		case 'kit_swap_unavailable':
+			return `${p0} is booked, and ${p1} is out or booked elsewhere at the same time — scan ${p0} instead.`;
 		case 'booking_not_approved':
 			return `${p0} is not booked and approved on this production — only the production’s own organization can add it.`;
 

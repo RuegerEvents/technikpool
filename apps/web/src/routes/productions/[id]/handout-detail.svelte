@@ -24,7 +24,7 @@
 	} from '#lib/remote/production-handout.remote.js';
 	import { reportDefect } from '#lib/remote/inspections.remote.js';
 	import { inspectionTypeLabel } from '#lib/inspection-ui.svelte.js';
-	import { swapNoticeText } from '#lib/swap-notice.svelte.js';
+	import { kitSwapNoticeText, swapNoticeText } from '#lib/swap-notice.svelte.js';
 	import { Modal } from '#lib/components/ui/modal/index.js';
 	import { Label } from '#lib/components/ui/label/index.js';
 	import { SvelteSet } from 'svelte/reactivity';
@@ -388,9 +388,15 @@
 				: null;
 		if (result.kit) {
 			const scanned = await kitScanned(result.kit, doneBefore);
-			const kitFeedback = packedNote
-				? { ...scanned, detail: [scanned.detail, packedNote].filter(Boolean).join(' · ') }
-				: scanned;
+			// It went out in the place of the kit of its type booked here.
+			const kitSwap = result.kitSwap ? kitSwapNoticeText(result.kitSwap) : null;
+			const kitFeedback =
+				packedNote || kitSwap
+					? {
+							...scanned,
+							detail: [scanned.detail, packedNote, kitSwap].filter(Boolean).join(' · ')
+						}
+					: scanned;
 			if (overdue.length === 0) return kitFeedback;
 			return {
 				...kitFeedback,

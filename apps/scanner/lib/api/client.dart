@@ -10,11 +10,20 @@ import 'generated/export.dart';
 /// `asset_not_found`, or RFC 8628's `authorization_pending` — which the device
 /// flow branches on; [message] is what to show a person.
 class ApiException implements Exception {
-  const ApiException({required this.code, required this.message, this.status});
+  const ApiException({
+    required this.code,
+    required this.message,
+    this.status,
+    this.params = const [],
+  });
 
   final String code;
   final String message;
   final int? status;
+
+  /// Values the wording of [code] names, by position — the kits of a `kit_*`
+  /// refusal. Empty where the code needs none.
+  final List<String> params;
 
   bool get isUnauthorized => status == 401;
 
@@ -116,10 +125,12 @@ class ApiClient {
     if (data is Map) {
       final err = data['error'];
       if (err is Map) {
+        final params = err['params'];
         return ApiException(
           code: err['code'] as String? ?? 'unknown',
           message: err['message'] as String? ?? 'HTTP $status',
           status: status,
+          params: params is List ? [for (final p in params) '$p'] : const [],
         );
       }
       if (err is String) {
@@ -180,6 +191,13 @@ String describeError(S l10n, Object error) {
     'not_approved' => l10n.errorNotApproved,
     'not_a_pack_case' => l10n.errorNotAPackCase,
     'pack_circle' => l10n.errorPackCircle,
+    'kit_started' when err.params.isNotEmpty => l10n.errorKitStarted(err.params[0]),
+    'kit_not_interchangeable' when err.params.length > 1 =>
+      l10n.errorKitNotInterchangeable(err.params[0], err.params[1]),
+    'kit_unavailable' when err.params.length > 1 => l10n.errorKitUnavailable(
+      err.params[0],
+      err.params[1],
+    ),
     'check_closed' => l10n.errorCheckClosed,
     'tick_not_yours' => l10n.errorTickNotYours,
     'receipt_forbidden' => l10n.errorReceiptForbidden,

@@ -732,7 +732,13 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
         : null;
     final overdue = _overdueNames(l10n, result.overdueInspections);
     if (result.kit case final kit?) {
-      final scanned = _kitBooked(l10n, kit, result.action, packedNote);
+      final scanned = _kitBooked(
+        l10n,
+        kit,
+        result.action,
+        packedNote,
+        result.kitSwap == null ? null : kitSwapNotice(l10n, result.kitSwap!),
+      );
       if (overdue.isNotEmpty) {
         _report(
           _Tone.warn,
@@ -803,7 +809,13 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
   /// A kit's sticker booked every unit in it that this list has. None of them
   /// here means the kit is not from this production; all of them done before
   /// is said like a second scan of one unit.
-  _Scanned _kitBooked(S l10n, ScanKit kit, ScanResultAction action, [String? packedNote]) {
+  _Scanned _kitBooked(
+    S l10n,
+    ScanKit kit,
+    ScanResultAction action, [
+    String? packedNote,
+    String? kitSwapNote,
+  ]) {
     if (kit.units.isEmpty) {
       _report(
         _Tone.warn,
@@ -831,7 +843,7 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
     _report(
       _Tone.good,
       l10n.kitScanned(kit.name, kit.units.length),
-      [?kit.tag, Labels.scanAction(l10n, action), ?packedNote].join(' · '),
+      [?kit.tag, Labels.scanAction(l10n, action), ?packedNote, ?kitSwapNote].join(' · '),
       ScanTone.ok,
     );
     return (unit: null, kit: kit, packCase: null);

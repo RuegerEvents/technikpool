@@ -325,6 +325,21 @@ for a kit's sticker or in a stocktake (`CheckoutOptions.swap: false`).
   two overlapping bookings (`swapBookingClash`).
 - **Case check**: only a unit the case still lacks (not ticked, not away), only for `canRecord`.
 
+**A whole kit stands in too.** Ring 1 is booked, ring 2's number (own tag or case tag) is handed
+out: the booking moves to ring 2. Ring 1's items go, ring 2's units are booked APPROVED under
+its own id as booking it would (inner kits along; an inner kit replaced alone is booked alone),
+and the ordinary checkout follows. Both kits keep their contents, and both kits' units get
+`KIT_REPLACED` (`took_over` / `released`). Pure rules in `src/lib/kit-swap.ts`
+(`bookedKitItems`, `kitSwapDecision`, `kitSwapPlan`, `wholeKits`), the database half in
+`services/kit-swap.ts` (`standInForKit`), called from `performBulkCheckout` for every kit the
+selection holds whole — a kit scan, a handout-list scan, a bulk checkout. `CheckoutOptions.kitSwap`
+follows `swap`, so take-back never moves a booking. Same bundle type and org; of several booked
+kits the lowest number nothing has gone out of. A kit already booked here just goes out. Refused
+(`kit_started`, `kit_unavailable`, `params` = both kits' names) when everything booked of the
+type is started, or when a unit of it is out or booked elsewhere for overlapping days.
+`notInterchangeable` is not asked: it guards a pair inside a kit, and a whole kit keeps its pairs. The
+result carries `kitSwap` (`ScanKitSwap`; `kitSwaps` on a batch).
+
 ## Containers and pack cases (Behälter, Pack-Kisten)
 
 `Product.isContainer` ("Behälter") marks a box things travel in, edited like the other product

@@ -8,6 +8,7 @@ import 'overdue_inspection.dart';
 import 'pack_case_ref.dart';
 import 'scan_group.dart';
 import 'scan_kit.dart';
+import 'scan_kit_swap.dart';
 import 'scan_result_action.dart';
 import 'scan_swap.dart';
 import 'scanned_asset.dart';
@@ -25,6 +26,7 @@ class ScanResult {
     this.kit,
     this.overdueInspections,
     this.swap,
+    this.kitSwap,
     this.packCase,
     this.packedInto,
   });
@@ -71,6 +73,13 @@ class ScanResult {
   /// older client keeps compiling.
   ///
   final ScanSwap? swap;
+
+  /// Checking out a kit's number: the kit went out in the place of the.
+  /// kit of its type booked here, and the booking moved to it. Show it;.
+  /// nothing to confirm. Null otherwise. Not required, so an older.
+  /// client keeps compiling.
+  ///
+  final ScanKitSwap? kitSwap;
 
   /// On a production's handout list: the scanned unit is a pack case.
   /// It was booked like any unit (on `checkout` even when it was not.

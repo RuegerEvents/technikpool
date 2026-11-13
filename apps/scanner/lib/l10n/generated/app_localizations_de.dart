@@ -1844,4 +1844,37 @@ class SDe extends S {
   String caseOfKit(String kit) {
     return 'Kiste von $kit';
   }
+
+  @override
+  String kitSwapIn(String replaced, String kit) {
+    return 'Statt $replaced · Buchung auf $kit umgestellt';
+  }
+
+  @override
+  String get actionKitReplaced => 'Kit getauscht';
+
+  @override
+  String historyKitTookOver(String kit) {
+    return 'Buchung von $kit übernommen';
+  }
+
+  @override
+  String historyKitReleased(String kit) {
+    return 'Stattdessen ging $kit raus';
+  }
+
+  @override
+  String errorKitStarted(String kit) {
+    return '$kit ist schon angefangen – Geräte einzeln scannen.';
+  }
+
+  @override
+  String errorKitNotInterchangeable(String kit, String scanned) {
+    return '$kit ist gebucht, und in $scanned steckt ein Gerät, das als nicht austauschbar markiert ist – $kit scannen.';
+  }
+
+  @override
+  String errorKitUnavailable(String kit, String scanned) {
+    return '$kit ist gebucht, und $scanned ist unterwegs oder für dieselben Tage anderweitig gebucht – $kit scannen.';
+  }
 }

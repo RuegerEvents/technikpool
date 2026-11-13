@@ -1578,6 +1578,34 @@
 														· found in a case check
 													{/if}
 												</span>
+											{:else if tx?.type === 'KIT_REPLACED'}
+												{#if tx.role === 'took_over'}
+													Booking taken over from
+													<a
+														href={resolve(`assets/bundles/${tx.otherKit.id}`)}
+														class="text-foreground underline underline-offset-2"
+														>{tx.otherKit.name}</a
+													>
+												{:else}
+													Released —
+													<a
+														href={resolve(`assets/bundles/${tx.otherKit.id}`)}
+														class="text-foreground underline underline-offset-2"
+														>{tx.otherKit.name}</a
+													>
+													went out instead
+												{/if}
+												<span class="font-normal text-muted-foreground">
+													· for
+													<a
+														href={item.productionRestricted
+															? undefined
+															: resolve(`productions/${tx.productionId}`)}
+														class="font-medium text-foreground {item.productionRestricted
+															? ''
+															: 'underline underline-offset-2'}">{tx.productionName}</a
+													>
+												</span>
 											{:else if tx?.type === 'ACCESSORY_ATTACHED'}
 												Attached as an accessory of
 												<a
