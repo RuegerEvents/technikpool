@@ -14,29 +14,31 @@
 	type Layout = 'grid' | 'list';
 	const KEY = 'inventory_list_options';
 
-	function remembered(): { size: Size; layout: Layout } {
+	function remembered(): { size: Size; layout: Layout; includeCase: boolean } {
 		try {
 			const saved = browser ? JSON.parse(localStorage.getItem(KEY) ?? 'null') : null;
 			return {
 				size: saved?.size === 'a5' ? 'a5' : 'a4',
-				layout: saved?.layout === 'list' ? 'list' : 'grid'
+				layout: saved?.layout === 'list' ? 'list' : 'grid',
+				includeCase: saved?.includeCase === true
 			};
 		} catch {
-			return { size: 'a4', layout: 'grid' };
+			return { size: 'a4', layout: 'grid', includeCase: false };
 		}
 	}
 
 	let open = $state(false);
 	let size = $state<Size>(remembered().size);
 	let layout = $state<Layout>(remembered().layout);
+	let includeCase = $state(remembered().includeCase);
 
 	function openPdf() {
 		try {
-			localStorage.setItem(KEY, JSON.stringify({ size, layout }));
+			localStorage.setItem(KEY, JSON.stringify({ size, layout, includeCase }));
 		} catch {
 			// A private window: the dialog simply starts on A4 tiles next time.
 		}
-		const url = `${resolve(`assets/bundles/${bundleId}/inventory-list`)}?size=${size}&layout=${layout}`;
+		const url = `${resolve(`assets/bundles/${bundleId}/inventory-list`)}?size=${size}&layout=${layout}${includeCase ? '&case=1' : ''}`;
 		window.open(url, '_blank', 'noopener');
 		open = false;
 	}
@@ -79,6 +81,15 @@
 					>
 				</div>
 			</div>
+			<label class="flex cursor-pointer items-start gap-2 text-sm">
+				<input type="checkbox" bind:checked={includeCase} class="mt-0.5" />
+				<span>
+					List the case itself
+					<span class="block text-xs text-muted-foreground"
+						>The container the kit travels in, which this sheet is usually stuck to.</span
+					>
+				</span>
+			</label>
 		</div>
 	{/snippet}
 	{#snippet footer()}

@@ -14480,3 +14480,7 @@ msgstr "For the lid of the case, always landscape: what belongs in it, with pict
 #: src/routes/assets/bundles/[id]/inventory-list-menu.svelte
 msgid "Open PDF"
 msgstr "Open PDF"
+
+#: src/routes/assets/bundles/[id]/inventory-list-menu.svelte
+msgid "List the case itself <0>The container the kit travels in, which this sheet is usually stuck to.</0>"
+msgstr "List the case itself <0>The container the kit travels in, which this sheet is usually stuck to.</0>"

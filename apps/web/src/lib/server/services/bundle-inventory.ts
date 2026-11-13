@@ -67,7 +67,9 @@ export async function renderBundleInventory(
 	userId: string,
 	bundleId: string,
 	size: InventorySheetSize,
-	layout: InventorySheetLayout
+	layout: InventorySheetLayout,
+	/** List the kit's own case too — off by default, the sheet is stuck in it. */
+	includeCase = false
 ) {
 	const bundle = await prisma.assetBundle.findUnique({
 		where: { id: bundleId },
@@ -128,9 +130,11 @@ export async function renderBundleInventory(
 			.filter((asset) => !asset.parentAssetId)
 			.map((asset) => ({ ...asset, isContainer: asset.product.isContainer }))
 	);
-	const contents = bundle.assets.filter(
-		(asset) => asset.id !== caseUnit?.id && asset.parentAssetId !== caseUnit?.id
-	);
+	const contents = includeCase
+		? bundle.assets
+		: bundle.assets.filter(
+				(asset) => asset.id !== caseUnit?.id && asset.parentAssetId !== caseUnit?.id
+			);
 
 	const org = bundle.template.organization;
 	const sheet: InventorySheet = {
