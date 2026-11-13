@@ -4,14 +4,13 @@
 	import { makerAndName } from '#lib/product-label.js';
 	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
 	import * as Card from '#lib/components/ui/card/index.js';
-	import { Button } from '#lib/components/ui/button/index.js';
+	import { resolve } from '$app/paths';
 	import { Input } from '#lib/components/ui/input/index.js';
 	import { getOrgWithMembers, getOrgEquipmentValue } from '#lib/remote/orgs.remote.js';
 	import { setOrgProductPrice } from '#lib/remote/assets.remote.js';
 	import { canManageInventory } from '#lib/roles.js';
 	import { getErrorMessage } from '#lib/utils.js';
 	import { page } from '$app/state';
-	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
@@ -114,31 +113,7 @@
 <svelte:head><title>Equipment value | {org?.name ?? ''} | Technikpool</title></svelte:head>
 
 <div class="space-y-6">
-	<div class="flex items-center gap-4">
-		<Button
-			variant="ghost"
-			href={resolve(`orgs/${orgId}`)}
-			class="flex max-w-full min-w-0 items-center gap-1 text-muted-foreground"
-		>
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				width="16"
-				height="16"
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-			>
-				<path d="m15 18-6-6 6-6" />
-			</svg>
-			<span class="truncate">{org?.name ?? ''}</span>
-		</Button>
-	</div>
-
 	<div>
-		<h1 class="text-3xl font-bold tracking-tight">Equipment value</h1>
 		<p class="text-muted-foreground">
 			Every unit still in the pool, at this organization's net purchase price.
 		</p>

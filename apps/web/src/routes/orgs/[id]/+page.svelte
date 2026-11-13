@@ -1,14 +1,6 @@
 <script lang="ts">
-	import { getErrorMessage, orgLabel } from '#lib/utils.js';
-	import { messageForErrorCode } from '#lib/error-messages.svelte.js';
-	import {
-		DEFAULT_ORG_ROLE,
-		ORG_ROLES,
-		ROLE_FOR,
-		canManageInventory,
-		roleAtLeast,
-		type OrgRole
-	} from '#lib/roles.js';
+	import { getErrorMessage } from '#lib/utils.js';
+	import { DEFAULT_ORG_ROLE, ORG_ROLES, type OrgRole } from '#lib/roles.js';
 	import { roleName, roleSummary } from '#lib/role-descriptions.svelte.js';
 	import {
 		InvitationLink,
@@ -19,133 +11,69 @@
 	import { Button } from '#lib/components/ui/button/index.js';
 	import { Input } from '#lib/components/ui/input/index.js';
 	import { Label } from '#lib/components/ui/label/index.js';
+	import { Modal } from '#lib/components/ui/modal/index.js';
 	import {
 		getOrgWithMembers,
 		addUserToOrg,
-		deleteOrg,
 		removeUserFromOrg,
-		updateMemberRole,
-		updateOrg,
-		getOrgIdentityInUse,
-		getNextAssetTag,
-		getAssetTagSuggestion,
-		resetAssetTagCounter,
-		setAutoAssetTags
+		updateMemberRole
 	} from '#lib/remote/orgs.remote.js';
+	import { getInspectionTypes, getOrgQualifications } from '#lib/remote/inspections.remote.js';
+	import { inspectionTypeLabel } from '#lib/inspection-ui.svelte.js';
 	import { confirmAction } from '#lib/confirm.svelte.js';
 	import { page } from '$app/state';
-	import { goto, refreshAll } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
-	import { resolve } from '$app/paths';
-	import { OrgBadge } from '#lib/components/ui/org-badge/index.js';
-	import { getInspectionTypes, getOrgQualifications } from '#lib/remote/inspections.remote.js';
 	import QualificationDialog from './qualification-dialog.svelte';
-	import { orgIntervals } from '#lib/inspection-due.js';
-	import { inspectionTypeLabel } from '#lib/inspection-ui.svelte.js';
-	import { Modal } from '#lib/components/ui/modal/index.js';
-	import { AddressInput, type AddressValue } from '#lib/components/ui/address-input/index.js';
-	import { orgIdentityProblem } from '#lib/org-identity.svelte.js';
-	import { bankAccountProblem } from '#lib/bank-account.svelte.js';
-	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
-	import OrgLogoCard from './org-logo-card.svelte';
-	import RentalTermsCard from './rental-terms-card.svelte';
-	import {
-		DEFAULT_INVOICE_CLOSING,
-		DEFAULT_INVOICE_INTRO,
-		DEFAULT_OFFER_CLOSING,
-		DEFAULT_OFFER_INTRO
-	} from '#lib/billing-text.js';
+	import { orgAccess } from './org-access.js';
+
+	// The Members tab: who is in, with which role and qualifications. The
+	// layout around it holds the org's name and the tabs.
 
 	let { data } = $props();
 
 	const orgId = $derived(page.params.id as string);
 	let orgQuery = $derived(getOrgWithMembers(orgId));
 	let org = $derived(orgQuery.current);
+	let access = $derived(orgAccess(org, data.user?.id, !!data.isAdmin));
 
-	// Colour, label and prefix are unique across every org — this org's own values don't count.
-	let identityInUseQuery = $derived(getOrgIdentityInUse());
-	let identityInUse = $derived((identityInUseQuery.current ?? []).filter((o) => o.id !== orgId));
-
-	let myMembership = $derived(org?.members.find((m) => m.userId === data.user?.id));
-	let canManage = $derived(myMembership?.role === 'OWNER' || data.isAdmin);
-	// Numbering new units is inventory work: an ADMIN may switch it as well.
-	let canNumber = $derived(canManage || (!!myMembership && canManageInventory(myMembership)));
-	// The value is prices, so it is for whoever may read the org's records.
-	let canSeeValue = $derived(
-		data.isAdmin || (!!myMembership && roleAtLeast(myMembership.role, ROLE_FOR.read))
-	);
-	let nextTagQuery = $derived(canNumber ? getNextAssetTag(orgId) : null);
-	let nextTag = $derived(nextTagQuery?.current ?? null);
-	let savingAutoTags = $state(false);
-	// Whether the counter has run ahead of every number in use — a sticker
-	// typed high, or the unit carrying it deleted since.
-	let tagSuggestionQuery = $derived(canNumber ? getAssetTagSuggestion(orgId) : null);
-	let tagSuggestion = $derived(tagSuggestionQuery?.current ?? null);
-
-	async function resetCounter() {
-		if (!tagSuggestion) return;
-		const ok = await confirmAction({
-			title: `Reset the counter to ${tagSuggestion.resetTo}?`,
-			description: tagSuggestion.highest
-				? `The highest number a device carries is ${tagSuggestion.highest}. Numbers above it become free again, including those of deleted devices.`
-				: 'No device carries a number yet. Numbering starts over, including the numbers of deleted devices.',
-			confirmLabel: 'Reset'
-		});
-		if (!ok) return;
-		savingAutoTags = true;
-		try {
-			await resetAssetTagCounter(orgId);
-			toast.success('Counter reset');
-		} catch (err) {
-			toast.error(getErrorMessage(err));
-		} finally {
-			savingAutoTags = false;
-		}
+	let inspectionTypesQuery = $derived(getInspectionTypes());
+	let inspectionTypes = $derived(inspectionTypesQuery.current ?? []);
+	// Who may record which inspection types here; ADMIN+ maintains them.
+	let qualificationsQuery = $derived(getOrgQualifications(orgId));
+	let qualifications = $derived(qualificationsQuery.current ?? []);
+	let qualifiableTypes = $derived(inspectionTypes.filter((t) => t.requiresQualification));
+	let qualifyTarget = $state<{ id: string; name: string } | null>(null);
+	let qualifyOpen = $state(false);
+	function qualificationsOf(membershipId: string) {
+		return qualifications.filter((q) => q.membershipId === membershipId);
 	}
 
-	async function toggleAutoTags(enabled: boolean) {
-		savingAutoTags = true;
-		try {
-			await setAutoAssetTags({ orgId, enabled });
-		} catch (err) {
-			toast.error(getErrorMessage(err));
-		} finally {
-			savingAutoTags = false;
-		}
-	}
-	let deleteOpen = $state(false);
-	let deleting = $state(false);
-
-	async function handleDeleteOrg() {
-		if (deleting) return;
-		deleting = true;
-		try {
-			await deleteOrg(orgId);
-			toast.success('Organization deleted');
-			await goto(resolve('orgs'));
-		} catch (err) {
-			toast.error(getErrorMessage(err));
-			deleting = false;
-		}
-	}
-
+	let addOpen = $state(false);
 	let addEmail = $state('');
 	let addRole = $state<OrgRole>(DEFAULT_ORG_ROLE);
 	let adding = $state(false);
 	let issued = $state<IssuedInvitation | null>(null);
 
+	function openAdd() {
+		addEmail = '';
+		addRole = DEFAULT_ORG_ROLE;
+		issued = null;
+		addOpen = true;
+	}
+
 	async function handleAddUser(e: Event) {
 		e.preventDefault();
 		if (!addEmail) return;
+		adding = true;
 		try {
-			adding = true;
 			const result = await addUserToOrg({ orgId, email: addEmail, role: addRole });
 			if (result.status === 'invited') {
 				// No account by that address yet, so the server sent an invitation
-				// into this org instead.
+				// into this org instead; the dialog shows its link.
 				issued = { email: addEmail, url: result.url, mailed: result.mailed };
 			} else {
 				toast.success(`${addEmail} added to organization`);
+				addOpen = false;
 			}
 			addEmail = '';
 		} catch (err) {
@@ -156,6 +84,13 @@
 	}
 
 	async function handleRemove(userId: string, name: string) {
+		const ok = await confirmAction({
+			title: `Remove ${name}?`,
+			description: 'They lose access to this organization at once. You can add them again later.',
+			confirmLabel: 'Remove',
+			destructive: true
+		});
+		if (!ok) return;
 		try {
 			await removeUserFromOrg({ orgId, userId });
 			toast.success(`${name} removed from organization`);
@@ -166,923 +101,194 @@
 
 	async function handleRoleChange(userId: string, role: string) {
 		try {
-			await updateMemberRole({
-				orgId,
-				userId,
-				role: role as OrgRole
-			});
+			await updateMemberRole({ orgId, userId, role: role as OrgRole });
 			toast.success('Role updated');
 		} catch (err) {
 			toast.error(getErrorMessage(err));
-		}
-	}
-
-	let editingSettings = $state(false);
-	let nameDraft = $state('');
-	let shortNameDraft = $state('');
-	let prefixDraft = $state('');
-	let colorDraft = $state('');
-	let avatarLabelDraft = $state('');
-	// Per inspection type, the org's own interval, else the type's default.
-	let inspectionTypesQuery = $derived(getInspectionTypes());
-	let inspectionTypes = $derived(inspectionTypesQuery.current ?? []);
-	let intervals = $derived(
-		org ? orgIntervals(inspectionTypes, org.inspectionIntervals) : new Map<string, number | null>()
-	);
-	let inspectionIntervalDrafts = $state<Record<string, string>>({});
-
-	// Who may record which inspection types here; ADMIN+ records them.
-	let qualificationsQuery = $derived(getOrgQualifications(orgId));
-	let qualifications = $derived(qualificationsQuery.current ?? []);
-	let qualifiableTypes = $derived(inspectionTypes.filter((t) => t.requiresQualification));
-	let canQualify = $derived(!!data.isAdmin || (!!myMembership && canManageInventory(myMembership)));
-	let qualifyTarget = $state<{ id: string; name: string } | null>(null);
-	let qualifyOpen = $state(false);
-	function qualificationsOf(membershipId: string) {
-		return qualifications.filter((q) => q.membershipId === membershipId);
-	}
-	let isKleinunternehmerDraft = $state(false);
-	let savingSettings = $state(false);
-
-	$effect(() => {
-		if (!editingSettings && org) {
-			nameDraft = org.name;
-			shortNameDraft = org.shortName ?? '';
-			prefixDraft = org.assetIdPrefix;
-			colorDraft = org.color;
-			avatarLabelDraft = org.avatarLabel;
-			inspectionIntervalDrafts = Object.fromEntries(
-				inspectionTypes.map((t) => [t.id, intervals.get(t.id)?.toString() ?? ''])
-			);
-			isKleinunternehmerDraft = org.isKleinunternehmer;
-		}
-	});
-
-	async function handleSettingsSave(e: Event) {
-		e.preventDefault();
-		if (!nameDraft.trim()) {
-			toast.error(messageForErrorCode('org_name_required'));
-			return;
-		}
-		const problem = orgIdentityProblem(
-			{ color: colorDraft, avatarLabel: avatarLabelDraft, assetIdPrefix: prefixDraft },
-			identityInUse
-		);
-		if (problem) {
-			toast.error(problem);
-			return;
-		}
-		savingSettings = true;
-		try {
-			await updateOrg({
-				orgId,
-				name: nameDraft,
-				shortName: shortNameDraft || null,
-				assetIdPrefix: prefixDraft,
-				color: colorDraft,
-				avatarLabel: avatarLabelDraft,
-				inspectionIntervals: Object.fromEntries(
-					inspectionTypes.map((t) => [
-						t.id,
-						inspectionIntervalDrafts[t.id] ? Number(inspectionIntervalDrafts[t.id]) : null
-					])
-				),
-				isKleinunternehmer: isKleinunternehmerDraft
-			});
-			toast.success('Organization settings updated');
-			editingSettings = false;
-			// The user menu shows the home org's label and colour from the layout.
-			if (orgId === data.homeOrgId) await refreshAll();
-		} catch (err) {
-			toast.error(getErrorMessage(err));
-		} finally {
-			savingSettings = false;
-		}
-	}
-
-	let editingBilling = $state(false);
-	let savingBilling = $state(false);
-	let billingAddress = $state<AddressValue>({ line1: '', line2: '', postalCode: '', city: '' });
-	let billingDraft = $state({
-		taxNumber: '',
-		vatId: '',
-		bankAccountHolder: '',
-		iban: '',
-		bic: '',
-		bankName: '',
-		billingEmail: '',
-		billingWebsite: '',
-		paymentTermsDays: '14',
-		offerIntroTemplate: '',
-		offerClosingTemplate: '',
-		invoiceIntroTemplate: '',
-		invoiceClosingTemplate: ''
-	});
-
-	$effect(() => {
-		if (!editingBilling && org) {
-			billingAddress = {
-				line1: org.address?.line1 ?? '',
-				line2: org.address?.line2 ?? '',
-				postalCode: org.address?.postalCode ?? '',
-				city: org.address?.city ?? ''
-			};
-			billingDraft = {
-				taxNumber: org.taxNumber ?? '',
-				vatId: org.vatId ?? '',
-				bankAccountHolder: org.bankAccountHolder ?? '',
-				iban: org.iban ?? '',
-				bic: org.bic ?? '',
-				bankName: org.bankName ?? '',
-				billingEmail: org.billingEmail ?? '',
-				billingWebsite: org.billingWebsite ?? '',
-				paymentTermsDays: String(org.paymentTermsDays),
-				offerIntroTemplate: org.offerIntroTemplate ?? DEFAULT_OFFER_INTRO,
-				offerClosingTemplate: org.offerClosingTemplate ?? DEFAULT_OFFER_CLOSING,
-				invoiceIntroTemplate: org.invoiceIntroTemplate ?? DEFAULT_INVOICE_INTRO,
-				invoiceClosingTemplate: org.invoiceClosingTemplate ?? DEFAULT_INVOICE_CLOSING
-			};
-		}
-	});
-
-	// The dashboard's billing to-do links here with `#billing`: open the form
-	// straight away rather than leave them looking for the Edit button. Once per
-	// visit, so saving doesn't reopen it.
-	let billingHashHandled = false;
-	$effect(() => {
-		if (billingHashHandled || !org || !canManage || page.url.hash !== '#billing') return;
-		billingHashHandled = true;
-		editingBilling = true;
-		requestAnimationFrame(() =>
-			document.getElementById('billing')?.scrollIntoView({ block: 'start' })
-		);
-	});
-
-	const customPreset = (value: string, preset: string) =>
-		value.trim() && value.trim() !== preset ? value : null;
-
-	let bankProblem = $derived(bankAccountProblem(billingDraft));
-
-	async function handleBillingSave(e: Event) {
-		e.preventDefault();
-		if (!org) return;
-		if (bankProblem) {
-			toast.error(bankProblem);
-			return;
-		}
-		savingBilling = true;
-		try {
-			const hasAddress = billingAddress.line1 || billingAddress.postalCode || billingAddress.city;
-			await updateOrg({
-				orgId,
-				assetIdPrefix: org.assetIdPrefix,
-				color: org.color,
-				avatarLabel: org.avatarLabel,
-				address: hasAddress
-					? {
-							line1: billingAddress.line1,
-							line2: billingAddress.line2 || undefined,
-							postalCode: billingAddress.postalCode,
-							city: billingAddress.city
-						}
-					: null,
-				taxNumber: billingDraft.taxNumber || null,
-				vatId: billingDraft.vatId || null,
-				bankAccountHolder: billingDraft.bankAccountHolder || null,
-				iban: billingDraft.iban || null,
-				bic: billingDraft.bic || null,
-				bankName: billingDraft.bankName || null,
-				billingEmail: billingDraft.billingEmail || null,
-				billingWebsite: billingDraft.billingWebsite || null,
-				paymentTermsDays: Number(billingDraft.paymentTermsDays) || 14,
-				// A preset left at its default is stored as none, so the org follows
-				// the default when that changes.
-				offerIntroTemplate: customPreset(billingDraft.offerIntroTemplate, DEFAULT_OFFER_INTRO),
-				offerClosingTemplate: customPreset(
-					billingDraft.offerClosingTemplate,
-					DEFAULT_OFFER_CLOSING
-				),
-				invoiceIntroTemplate: customPreset(
-					billingDraft.invoiceIntroTemplate,
-					DEFAULT_INVOICE_INTRO
-				),
-				invoiceClosingTemplate: customPreset(
-					billingDraft.invoiceClosingTemplate,
-					DEFAULT_INVOICE_CLOSING
-				)
-			});
-			toast.success('Billing details updated');
-			editingBilling = false;
-		} catch (err) {
-			toast.error(getErrorMessage(err));
-		} finally {
-			savingBilling = false;
 		}
 	}
 </script>
 
 <svelte:head><title>{org?.name ?? ''} | Technikpool</title></svelte:head>
 
-<div class="space-y-6">
-	<div class="flex items-center gap-4">
-		<Button
-			variant="ghost"
-			href={resolve('orgs')}
-			class="flex items-center gap-1 text-muted-foreground"
-		>
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				width="16"
-				height="16"
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-			>
-				<path d="m15 18-6-6 6-6" />
-			</svg>
-			Organizations
-		</Button>
-	</div>
-
-	{#if !org}
-		<ContentSkeleton shape="form" count={6} error={orgQuery.error} />
-	{:else}
-		<div>
-			<div class="flex flex-wrap items-start justify-between gap-3">
-				<div class="min-w-0">
-					<h1 class="text-3xl font-bold tracking-tight break-words">{org.name}</h1>
-					<p class="text-muted-foreground">Manage members and roles.</p>
-				</div>
-				{#if canManage || canSeeValue}
-					<div class="flex flex-wrap items-center gap-2">
-						{#if canSeeValue}
-							<Button variant="outline" href={resolve(`orgs/${orgId}/value`)}
-								>Equipment value</Button
-							>
-						{/if}
-						{#if canManage}
-							<Button variant="outline" href={resolve(`orgs/${orgId}/locations`)}>Locations</Button>
-							<Button variant="outline" href={resolve(`orgs/${orgId}/rates`)}
-								>Rates & services</Button
-							>
-							<Button variant="destructive" onclick={() => (deleteOpen = true)}>Delete</Button>
-						{/if}
-					</div>
-				{/if}
-			</div>
-		</div>
-
-		<div class="grid gap-6 lg:grid-cols-3">
-			{#if canManage || canNumber}
-				<div class="space-y-6">
-					{#if canNumber}
-						{@render assetTagsCard(org.autoAssetTags, org.assetIdPrefix)}
-					{/if}
-					{#if canManage}
-						<Card.Root>
-							<Card.Header>
-								<Card.Title>Organization Settings</Card.Title>
-								<Card.Description>
-									Name, asset ID prefix, visual identity, DGUV default interval, and
-									Kleinunternehmer status.
-								</Card.Description>
-							</Card.Header>
-							<Card.Content>
-								{#if editingSettings}
-									<form onsubmit={handleSettingsSave} class="space-y-4">
-										<div class="space-y-2">
-											<Label for="nameInput">Name</Label>
-											<Input id="nameInput" bind:value={nameDraft} required maxlength={120} />
-											<p class="text-xs text-muted-foreground">
-												The full name, printed on offers, invoices and delivery notes. Documents
-												already issued keep the old one; drafts offer to take the new one.
-											</p>
-										</div>
-										<div class="space-y-2">
-											<Label for="shortNameInput"
-												>Short name <span class="text-muted-foreground">(optional)</span></Label
-											>
-											<Input
-												id="shortNameInput"
-												bind:value={shortNameDraft}
-												placeholder={org.name}
-												maxlength={24}
-											/>
-											<p class="text-xs text-muted-foreground">
-												Shown instead of the full name in tables and pickers. Invoices and offers
-												always use the full name.
-											</p>
-										</div>
-										<div class="space-y-2">
-											<Label for="prefixInput">Asset ID prefix</Label>
-											<Input
-												id="prefixInput"
-												bind:value={prefixDraft}
-												placeholder="123"
-												maxlength={3}
-												required
-												class="w-24"
-											/>
-										</div>
-										<div class="flex gap-4">
-											<div class="space-y-2">
-												<Label for="colorInput">Color</Label>
-												<div class="flex gap-2">
-													<Input
-														id="colorInput"
-														type="color"
-														bind:value={colorDraft}
-														class="h-10 w-14 p-1"
-													/>
-													<Input bind:value={colorDraft} class="w-28 font-mono" required />
-												</div>
-											</div>
-											<div class="space-y-2">
-												<Label for="avatarLabelInput">Avatar label</Label>
-												<Input
-													id="avatarLabelInput"
-													bind:value={avatarLabelDraft}
-													maxlength={2}
-													required
-													class="w-20 font-mono uppercase"
-												/>
-											</div>
-										</div>
-										<div class="space-y-2">
-											<span class="text-sm font-medium">Inspection intervals (months)</span>
-											<div class="grid gap-2 sm:grid-cols-2">
-												{#each inspectionTypes as type (type.id)}
-													<div class="flex items-center gap-2">
-														<Input
-															id="inspection-interval-{type.id}"
-															type="number"
-															min="1"
-															max="120"
-															bind:value={inspectionIntervalDrafts[type.id]}
-															placeholder="—"
-															class="w-20"
-														/>
-														<Label for="inspection-interval-{type.id}" class="font-normal"
-															>{inspectionTypeLabel(type)}</Label
-														>
-													</div>
-												{/each}
-											</div>
-											<p class="text-xs text-muted-foreground">
-												For devices whose product needs that inspection (set per category, or on the
-												product's page). A change applies to every device at once, except those with
-												an interval set for their product or of their own. A device never inspected
-												is due at once. Leave a type blank to not track it.
-											</p>
-										</div>
-										<label class="flex items-center gap-2 text-sm">
-											<input
-												type="checkbox"
-												bind:checked={isKleinunternehmerDraft}
-												class="h-4 w-4 rounded border-input"
-											/>
-											Kleinunternehmer (§19 UStG) — no VAT charged
-										</label>
-										<div class="flex gap-2">
-											<Button icon="save" type="submit" disabled={savingSettings}>
-												{savingSettings ? 'Saving…' : 'Save'}
-											</Button>
-											<Button
-												icon="close"
-												type="button"
-												variant="outline"
-												onclick={() => (editingSettings = false)}
-											>
-												Cancel
-											</Button>
-										</div>
-									</form>
-								{:else}
-									<div class="space-y-3">
-										<div class="flex items-center justify-between gap-4">
-											<span class="text-sm text-muted-foreground">Name</span>
-											<span class="text-right break-words">{org.name}</span>
-										</div>
-										<div class="flex items-center justify-between">
-											<span class="text-sm text-muted-foreground">Short name</span>
-											<span>{org.shortName || '—'}</span>
-										</div>
-										<div class="flex items-center justify-between">
-											<span class="text-sm text-muted-foreground">Asset ID prefix</span>
-											<span class="font-mono">{org.assetIdPrefix}</span>
-										</div>
-										<div class="flex items-center justify-between">
-											<span class="text-sm text-muted-foreground">Visual identity</span>
-											<OrgBadge
-												name={orgLabel(org)}
-												color={org.color}
-												avatarLabel={org.avatarLabel}
-											/>
-										</div>
-										{#each inspectionTypes as type (type.id)}
-											{@const months = intervals.get(type.id)}
-											<div class="flex items-center justify-between">
-												<span class="text-sm text-muted-foreground"
-													>Interval: {inspectionTypeLabel(type)}</span
-												>
-												<span>{months ? `${months} months` : 'Not tracked'}</span>
-											</div>
-										{/each}
-										<div class="flex items-center justify-between">
-											<span class="text-sm text-muted-foreground">Kleinunternehmer</span>
-											<span>{org.isKleinunternehmer ? 'Yes' : 'No'}</span>
-										</div>
-										<Button
-											icon="edit"
-											variant="outline"
-											size="sm"
-											class="w-full"
-											onclick={() => (editingSettings = true)}
-										>
-											Edit
-										</Button>
-									</div>
-								{/if}
-							</Card.Content>
-						</Card.Root>
-
-						<OrgLogoCard {orgId} logoPath={org.logoPath} />
-
-						{#if org.dpaAcceptances[0]}
-							<Card.Root>
-								<Card.Header>
-									<Card.Title>Data processing agreement</Card.Title>
-									<Card.Description>
-										Accepted with the operator of this server on {new Date(
-											org.dpaAcceptances[0].acceptedAt
-										).toLocaleDateString()}. The PDF shows who accepted which version, and when.
-									</Card.Description>
-								</Card.Header>
-								<Card.Content>
-									<Button
-										variant="outline"
-										size="sm"
-										href={resolve(`api/dpa-acceptances/${org.dpaAcceptances[0].id}`)}
-										target="_blank">Download PDF</Button
-									>
-								</Card.Content>
-							</Card.Root>
-						{/if}
-
-						<Card.Root id="billing" class="scroll-mt-20">
-							<Card.Header>
-								<Card.Title>Billing Details</Card.Title>
-								<Card.Description
-									>Address, tax numbers, and bank account — used on generated offers/invoices.</Card.Description
-								>
-							</Card.Header>
-							<Card.Content>
-								{#if editingBilling}
-									<form onsubmit={handleBillingSave} class="space-y-4">
-										<AddressInput bind:value={billingAddress} idPrefix="billing" />
-										<div class="grid gap-4 sm:grid-cols-2">
-											<div class="space-y-2">
-												<Label for="billingTaxNumber">Tax number (Steuernummer)</Label>
-												<Input
-													id="billingTaxNumber"
-													bind:value={billingDraft.taxNumber}
-													placeholder="12/345/67890"
-												/>
-											</div>
-											<div class="space-y-2">
-												<Label for="billingVatId">VAT ID (USt-IdNr.)</Label>
-												<Input
-													id="billingVatId"
-													bind:value={billingDraft.vatId}
-													placeholder="DE123456789"
-													class="font-mono"
-												/>
-											</div>
-											<p class="text-xs text-muted-foreground sm:col-span-2">
-												Invoices need at least one of the two and show both if both are set. Not
-												your personal tax ID (Steuer-ID) — that one does not belong on an invoice.
-											</p>
-										</div>
-										<div class="space-y-2">
-											<Label for="billingHolder">Bank account holder</Label>
-											<Input id="billingHolder" bind:value={billingDraft.bankAccountHolder} />
-										</div>
-										<div class="flex gap-4">
-											<div class="flex-1 space-y-2">
-												<Label for="billingIban">IBAN</Label>
-												<Input id="billingIban" bind:value={billingDraft.iban} class="font-mono" />
-											</div>
-											<div class="space-y-2">
-												<Label for="billingBic">BIC</Label>
-												<Input
-													id="billingBic"
-													bind:value={billingDraft.bic}
-													class="w-32 font-mono"
-												/>
-											</div>
-										</div>
-										{#if bankProblem}
-											<p class="text-xs text-destructive">{bankProblem}</p>
-										{/if}
-										<div class="space-y-2">
-											<Label for="billingBankName">Bank name</Label>
-											<Input id="billingBankName" bind:value={billingDraft.bankName} />
-										</div>
-										<div class="grid gap-4 sm:grid-cols-2">
-											<div class="space-y-2">
-												<Label for="billingEmail">Billing email</Label><Input
-													id="billingEmail"
-													type="email"
-													bind:value={billingDraft.billingEmail}
-												/>
-											</div>
-											<div class="space-y-2">
-												<Label for="billingWebsite">Website</Label><Input
-													id="billingWebsite"
-													bind:value={billingDraft.billingWebsite}
-												/>
-											</div>
-											<div class="space-y-2">
-												<Label for="paymentTerms">Payment term (days)</Label><Input
-													id="paymentTerms"
-													type="number"
-													min="0"
-													bind:value={billingDraft.paymentTermsDays}
-												/>
-											</div>
-										</div>
-										<div class="space-y-4 rounded-md border p-4">
-											<div>
-												<p class="font-medium">Document text presets</p>
-												<p class="text-sm text-muted-foreground">
-													Placeholders: {'{production}'}, {'{startDate}'}, {'{endDate}'}, {'{servicePeriod}'},
-													{'{customer}'}, {'{documentNumber}'}, {'{paymentTermsDays}'}
-												</p>
-												<p class="text-sm text-muted-foreground">
-													{'{rentalTermsDate}'} and {'{rentalTermsUrl}'} cite your rental terms. Without
-													rental terms, a line holding one of them is left out.
-												</p>
-											</div>
-											<div class="space-y-2">
-												<Label for="offerIntro">Offer introduction</Label><textarea
-													id="offerIntro"
-													bind:value={billingDraft.offerIntroTemplate}
-													rows="3"
-													class="w-full rounded-md border bg-background px-3 py-2 text-sm"
-												></textarea>
-											</div>
-											<div class="space-y-2">
-												<Label for="offerClosing">Offer closing</Label><textarea
-													id="offerClosing"
-													bind:value={billingDraft.offerClosingTemplate}
-													rows="3"
-													class="w-full rounded-md border bg-background px-3 py-2 text-sm"
-												></textarea>
-											</div>
-											<div class="space-y-2">
-												<Label for="invoiceIntro">Invoice introduction</Label><textarea
-													id="invoiceIntro"
-													bind:value={billingDraft.invoiceIntroTemplate}
-													rows="3"
-													class="w-full rounded-md border bg-background px-3 py-2 text-sm"
-												></textarea>
-											</div>
-											<div class="space-y-2">
-												<Label for="invoiceClosing">Invoice closing</Label><textarea
-													id="invoiceClosing"
-													bind:value={billingDraft.invoiceClosingTemplate}
-													rows="3"
-													class="w-full rounded-md border bg-background px-3 py-2 text-sm"
-												></textarea>
-											</div>
-										</div>
-										<div class="flex gap-2">
-											<Button icon="save" type="submit" disabled={savingBilling}>
-												{savingBilling ? 'Saving…' : 'Save'}
-											</Button>
-											<Button
-												icon="close"
-												type="button"
-												variant="outline"
-												onclick={() => (editingBilling = false)}
-											>
-												Cancel
-											</Button>
-										</div>
-									</form>
-								{:else}
-									<div class="space-y-3 text-sm">
-										<div>
-											<p class="text-muted-foreground">Address</p>
-											<p>
-												{#if org.address}
-													{org.address.line1}{#if org.address.line2}, {org.address.line2}{/if},
-													{org.address.postalCode}
-													{org.address.city}
-												{:else}
-													Not set
-												{/if}
-											</p>
-										</div>
-										<div>
-											<p class="text-muted-foreground">Tax number</p>
-											<p>{org.taxNumber ?? 'Not set'}</p>
-										</div>
-										<div>
-											<p class="text-muted-foreground">VAT ID</p>
-											<p>{org.vatId ?? 'Not set'}</p>
-										</div>
-										<div>
-											<p class="text-muted-foreground">Bank account</p>
-											<p>
-												{#if org.iban}
-													{org.bankAccountHolder ?? ''} · {org.iban} · {org.bic ?? ''}
-												{:else}
-													Not set
-												{/if}
-											</p>
-										</div>
-										<Button
-											icon="edit"
-											variant="outline"
-											size="sm"
-											class="w-full"
-											onclick={() => (editingBilling = true)}
-										>
-											Edit
-										</Button>
-									</div>
-								{/if}
-							</Card.Content>
-						</Card.Root>
-
-						<Card.Root>
-							<Card.Header>
-								<Card.Title>Data Export</Card.Title>
-								<Card.Description>
-									Download everything this organization owns — members, inventory, productions,
-									offers and invoices including the archived PDFs — as one JSON file.
-								</Card.Description>
-							</Card.Header>
-							<Card.Content>
-								<Button icon="download" variant="outline" href={`/api/orgs/${orgId}/export`}>
-									Export all data (JSON)
-								</Button>
-							</Card.Content>
-						</Card.Root>
-					{/if}
-					{#if canNumber}
-						<!-- Billing setup, so ADMIN+ like offers and invoices. -->
-						<RentalTermsCard {orgId} />
-					{/if}
-				</div>
-			{/if}
-
-			<div class="min-w-0 space-y-4 {canManage || canNumber ? 'lg:col-span-2' : 'lg:col-span-3'}">
-				<h2 class="text-xl font-semibold">Members ({org.members.length})</h2>
-
-				<!-- The roles are a ladder: each one carries everything below it. Spelling
-			     that out where members are managed is the only place it is actionable. -->
-				<Card.Root>
-					<Card.Content class="space-y-2 py-4">
-						<p class="text-sm font-medium">What the roles mean</p>
-						<dl class="space-y-1.5">
+{#if org}
+	<div class="space-y-6">
+		<Card.Root>
+			<Card.Header class="flex flex-row flex-wrap items-start justify-between gap-3">
+				<div class="space-y-1.5">
+					<Card.Title>Members ({org.members.length})</Card.Title>
+					<!-- The roles are a ladder: each one carries everything below it. Folded
+					     away, since it is looked up rather than read every time. -->
+					<details class="text-sm">
+						<summary class="cursor-pointer text-muted-foreground hover:text-foreground"
+							>What do the roles mean?</summary
+						>
+						<dl class="mt-2 space-y-1.5">
 							{#each ORG_ROLES as role (role)}
-								<div class="grid gap-x-3 sm:grid-cols-[5rem_1fr]">
-									<dt class="text-sm font-medium">{roleName(role)}</dt>
-									<dd class="text-sm text-muted-foreground">{roleSummary(role)}</dd>
+								<div class="grid gap-x-3 sm:grid-cols-[6rem_1fr]">
+									<dt class="font-medium">{roleName(role)}</dt>
+									<dd class="text-muted-foreground">{roleSummary(role)}</dd>
 								</div>
 							{/each}
 						</dl>
-					</Card.Content>
-				</Card.Root>
-				<div class="space-y-2">
+					</details>
+				</div>
+				{#if access.canManage}
+					<Button icon="add" onclick={openAdd}>Add member</Button>
+				{/if}
+			</Card.Header>
+			<Card.Content class="p-0">
+				<ul class="divide-y border-t">
 					{#each org.members as membership (membership.id)}
-						<Card.Root>
-							<Card.Content class="flex items-center justify-between py-3">
-								<div class="min-w-0 flex-1">
-									<div class="flex items-center gap-2">
-										<p class="truncate font-medium">
-											{membership.user.name || membership.user.email}
-										</p>
-										{#if membership.user.isAdmin}
-											<span
-												class="rounded bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary"
-											>
-												System Admin
-											</span>
-										{/if}
-									</div>
-									<p class="truncate text-sm text-muted-foreground">{membership.user.email}</p>
-									{#if qualificationsOf(membership.id).length > 0}
-										<div class="mt-1 flex flex-wrap gap-1">
-											{#each qualificationsOf(membership.id) as q (q.typeId)}
-												{@const type = inspectionTypes.find((t) => t.id === q.typeId)}
-												{@const lapsed = !!q.validUntil && new Date(q.validUntil) < new Date()}
-												<span
-													class="rounded border px-1.5 py-0.5 text-xs {lapsed
-														? 'border-destructive/40 text-destructive'
-														: 'text-muted-foreground'}"
-													title={q.validUntil
-														? `Valid until ${new Date(q.validUntil).toLocaleDateString('de-DE', { timeZone: 'UTC' })}`
-														: undefined}
-												>
-													{q.title}{type ? ` · ${inspectionTypeLabel(type)}` : ''}{lapsed
-														? ' · lapsed'
-														: ''}
-												</span>
-											{/each}
-										</div>
-									{/if}
-								</div>
-								<div class="ml-4 flex items-center gap-2">
-									{#if canQualify && qualifiableTypes.length > 0}
-										<Button
-											variant="outline"
-											size="sm"
-											onclick={() => {
-												qualifyTarget = {
-													id: membership.id,
-													name: membership.user.name || membership.user.email
-												};
-												qualifyOpen = true;
-											}}
-										>
-											Qualifications
-										</Button>
-									{/if}
-									{#if canManage && membership.userId !== data.user?.id}
-										<select
-											value={membership.role}
-											onchange={(e) =>
-												handleRoleChange(membership.userId, (e.target as HTMLSelectElement).value)}
-											class="h-8 rounded-md border border-input bg-background px-2 text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
-										>
-											{#each ORG_ROLES as role (role)}
-												<option value={role} title={roleSummary(role)}>{roleName(role)}</option>
-											{/each}
-										</select>
-										<Button
-											variant="destructive"
-											size="sm"
-											onclick={() =>
-												handleRemove(
-													membership.userId,
-													membership.user.name || membership.user.email
-												)}
-										>
-											Remove
-										</Button>
-									{:else}
+						{@const name = membership.user.name || membership.user.email}
+						<li class="flex flex-wrap items-center gap-3 px-6 py-3">
+							<div class="min-w-0 flex-1">
+								<div class="flex items-center gap-2">
+									<p class="truncate font-medium">{name}</p>
+									{#if membership.user.isAdmin}
 										<span
-											class="rounded-md border border-input bg-background px-2 py-1 text-sm text-muted-foreground"
+											class="rounded bg-primary/10 px-1.5 py-0.5 text-xs font-medium text-primary"
 										>
-											{roleName(membership.role)}
+											System Admin
 										</span>
 									{/if}
 								</div>
-							</Card.Content>
-						</Card.Root>
-					{/each}
-				</div>
-
-				<!-- Below the list it is describing: you read who is already in, then
-			     add. It also sits in the wide column now, so the two fields are
-			     side by side rather than stacked for a sidebar. -->
-				{#if canManage}
-					<Card.Root>
-						<Card.Header>
-							<Card.Title>Add Member</Card.Title>
-							<Card.Description
-								>Add someone by email. If they have no account yet, they get an invitation to create
-								one and join this organization.</Card.Description
-							>
-						</Card.Header>
-						<Card.Content>
-							<form onsubmit={handleAddUser} class="space-y-4">
-								<div class="grid gap-4 sm:grid-cols-2">
-									<div class="space-y-2">
-										<Label for="addEmail">Email address</Label>
-										<Input
-											id="addEmail"
-											type="email"
-											bind:value={addEmail}
-											placeholder="user@example.com"
-											required
-										/>
+								{#if membership.user.name}
+									<p class="truncate text-sm text-muted-foreground">{membership.user.email}</p>
+								{/if}
+								{#if qualificationsOf(membership.id).length > 0}
+									<div class="mt-1 flex flex-wrap gap-1">
+										{#each qualificationsOf(membership.id) as q (q.typeId)}
+											{@const type = inspectionTypes.find((t) => t.id === q.typeId)}
+											{@const lapsed = !!q.validUntil && new Date(q.validUntil) < new Date()}
+											<span
+												class="rounded border px-1.5 py-0.5 text-xs {lapsed
+													? 'border-destructive/40 text-destructive'
+													: 'text-muted-foreground'}"
+												title={q.validUntil
+													? `Valid until ${new Date(q.validUntil).toLocaleDateString('de-DE', { timeZone: 'UTC' })}`
+													: undefined}
+											>
+												{q.title}{type ? ` · ${inspectionTypeLabel(type)}` : ''}{lapsed
+													? ' · lapsed'
+													: ''}
+											</span>
+										{/each}
 									</div>
-									<div class="space-y-2">
-										<Label for="addRole">Role</Label>
-										<select
-											id="addRole"
-											bind:value={addRole}
-											class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
-										>
-											{#each ORG_ROLES as role (role)}
-												<option value={role}>{roleName(role)}</option>
-											{/each}
-										</select>
-									</div>
-								</div>
-								<p class="text-sm text-muted-foreground">{roleSummary(addRole)}</p>
-								<Button type="submit" disabled={adding}>
-									{adding ? 'Adding...' : 'Add Member'}
-								</Button>
-							</form>
-							{#if issued}
-								<div class="mt-4">
-									<InvitationLink {issued} onclose={() => (issued = null)} />
-								</div>
-							{/if}
-							<div class="mt-6 space-y-2">
-								<h3 class="text-sm font-medium">Open invitations</h3>
-								<InvitationList organizationId={orgId} onissued={(result) => (issued = result)} />
+								{/if}
 							</div>
-						</Card.Content>
-					</Card.Root>
-				{/if}
-			</div>
-		</div>
-	{/if}
-</div>
+							<div class="flex items-center gap-2">
+								{#if access.canInventory && qualifiableTypes.length > 0}
+									<Button
+										variant="outline"
+										size="sm"
+										onclick={() => {
+											qualifyTarget = { id: membership.id, name };
+											qualifyOpen = true;
+										}}
+									>
+										Qualifications
+									</Button>
+								{/if}
+								{#if access.canManage && membership.userId !== data.user?.id}
+									<select
+										value={membership.role}
+										onchange={(e) =>
+											handleRoleChange(membership.userId, (e.target as HTMLSelectElement).value)}
+										aria-label="Role"
+										class="h-8 rounded-md border border-input bg-background px-2 text-sm focus-visible:ring-2 focus-visible:ring-ring focus-visible:outline-none"
+									>
+										{#each ORG_ROLES as role (role)}
+											<option value={role} title={roleSummary(role)}>{roleName(role)}</option>
+										{/each}
+									</select>
+									<Button
+										icon="delete"
+										variant="ghost"
+										size="sm"
+										aria-label="Remove {name}"
+										onclick={() => handleRemove(membership.userId, name)}
+									/>
+								{:else}
+									<span class="text-sm text-muted-foreground">{roleName(membership.role)}</span>
+								{/if}
+							</div>
+						</li>
+					{/each}
+				</ul>
+			</Card.Content>
+		</Card.Root>
 
-<Modal bind:open={deleteOpen} title="Delete organization" dismissible={!deleting}>
-	{#snippet description()}
-		This permanently deletes the organization and all of its locations, assets, productions, offers,
-		and invoices.
-	{/snippet}
+		{#if access.canManage}
+			<Card.Root>
+				<Card.Header>
+					<Card.Title>Open invitations</Card.Title>
+					<Card.Description>
+						People invited by email who have not created their account yet.
+					</Card.Description>
+				</Card.Header>
+				<Card.Content>
+					<InvitationList organizationId={orgId} onissued={(result) => (issued = result)} />
+					{#if issued && !addOpen}
+						<div class="mt-4">
+							<InvitationLink {issued} onclose={() => (issued = null)} />
+						</div>
+					{/if}
+				</Card.Content>
+			</Card.Root>
+		{/if}
+	</div>
+{/if}
+
+<Modal bind:open={addOpen} title="Add member" dismissible={!adding}>
 	{#snippet children()}
-		<p class="text-sm">
-			Delete <span class="font-medium">{org?.name ?? ''}</span> and all of its data?
-		</p>
+		{#if issued}
+			<InvitationLink {issued} onclose={() => (issued = null)} />
+		{:else}
+			<form id="add-member" onsubmit={handleAddUser} class="space-y-4">
+				<p class="text-sm text-muted-foreground">
+					Add someone by email. If they have no account yet, they get an invitation to create one
+					and join this organization.
+				</p>
+				<div class="space-y-2">
+					<Label for="addEmail">Email address</Label>
+					<Input
+						id="addEmail"
+						type="email"
+						bind:value={addEmail}
+						placeholder="user@example.com"
+						required
+					/>
+				</div>
+				<div class="space-y-2">
+					<Label for="addRole">Role</Label>
+					<select
+						id="addRole"
+						bind:value={addRole}
+						class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:outline-none"
+					>
+						{#each ORG_ROLES as role (role)}
+							<option value={role}>{roleName(role)}</option>
+						{/each}
+					</select>
+					<p class="text-sm text-muted-foreground">{roleSummary(addRole)}</p>
+				</div>
+			</form>
+		{/if}
 	{/snippet}
 	{#snippet footer()}
-		<Button icon="delete" variant="destructive" onclick={handleDeleteOrg} disabled={deleting}>
-			{deleting ? 'Deleting…' : 'Delete organization'}
-		</Button>
-		<Button icon="close" variant="outline" onclick={() => (deleteOpen = false)} disabled={deleting}
-			>Cancel</Button
-		>
+		{#if issued}
+			<Button onclick={() => (addOpen = false)}>Done</Button>
+		{:else}
+			<Button type="submit" form="add-member" disabled={adding}>
+				{adding ? 'Adding…' : 'Add member'}
+			</Button>
+			<Button icon="close" variant="outline" disabled={adding} onclick={() => (addOpen = false)}>
+				Cancel
+			</Button>
+		{/if}
 	{/snippet}
 </Modal>
-
-<!-- Numbering units created without a tag. Its own card rather than a field of
-     the settings form, because an ADMIN may switch it and that form is the
-     OWNER's. It saves the moment it is ticked. -->
-{#snippet assetTagsCard(enabled: boolean, prefix: string)}
-	<Card.Root>
-		<Card.Header>
-			<Card.Title>Asset tags</Card.Title>
-			<Card.Description>
-				Give devices created without a tag the next number: the prefix {prefix} and five digits.
-			</Card.Description>
-		</Card.Header>
-		<Card.Content class="space-y-2">
-			<label class="flex cursor-pointer items-center gap-2 text-sm">
-				<input
-					type="checkbox"
-					checked={enabled}
-					disabled={savingAutoTags}
-					onchange={(e) => toggleAutoTags(e.currentTarget.checked)}
-					class="h-4 w-4 rounded border-input"
-				/>
-				Number new devices automatically
-			</label>
-			{#if enabled && nextTag}
-				<p class="text-xs text-muted-foreground">
-					Next number: <span class="font-mono">{nextTag}</span>. A number is never handed out twice,
-					even after its device is deleted.
-				</p>
-				{#if tagSuggestion?.counterAhead}
-					<div class="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted-foreground">
-						<span>
-							{#if tagSuggestion.highest}
-								The highest number in use is <span class="font-mono">{tagSuggestion.highest}</span>
-								— the counter is further ahead.
-							{:else}
-								No device carries a number yet, but the counter is further ahead.
-							{/if}
-						</span>
-						<button
-							type="button"
-							disabled={savingAutoTags}
-							onclick={resetCounter}
-							class="font-medium text-foreground underline underline-offset-2 hover:no-underline disabled:opacity-50"
-							>Reset counter to {tagSuggestion.resetTo}</button
-						>
-					</div>
-				{/if}
-			{:else if !enabled}
-				<p class="text-xs text-muted-foreground">
-					Off: a device gets its tag by typing or scanning the sticker.
-				</p>
-			{/if}
-		</Card.Content>
-	</Card.Root>
-{/snippet}
 
 {#if qualifyTarget}
 	<QualificationDialog

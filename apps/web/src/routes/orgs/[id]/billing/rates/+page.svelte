@@ -10,7 +10,6 @@
 		setOrgCategoryRate
 	} from '#lib/remote/orgs.remote.js';
 	import { page } from '$app/state';
-	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
 	import { SvelteMap, SvelteSet } from 'svelte/reactivity';
 	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
@@ -56,36 +55,9 @@
 
 <svelte:head><title>Rates & services | {org?.name ?? ''} | Technikpool</title></svelte:head>
 
-<div class="space-y-6">
-	<div class="flex items-center gap-4">
-		<Button
-			variant="ghost"
-			href={resolve(`orgs/${orgId}`)}
-			class="flex max-w-full min-w-0 items-center gap-1 text-muted-foreground"
-		>
-			<svg
-				xmlns="http://www.w3.org/2000/svg"
-				width="16"
-				height="16"
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				stroke-linecap="round"
-				stroke-linejoin="round"
-			>
-				<path d="m15 18-6-6 6-6" />
-			</svg>
-			<span class="truncate">{org?.name ?? ''}</span>
-		</Button>
-	</div>
-
-	<div>
-		<h1 class="text-3xl font-bold tracking-tight">Rates & services</h1>
-		<p class="text-muted-foreground">What offers and invoices are priced from.</p>
-	</div>
-
-	<Card.Root class="max-w-2xl">
+<!-- Side by side: the rates on the left, the service price list on the right. -->
+<div class="grid items-start gap-6 lg:grid-cols-2">
+	<Card.Root>
 		<Card.Header>
 			<Card.Title>Rental Rates</Card.Title>
 			<Card.Description>

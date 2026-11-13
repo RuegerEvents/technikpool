@@ -144,7 +144,7 @@
 		'h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:ring-2 focus:ring-ring focus:outline-none';
 </script>
 
-<Card.Root class="max-w-2xl">
+<Card.Root>
 	<Card.Header>
 		<Card.Title>Services</Card.Title>
 		<Card.Description>

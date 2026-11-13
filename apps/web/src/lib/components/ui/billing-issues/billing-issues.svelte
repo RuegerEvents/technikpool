@@ -24,7 +24,7 @@
 		{ key: 'lines', title: 'Line items' }
 	];
 
-	let billingHref = $derived(resolve(`orgs/${organizationId}`) + '#billing');
+	let billingHref = $derived(resolve(`orgs/${organizationId}/billing`) + '#edit');
 	const linkClass = 'underline underline-offset-2 hover:text-amber-950 dark:hover:text-amber-100';
 
 	let groups = $derived(

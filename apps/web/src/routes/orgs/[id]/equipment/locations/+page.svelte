@@ -18,7 +18,6 @@
 	} from '#lib/remote/assets.remote.js';
 	import { LocationSelect } from '#lib/components/ui/location-select/index.js';
 	import { page } from '$app/state';
-	import { resolve } from '$app/paths';
 	import { toast } from 'svelte-sonner';
 	import { Star } from '@lucide/svelte';
 	import { ContentSkeleton } from '#lib/components/ui/skeleton/index.js';
@@ -155,21 +154,11 @@
 <svelte:head><title>Locations – {org?.name ?? ''} | Technikpool</title></svelte:head>
 
 <div class="space-y-6">
-	<div class="flex items-center gap-4">
-		<Button variant="ghost" href={resolve(`orgs/${orgId}`)} class="-ml-3 text-muted-foreground">
-			← Organization
-		</Button>
-	</div>
-
-	<div class="flex flex-wrap items-start justify-between gap-4">
-		<div>
-			<h1 class="text-3xl font-bold tracking-tight">Locations</h1>
-			<p class="text-muted-foreground">Manage locations for {org?.name ?? '…'}.</p>
-		</div>
-		{#if canManage}
+	{#if canManage}
+		<div class="flex justify-end">
 			<Button icon="add" onclick={startCreate}>New Location</Button>
-		{/if}
-	</div>
+		</div>
+	{/if}
 
 	{#if !canManage}
 		<Card.Root>

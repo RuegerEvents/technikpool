@@ -59,7 +59,8 @@
 		page.url.pathname.startsWith('/share/') || page.url.pathname.startsWith('/rental-terms/')
 	);
 	let isCalendarRoute = $derived(page.url.pathname.startsWith('/calendar'));
-	let isEquipmentRoute = $derived(/\/equipment$/.test(page.url.pathname));
+	// The production planner fills the screen; an org's Equipment tab does not.
+	let isEquipmentRoute = $derived(/\/productions\/[^/]+\/equipment$/.test(page.url.pathname));
 
 	// Dark mode
 	let dark = $state(browser ? document.documentElement.classList.contains('dark') : false);

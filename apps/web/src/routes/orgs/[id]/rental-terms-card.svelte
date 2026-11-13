@@ -145,7 +145,7 @@
 							Your closing text for invoices doesn't mention the rental terms.
 						{/if}
 						Add a sentence with {'{rentalTermsDate}'} and {'{rentalTermsUrl}'} under
-						<a href={resolve(`orgs/${orgId}`) + '#billing'} class="underline underline-offset-2"
+						<a href={resolve(`orgs/${orgId}/billing`)} class="underline underline-offset-2"
 							>Billing Details</a
 						>. The offer is where the terms become part of the contract.
 					</p>

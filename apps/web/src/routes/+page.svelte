@@ -371,7 +371,7 @@
 		{#if homeOrg && billingIncomplete}
 			<!-- eslint-disable svelte/no-navigation-without-resolve -- resolved, plus a hash -->
 			<a
-				href={resolve(`orgs/${homeOrg.id}`) + '#billing'}
+				href={resolve(`orgs/${homeOrg.id}/billing`) + '#edit'}
 				class="group flex items-center gap-3 rounded-lg border border-amber-500/40 bg-amber-50/60 px-4 py-3 text-sm transition-colors hover:bg-amber-50 dark:bg-amber-950/20 dark:hover:bg-amber-950/40"
 			>
 				<!-- eslint-enable svelte/no-navigation-without-resolve -->
