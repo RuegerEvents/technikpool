@@ -1,4 +1,5 @@
-• New: DGUV inspection, under Scans › Stocktake. Pick the date and inspector once, then scan device after device — each scan records an inspection. Switch to "Failed" for a device that fails, and it is marked broken. Every entry can be undone. Needs the Admin role.
-• Lookup shows a device's inspection: its interval, when the next one is due and the latest inspections.
-• A kit's own sticker hands out, takes back or checks every unit in it, and the lists show a kit's units under its heading.
-• Product pictures in the accessory and kit questions and when counting. A finished handout now says "Ausgegeben", and scanning the same unit twice says so.
+• Print case labels: for a kit or a unit with accessories, a label with name, contents, logo and a scannable code on a ZPL label printer (e.g. Honeywell PC42E-T) on the warehouse network. Printer address under Settings.
+• Kits in the app: view them in Inventory and edit with the pencil – scan units in (whole kits too), take them out, add loose cables by count. New kits and new devices (with a new product as well, with or without a label) from “+”.
+• Inventory like the web: Bundle View, All Products, All Devices, with a forgiving search. Lookup now lives in Inventory: a scan or a typed number opens the unit or kit.
+• Hand-out list: hand out by name and count, pack into pack cases and print per-production case labels. When a scanned unit or kit swaps places with the booked one, the scan says so.
+• Safe from slips: what you look at opens to look at – changes go through the pencil or the ⋮ menu.
