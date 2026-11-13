@@ -259,18 +259,6 @@ abstract class S {
   /// **'Nothing scanned yet.'**
   String get sessionEmpty;
 
-  /// No description provided for @lookup.
-  ///
-  /// In en, this message translates to:
-  /// **'Look up'**
-  String get lookup;
-
-  /// No description provided for @lookupHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Scan a label to see its details.'**
-  String get lookupHint;
-
   /// No description provided for @serialNumber.
   ///
   /// In en, this message translates to:
@@ -706,7 +694,7 @@ abstract class S {
   /// No description provided for @demoTagHint.
   ///
   /// In en, this message translates to:
-  /// **'Try tag {tag} — Inventory lists them all'**
+  /// **'Try tag {tag}: type it and press search to open the unit'**
   String demoTagHint(String tag);
 
   /// No description provided for @statusDecommissioned.
@@ -1303,18 +1291,6 @@ abstract class S {
   /// **'Scan a sticker: it goes to the unit you tapped, or else to the next one without a tag.'**
   String get productTagHint;
 
-  /// No description provided for @productRegisterHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Every scanned sticker becomes a new unit here.'**
-  String get productRegisterHint;
-
-  /// No description provided for @productRegisterAt.
-  ///
-  /// In en, this message translates to:
-  /// **'New units go to'**
-  String get productRegisterAt;
-
   /// No description provided for @productNoUntagged.
   ///
   /// In en, this message translates to:
@@ -1344,12 +1320,6 @@ abstract class S {
   /// In en, this message translates to:
   /// **'{tag} registered'**
   String productRegistered(String tag);
-
-  /// No description provided for @productNeedsAdmin.
-  ///
-  /// In en, this message translates to:
-  /// **'Registering and tagging units takes ADMIN in {org}.'**
-  String productNeedsAdmin(String org);
 
   /// No description provided for @productUnitCount.
   ///
@@ -2400,6 +2370,462 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Defect reported · the unit is in maintenance'**
   String get defectReportedDone;
+
+  /// No description provided for @createNew.
+  ///
+  /// In en, this message translates to:
+  /// **'Create new'**
+  String get createNew;
+
+  /// No description provided for @bundle.
+  ///
+  /// In en, this message translates to:
+  /// **'Kit'**
+  String get bundle;
+
+  /// No description provided for @bundleNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New kit'**
+  String get bundleNew;
+
+  /// No description provided for @bundleNewHint.
+  ///
+  /// In en, this message translates to:
+  /// **'An empty case, filled by scanning'**
+  String get bundleNewHint;
+
+  /// No description provided for @bundleName.
+  ///
+  /// In en, this message translates to:
+  /// **'Name'**
+  String get bundleName;
+
+  /// No description provided for @bundleCategory.
+  ///
+  /// In en, this message translates to:
+  /// **'Category'**
+  String get bundleCategory;
+
+  /// No description provided for @bundleTag.
+  ///
+  /// In en, this message translates to:
+  /// **'Tag (optional)'**
+  String get bundleTag;
+
+  /// No description provided for @bundleTagHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan the case\'s sticker or type it'**
+  String get bundleTagHint;
+
+  /// No description provided for @bundleCaption.
+  ///
+  /// In en, this message translates to:
+  /// **'Description (optional)'**
+  String get bundleCaption;
+
+  /// No description provided for @bundleCreate.
+  ///
+  /// In en, this message translates to:
+  /// **'Create kit'**
+  String get bundleCreate;
+
+  /// No description provided for @bundleCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Kit {name} created'**
+  String bundleCreated(String name);
+
+  /// No description provided for @bundleEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Edit kit'**
+  String get bundleEdit;
+
+  /// No description provided for @bundleReadOnly.
+  ///
+  /// In en, this message translates to:
+  /// **'Only an admin of its organization can change this kit.'**
+  String get bundleReadOnly;
+
+  /// No description provided for @bundleScanHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan a device to put it in the kit'**
+  String get bundleScanHint;
+
+  /// No description provided for @bundleNoTag.
+  ///
+  /// In en, this message translates to:
+  /// **'No tag'**
+  String get bundleNoTag;
+
+  /// No description provided for @bundleUnitCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{1 unit} other{{count} units}}'**
+  String bundleUnitCount(int count);
+
+  /// No description provided for @bundleEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing in this kit yet.'**
+  String get bundleEmpty;
+
+  /// No description provided for @bundleEmptyEdit.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing in this kit yet. Scan a device to put it in, or add loose units by name.'**
+  String get bundleEmptyEdit;
+
+  /// No description provided for @bundleAccessory.
+  ///
+  /// In en, this message translates to:
+  /// **'Accessory'**
+  String get bundleAccessory;
+
+  /// No description provided for @bundleUnitOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Out on {production}'**
+  String bundleUnitOut(String production);
+
+  /// No description provided for @bundleScanAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is in the kit'**
+  String bundleScanAdded(String name);
+
+  /// No description provided for @bundleScanAlreadyIn.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} is already in this kit'**
+  String bundleScanAlreadyIn(String name);
+
+  /// No description provided for @bundleScanIsBundle.
+  ///
+  /// In en, this message translates to:
+  /// **'That is a kit\'s own tag. Kits do not go into kits.'**
+  String get bundleScanIsBundle;
+
+  /// No description provided for @bundleScanUnknown.
+  ///
+  /// In en, this message translates to:
+  /// **'The server did not say what happened to this scan.'**
+  String get bundleScanUnknown;
+
+  /// No description provided for @bundleMoveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'In another kit'**
+  String get bundleMoveTitle;
+
+  /// No description provided for @bundleMoveQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'{unit} is in kit {kit}. Take it out of there and put it in here?'**
+  String bundleMoveQuestion(String unit, String kit);
+
+  /// No description provided for @bundleMoveConfirm.
+  ///
+  /// In en, this message translates to:
+  /// **'Move here'**
+  String get bundleMoveConfirm;
+
+  /// No description provided for @bundleMoveSkipped.
+  ///
+  /// In en, this message translates to:
+  /// **'{unit} stays in {kit}'**
+  String bundleMoveSkipped(String unit, String kit);
+
+  /// No description provided for @bundleRemove.
+  ///
+  /// In en, this message translates to:
+  /// **'Take out'**
+  String get bundleRemove;
+
+  /// No description provided for @bundleRemoveTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Take out of the kit?'**
+  String get bundleRemoveTitle;
+
+  /// No description provided for @bundleRemoveQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Take {name} out of the kit? The unit stays where it is.'**
+  String bundleRemoveQuestion(String name);
+
+  /// No description provided for @bundleRemoveWithAccessories.
+  ///
+  /// In en, this message translates to:
+  /// **'Take {name} out of the kit? {count, plural, =1{Its accessory comes out with it.} other{Its {count} accessories come out with it.}}'**
+  String bundleRemoveWithAccessories(String name, int count);
+
+  /// No description provided for @bundleRemoved.
+  ///
+  /// In en, this message translates to:
+  /// **'{name} taken out'**
+  String bundleRemoved(String name);
+
+  /// No description provided for @bundleAddLoose.
+  ///
+  /// In en, this message translates to:
+  /// **'Add loose units'**
+  String get bundleAddLoose;
+
+  /// No description provided for @bundleLooseAdded.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} × {name} put in the kit'**
+  String bundleLooseAdded(int count, String name);
+
+  /// No description provided for @add.
+  ///
+  /// In en, this message translates to:
+  /// **'Add'**
+  String get add;
+
+  /// No description provided for @availableUntagged.
+  ///
+  /// In en, this message translates to:
+  /// **'{available} available ({untagged} without tag)'**
+  String availableUntagged(int available, int untagged);
+
+  /// No description provided for @searchMinLength.
+  ///
+  /// In en, this message translates to:
+  /// **'Type at least two letters.'**
+  String get searchMinLength;
+
+  /// No description provided for @countLess.
+  ///
+  /// In en, this message translates to:
+  /// **'One fewer'**
+  String get countLess;
+
+  /// No description provided for @countMore.
+  ///
+  /// In en, this message translates to:
+  /// **'One more'**
+  String get countMore;
+
+  /// No description provided for @handoutAddByName.
+  ///
+  /// In en, this message translates to:
+  /// **'Hand out by name'**
+  String get handoutAddByName;
+
+  /// No description provided for @handoutAddHandOut.
+  ///
+  /// In en, this message translates to:
+  /// **'Hand out'**
+  String get handoutAddHandOut;
+
+  /// No description provided for @handoutAddedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} × {name} handed out'**
+  String handoutAddedCount(int count, String name);
+
+  /// No description provided for @bundleEditDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done editing'**
+  String get bundleEditDone;
+
+  /// No description provided for @bundleScanViewMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Editing is off. Tap the pencil to put units in.'**
+  String get bundleScanViewMode;
+
+  /// No description provided for @done.
+  ///
+  /// In en, this message translates to:
+  /// **'Done'**
+  String get done;
+
+  /// No description provided for @deviceNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New device'**
+  String get deviceNew;
+
+  /// No description provided for @deviceNewHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Register units of a product, with or without a label'**
+  String get deviceNewHint;
+
+  /// No description provided for @deviceProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Product'**
+  String get deviceProduct;
+
+  /// No description provided for @deviceProductSearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search the catalogue'**
+  String get deviceProductSearch;
+
+  /// No description provided for @deviceProductChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Change'**
+  String get deviceProductChange;
+
+  /// No description provided for @deviceProductNew.
+  ///
+  /// In en, this message translates to:
+  /// **'New product'**
+  String get deviceProductNew;
+
+  /// No description provided for @deviceProductSearchInstead.
+  ///
+  /// In en, this message translates to:
+  /// **'Search the catalogue instead'**
+  String get deviceProductSearchInstead;
+
+  /// No description provided for @deviceProductName.
+  ///
+  /// In en, this message translates to:
+  /// **'Product name'**
+  String get deviceProductName;
+
+  /// No description provided for @deviceManufacturer.
+  ///
+  /// In en, this message translates to:
+  /// **'Manufacturer (optional)'**
+  String get deviceManufacturer;
+
+  /// No description provided for @deviceProductCreated.
+  ///
+  /// In en, this message translates to:
+  /// **'Product {name} created'**
+  String deviceProductCreated(String name);
+
+  /// No description provided for @deviceLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Location'**
+  String get deviceLocation;
+
+  /// No description provided for @deviceBundle.
+  ///
+  /// In en, this message translates to:
+  /// **'Into kit (optional)'**
+  String get deviceBundle;
+
+  /// No description provided for @deviceNoBundle.
+  ///
+  /// In en, this message translates to:
+  /// **'No kit'**
+  String get deviceNoBundle;
+
+  /// No description provided for @deviceModeScan.
+  ///
+  /// In en, this message translates to:
+  /// **'Scan labels'**
+  String get deviceModeScan;
+
+  /// No description provided for @deviceModeUntagged.
+  ///
+  /// In en, this message translates to:
+  /// **'Without label'**
+  String get deviceModeUntagged;
+
+  /// No description provided for @deviceScanHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Every scanned label becomes a new unit.'**
+  String get deviceScanHint;
+
+  /// No description provided for @deviceScanOtherMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Switch to “Scan labels” to register by scanning.'**
+  String get deviceScanOtherMode;
+
+  /// No description provided for @deviceUntaggedCount.
+  ///
+  /// In en, this message translates to:
+  /// **'How many?'**
+  String get deviceUntaggedCount;
+
+  /// No description provided for @deviceRegisterUntagged.
+  ///
+  /// In en, this message translates to:
+  /// **'{count, plural, =1{Register 1 unit} other{Register {count} units}}'**
+  String deviceRegisterUntagged(int count);
+
+  /// No description provided for @deviceRegisteredUntagged.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} × without label'**
+  String deviceRegisteredUntagged(int count);
+
+  /// No description provided for @deviceRegistered.
+  ///
+  /// In en, this message translates to:
+  /// **'Registered ({count})'**
+  String deviceRegistered(int count);
+
+  /// No description provided for @deviceNeedsProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a product first.'**
+  String get deviceNeedsProduct;
+
+  /// No description provided for @deviceNeedsNewProduct.
+  ///
+  /// In en, this message translates to:
+  /// **'Give the new product a name and a category.'**
+  String get deviceNeedsNewProduct;
+
+  /// No description provided for @deviceNeedsLocation.
+  ///
+  /// In en, this message translates to:
+  /// **'Pick a location first.'**
+  String get deviceNeedsLocation;
+
+  /// No description provided for @inventoryBundleView.
+  ///
+  /// In en, this message translates to:
+  /// **'Bundle View'**
+  String get inventoryBundleView;
+
+  /// No description provided for @inventoryAllProducts.
+  ///
+  /// In en, this message translates to:
+  /// **'All Products'**
+  String get inventoryAllProducts;
+
+  /// No description provided for @inventoryAllDevices.
+  ///
+  /// In en, this message translates to:
+  /// **'All Devices'**
+  String get inventoryAllDevices;
+
+  /// No description provided for @productScanViewMode.
+  ///
+  /// In en, this message translates to:
+  /// **'Nothing was changed. To tag units, choose “Tag units” in the ⋮ menu.'**
+  String get productScanViewMode;
+
+  /// No description provided for @productTagDone.
+  ///
+  /// In en, this message translates to:
+  /// **'Done assigning tags'**
+  String get productTagDone;
+
+  /// No description provided for @inventorySearch.
+  ///
+  /// In en, this message translates to:
+  /// **'Search, or enter a tag'**
+  String get inventorySearch;
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 
 /// A product's picture as a small square beside a row, as the web lists show
 /// it — so a unit is recognised before its name is read. A product without a
@@ -30,6 +31,14 @@ class ProductThumb extends StatelessWidget {
       padding: const EdgeInsets.all(1),
       alignment: Alignment.center,
       child: switch (url) {
+        // A kit's picture is an SVG the server composes from its products'
+        // photos, which Image.network cannot draw.
+        final url? when isSvgUrl(url) => SvgPicture.network(
+          url,
+          fit: BoxFit.contain,
+          placeholderBuilder: (_) => placeholder,
+          errorBuilder: (_, _, _) => placeholder,
+        ),
         final url? => Image.network(
           url,
           fit: BoxFit.contain,
@@ -42,3 +51,7 @@ class ProductThumb extends StatelessWidget {
     );
   }
 }
+
+/// Whether [url] names an SVG — by its path, whatever query string follows.
+bool isSvgUrl(String url) =>
+    (Uri.tryParse(url)?.path ?? url).toLowerCase().endsWith('.svg');

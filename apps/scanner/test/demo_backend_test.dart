@@ -27,7 +27,8 @@ void main() {
     expect(await api.inventory.listCategories(), hasLength(3));
     expect(
       (await api.inventory.listAssets()).items,
-      hasLength(DemoData.assets().length),
+      // The tagged fixture and the twelve untagged Schuko cables.
+      hasLength(DemoData.assets().length + 12),
     );
   });
 
@@ -820,5 +821,279 @@ void main() {
         failsWith('not_found'),
       );
     });
+  });
+
+  group('bundles', () {
+    final kitId = DemoData.cableKit.id;
+
+    test('lists the kit, finds it by what is in it, and opens it', () async {
+      final all = await api.bundles.listBundles();
+      expect(all.map((b) => b.id), contains(kitId));
+      // A search matches what the kit holds, not only its own name.
+      final byContent = await api.bundles.listBundles(q: 'xlr');
+      expect(byContent.single.id, kitId);
+      expect(await api.bundles.listBundles(q: 'nothing like it'), isEmpty);
+
+      final kit = await api.bundles.getBundle(bundleId: kitId);
+      expect(kit.unitCount, 3);
+      expect(kit.canEdit, isTrue);
+      expect(kit.location?.name, 'Lager Hamburg');
+    });
+
+    test('a scan puts a unit in, says what else it is, and moves on asking', () async {
+      final added = await api.bundles.scanIntoBundle(
+        bundleId: kitId,
+        body: const BundleScanRequest(code: '40000004'),
+      );
+      expect(added.outcome, BundleScanOutcome.added);
+      expect(added.bundle.unitCount, 4);
+
+      final again = await api.bundles.scanIntoBundle(
+        bundleId: kitId,
+        body: const BundleScanRequest(code: '40000004'),
+      );
+      expect(again.outcome, BundleScanOutcome.alreadyIn);
+
+      final unknown = await api.bundles.scanIntoBundle(
+        bundleId: kitId,
+        body: const BundleScanRequest(code: '49999999'),
+      );
+      expect(unknown.outcome, BundleScanOutcome.notFound);
+
+      final itself = await api.bundles.scanIntoBundle(
+        bundleId: kitId,
+        body: BundleScanRequest(code: DemoData.cableKit.tag),
+      );
+      expect(itself.outcome, BundleScanOutcome.isBundle);
+
+      // A second kit: the unit is in the first, so it is moved only on request.
+      final other = await api.bundles.createBundle(
+        body: const BundleCreateRequest(
+          organizationId: 'org_demo_nordlicht',
+          name: 'Lichtkiste',
+          categoryId: 'catg_demo_light',
+          tag: 'K-0002',
+        ),
+      );
+      expect(other.units, isEmpty);
+      final asked = await api.bundles.scanIntoBundle(
+        bundleId: other.id,
+        body: const BundleScanRequest(code: '40000004'),
+      );
+      expect(asked.outcome, BundleScanOutcome.inOtherBundle);
+      expect(asked.otherBundle?.name, DemoData.cableKit.name);
+      final moved = await api.bundles.scanIntoBundle(
+        bundleId: other.id,
+        body: const BundleScanRequest(code: '40000004', moveFromOtherBundle: true),
+      );
+      expect(moved.outcome, BundleScanOutcome.added);
+      expect((await api.bundles.getBundle(bundleId: kitId)).unitCount, 3);
+
+      // The new kit opens a case check by its tag like the seeded one.
+      final check = await api.caseCheck.getCaseCheckByCode(code: 'K-0002');
+      expect(check.id, other.id);
+      expect(check.items, hasLength(1));
+
+      final out = await api.bundles.removeFromBundle(
+        bundleId: other.id,
+        assetId: 'asset_demo_40000004',
+      );
+      expect(out.units, isEmpty);
+    });
+
+    test('loose cables go in by name, untagged first', () async {
+      expect(await api.bundles.searchLooseForBundle(bundleId: kitId, q: 's'), isEmpty);
+      final groups = await api.bundles.searchLooseForBundle(bundleId: kitId, q: 'schuko');
+      final schuko = groups.single;
+      expect(schuko.available, 12);
+      expect(schuko.untagged, 12);
+
+      final result = await api.bundles.addLooseToBundle(
+        bundleId: kitId,
+        body: LooseAddRequest(
+          productId: schuko.productId,
+          locationId: schuko.locationId,
+          count: 5,
+        ),
+      );
+      expect(result.count, 5);
+      expect(result.bundle.unitCount, 8);
+      final left = await api.bundles.searchLooseForBundle(bundleId: kitId, q: 'schuko');
+      expect(left.single.available, 7);
+    });
+
+    test('a kit of the other organization is read-only', () async {
+      final refused = api.bundles.createBundle(
+        body: const BundleCreateRequest(
+          organizationId: 'org_demo_buehnenwerk',
+          name: 'Fremde Kiste',
+          categoryId: 'catg_demo_sound',
+        ),
+      );
+      await expectLater(
+        refused,
+        throwsA(
+          isA<Object>().having(
+            (e) => (unwrapError(e) as ApiException).code,
+            'code',
+            'forbidden',
+          ),
+        ),
+      );
+    });
+  });
+
+  test('hands out what was never booked, found by name', () async {
+    const festival = 'prdn_demo_festival';
+    expect(
+      await api.productionHandout.searchProductionHandoutAdditions(
+        productionId: festival,
+        q: 'x',
+      ),
+      isEmpty,
+    );
+    // Ten of the twelve untagged Schuko cables are booked; two are free.
+    final hits = await api.productionHandout.searchProductionHandoutAdditions(
+      productionId: festival,
+      q: 'schuko',
+    );
+    final schuko = hits.single;
+    expect(schuko.available, 2);
+
+    final result = await api.productionHandout.handOutProductionAdditions(
+      productionId: festival,
+      body: HandoutAdditionRequest(
+        productId: schuko.productId,
+        ownerId: schuko.organizationId,
+        locationId: schuko.locationId,
+        count: 5,
+      ),
+    );
+    // Asked for more than there was: only what was free went out.
+    expect(result.count, 2);
+    final list = await api.productionHandout.getProductionHandout(
+      productionId: festival,
+      mode: HandoutMode.checkout,
+    );
+    expect(list.lines.single.total, 12);
+    expect(
+      await api.productionHandout.searchProductionHandoutAdditions(
+        productionId: festival,
+        q: 'schuko',
+      ),
+      isEmpty,
+    );
+  });
+
+  group('new devices', () {
+    const nordlicht = 'org_demo_nordlicht';
+    const warehouse = 'loc_demo_warehouse';
+    Matcher failsWith(String code) => throwsA(
+      isA<Object>().having(
+        (e) => (unwrapError(e) as ApiException).code,
+        'code',
+        code,
+      ),
+    );
+
+    test('a new product, then units of it by tag and without one', () async {
+      final product = await api.catalog.createProduct(
+        body: const ProductCreateRequest(
+          organizationId: nordlicht,
+          name: 'Powercon 3 m',
+          categoryId: 'catg_demo_light',
+        ),
+      );
+      // The same name again is refused, as the server's unique index does.
+      await expectLater(
+        api.catalog.createProduct(
+          body: const ProductCreateRequest(
+            organizationId: nordlicht,
+            name: 'powercon 3 m',
+            categoryId: 'catg_demo_light',
+          ),
+        ),
+        failsWith('conflict'),
+      );
+      final found = await api.catalog.listProducts(q: 'powercon');
+      expect(found.items.single.id, product.id);
+
+      final unit = await api.inventory.createAsset(
+        body: AssetCreateRequest(
+          productId: product.id,
+          organizationId: nordlicht,
+          locationId: warehouse,
+          assetTag: '40000100',
+          bundleId: DemoData.cableKit.id,
+        ),
+      );
+      expect(unit.bundleId, DemoData.cableKit.id);
+      expect((await api.inventory.getAssetByTag(tag: '40000100')).product.id, product.id);
+      await expectLater(
+        api.inventory.createAsset(
+          body: AssetCreateRequest(
+            productId: product.id,
+            organizationId: nordlicht,
+            locationId: warehouse,
+            assetTag: '40000100',
+          ),
+        ),
+        failsWith('asset_tag_in_use'),
+      );
+
+      final untagged = await api.inventory.createUntaggedAssets(
+        body: UntaggedAssetsRequest(
+          organizationId: nordlicht,
+          locationId: warehouse,
+          productId: product.id,
+          count: 4,
+          bundleId: DemoData.cableKit.id,
+        ),
+      );
+      expect(untagged.assets, hasLength(4));
+      expect(untagged.assets.every((a) => a.assetTag == null), isTrue);
+      final kit = await api.bundles.getBundle(bundleId: DemoData.cableKit.id);
+      expect(kit.unitCount, 3 + 1 + 4);
+    });
+
+    test('the other organization is refused', () async {
+      await expectLater(
+        api.inventory.createUntaggedAssets(
+          body: const UntaggedAssetsRequest(
+            organizationId: 'org_demo_buehnenwerk',
+            locationId: 'loc_demo_venue',
+            productId: 'prd_demo_xlr',
+            count: 2,
+          ),
+        ),
+        failsWith('forbidden'),
+      );
+      expect(await api.catalog.listManufacturers(), isNotEmpty);
+    });
+  });
+
+  test('counts the inventory by product, with or without kit members', () async {
+    final all = await api.inventory.listInventoryProducts();
+    final xlr = all.singleWhere((r) => r.product.id == 'prd_demo_xlr');
+    expect(xlr.count, 2);
+    final schuko = all.singleWhere((r) => r.product.name == 'Schuko 5 m');
+    expect(schuko.untagged, 12);
+
+    final loose = await api.inventory.listInventoryProducts(looseOnly: true);
+    expect(loose.where((r) => r.product.id == 'prd_demo_xlr'), isEmpty);
+
+    final narrowed = await api.inventory.listInventoryProducts(
+      q: 'k2',
+      locationId: 'loc_demo_warehouse',
+    );
+    expect(narrowed.single.product.name, 'K2');
+  });
+
+  test('a unit opens by id, with or without a tag', () async {
+    final tagged = await api.inventory.getAsset(assetId: 'asset_demo_40000001');
+    expect(tagged.assetTag, '40000001');
+    final untagged = await api.inventory.getAsset(assetId: 'asset_demo_schuko_1');
+    expect(untagged.assetTag, isNull);
+    expect(untagged.product.name, 'Schuko 5 m');
   });
 }

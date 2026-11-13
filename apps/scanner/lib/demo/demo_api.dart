@@ -5,6 +5,7 @@ import 'package:dio/dio.dart';
 
 import '../api/client.dart';
 import '../api/generated/export.dart';
+import '../natural_sort.dart';
 import '../product_label.dart';
 import 'demo_data.dart';
 
@@ -91,8 +92,38 @@ class DemoBackend {
       if (unknownProduction != null) return unknownProduction;
       return _ok(options, _listAssets(options));
     }
+    if (method == 'POST' && path == '/api/v1/assets') {
+      return _createAsset(options);
+    }
+    if (method == 'PUT' && path.startsWith('/api/v1/assets/') && path.endsWith('/tag')) {
+      return _setTag(options, Uri.decodeComponent(path.split('/')[4]));
+    }
+    if (method == 'POST' && path == '/api/v1/assets/untagged') {
+      return _createUntagged(options);
+    }
+    if (method == 'GET' && path == '/api/v1/products') {
+      return _ok(options, _listCatalog(options.queryParameters));
+    }
+    if (method == 'POST' && path == '/api/v1/products') {
+      return _createProduct(options);
+    }
+    if (method == 'GET' && path == '/api/v1/manufacturers') {
+      return _ok(options, _manufacturers());
+    }
     if (method == 'GET' && path.startsWith('/api/v1/assets/by-tag/')) {
       return _byTag(options, Uri.decodeComponent(path.split('/').last));
+    }
+    // ['', 'api', 'v1', 'assets', id]
+    if (method == 'GET' && path.startsWith('/api/v1/assets/') && path.split('/').length == 5) {
+      final id = Uri.decodeComponent(path.split('/').last);
+      final asset = _units.where((a) => a.id == id).firstOrNull;
+      if (asset == null) {
+        return _error(options, 404, 'asset_not_found', 'Unit not found');
+      }
+      return _ok(options, _assetDetail(asset));
+    }
+    if (method == 'GET' && path == '/api/v1/inventory/products') {
+      return _ok(options, _inventoryProducts(options.queryParameters));
     }
     if (method == 'POST' && path == '/api/v1/scans') {
       return _scan(options);
@@ -123,6 +154,9 @@ class DemoBackend {
     final segments = path.split('/');
     if (segments.length >= 7 && segments[3] == 'productions' && segments[5] == 'handout') {
       return _handoutRoute(options, method, segments);
+    }
+    if (path == '/api/v1/bundles' || path.startsWith('/api/v1/bundles/')) {
+      return _bundleRoute(options, method, path);
     }
     if (method == 'GET' && path == '/api/v1/inspection-types') {
       return _ok(options, _inspectionTypes);
@@ -164,7 +198,9 @@ class DemoBackend {
     final productionId = query['productionId'] as String?;
     final productId = query['productId'] as String?;
 
-    var matches = _assets.where((asset) {
+    // Every unit, the untagged cables included: the Inventory tab counts
+    // them by product, and a drawer of cables is stock like any other.
+    var matches = _units.where((asset) {
       if (productId != null && asset.product.id != productId) return false;
       if (categoryId != null && asset.product.category.id != categoryId) return false;
       if (locationId != null && asset.location.id != locationId) return false;
@@ -197,7 +233,12 @@ class DemoBackend {
     if (asset == null) {
       return _error(options, 404, 'asset_not_found', 'Tag "$tag" not found');
     }
-    final detail = AssetDetail(
+    return _ok(options, _assetDetail(asset));
+  }
+
+  /// What a unit's lookup answers, by tag or by id alike.
+  AssetDetail _assetDetail(Asset asset) {
+    return AssetDetail(
       id: asset.id,
       assetTag: asset.assetTag,
       serialNumber: asset.serialNumber,
@@ -214,7 +255,40 @@ class DemoBackend {
       nextInspectionDue: _inspectionDue(asset),
       inspections: _inspectionsOf(asset).take(10).toList(),
     );
-    return _ok(options, detail);
+  }
+
+  /// Mirrors `listInventoryProducts`: the units by product and organization,
+  /// counted here, only rows with any, by product name. With `looseOnly` a
+  /// unit in a kit is left out — its kit is the row it is on.
+  List<InventoryProduct> _inventoryProducts(Map<String, dynamic> query) {
+    final q = '${query['q'] ?? ''}'.trim();
+    final orgId = query['organizationId'] as String?;
+    final locationId = query['locationId'] as String?;
+    final categoryId = query['categoryId'] as String?;
+    final looseOnly = '${query['looseOnly']}' == 'true';
+    final groups = <String, List<Asset>>{};
+    for (final a in _units) {
+      if (a.status == AssetStatus.sold || a.status == AssetStatus.decommissioned) continue;
+      if (orgId != null && a.organization.id != orgId) continue;
+      if (locationId != null && a.location.id != locationId) continue;
+      if (categoryId != null && a.product.category.id != categoryId) continue;
+      if (looseOnly && a.bundleId != null) continue;
+      if (q.isNotEmpty && !_matches(a.product, q)) continue;
+      groups.putIfAbsent('${a.product.id}|${a.organization.id}', () => []).add(a);
+    }
+    return [
+      for (final units in groups.values)
+        InventoryProduct(
+          product: units.first.product,
+          organizationId: units.first.organization.id,
+          organizationName: units.first.organization.name,
+          count: units.length,
+          available: units
+              .where((u) => u.status == AssetStatus.available && !_checkedOutTo.containsKey(u.id))
+              .length,
+          untagged: units.where((u) => u.assetTag == null).length,
+        ),
+    ]..sort((a, b) => naturalCompare(a.product.name, b.product.name));
   }
 
   Response<dynamic> _scan(RequestOptions options) {
@@ -1037,6 +1111,15 @@ class DemoBackend {
     final body = options.data is Map ? options.data as Map : const {};
     final byId = {for (final a in _units) a.id: a};
 
+    if (sub == 'additions') {
+      if (mode != HandoutMode.checkout) {
+        return _error(options, 404, 'not_found', 'Additions are on the checkout list only.');
+      }
+      return method == 'GET'
+          ? _ok(options, _handoutAdditions(production, options.queryParameters))
+          : _handOutAdditions(options, production, body);
+    }
+
     switch ((method, sub)) {
       case ('GET', null):
         return _ok(options, _handoutView(production, mode));
@@ -1123,6 +1206,68 @@ class DemoBackend {
     return _error(options, 404, 'not_found', 'Not available in the demo');
   }
 
+  /// Mirrors `searchHandoutAdditions`: the side's free units of a product
+  /// matching the search, not on this list, in no kit, grouped by product,
+  /// shelf and owner. Nothing below two characters.
+  List<HandoutAddition> _handoutAdditions(Production p, Map<String, dynamic> query) {
+    final q = '${query['q'] ?? ''}'.trim();
+    if (q.length < 2) return const [];
+    final side = query['organizationId'] as String? ?? p.organization.id;
+    final groups = <String, List<Asset>>{};
+    for (final a in _additionCandidates(p, side)) {
+      if (!_matches(a.product, q)) continue;
+      groups.putIfAbsent(_additionKey(a), () => []).add(a);
+    }
+    return [
+      for (final MapEntry(:key, value: units) in groups.entries)
+        HandoutAddition(
+          key: key,
+          productId: units.first.product.id,
+          organizationId: units.first.organization.id,
+          locationId: units.first.location.id,
+          productName: units.first.product.name,
+          productCaption: units.first.product.caption,
+          productImageUrl: units.first.product.imageUrl,
+          manufacturerName: units.first.product.manufacturerName,
+          locationName: units.first.location.name,
+          organizationName:
+              units.first.organization.shortName ?? units.first.organization.name,
+          available: units.length,
+          untagged: units.where((u) => u.assetTag == null).length,
+        ),
+    ]..sort((a, b) => naturalCompare(a.productName, b.productName));
+  }
+
+  Response<dynamic> _handOutAdditions(RequestOptions options, Production p, Map body) {
+    final side = body['organizationId'] as String? ?? p.organization.id;
+    final count = (body['count'] as num? ?? 0).toInt();
+    final key = '${body['productId']}|${body['locationId']}|${body['ownerId']}';
+    if (count < 1) {
+      return _error(options, 400, 'invalid_request', 'count must be at least 1.');
+    }
+    final picked = _untaggedFirst(
+      _additionCandidates(p, side).where((a) => _additionKey(a) == key),
+    ).take(count).toList();
+    for (final asset in picked) {
+      _handOut(asset, p);
+    }
+    return _ok(options, CountResult(count: picked.length));
+  }
+
+  /// The side's units that could still go out on [p]: free, on no list, in
+  /// no kit, not an accessory.
+  Iterable<Asset> _additionCandidates(Production p, String side) => _units.where(
+    (a) =>
+        a.organization.id == side &&
+        a.status == AssetStatus.available &&
+        a.bundleId == null &&
+        a.parentAssetId == null &&
+        !_checkedOutTo.containsKey(a.id) &&
+        !(_booked[p.id]?.contains(a.id) ?? false),
+  );
+
+  String _additionKey(Asset a) => '${a.product.id}|${a.location.id}|${a.organization.id}';
+
   ProductionHandout _handoutView(Production p, HandoutMode mode) {
     final list = _handoutList(p, mode);
     return ProductionHandout(
@@ -1177,8 +1322,8 @@ class DemoBackend {
   final _lastCaseCheck = <String, CaseCheckLast>{};
 
   Response<dynamic> _openCase(RequestOptions options, String code) {
-    final kit = DemoData.cableKit;
-    if (code.trim() == kit.tag) {
+    final kit = _bundles.values.where((b) => b.tag == code.trim()).firstOrNull;
+    if (kit != null) {
       return _ok(options, _case(CaseKind.bundle, kit.id, null));
     }
     final match = _resolve(code);
@@ -1212,7 +1357,7 @@ class DemoBackend {
   }
 
   List<Asset> _caseUnits(CaseKind kind, String id) => kind == CaseKind.bundle
-      ? _assets.where((a) => a.bundleId == id).toList()
+      ? _units.where((a) => a.bundleId == id).toList()
       : [
           ..._assets.where((a) => a.id == id),
           ..._assets.where((a) => a.parentAssetId == id),
@@ -1234,13 +1379,14 @@ class DemoBackend {
     final units = _caseUnits(kind, id);
     final home = _caseProductionId(units);
     final inCase = {for (final u in units) u.id};
-    final name = kind == CaseKind.bundle
-        ? '${DemoData.cableKit.name} (${DemoData.cableKit.tag})'
+    final kit = kind == CaseKind.bundle ? _bundles[id] : null;
+    final name = kit != null
+        ? (kit.tag == null ? kit.name : '${kit.name} (${kit.tag})')
         : units.first.product.name;
     return CaseCheck(
       kind: kind,
       id: id,
-      tag: kind == CaseKind.bundle ? DemoData.cableKit.tag : null,
+      tag: kit?.tag,
       name: name,
       checkedOutTo: home == null
           ? null
@@ -1347,6 +1493,551 @@ class DemoBackend {
       options,
       CaseCheckResult(found: foundCount, missing: missing, away: away),
     );
+  }
+
+  // ---------------------------------------------------------------------------
+  // The catalogue and new units — mirrors services/products.ts and the
+  // asset endpoints. The catalogue is every product a unit is of, plus the
+  // ones made here.
+
+  final _madeProducts = <Product>[];
+  var _unitSeq = 0;
+
+  List<Product> get _catalogue {
+    final byId = <String, Product>{};
+    for (final a in _units) {
+      byId[a.product.id] = a.product;
+    }
+    for (final p in _madeProducts) {
+      byId[p.id] = p;
+    }
+    return byId.values.toList();
+  }
+
+  CatalogProductPage _listCatalog(Map<String, dynamic> query) {
+    final q = '${query['q'] ?? ''}'.trim();
+    final limit = int.tryParse('${query['limit'] ?? ''}') ?? 50;
+    final matches = _catalogue.where((p) => q.isEmpty || _matches(p, q)).toList()
+      ..sort((a, b) => naturalCompare(a.name, b.name));
+    return CatalogProductPage(
+      items: [
+        for (final p in matches.take(limit))
+          CatalogProduct(
+            id: p.id,
+            name: p.name,
+            manufacturerName: p.manufacturerName,
+            caption: p.caption,
+            category: p.category,
+            imageUrl: p.imageUrl,
+            cable: p.cable,
+            requiresInspection: DemoData.inspectionIntervals.containsKey(p.id),
+            inspectionRequired: DemoData.inspectionIntervals.containsKey(p.id),
+            isLicense: false,
+            mainsConnectors: const [],
+            units: CatalogProductUnits(
+              active: _units.where((a) => a.product.id == p.id).length,
+              tracked: 0,
+              overdue: 0,
+            ),
+          ),
+      ],
+      nextCursor: null,
+    );
+  }
+
+  List<Manufacturer> _manufacturers() {
+    final counts = <String, int>{};
+    for (final p in _catalogue) {
+      if (p.manufacturerName case final name?) counts[name] = (counts[name] ?? 0) + 1;
+    }
+    return [
+      for (final MapEntry(key: name, value: count) in counts.entries)
+        Manufacturer(id: 'mfr_demo_${name.toLowerCase()}', name: name, productCount: count),
+    ]..sort((a, b) => naturalCompare(a.name, b.name));
+  }
+
+  /// The demo account may register for its own organization only — the rule
+  /// kits and inspections follow here, for the same reason.
+  bool _mayRegister(Object? orgId) => orgId == DemoData.nordlicht.id;
+
+  Response<dynamic> _createProduct(RequestOptions options) {
+    final body = options.data is Map ? options.data as Map : const {};
+    String? text(Object? value) {
+      final trimmed = value is String ? value.trim() : '';
+      return trimmed.isEmpty ? null : trimmed;
+    }
+
+    final name = text(body['name']);
+    final manufacturer = text(body['manufacturerName']);
+    final category = DemoData.categories.where((c) => c.id == body['categoryId']).firstOrNull;
+    if (name == null || category == null) {
+      return _error(options, 400, 'invalid_request', 'name and categoryId are required.');
+    }
+    if (!_mayRegister(body['organizationId'])) {
+      return _error(options, 403, 'forbidden', 'Only an admin may add to the catalogue');
+    }
+    final taken = _catalogue.any(
+      (p) =>
+          p.name.toLowerCase() == name.toLowerCase() &&
+          (p.manufacturerName ?? '').toLowerCase() == (manufacturer ?? '').toLowerCase(),
+    );
+    if (taken) {
+      return _error(
+        options,
+        409,
+        'conflict',
+        '${productLabel(manufacturer, name)} is in the catalogue already.',
+      );
+    }
+    final product = Product(
+      id: 'prd_demo_new_${_madeProducts.length + 1}',
+      name: name,
+      manufacturerName: manufacturer,
+      caption: text(body['caption']),
+      category: category,
+    );
+    _madeProducts.add(product);
+    return _ok(options, product, status: 201);
+  }
+
+  /// What a new unit needs, checked as the server checks it; the error to
+  /// answer with, or the product, location and kit it is made with.
+  ({Response<dynamic>? error, Product? product, Location? location, String? bundleId})
+  _unitTarget(RequestOptions options, Map body) {
+    Response<dynamic> fail(int status, String code, String message) =>
+        _error(options, status, code, message);
+    final product = _catalogue.where((p) => p.id == body['productId']).firstOrNull;
+    final location = DemoData.locations.where((l) => l.id == body['locationId']).firstOrNull;
+    final bundleId = body['bundleId'] as String?;
+    if (product == null || location == null) {
+      return (
+        error: fail(404, 'not_found', 'Product or location not found'),
+        product: null,
+        location: null,
+        bundleId: null,
+      );
+    }
+    if (!_mayRegister(body['organizationId']) ||
+        location.organization.id != body['organizationId']) {
+      return (
+        error: fail(403, 'forbidden', 'Only an admin may register units here'),
+        product: null,
+        location: null,
+        bundleId: null,
+      );
+    }
+    if (bundleId != null && _bundles[bundleId]?.organization.id != body['organizationId']) {
+      return (
+        error: fail(404, 'not_found', 'Kit not found'),
+        product: null,
+        location: null,
+        bundleId: null,
+      );
+    }
+    return (error: null, product: product, location: location, bundleId: bundleId);
+  }
+
+  Asset _newUnit(Product product, Location location, String? tag, String? bundleId) => Asset(
+    id: 'asset_demo_new_${++_unitSeq}',
+    assetTag: tag,
+    serialNumber: null,
+    orgIndex: 300 + _unitSeq,
+    status: AssetStatus.available,
+    product: product,
+    location: location,
+    organization: location.organization,
+    bundleId: bundleId,
+    parentAssetId: null,
+  );
+
+  Response<dynamic> _createAsset(RequestOptions options) {
+    final body = options.data is Map ? options.data as Map : const {};
+    final tag = '${body['assetTag'] ?? ''}'.trim();
+    if (tag.isEmpty) return _error(options, 400, 'invalid_request', 'assetTag is required.');
+    final target = _unitTarget(options, body);
+    if (target.error case final error?) return error;
+    if (_assets.any((a) => a.assetTag == tag) || _bundles.values.any((b) => b.tag == tag)) {
+      return _error(options, 409, 'asset_tag_in_use', 'Tag "$tag" is already in use');
+    }
+    final asset = _newUnit(target.product!, target.location!, tag, target.bundleId);
+    _assets.add(asset);
+    _log(asset, 'CREATED', '');
+    return _ok(options, asset, status: 201);
+  }
+
+  /// Gives an untagged unit the sticker just scanned. It joins the tagged
+  /// units, so Lookup finds it by that tag from now on.
+  Response<dynamic> _setTag(RequestOptions options, String assetId) {
+    final body = options.data is Map ? options.data as Map : const {};
+    final tag = '${body['assetTag'] ?? ''}'.trim();
+    if (tag.isEmpty) return _error(options, 400, 'invalid_request', 'assetTag is required.');
+    final unit = _units.where((a) => a.id == assetId).firstOrNull;
+    if (unit == null) return _error(options, 404, 'asset_not_found', 'Unit not found');
+    if (!_mayRegister(unit.organization.id)) {
+      return _error(options, 403, 'forbidden', 'Only an admin may tag units here');
+    }
+    if (unit.assetTag != null) {
+      return _error(options, 409, 'asset_already_tagged', 'This unit already has a tag');
+    }
+    if (_assets.any((a) => a.assetTag == tag) || _bundles.values.any((b) => b.tag == tag)) {
+      return _error(options, 409, 'asset_tag_in_use', 'Tag "$tag" is already in use');
+    }
+    final tagged = Asset(
+      id: unit.id,
+      assetTag: tag,
+      serialNumber: unit.serialNumber,
+      orgIndex: unit.orgIndex,
+      status: unit.status,
+      product: unit.product,
+      location: unit.location,
+      organization: unit.organization,
+      bundleId: unit.bundleId,
+      parentAssetId: unit.parentAssetId,
+    );
+    _looseUnits.removeWhere((a) => a.id == unit.id);
+    final index = _assets.indexWhere((a) => a.id == unit.id);
+    if (index >= 0) {
+      _assets[index] = tagged;
+    } else {
+      _assets.add(tagged);
+    }
+    return _ok(options, tagged);
+  }
+
+  Response<dynamic> _createUntagged(RequestOptions options) {
+    final body = options.data is Map ? options.data as Map : const {};
+    final count = (body['count'] as num? ?? 0).toInt();
+    if (count < 1 || count > 200) {
+      return _error(options, 400, 'invalid_request', 'count is 1 to 200.');
+    }
+    final target = _unitTarget(options, body);
+    if (target.error case final error?) return error;
+    final made = [
+      for (var i = 0; i < count; i++)
+        _newUnit(target.product!, target.location!, null, target.bundleId),
+    ];
+    // With the other untagged units: they have no tag to look up.
+    _looseUnits.addAll(made);
+    return _ok(options, AssetCreateResult(assets: made), status: 201);
+  }
+
+  // ---------------------------------------------------------------------------
+  // Kits — mirrors services/bundles.ts. Membership is the unit's `bundleId`,
+  // as on the server; the kit itself is a row of its own here.
+
+  late final Map<String, _DemoBundle> _bundles = {
+    DemoData.cableKit.id: _DemoBundle(
+      id: DemoData.cableKit.id,
+      name: DemoData.cableKit.name,
+      caption: null,
+      tag: DemoData.cableKit.tag,
+      categoryName: 'Ton',
+      organization: DemoData.nordlicht,
+    ),
+  };
+  var _bundleSeq = 0;
+
+  /// As with inspections: the demo account is a MEMBER on paper, which could
+  /// change no kit at all, so it may edit its own organization's.
+  bool _mayEditKit(_DemoBundle kit) => kit.organization.id == DemoData.nordlicht.id;
+
+  Response<dynamic> _bundleRoute(RequestOptions options, String method, String path) {
+    // ['', 'api', 'v1', 'bundles', id?, sub?, assetId?]
+    final parts = path.split('/');
+    final body = options.data is Map ? options.data as Map : const {};
+    if (parts.length == 4) {
+      return method == 'POST'
+          ? _createBundle(options, body)
+          : _ok(options, _listBundles(options.queryParameters));
+    }
+    final kit = _bundles[Uri.decodeComponent(parts[4])];
+    if (kit == null) return _error(options, 404, 'not_found', 'Kit not found');
+    final sub = parts.length > 5 ? parts[5] : null;
+    if (method == 'GET' && sub == null) return _ok(options, _bundleDetail(kit));
+    if (method == 'GET' && sub == 'loose') {
+      return _ok(options, _looseGroups(kit, '${options.queryParameters['q'] ?? ''}'));
+    }
+    if (!_mayEditKit(kit)) {
+      return _error(options, 403, 'forbidden', 'Only an admin may change this kit');
+    }
+    switch ((method, sub)) {
+      case ('POST', 'scans'):
+        return _scanIntoBundle(options, kit, body);
+      case ('DELETE', 'units') when parts.length > 6:
+        final assetId = Uri.decodeComponent(parts[6]);
+        final asset = _units.where((a) => a.id == assetId && a.bundleId == kit.id).firstOrNull;
+        if (asset == null) return _error(options, 404, 'not_found', 'Not in this kit');
+        _putInKit(asset, null);
+        return _ok(options, _bundleDetail(kit));
+      case ('POST', 'loose'):
+        final key = '${body['productId']}|${body['locationId']}';
+        final count = (body['count'] as num? ?? 0).toInt();
+        if (count < 1) {
+          return _error(options, 400, 'invalid_request', 'count must be at least 1.');
+        }
+        final picked = _untaggedFirst(
+          _looseFor(kit).where((a) => '${a.product.id}|${a.location.id}' == key),
+        ).take(count).toList();
+        for (final asset in picked) {
+          _putInKit(asset, kit.id);
+        }
+        return _ok(options, LooseAddResult(count: picked.length, bundle: _bundleDetail(kit)));
+    }
+    return _error(options, 404, 'not_found', 'Not available in the demo');
+  }
+
+  List<BundleSummary> _listBundles(Map<String, dynamic> query) {
+    final orgId = query['organizationId'] as String?;
+    final q = '${query['q'] ?? ''}'.trim();
+    final kits = _bundles.values.where((kit) {
+      if (orgId != null && kit.organization.id != orgId) return false;
+      if (q.isEmpty) return true;
+      final words = q.toLowerCase().split(RegExp(r'\s+'));
+      final text = [
+        kit.name,
+        kit.caption ?? '',
+        kit.tag ?? '',
+        for (final a in _units.where((a) => a.bundleId == kit.id))
+          '${a.product.manufacturerName ?? ''} ${a.product.name} ${a.assetTag ?? ''}',
+      ].join(' ').toLowerCase();
+      return words.every(text.contains);
+    }).toList()..sort((a, b) => naturalCompare(a.name, b.name));
+    return [
+      for (final kit in kits)
+        BundleSummary(
+          id: kit.id,
+          name: kit.name,
+          caption: kit.caption,
+          tag: kit.tag,
+          imageUrl: null,
+          categoryName: kit.categoryName,
+          organizationId: kit.organization.id,
+          location: _kitLocation(kit),
+          unitCount: _units.where((a) => a.bundleId == kit.id).length,
+        ),
+    ];
+  }
+
+  Response<dynamic> _createBundle(RequestOptions options, Map body) {
+    final name = '${body['name'] ?? ''}'.trim();
+    final orgId = '${body['organizationId'] ?? ''}';
+    final category = DemoData.categories
+        .where((c) => c.id == body['categoryId'])
+        .firstOrNull;
+    final organization = [
+      DemoData.nordlicht,
+      DemoData.buehnenwerk,
+    ].where((o) => o.id == orgId).firstOrNull;
+    if (name.isEmpty || category == null || organization == null) {
+      return _error(
+        options,
+        400,
+        'invalid_request',
+        'organizationId, name and categoryId are required.',
+      );
+    }
+    String? text(Object? value) {
+      final trimmed = value is String ? value.trim() : '';
+      return trimmed.isEmpty ? null : trimmed;
+    }
+
+    final tag = text(body['tag']);
+    final kit = _DemoBundle(
+      id: 'bundle_demo_new_${++_bundleSeq}',
+      name: name,
+      caption: text(body['caption']),
+      tag: tag,
+      categoryName: category.name,
+      organization: organization,
+    );
+    if (!_mayEditKit(kit)) {
+      return _error(options, 403, 'forbidden', 'Only an admin may make a kit');
+    }
+    if (tag != null &&
+        (_bundles.values.any((b) => b.tag == tag) || _assets.any((a) => a.assetTag == tag))) {
+      return _error(options, 409, 'conflict', 'The tag $tag is taken.');
+    }
+    _bundles[kit.id] = kit;
+    return _ok(options, _bundleDetail(kit), status: 201);
+  }
+
+  Response<dynamic> _scanIntoBundle(RequestOptions options, _DemoBundle kit, Map body) {
+    final code = '${body['code'] ?? ''}'.trim();
+    if (code.isEmpty) return _error(options, 400, 'invalid_request', 'code is required.');
+    final move = body['moveFromOtherBundle'] == true;
+    BundleScanResult answer(BundleScanOutcome outcome, {String? assetId, LocationRef? other}) =>
+        BundleScanResult(
+          outcome: outcome,
+          assetId: assetId,
+          otherBundle: other,
+          bundle: _bundleDetail(kit),
+        );
+
+    if (_bundles.values.any((b) => b.tag == code)) {
+      return _ok(options, answer(BundleScanOutcome.isBundle));
+    }
+    final match = _resolve(code);
+    if (match.ambiguous) return _ok(options, answer(BundleScanOutcome.ambiguous));
+    var asset = match.asset;
+    if (asset == null) return _ok(options, answer(BundleScanOutcome.notFound));
+    // An accessory's tag puts in the unit it hangs off.
+    if (asset.parentAssetId case final parentId?) {
+      asset = _units.firstWhere((a) => a.id == parentId);
+    }
+    if (asset.bundleId == kit.id) {
+      return _ok(options, answer(BundleScanOutcome.alreadyIn, assetId: asset.id));
+    }
+    if (asset.organization.id != kit.organization.id) {
+      return _error(options, 403, 'forbidden', 'This unit belongs to another organization');
+    }
+    if (asset.status == AssetStatus.sold || asset.status == AssetStatus.decommissioned) {
+      return _error(options, 409, 'conflict', 'A retired unit goes into no kit.');
+    }
+    if (asset.bundleId case final otherId? when !move) {
+      final other = _bundles[otherId];
+      return _ok(
+        options,
+        answer(
+          BundleScanOutcome.inOtherBundle,
+          assetId: asset.id,
+          other: LocationRef(id: otherId, name: other?.name ?? otherId),
+        ),
+      );
+    }
+    _putInKit(asset, kit.id);
+    return _ok(options, answer(BundleScanOutcome.added, assetId: asset.id));
+  }
+
+  List<LooseGroup> _looseGroups(_DemoBundle kit, String q) {
+    if (q.trim().length < 2) return const [];
+    final groups = <String, List<Asset>>{};
+    for (final a in _looseFor(kit)) {
+      if (!_matches(a.product, q)) continue;
+      groups.putIfAbsent('${a.product.id}|${a.location.id}', () => []).add(a);
+    }
+    return [
+      for (final MapEntry(:key, value: units) in groups.entries)
+        LooseGroup(
+          key: key,
+          productId: units.first.product.id,
+          locationId: units.first.location.id,
+          productName: units.first.product.name,
+          productCaption: units.first.product.caption,
+          productImageUrl: units.first.product.imageUrl,
+          manufacturerName: units.first.product.manufacturerName,
+          locationName: units.first.location.name,
+          available: units.length,
+          untagged: units.where((u) => u.assetTag == null).length,
+        ),
+    ]..sort((a, b) => naturalCompare(a.productName, b.productName));
+  }
+
+  /// The kit's organization's units in no kit and not out.
+  Iterable<Asset> _looseFor(_DemoBundle kit) => _units.where(
+    (a) =>
+        a.organization.id == kit.organization.id &&
+        a.bundleId == null &&
+        a.parentAssetId == null &&
+        a.status != AssetStatus.sold &&
+        a.status != AssetStatus.decommissioned &&
+        !_checkedOutTo.containsKey(a.id),
+  );
+
+  BundleDetail _bundleDetail(_DemoBundle kit) {
+    final inKit = _units.where((a) => a.bundleId == kit.id).toList();
+    final ids = {for (final a in inKit) a.id};
+    // Each unit followed by its accessories, as the server lists them.
+    final heads = inKit.where((a) => !ids.contains(a.parentAssetId)).toList()
+      ..sort((a, b) => naturalCompare(a.product.name, b.product.name));
+    final ordered = [
+      for (final head in heads) ...[
+        head,
+        ...inKit.where((a) => a.parentAssetId == head.id),
+      ],
+    ];
+    return BundleDetail(
+      id: kit.id,
+      name: kit.name,
+      caption: kit.caption,
+      tag: kit.tag,
+      imageUrl: null,
+      categoryName: kit.categoryName,
+      organizationId: kit.organization.id,
+      location: _kitLocation(kit),
+      unitCount: inKit.length,
+      canEdit: _mayEditKit(kit),
+      units: [
+        for (final a in ordered)
+          BundleUnit(
+            id: a.id,
+            assetTag: a.assetTag,
+            serialNumber: a.serialNumber,
+            orgIndex: a.orgIndex ?? 0,
+            status: a.status.toJson(),
+            parentAssetId: ids.contains(a.parentAssetId) ? a.parentAssetId : null,
+            productId: a.product.id,
+            productName: a.product.name,
+            productCaption: a.product.caption,
+            manufacturerName: a.product.manufacturerName,
+            productImageUrl: a.product.imageUrl,
+            location: LocationRef(id: a.location.id, name: a.location.name),
+            checkedOutTo: _checkedOutTo[a.id]?.name,
+          ),
+      ],
+    );
+  }
+
+  /// Where most of the kit is kept; none while it is empty.
+  LocationRef? _kitLocation(_DemoBundle kit) {
+    final tally = <String, ({Location location, int count})>{};
+    for (final a in _units.where((a) => a.bundleId == kit.id)) {
+      final seen = tally[a.location.id];
+      tally[a.location.id] = (location: a.location, count: (seen?.count ?? 0) + 1);
+    }
+    if (tally.isEmpty) return null;
+    final top = tally.values.reduce((a, b) => b.count > a.count ? b : a).location;
+    return LocationRef(id: top.id, name: top.name);
+  }
+
+  /// Puts a unit, with its accessories, into a kit — or out of one with null.
+  void _putInKit(Asset asset, String? bundleId) {
+    for (final unit in [asset, ..._units.where((a) => a.parentAssetId == asset.id)]) {
+      final copy = Asset(
+        id: unit.id,
+        assetTag: unit.assetTag,
+        serialNumber: unit.serialNumber,
+        orgIndex: unit.orgIndex,
+        status: unit.status,
+        product: unit.product,
+        location: unit.location,
+        organization: unit.organization,
+        bundleId: bundleId,
+        parentAssetId: unit.parentAssetId,
+      );
+      final index = _assets.indexWhere((a) => a.id == unit.id);
+      if (index >= 0) {
+        _assets[index] = copy;
+      } else {
+        final loose = _looseUnits.indexWhere((a) => a.id == unit.id);
+        if (loose >= 0) _looseUnits[loose] = copy;
+      }
+    }
+  }
+
+  /// Untagged units first, then by unit number — the order the server takes
+  /// a number of one product in.
+  static List<Asset> _untaggedFirst(Iterable<Asset> units) => units.toList()
+    ..sort((a, b) {
+      final byTag = (a.assetTag == null ? 0 : 1).compareTo(b.assetTag == null ? 0 : 1);
+      return byTag != 0 ? byTag : (a.orgIndex ?? 0).compareTo(b.orgIndex ?? 0);
+    });
+
+  /// Every word of [q] somewhere in the product's full name — a plain stand-in
+  /// for the server's forgiving search.
+  static bool _matches(Product product, String q) {
+    final text = '${product.manufacturerName ?? ''} ${product.name} ${product.caption ?? ''}'
+        .toLowerCase();
+    return q.trim().toLowerCase().split(RegExp(r'\s+')).every(text.contains);
   }
 
   // ---------------------------------------------------------------------------
@@ -1932,6 +2623,25 @@ class _DemoItem {
 /// An [ApiClient] wired to a [DemoBackend] instead of the network.
 ApiClient demoApiClient(DemoBackend backend) =>
     ApiClient(baseUrl: demoBaseUrl, dio: backend.dio());
+
+/// A kit held in memory — see `_bundleRoute`.
+class _DemoBundle {
+  _DemoBundle({
+    required this.id,
+    required this.name,
+    required this.caption,
+    required this.tag,
+    required this.categoryName,
+    required this.organization,
+  });
+
+  final String id;
+  final String name;
+  final String? caption;
+  final String? tag;
+  final String categoryName;
+  final Organization organization;
+}
 
 /// A production check held in memory — see `_startCheck`.
 class _DemoCheck {

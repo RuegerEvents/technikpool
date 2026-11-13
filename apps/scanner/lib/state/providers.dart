@@ -8,6 +8,7 @@ import '../api/auth_service.dart';
 import '../api/client.dart';
 import '../api/generated/export.dart';
 import '../demo/demo_api.dart';
+import '../inventory_rows.dart';
 import '../print/label_printer.dart';
 import '../scan/scan_bus.dart';
 import '../scan/scan_channel.dart';
@@ -25,6 +26,7 @@ const _kScanTones = 'scan_tones';
 const _kInspectorName = 'inspector_name';
 const _kLabelPrinter = 'label_printer';
 const _kLabelSize = 'label_size';
+const _kInventoryGrouping = 'inventory_grouping';
 
 final storageProvider = Provider((_) => const FlutterSecureStorage());
 
@@ -45,7 +47,7 @@ final scanBusProvider = Provider<ScanBus>((ref) {
   return bus;
 });
 
-enum HomeTab { session, lookup, inventory, settings }
+enum HomeTab { session, inventory, settings }
 
 /// Which tab of the home screen is in front. The tabs live in an IndexedStack,
 /// so they all stay mounted and all hear every scan — a screen has to know it
@@ -461,3 +463,51 @@ class StocktakeLocations extends Notifier<Map<String, String>> {
 
 final stocktakeLocationProvider =
     NotifierProvider<StocktakeLocations, Map<String, String>>(StocktakeLocations.new);
+
+/// The kits of the user's organizations, filtered by a search (empty = all).
+/// The server does the forgiving search, so the client only passes the text.
+/// Invalidated whenever a kit is made or its contents change, so the list on
+/// the Inventory tab follows what was done on a kit's screen.
+final bundlesProvider = FutureProvider.autoDispose.family<List<BundleSummary>, String>(
+  (ref, q) => _requireApi(ref).bundles.listBundles(q: q.isEmpty ? null : q),
+);
+
+/// The manufacturers the catalogue knows, as suggestions for a new product.
+final manufacturersProvider = FutureProvider<List<Manufacturer>>(
+  (ref) => _requireApi(ref).catalog.listManufacturers(),
+);
+
+/// Bumped whenever units are registered, so a list that shows them — the
+/// Inventory tab — reloads instead of missing what was just made.
+class UnitsChanged extends Notifier<int> {
+  @override
+  int build() => 0;
+
+  void bump() => state++;
+}
+
+final unitsChangedProvider = NotifierProvider<UnitsChanged, int>(UnitsChanged.new);
+
+/// How the Inventory tab groups its list, remembered per device like the
+/// other settings. The bundle view unless changed.
+class InventoryGroupingNotifier extends AsyncNotifier<InventoryGrouping> {
+  FlutterSecureStorage get _storage => ref.read(storageProvider);
+
+  @override
+  Future<InventoryGrouping> build() async {
+    final stored = await _storage.read(key: _kInventoryGrouping);
+    return InventoryGrouping.values.where((g) => g.name == stored).firstOrNull ??
+        InventoryGrouping.bundles;
+  }
+
+  Future<void> save(InventoryGrouping grouping) async {
+    if (state.value == grouping) return;
+    state = AsyncData(grouping);
+    await _storage.write(key: _kInventoryGrouping, value: grouping.name);
+  }
+}
+
+final inventoryGroupingProvider =
+    AsyncNotifierProvider<InventoryGroupingNotifier, InventoryGrouping>(
+      InventoryGroupingNotifier.new,
+    );

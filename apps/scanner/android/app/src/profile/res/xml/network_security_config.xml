@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
   Overrides the release config in src/main for profile builds only: any cleartext
-  host, so `pnpm --filter web dev` on 0.0.0.0 can be reached at the dev
+  host, so the web dev server on 0.0.0.0 can be reached at the dev
   machine's LAN address without knowing it in advance. Never merged into a
   release build.
 -->

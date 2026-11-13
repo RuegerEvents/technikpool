@@ -11,6 +11,7 @@ import '../scan/camera_scan_screen.dart';
 import '../scan/scan_tones.dart';
 import '../state/providers.dart';
 import '../theme.dart';
+import 'bundle_screen.dart';
 import 'case_label_screen.dart';
 
 /// Checking one case (Kiste checken): scan the case — a kit's tag, or any unit
@@ -21,10 +22,14 @@ import 'case_label_screen.dart';
 /// round trip. Only a code that is not on the list goes back to the server, to
 /// say what it is. See services/case-check.ts on the web.
 class CaseCheckScreen extends ConsumerStatefulWidget {
-  const CaseCheckScreen({super.key, this.initialCode});
+  const CaseCheckScreen({super.key, this.initialCode, this.showEdit = true});
 
   /// A code to open the case with straight away — the unit just looked up.
   final String? initialCode;
+
+  /// Whether a kit offers its own screen to edit it. Off when this check was
+  /// opened from that screen, which is one step back.
+  final bool showEdit;
 
   @override
   ConsumerState<CaseCheckScreen> createState() => _CaseCheckScreenState();
@@ -45,6 +50,12 @@ class _CaseCheckScreenState extends ConsumerState<CaseCheckScreen> {
   final _found = <String>{};
   final _foreign = <({String code, String? name})>[];
   CaseCheckResult? _result;
+
+  /// The code the case was opened with, to open it again after editing.
+  String? _openedWith;
+
+  /// While the kit's own screen is in front, its scans are its own.
+  bool _editing = false;
   ({_Tone tone, String title, String? detail})? _last;
 
   @override
@@ -65,7 +76,7 @@ class _CaseCheckScreenState extends ConsumerState<CaseCheckScreen> {
 
   void _enqueue(String code) {
     final trimmed = code.trim();
-    if (trimmed.isEmpty) return;
+    if (trimmed.isEmpty || _editing) return;
     _queue = _queue.then((_) => _submit(trimmed));
   }
 
@@ -136,6 +147,7 @@ class _CaseCheckScreenState extends ConsumerState<CaseCheckScreen> {
       if (!mounted) return;
       setState(() {
         _case = check;
+        _openedWith = code;
         _found
           ..clear()
           ..addAll([?check.scannedAssetId]);
@@ -208,6 +220,37 @@ class _CaseCheckScreenState extends ConsumerState<CaseCheckScreen> {
     }
   }
 
+  /// The kit's own screen, to put units in or take them out. The list in hand
+  /// is read again afterwards, keeping the ticks of what is still in it.
+  Future<void> _edit(CaseCheck check) async {
+    setState(() => _editing = true);
+    await Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) =>
+            BundleScreen(bundleId: check.id, name: check.name, startEditing: true),
+      ),
+    );
+    if (!mounted) return;
+    setState(() => _editing = false);
+    final api = ref.read(apiClientProvider);
+    final code = check.tag ?? _openedWith;
+    if (api == null || code == null || _result != null) return;
+    setState(() => _busy = true);
+    try {
+      final fresh = await api.caseCheck.getCaseCheckByCode(code: code);
+      if (!mounted) return;
+      final ids = {for (final item in fresh.items) item.assetId};
+      setState(() {
+        _case = fresh;
+        _found.retainWhere(ids.contains);
+      });
+    } catch (_) {
+      // The unit it was opened with may have left the kit; the old list stands.
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   void _next() => setState(() {
     _case = null;
     _result = null;
@@ -234,6 +277,12 @@ class _CaseCheckScreenState extends ConsumerState<CaseCheckScreen> {
       appBar: AppBar(
         title: Text(check?.name ?? l10n.caseCheck),
         actions: [
+          if (check != null && check.kind == CaseKind.bundle && widget.showEdit)
+            IconButton(
+              tooltip: l10n.bundleEdit,
+              onPressed: () => _edit(check),
+              icon: const Icon(Icons.edit_outlined),
+            ),
           if (check != null)
             IconButton(
               tooltip: l10n.caseLabel,

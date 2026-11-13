@@ -95,13 +95,6 @@ class SDe extends S {
   String get sessionEmpty => 'Noch nichts gescannt.';
 
   @override
-  String get lookup => 'Nachschlagen';
-
-  @override
-  String get lookupHint =>
-      'Inventar- oder Seriennummer scannen, um Details zu sehen.';
-
-  @override
   String get serialNumber => 'Seriennummer';
 
   @override
@@ -333,7 +326,7 @@ class SDe extends S {
 
   @override
   String demoTagHint(String tag) {
-    return 'Inventarnummer $tag probieren — im Inventar stehen alle';
+    return 'Inventarnummer $tag probieren: eingeben und suchen öffnet das Gerät';
   }
 
   @override
@@ -681,13 +674,6 @@ class SDe extends S {
       'Inventarnummer scannen: sie kommt an das angetippte Gerät, sonst an das nächste ohne Inventarnummer.';
 
   @override
-  String get productRegisterHint =>
-      'Jede gescannte Inventarnummer wird ein neues Gerät hier.';
-
-  @override
-  String get productRegisterAt => 'Neue Geräte nach';
-
-  @override
   String get productNoUntagged =>
       'Alle Geräte haben schon eine Inventarnummer.';
 
@@ -705,11 +691,6 @@ class SDe extends S {
   @override
   String productRegistered(String tag) {
     return '$tag angelegt';
-  }
-
-  @override
-  String productNeedsAdmin(String org) {
-    return 'Geräte anlegen und Inventarnummern vergeben braucht ADMIN in $org.';
   }
 
   @override
@@ -1409,4 +1390,293 @@ class SDe extends S {
 
   @override
   String get defectReportedDone => 'Defekt gemeldet · das Gerät ist in Wartung';
+
+  @override
+  String get createNew => 'Neu anlegen';
+
+  @override
+  String get bundle => 'Bundle';
+
+  @override
+  String get bundleNew => 'Neues Bundle';
+
+  @override
+  String get bundleNewHint => 'Eine leere Kiste, gefüllt per Scan';
+
+  @override
+  String get bundleName => 'Name';
+
+  @override
+  String get bundleCategory => 'Kategorie';
+
+  @override
+  String get bundleTag => 'Inventarnummer (optional)';
+
+  @override
+  String get bundleTagHint => 'Etikett der Kiste scannen oder eintippen';
+
+  @override
+  String get bundleCaption => 'Beschreibung (optional)';
+
+  @override
+  String get bundleCreate => 'Bundle anlegen';
+
+  @override
+  String bundleCreated(String name) {
+    return 'Bundle $name angelegt';
+  }
+
+  @override
+  String get bundleEdit => 'Bundle bearbeiten';
+
+  @override
+  String get bundleReadOnly =>
+      'Nur ein Admin der Organisation kann dieses Bundle ändern.';
+
+  @override
+  String get bundleScanHint => 'Gerät scannen, um es ins Bundle zu legen';
+
+  @override
+  String get bundleNoTag => 'Ohne Etikett';
+
+  @override
+  String bundleUnitCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Geräte',
+      one: '1 Gerät',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bundleEmpty => 'Noch nichts in diesem Bundle.';
+
+  @override
+  String get bundleEmptyEdit =>
+      'Noch nichts in diesem Bundle. Scanne ein Gerät, um es hineinzulegen, oder füge lose Geräte per Name hinzu.';
+
+  @override
+  String get bundleAccessory => 'Zubehör';
+
+  @override
+  String bundleUnitOut(String production) {
+    return 'Unterwegs bei $production';
+  }
+
+  @override
+  String bundleScanAdded(String name) {
+    return '$name liegt jetzt im Bundle';
+  }
+
+  @override
+  String bundleScanAlreadyIn(String name) {
+    return '$name ist schon in diesem Bundle';
+  }
+
+  @override
+  String get bundleScanIsBundle =>
+      'Das ist die Nummer eines Bundles. Bundles kommen nicht in Bundles.';
+
+  @override
+  String get bundleScanUnknown =>
+      'Der Server hat nicht gesagt, was mit diesem Scan passiert ist.';
+
+  @override
+  String get bundleMoveTitle => 'In einem anderen Bundle';
+
+  @override
+  String bundleMoveQuestion(String unit, String kit) {
+    return '$unit liegt im Bundle $kit. Dort herausnehmen und hier hineinlegen?';
+  }
+
+  @override
+  String get bundleMoveConfirm => 'Hierher umlegen';
+
+  @override
+  String bundleMoveSkipped(String unit, String kit) {
+    return '$unit bleibt in $kit';
+  }
+
+  @override
+  String get bundleRemove => 'Herausnehmen';
+
+  @override
+  String get bundleRemoveTitle => 'Aus dem Bundle nehmen?';
+
+  @override
+  String bundleRemoveQuestion(String name) {
+    return '$name aus dem Bundle nehmen? Das Gerät bleibt, wo es ist.';
+  }
+
+  @override
+  String bundleRemoveWithAccessories(String name, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Die $count Zubehörteile kommen mit.',
+      one: 'Das Zubehör kommt mit.',
+    );
+    return '$name aus dem Bundle nehmen? $_temp0';
+  }
+
+  @override
+  String bundleRemoved(String name) {
+    return '$name herausgenommen';
+  }
+
+  @override
+  String get bundleAddLoose => 'Lose Geräte hinzufügen';
+
+  @override
+  String bundleLooseAdded(int count, String name) {
+    return '$count × $name ins Bundle gelegt';
+  }
+
+  @override
+  String get add => 'Hinzufügen';
+
+  @override
+  String availableUntagged(int available, int untagged) {
+    return '$available verfügbar ($untagged ohne Etikett)';
+  }
+
+  @override
+  String get searchMinLength => 'Mindestens zwei Buchstaben eingeben.';
+
+  @override
+  String get countLess => 'Eins weniger';
+
+  @override
+  String get countMore => 'Eins mehr';
+
+  @override
+  String get handoutAddByName => 'Per Name ausgeben';
+
+  @override
+  String get handoutAddHandOut => 'Ausgeben';
+
+  @override
+  String handoutAddedCount(int count, String name) {
+    return '$count × $name ausgegeben';
+  }
+
+  @override
+  String get bundleEditDone => 'Bearbeiten beenden';
+
+  @override
+  String get bundleScanViewMode =>
+      'Bearbeiten ist aus. Tippe auf den Stift, um Geräte hineinzulegen.';
+
+  @override
+  String get done => 'Fertig';
+
+  @override
+  String get deviceNew => 'Neues Gerät';
+
+  @override
+  String get deviceNewHint =>
+      'Geräte eines Produkts erfassen, mit oder ohne Etikett';
+
+  @override
+  String get deviceProduct => 'Produkt';
+
+  @override
+  String get deviceProductSearch => 'Im Katalog suchen';
+
+  @override
+  String get deviceProductChange => 'Ändern';
+
+  @override
+  String get deviceProductNew => 'Neues Produkt';
+
+  @override
+  String get deviceProductSearchInstead => 'Doch im Katalog suchen';
+
+  @override
+  String get deviceProductName => 'Produktname';
+
+  @override
+  String get deviceManufacturer => 'Hersteller (optional)';
+
+  @override
+  String deviceProductCreated(String name) {
+    return 'Produkt $name angelegt';
+  }
+
+  @override
+  String get deviceLocation => 'Lagerort';
+
+  @override
+  String get deviceBundle => 'In Bundle (optional)';
+
+  @override
+  String get deviceNoBundle => 'Kein Bundle';
+
+  @override
+  String get deviceModeScan => 'Etiketten scannen';
+
+  @override
+  String get deviceModeUntagged => 'Ohne Etikett';
+
+  @override
+  String get deviceScanHint => 'Jedes gescannte Etikett wird ein neues Gerät.';
+
+  @override
+  String get deviceScanOtherMode =>
+      'Zum Erfassen per Scan auf „Etiketten scannen“ wechseln.';
+
+  @override
+  String get deviceUntaggedCount => 'Wie viele?';
+
+  @override
+  String deviceRegisterUntagged(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count Geräte erfassen',
+      one: '1 Gerät erfassen',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deviceRegisteredUntagged(int count) {
+    return '$count × ohne Etikett';
+  }
+
+  @override
+  String deviceRegistered(int count) {
+    return 'Erfasst ($count)';
+  }
+
+  @override
+  String get deviceNeedsProduct => 'Zuerst ein Produkt wählen.';
+
+  @override
+  String get deviceNeedsNewProduct =>
+      'Das neue Produkt braucht einen Namen und eine Kategorie.';
+
+  @override
+  String get deviceNeedsLocation => 'Zuerst einen Lagerort wählen.';
+
+  @override
+  String get inventoryBundleView => 'Bundle-Ansicht';
+
+  @override
+  String get inventoryAllProducts => 'Alle Produkte';
+
+  @override
+  String get inventoryAllDevices => 'Alle Geräte';
+
+  @override
+  String get productScanViewMode =>
+      'Nichts geändert. Zum Vergeben „Inventarnummern vergeben“ im ⋮-Menü wählen.';
+
+  @override
+  String get productTagDone => 'Vergeben beenden';
+
+  @override
+  String get inventorySearch => 'Suchen oder Inventarnummer eingeben';
 }

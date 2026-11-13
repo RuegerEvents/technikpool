@@ -5,8 +5,8 @@ import '../api/client.dart';
 import '../changelog.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../state/providers.dart';
+import 'create_sheet.dart';
 import 'inventory_screen.dart';
-import 'lookup_screen.dart';
 import 'session_setup_screen.dart';
 import 'settings_screen.dart';
 import 'whats_new_screen.dart';
@@ -14,12 +14,7 @@ import 'whats_new_screen.dart';
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
-  static const _tabs = [
-    SessionSetupScreen(),
-    LookupScreen(),
-    InventoryScreen(),
-    SettingsScreen(),
-  ];
+  static const _tabs = [SessionSetupScreen(), InventoryScreen(), SettingsScreen()];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -78,13 +73,21 @@ class HomeScreen extends ConsumerWidget {
           Expanded(child: tabs),
         ],
       ),
+      // Only on the Inventory tab: the scan tab is worked with the trigger, and a
+      // button floating over its list is only ever a mis-tap there.
+      floatingActionButton: tab == HomeTab.inventory
+          ? FloatingActionButton(
+              tooltip: l10n.createNew,
+              onPressed: () => showCreateSheet(context),
+              child: const Icon(Icons.add),
+            )
+          : null,
       bottomNavigationBar: NavigationBar(
         selectedIndex: tab.index,
         onDestinationSelected: (i) =>
             ref.read(activeTabProvider.notifier).select(HomeTab.values[i]),
         destinations: [
           NavigationDestination(icon: Icon(Icons.qr_code_scanner), label: l10n.scansLabel),
-          NavigationDestination(icon: Icon(Icons.search), label: l10n.lookup),
           NavigationDestination(
             icon: Icon(Icons.inventory_2_outlined),
             label: l10n.inventory,

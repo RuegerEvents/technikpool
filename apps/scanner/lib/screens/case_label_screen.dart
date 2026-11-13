@@ -31,10 +31,26 @@ class CaseLabelScreen extends ConsumerStatefulWidget {
   ConsumerState<CaseLabelScreen> createState() => _CaseLabelScreenState();
 }
 
+/// A preview as it is drawn: the label and its pictures together, so a
+/// picture is never framed at another label's aspect ratio. [pages] is null
+/// when Labelary did not answer, and [error] then says why.
+typedef _Preview = ({CaseLabel label, List<Uint8List>? pages, Object? error});
+
 class _CaseLabelScreenState extends ConsumerState<CaseLabelScreen> {
   CaseLabelSize? _size;
-  Future<CaseLabel>? _label;
-  Future<List<Uint8List>>? _preview;
+
+  /// The label of the size picked, once the server sent it — what is printed.
+  CaseLabel? _label;
+  Object? _labelError;
+
+  /// What the frame shows. Replaced only once the new size's pictures are in,
+  /// so switching sizes keeps the old preview, at its own shape, until then.
+  _Preview? _shown;
+  bool _rendering = false;
+
+  /// Only the newest size may land: an answer for one picked earlier that
+  /// arrives late must not overwrite it.
+  int _seq = 0;
   bool _printing = false;
 
   @override
@@ -45,18 +61,46 @@ class _CaseLabelScreenState extends ConsumerState<CaseLabelScreen> {
     });
   }
 
-  void _load(CaseLabelSize size) {
+  Future<void> _load(CaseLabelSize size) async {
     final api = ref.read(apiClientProvider);
     if (api == null) return;
-    final label = api.caseCheck.getCaseLabel(
-      kind: widget.kind,
-      id: widget.id,
-      size: size,
-    );
+    final seq = ++_seq;
     setState(() {
       _size = size;
-      _label = label;
-      _preview = label.then(_renderAll);
+      _label = null;
+      _labelError = null;
+      _rendering = true;
+    });
+    final CaseLabel label;
+    try {
+      label = await api.caseCheck.getCaseLabel(
+        kind: widget.kind,
+        id: widget.id,
+        size: size,
+      );
+    } catch (error) {
+      if (mounted && seq == _seq) {
+        setState(() {
+          _labelError = error;
+          _rendering = false;
+        });
+      }
+      return;
+    }
+    if (!mounted || seq != _seq) return;
+    setState(() => _label = label);
+
+    List<Uint8List>? pages;
+    Object? previewError;
+    try {
+      pages = await _renderAll(label);
+    } catch (error) {
+      previewError = error;
+    }
+    if (!mounted || seq != _seq) return;
+    setState(() {
+      _shown = (label: label, pages: pages, error: previewError);
+      _rendering = false;
     });
   }
 
@@ -78,7 +122,7 @@ class _CaseLabelScreenState extends ConsumerState<CaseLabelScreen> {
     final messenger = ScaffoldMessenger.of(context);
     setState(() => _printing = true);
     try {
-      await sendToPrinter(printer, (await label).zpl);
+      await sendToPrinter(printer, label.zpl);
       messenger.showSnackBar(SnackBar(content: Text(l10n.caseLabelSent('$printer'))));
     } catch (error) {
       final text = error is LabelPrintException
@@ -95,6 +139,7 @@ class _CaseLabelScreenState extends ConsumerState<CaseLabelScreen> {
     final l10n = S.of(context);
     final printer = ref.watch(labelPrinterProvider).value;
     final muted = Theme.of(context).colorScheme.onSurfaceVariant;
+    final label = _label;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.caseLabel)),
@@ -115,54 +160,42 @@ class _CaseLabelScreenState extends ConsumerState<CaseLabelScreen> {
             },
           ),
           const SizedBox(height: 16),
-          FutureBuilder<CaseLabel>(
-            future: _label,
-            builder: (context, label) {
-              if (label.hasError) {
-                return Text(
-                  describeError(l10n, label.error!),
-                  style: TextStyle(color: Theme.of(context).colorScheme.error),
-                );
-              }
-              final data = label.data;
-              if (data == null) return const Center(child: CircularProgressIndicator());
-              return Column(
-                crossAxisAlignment: CrossAxisAlignment.stretch,
-                children: [
-                  _PreviewFrame(label: data, preview: _preview),
-                  const SizedBox(height: 6),
-                  Text(
-                    l10n.caseLabelPreviewHint,
-                    style: TextStyle(color: muted, fontSize: 12),
-                  ),
-                  const SizedBox(height: 16),
-                  if (printer == null)
-                    FilledButton.icon(
-                      onPressed: () => editLabelPrinter(context, ref),
-                      icon: const Icon(Icons.settings_outlined),
-                      label: Text(l10n.labelPrinterSetUp),
-                    )
-                  else
-                    FilledButton.icon(
-                      onPressed: _printing ? null : () => _print(printer),
-                      icon: _printing
-                          ? const SizedBox.square(
-                              dimension: 18,
-                              child: CircularProgressIndicator(strokeWidth: 2),
-                            )
-                          : const Icon(Icons.print),
-                      label: Text('${l10n.caseLabelPrint} · $printer'),
-                    ),
-                  const SizedBox(height: 8),
-                  OutlinedButton.icon(
-                    onPressed: () => openExternal(context, Uri.parse(data.previewUrl)),
-                    icon: const Icon(Icons.open_in_new),
-                    label: Text(l10n.caseLabelOpenLabelary),
-                  ),
-                ],
-              );
-            },
-          ),
+          if (_labelError case final error?)
+            Text(
+              describeError(l10n, error),
+              style: TextStyle(color: Theme.of(context).colorScheme.error),
+            )
+          else ...[
+            _PreviewFrame(shown: _shown, loading: _rendering),
+            const SizedBox(height: 6),
+            Text(l10n.caseLabelPreviewHint, style: TextStyle(color: muted, fontSize: 12)),
+            const SizedBox(height: 16),
+            if (printer == null)
+              FilledButton.icon(
+                onPressed: () => editLabelPrinter(context, ref),
+                icon: const Icon(Icons.settings_outlined),
+                label: Text(l10n.labelPrinterSetUp),
+              )
+            else
+              FilledButton.icon(
+                onPressed: _printing || label == null ? null : () => _print(printer),
+                icon: _printing
+                    ? const SizedBox.square(
+                        dimension: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : const Icon(Icons.print),
+                label: Text('${l10n.caseLabelPrint} · $printer'),
+              ),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: label == null
+                  ? null
+                  : () => openExternal(context, Uri.parse(label.previewUrl)),
+              icon: const Icon(Icons.open_in_new),
+              label: Text(l10n.caseLabelOpenLabelary),
+            ),
+          ],
         ],
       ),
     );
@@ -177,61 +210,83 @@ String _why(Object error) => switch (error) {
 };
 
 /// Each label at its own aspect ratio, white like the roll whatever the theme.
+///
+/// While another size loads, the preview in hand stays at its own shape under
+/// a spinner — never stretched to the new one — and is swapped for the new
+/// label and its pictures in one go.
 class _PreviewFrame extends StatelessWidget {
-  const _PreviewFrame({required this.label, required this.preview});
+  const _PreviewFrame({required this.shown, required this.loading});
 
-  final CaseLabel label;
-  final Future<List<Uint8List>>? preview;
+  final _Preview? shown;
+  final bool loading;
 
   @override
   Widget build(BuildContext context) {
     final l10n = S.of(context);
-    return FutureBuilder<List<Uint8List>>(
-      future: preview,
-      builder: (context, png) {
-        if (png.hasError) {
-          return _frame(
-            context,
-            Center(
-              child: Padding(
-                padding: const EdgeInsets.all(16),
-                child: Text(
-                  l10n.caseLabelPreviewFailed(_why(png.error!)),
-                  textAlign: TextAlign.center,
-                  style: const TextStyle(color: Colors.black54),
-                ),
+    final preview = shown;
+    if (preview == null) {
+      return const Padding(
+        padding: EdgeInsets.all(24),
+        child: Center(child: CircularProgressIndicator()),
+      );
+    }
+    final pages = preview.pages;
+    final Widget content;
+    if (pages == null) {
+      content = _frame(
+        context,
+        preview.label,
+        Center(
+          child: Padding(
+            padding: const EdgeInsets.all(16),
+            child: Text(
+              l10n.caseLabelPreviewFailed(_why(preview.error ?? '')),
+              textAlign: TextAlign.center,
+              style: const TextStyle(color: Colors.black54),
+            ),
+          ),
+        ),
+      );
+    } else {
+      content = Column(
+        children: [
+          for (final (i, bytes) in pages.indexed) ...[
+            if (i > 0) const SizedBox(height: 12),
+            _frame(
+              context,
+              preview.label,
+              Padding(
+                padding: const EdgeInsets.all(4),
+                child: Image.memory(bytes, fit: BoxFit.contain),
               ),
             ),
-          );
-        }
-        final pages = png.data;
-        if (pages == null) {
-          return _frame(context, const Center(child: CircularProgressIndicator()));
-        }
-        return Column(
-          children: [
-            for (final (i, bytes) in pages.indexed) ...[
-              if (i > 0) const SizedBox(height: 12),
-              _frame(
-                context,
-                Padding(
-                  padding: const EdgeInsets.all(4),
-                  child: Image.memory(bytes, fit: BoxFit.contain, gaplessPlayback: true),
-                ),
+            if (pages.length > 1)
+              Padding(
+                padding: const EdgeInsets.only(top: 4),
+                child: Text(l10n.caseLabelPage(i + 1, pages.length)),
               ),
-              if (pages.length > 1)
-                Padding(
-                  padding: const EdgeInsets.only(top: 4),
-                  child: Text(l10n.caseLabelPage(i + 1, pages.length)),
-                ),
-            ],
           ],
-        );
-      },
+        ],
+      );
+    }
+    return Stack(
+      alignment: Alignment.topCenter,
+      children: [
+        AnimatedOpacity(
+          opacity: loading ? 0.4 : 1,
+          duration: const Duration(milliseconds: 150),
+          child: content,
+        ),
+        if (loading)
+          const Padding(
+            padding: EdgeInsets.only(top: 48),
+            child: CircularProgressIndicator(),
+          ),
+      ],
     );
   }
 
-  Widget _frame(BuildContext context, Widget child) => Center(
+  Widget _frame(BuildContext context, CaseLabel label, Widget child) => Center(
     child: ConstrainedBox(
       constraints: const BoxConstraints(maxWidth: 360, maxHeight: 520),
       child: AspectRatio(

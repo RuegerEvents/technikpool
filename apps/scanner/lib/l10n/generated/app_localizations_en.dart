@@ -95,12 +95,6 @@ class SEn extends S {
   String get sessionEmpty => 'Nothing scanned yet.';
 
   @override
-  String get lookup => 'Look up';
-
-  @override
-  String get lookupHint => 'Scan a label to see its details.';
-
-  @override
   String get serialNumber => 'Serial number';
 
   @override
@@ -331,7 +325,7 @@ class SEn extends S {
 
   @override
   String demoTagHint(String tag) {
-    return 'Try tag $tag — Inventory lists them all';
+    return 'Try tag $tag: type it and press search to open the unit';
   }
 
   @override
@@ -677,13 +671,6 @@ class SEn extends S {
       'Scan a sticker: it goes to the unit you tapped, or else to the next one without a tag.';
 
   @override
-  String get productRegisterHint =>
-      'Every scanned sticker becomes a new unit here.';
-
-  @override
-  String get productRegisterAt => 'New units go to';
-
-  @override
   String get productNoUntagged => 'Every unit already has a tag.';
 
   @override
@@ -700,11 +687,6 @@ class SEn extends S {
   @override
   String productRegistered(String tag) {
     return '$tag registered';
-  }
-
-  @override
-  String productNeedsAdmin(String org) {
-    return 'Registering and tagging units takes ADMIN in $org.';
   }
 
   @override
@@ -1404,4 +1386,293 @@ class SEn extends S {
   @override
   String get defectReportedDone =>
       'Defect reported · the unit is in maintenance';
+
+  @override
+  String get createNew => 'Create new';
+
+  @override
+  String get bundle => 'Kit';
+
+  @override
+  String get bundleNew => 'New kit';
+
+  @override
+  String get bundleNewHint => 'An empty case, filled by scanning';
+
+  @override
+  String get bundleName => 'Name';
+
+  @override
+  String get bundleCategory => 'Category';
+
+  @override
+  String get bundleTag => 'Tag (optional)';
+
+  @override
+  String get bundleTagHint => 'Scan the case\'s sticker or type it';
+
+  @override
+  String get bundleCaption => 'Description (optional)';
+
+  @override
+  String get bundleCreate => 'Create kit';
+
+  @override
+  String bundleCreated(String name) {
+    return 'Kit $name created';
+  }
+
+  @override
+  String get bundleEdit => 'Edit kit';
+
+  @override
+  String get bundleReadOnly =>
+      'Only an admin of its organization can change this kit.';
+
+  @override
+  String get bundleScanHint => 'Scan a device to put it in the kit';
+
+  @override
+  String get bundleNoTag => 'No tag';
+
+  @override
+  String bundleUnitCount(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: '$count units',
+      one: '1 unit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get bundleEmpty => 'Nothing in this kit yet.';
+
+  @override
+  String get bundleEmptyEdit =>
+      'Nothing in this kit yet. Scan a device to put it in, or add loose units by name.';
+
+  @override
+  String get bundleAccessory => 'Accessory';
+
+  @override
+  String bundleUnitOut(String production) {
+    return 'Out on $production';
+  }
+
+  @override
+  String bundleScanAdded(String name) {
+    return '$name is in the kit';
+  }
+
+  @override
+  String bundleScanAlreadyIn(String name) {
+    return '$name is already in this kit';
+  }
+
+  @override
+  String get bundleScanIsBundle =>
+      'That is a kit\'s own tag. Kits do not go into kits.';
+
+  @override
+  String get bundleScanUnknown =>
+      'The server did not say what happened to this scan.';
+
+  @override
+  String get bundleMoveTitle => 'In another kit';
+
+  @override
+  String bundleMoveQuestion(String unit, String kit) {
+    return '$unit is in kit $kit. Take it out of there and put it in here?';
+  }
+
+  @override
+  String get bundleMoveConfirm => 'Move here';
+
+  @override
+  String bundleMoveSkipped(String unit, String kit) {
+    return '$unit stays in $kit';
+  }
+
+  @override
+  String get bundleRemove => 'Take out';
+
+  @override
+  String get bundleRemoveTitle => 'Take out of the kit?';
+
+  @override
+  String bundleRemoveQuestion(String name) {
+    return 'Take $name out of the kit? The unit stays where it is.';
+  }
+
+  @override
+  String bundleRemoveWithAccessories(String name, int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Its $count accessories come out with it.',
+      one: 'Its accessory comes out with it.',
+    );
+    return 'Take $name out of the kit? $_temp0';
+  }
+
+  @override
+  String bundleRemoved(String name) {
+    return '$name taken out';
+  }
+
+  @override
+  String get bundleAddLoose => 'Add loose units';
+
+  @override
+  String bundleLooseAdded(int count, String name) {
+    return '$count × $name put in the kit';
+  }
+
+  @override
+  String get add => 'Add';
+
+  @override
+  String availableUntagged(int available, int untagged) {
+    return '$available available ($untagged without tag)';
+  }
+
+  @override
+  String get searchMinLength => 'Type at least two letters.';
+
+  @override
+  String get countLess => 'One fewer';
+
+  @override
+  String get countMore => 'One more';
+
+  @override
+  String get handoutAddByName => 'Hand out by name';
+
+  @override
+  String get handoutAddHandOut => 'Hand out';
+
+  @override
+  String handoutAddedCount(int count, String name) {
+    return '$count × $name handed out';
+  }
+
+  @override
+  String get bundleEditDone => 'Done editing';
+
+  @override
+  String get bundleScanViewMode =>
+      'Editing is off. Tap the pencil to put units in.';
+
+  @override
+  String get done => 'Done';
+
+  @override
+  String get deviceNew => 'New device';
+
+  @override
+  String get deviceNewHint =>
+      'Register units of a product, with or without a label';
+
+  @override
+  String get deviceProduct => 'Product';
+
+  @override
+  String get deviceProductSearch => 'Search the catalogue';
+
+  @override
+  String get deviceProductChange => 'Change';
+
+  @override
+  String get deviceProductNew => 'New product';
+
+  @override
+  String get deviceProductSearchInstead => 'Search the catalogue instead';
+
+  @override
+  String get deviceProductName => 'Product name';
+
+  @override
+  String get deviceManufacturer => 'Manufacturer (optional)';
+
+  @override
+  String deviceProductCreated(String name) {
+    return 'Product $name created';
+  }
+
+  @override
+  String get deviceLocation => 'Location';
+
+  @override
+  String get deviceBundle => 'Into kit (optional)';
+
+  @override
+  String get deviceNoBundle => 'No kit';
+
+  @override
+  String get deviceModeScan => 'Scan labels';
+
+  @override
+  String get deviceModeUntagged => 'Without label';
+
+  @override
+  String get deviceScanHint => 'Every scanned label becomes a new unit.';
+
+  @override
+  String get deviceScanOtherMode =>
+      'Switch to “Scan labels” to register by scanning.';
+
+  @override
+  String get deviceUntaggedCount => 'How many?';
+
+  @override
+  String deviceRegisterUntagged(int count) {
+    String _temp0 = intl.Intl.pluralLogic(
+      count,
+      locale: localeName,
+      other: 'Register $count units',
+      one: 'Register 1 unit',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String deviceRegisteredUntagged(int count) {
+    return '$count × without label';
+  }
+
+  @override
+  String deviceRegistered(int count) {
+    return 'Registered ($count)';
+  }
+
+  @override
+  String get deviceNeedsProduct => 'Pick a product first.';
+
+  @override
+  String get deviceNeedsNewProduct =>
+      'Give the new product a name and a category.';
+
+  @override
+  String get deviceNeedsLocation => 'Pick a location first.';
+
+  @override
+  String get inventoryBundleView => 'Bundle View';
+
+  @override
+  String get inventoryAllProducts => 'All Products';
+
+  @override
+  String get inventoryAllDevices => 'All Devices';
+
+  @override
+  String get productScanViewMode =>
+      'Nothing was changed. To tag units, choose “Tag units” in the ⋮ menu.';
+
+  @override
+  String get productTagDone => 'Done assigning tags';
+
+  @override
+  String get inventorySearch => 'Search, or enter a tag';
 }

@@ -17,8 +17,8 @@ required. We do not operate a service anyone has to be a customer of, and we
 cannot see or restrict who runs it.
 
 The app also works with no server at all: "Explore the demo" on the first
-screen runs a complete sample warehouse on the device — scanning, lookup and
-inventory all work there, with no account, no sign-up and no network request.
+screen runs a complete sample warehouse on the device — scanning, inventory
+and kits all work there, with no account, no sign-up and no network request.
 That is a real feature of the shipped app, available to everyone.
 
 Nothing is paid: no purchase, subscription, in-app purchase or paid tier, from
@@ -37,8 +37,9 @@ Scanning an asset tag there shows a message saying so.
   * Scans — pick a location or production, then type an asset tag where it says
     "Manual entry" (tags run 40000001 to 40000014), or use the camera button on
     the QR codes in demo-tags.png (attached).
-  * Lookup — type the same tags to see an asset, where it is, and its history.
   * Inventory — lists every asset with its tag, so nothing has to be guessed.
+    Type or scan one of the same tags into its search to see that asset, where
+    it is, and its history. "+" there creates a new kit or a new device.
   * Settings › Leave demo returns to the first screen.
 
 To use the app for real, a person installs the open-source server (Docker

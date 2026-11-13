@@ -15,6 +15,7 @@ import '../state/providers.dart';
 import '../theme.dart';
 import '../widgets/accessory_dialog.dart';
 import '../widgets/count_dialog.dart';
+import '../widgets/count_search_sheet.dart';
 import '../widgets/product_thumb.dart';
 
 /// What working through a production's list does with a tick.
@@ -1015,6 +1016,75 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
     });
   }
 
+  /// Hand out what is not on the list and has nothing to scan — a cable
+  /// without a tag — by finding it by name. Only from the side the list is
+  /// seen from; the server answers nothing when that side may not add.
+  Future<void> _addByName() async {
+    final api = ref.read(apiClientProvider);
+    final handout = _handout;
+    if (api == null || handout == null) return;
+    final l10n = S.of(context);
+    final side = handout.side.organizationId;
+    final groups = <String, HandoutAddition>{};
+    var added = 0;
+    await showCountSearchSheet(
+      context: context,
+      title: l10n.handoutAddByName,
+      actionLabel: l10n.handoutAddHandOut,
+      search: (q) async {
+        final found = await api.productionHandout.searchProductionHandoutAdditions(
+          productionId: widget.productionId,
+          q: q,
+          organizationId: side,
+        );
+        groups
+          ..clear()
+          ..addEntries(found.map((g) => MapEntry(g.key, g)));
+        return [
+          for (final g in found)
+            CountSearchHit(
+              key: g.key,
+              title: withCaption(
+                productLabel(g.manufacturerName, g.productName),
+                g.productCaption,
+              ),
+              subtitle: [
+                g.locationName,
+                g.organizationName,
+                l10n.availableUntagged(g.available, g.untagged),
+              ].join(' · '),
+              imageUrl: g.productImageUrl,
+              available: g.available,
+            ),
+        ];
+      },
+      submit: (hit, count) async {
+        final group = groups[hit.key]!;
+        final result = await api.productionHandout.handOutProductionAdditions(
+          productionId: widget.productionId,
+          body: HandoutAdditionRequest(
+            organizationId: side,
+            productId: group.productId,
+            ownerId: group.organizationId,
+            locationId: group.locationId,
+            count: count,
+          ),
+        );
+        added += result.count;
+        return l10n.handoutAddedCount(result.count, hit.title);
+      },
+    );
+    if (!mounted || added == 0) return;
+    setState(() => _busy = true);
+    try {
+      await _fetch(api);
+    } catch (_) {
+      // The next poll catches up.
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
   Future<void> _openCamera() => Navigator.of(context).push<void>(
     MaterialPageRoute(
       builder: (_) => CameraScanScreen(
@@ -1048,6 +1118,12 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
           ],
         ),
         actions: [
+          if (open && widget.mode == ProductionListMode.checkout && _handout != null)
+            IconButton(
+              tooltip: l10n.handoutAddByName,
+              onPressed: _busy ? null : _addByName,
+              icon: const Icon(Icons.manage_search),
+            ),
           if (open && ref.watch(scanSettingsProvider).cameraEnabled)
             IconButton(
               tooltip: l10n.scanWithCamera,
