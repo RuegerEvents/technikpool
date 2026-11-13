@@ -13,34 +13,54 @@ import { wuchale } from 'wuchale/vite';
 // only fix, and until this existed that meant restarting the dev server.
 //
 // It fires on *every* .po write rather than trying to tell the dev server's own
-// extraction apart from an external one. That distinction turned out to be
-// unreliable — formatting a source file and then filling in a translation puts
-// the two milliseconds apart — and it buys nothing:
-//   - An edit that adds or changes no string writes no .po at all, so ordinary
-//     HMR never reaches this and keeps its page state.
-//   - An edit that does change a string already triggers a full reload from
-//     wuchale itself, so the re-transform here is the missing half rather than
-//     an extra cost.
+// extraction apart from an external one. An edit that adds or changes no string
+// writes no .po at all, so ordinary HMR never reaches this and keeps its page
+// state.
+//
+// **When it fires is the whole point.** wuchale re-reads and recompiles a
+// changed catalog in its own HMR hook, asynchronously. This used to listen on
+// the file watcher, which runs *before* that hook: the modules were invalidated
+// and the browser reloaded while wuchale still held the old catalog, so they
+// were re-transformed against the very slots that had just gone stale — and a
+// second `touch` of the .po "fixed" it only because by then the catalog was
+// loaded. As a `hotUpdate` hook listed after `wuchale()` it runs once wuchale's
+// own hook has finished (Vite awaits them in order).
 function wuchaleCatalogReload(): Plugin {
 	return {
 		name: 'wuchale-catalog-reload',
 		apply: 'serve',
-		configureServer(server) {
-			const onChange = (path: string) => {
-				if (!path.endsWith('.po')) return;
-				server.moduleGraph.invalidateAll();
-				server.ws.send({ type: 'full-reload' });
-			};
-			server.watcher.on('change', onChange);
-			server.watcher.on('add', onChange);
+		hotUpdate(options) {
+			if (this.environment.name !== 'client') return;
+			if (options.type === 'delete' || !options.file.endsWith('.po')) return;
+			for (const environment of Object.values(options.server.environments)) {
+				environment.moduleGraph.invalidateAll();
+			}
+			options.server.ws.send({ type: 'full-reload' });
+			return [];
 		}
 	};
 }
 
 export default defineConfig({
 	plugins: [
-		wuchale(),
-		wuchaleCatalogReload(),
+		// Not under vitest. It loads this config too, and wuchale in it extracts
+		// afresh and rewrites src/locales/.wuchale/*.compiled.js with slots numbered
+		// from zero — underneath a running dev server, which ignores changes to
+		// those files and serves them to modules numbered against its own. Every
+		// string after the first difference then rendered off by one or more: the
+		// "wuchale broke again" that followed `pnpm test`. No test needs the
+		// transform; a .svelte.ts module under test just keeps its English.
+		...(process.env.VITEST
+			? []
+			: [
+					// A catalog write within this many ms of wuchale's own extraction
+					// counts as that extraction and is not re-read from disk. The default
+					// (1000ms) also swallowed a hand-filled msgstr saved right after
+					// formatting a source file; re-reading one that is wuchale's own costs
+					// a recompile and nothing else.
+					wuchale({ hmrDelayThreshold: 200 }),
+					wuchaleCatalogReload()
+				]),
 		tailwindcss(),
 		sveltekit({
 			compilerOptions: {
