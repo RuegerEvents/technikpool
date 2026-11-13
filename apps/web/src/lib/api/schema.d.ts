@@ -3639,11 +3639,6 @@ export interface components {
          */
         CaseLabelLayout: components["schemas"]["CaseLabelLayout"];
         /**
-         * @description Draw each tile's product picture (`layout=grid`). Without them a tile
-         *     shows its count large over the name, and the tiles take less room.
-         */
-        CaseLabelPictures: boolean;
-        /**
          * @description Whether the small label carries the contents: `auto` where they fit at
          *     a size still read up close, `always` (cut short with a line for the
          *     rest), `never`. The large label always does.
@@ -4969,11 +4964,6 @@ export interface operations {
                  */
                 contents?: components["parameters"]["CaseLabelContents"];
                 /**
-                 * @description Draw each tile's product picture (`layout=grid`). Without them a tile
-                 *     shows its count large over the name, and the tiles take less room.
-                 */
-                pictures?: components["parameters"]["CaseLabelPictures"];
-                /**
                  * @description List a kit's own case (its container unit) and what hangs off it
                  *     among the contents. Off by default: the label is stuck on that case.
                  *     Ignored where there is none (`CaseLabel.hasCase`).
@@ -5429,11 +5419,6 @@ export interface operations {
                  *     `CaseLabel.contentsShown` says what came out.
                  */
                 contents?: components["parameters"]["CaseLabelContents"];
-                /**
-                 * @description Draw each tile's product picture (`layout=grid`). Without them a tile
-                 *     shows its count large over the name, and the tiles take less room.
-                 */
-                pictures?: components["parameters"]["CaseLabelPictures"];
             };
             header?: never;
             path: {

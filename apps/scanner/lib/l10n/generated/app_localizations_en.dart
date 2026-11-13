@@ -1388,13 +1388,6 @@ class SEn extends S {
       'The label sits on this case, so it is left out of the contents by default.';
 
   @override
-  String get caseLabelPictures => 'Product pictures';
-
-  @override
-  String get caseLabelPicturesHint =>
-      'Without them each tile shows its count large, and more fit on a label.';
-
-  @override
   String get caseLabelPreviewHintServer =>
       'Preview rendered by your Technikpool server. The printer may draw fonts slightly differently.';
 

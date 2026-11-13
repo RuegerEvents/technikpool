@@ -30,7 +30,6 @@ const _kLabelSize = 'label_size';
 const _kLabelLayout = 'label_layout';
 const _kLabelContents = 'label_contents';
 const _kLabelIncludeCase = 'label_include_case';
-const _kLabelPictures = 'label_pictures';
 const _kInventoryGrouping = 'inventory_grouping';
 
 final storageProvider = Provider((_) => const FlutterSecureStorage());
@@ -310,7 +309,6 @@ typedef LabelOptions = ({
   CaseLabelLayout layout,
   CaseLabelContents contents,
   bool includeCase,
-  bool pictures,
 });
 
 class LabelOptionsNotifier extends AsyncNotifier<LabelOptions> {
@@ -330,7 +328,6 @@ class LabelOptionsNotifier extends AsyncNotifier<LabelOptions> {
           ? CaseLabelContents.auto
           : contents,
       includeCase: await _storage.read(key: _kLabelIncludeCase) == 'true',
-      pictures: await _storage.read(key: _kLabelPictures) != 'false',
     );
   }
 
@@ -340,7 +337,6 @@ class LabelOptionsNotifier extends AsyncNotifier<LabelOptions> {
     await _storage.write(key: _kLabelLayout, value: options.layout.toJson());
     await _storage.write(key: _kLabelContents, value: options.contents.toJson());
     await _storage.write(key: _kLabelIncludeCase, value: '${options.includeCase}');
-    await _storage.write(key: _kLabelPictures, value: '${options.pictures}');
   }
 }
 

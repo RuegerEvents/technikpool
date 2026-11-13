@@ -2383,18 +2383,6 @@ abstract class S {
   /// **'The label sits on this case, so it is left out of the contents by default.'**
   String get caseLabelIncludeCaseHint;
 
-  /// No description provided for @caseLabelPictures.
-  ///
-  /// In en, this message translates to:
-  /// **'Product pictures'**
-  String get caseLabelPictures;
-
-  /// No description provided for @caseLabelPicturesHint.
-  ///
-  /// In en, this message translates to:
-  /// **'Without them each tile shows its count large, and more fit on a label.'**
-  String get caseLabelPicturesHint;
-
   /// No description provided for @caseLabelPreviewHintServer.
   ///
   /// In en, this message translates to:

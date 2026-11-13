@@ -26,7 +26,6 @@ export type CaseLabelQuery = {
 	size: CaseLabelSize;
 	layout: CaseLabelLayout;
 	contents: CaseLabelContents;
-	pictures: boolean;
 };
 
 /** The query's options, or the message for a 400 naming the one that is wrong. */
@@ -41,7 +40,7 @@ export function caseLabelQuery(url: URL): CaseLabelQuery | string {
 	if (!layout) return 'layout must be list or grid';
 	const contents = pick('contents', CONTENTS, 'auto');
 	if (!contents) return 'contents must be auto, always or never';
-	return { size, layout, contents, pictures: url.searchParams.get('pictures') !== 'false' };
+	return { size, layout, contents };
 }
 
 /** Long enough for a label full of pictures, short enough that a hung renderer only costs the preview. */
@@ -88,11 +87,11 @@ export async function caseLabelResponse(
 	query: CaseLabelQuery,
 	hasCase: boolean
 ) {
-	const { size, layout, contents, pictures } = query;
+	const { size, layout, contents } = query;
 	const grid = size === 'large' && layout === 'grid';
 	const [logo, images] = await Promise.all([
 		labelLogo(logoPath, LOGO_BOX[size]),
-		grid && pictures
+		grid
 			? labelPictures(
 					data.lines.map((line) => line.imagePath),
 					gridPictureBox(data)
@@ -102,7 +101,6 @@ export async function caseLabelResponse(
 	const { zpl, labels, contentsShown } = renderCaseLabel(data, size, logo, {
 		layout,
 		contents,
-		pictures,
 		images
 	});
 	const previews = await renderPreviews(zpl, size);

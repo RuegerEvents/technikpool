@@ -125,15 +125,10 @@ abstract class ProductionHandoutClient {
   /// a size still read up close, `always` (cut short with a line for the.
   /// rest), `never`. The large label always does.
   /// `CaseLabel.contentsShown` says what came out.
-  ///
-  ///
-  /// [pictures] - Draw each tile's product picture (`layout=grid`). Without them a tile.
-  /// shows its count large over the name, and the tiles take less room.
   @GET('/api/v1/productions/{productionId}/packing/{caseAssetId}/label')
   Future<CaseLabel> getPackCaseLabel({
     @Path('productionId') required String productionId,
     @Path('caseAssetId') required String caseAssetId,
-    @Query('pictures') bool? pictures = true,
     @Query('size') CaseLabelSize? size,
     @Query('layout') CaseLabelLayout? layout,
     @Query('contents') CaseLabelContents? contents,

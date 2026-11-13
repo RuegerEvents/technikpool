@@ -29,7 +29,6 @@ class CaseLabelScreen extends ConsumerStatefulWidget {
          layout: options.layout,
          contents: options.contents,
          includeCase: options.includeCase,
-         pictures: options.pictures,
        ));
 
   /// A pack case's label for one production: the production, the case's
@@ -45,7 +44,6 @@ class CaseLabelScreen extends ConsumerStatefulWidget {
          size: size,
          layout: options.layout,
          contents: options.contents,
-         pictures: options.pictures,
        ));
 
   /// Fetches the label of a size, laid out as [LabelOptions] say, from the server.
@@ -293,7 +291,6 @@ extension on _CaseLabelScreenState {
           layout: picked.first,
           contents: options.contents,
           includeCase: options.includeCase,
-          pictures: options.pictures,
         )),
       )
     else ...[
@@ -318,7 +315,6 @@ extension on _CaseLabelScreenState {
           layout: options.layout,
           contents: picked.first,
           includeCase: options.includeCase,
-          pictures: options.pictures,
         )),
       ),
       if (options.contents == CaseLabelContents.auto &&
@@ -332,19 +328,6 @@ extension on _CaseLabelScreenState {
           ),
         ),
     ],
-    if (_size == CaseLabelSize.large && options.layout == CaseLabelLayout.grid)
-      SwitchListTile(
-        contentPadding: EdgeInsets.zero,
-        title: Text(l10n.caseLabelPictures),
-        subtitle: Text(l10n.caseLabelPicturesHint),
-        value: options.pictures,
-        onChanged: (value) => _setOptions((
-          layout: options.layout,
-          contents: options.contents,
-          includeCase: options.includeCase,
-          pictures: value,
-        )),
-      ),
     if (_hasCase)
       SwitchListTile(
         contentPadding: EdgeInsets.zero,
@@ -355,7 +338,6 @@ extension on _CaseLabelScreenState {
           layout: options.layout,
           contents: options.contents,
           includeCase: value,
-          pictures: options.pictures,
         )),
       ),
   ];

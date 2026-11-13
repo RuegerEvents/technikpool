@@ -527,8 +527,6 @@
   "caseLabelContentsDidNotFit": "The contents do not fit on the small label, so it carries the name only.",
   "caseLabelIncludeCase": "List the case itself",
   "caseLabelIncludeCaseHint": "The label sits on this case, so it is left out of the contents by default.",
-  "caseLabelPictures": "Product pictures",
-  "caseLabelPicturesHint": "Without them each tile shows its count large, and more fit on a label.",
   "caseLabelPreviewHintServer": "Preview rendered by your Technikpool server. The printer may draw fonts slightly differently.",
   "caseLabelPrint": "Print",
   "caseLabelSent": "Sent to {printer}",

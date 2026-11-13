@@ -92,10 +92,6 @@ abstract class CaseCheckClient {
   /// `CaseLabel.contentsShown` says what came out.
   ///
   ///
-  /// [pictures] - Draw each tile's product picture (`layout=grid`). Without them a tile.
-  /// shows its count large over the name, and the tiles take less room.
-  ///
-  ///
   /// [includeCase] - List a kit's own case (its container unit) and what hangs off it.
   /// among the contents. Off by default: the label is stuck on that case.
   /// Ignored where there is none (`CaseLabel.hasCase`).
@@ -103,7 +99,6 @@ abstract class CaseCheckClient {
   Future<CaseLabel> getCaseLabel({
     @Path('kind') required CaseKind kind,
     @Path('id') required String id,
-    @Query('pictures') bool? pictures = true,
     @Query('includeCase') bool? includeCase = false,
     @Query('size') CaseLabelSize? size,
     @Query('layout') CaseLabelLayout? layout,

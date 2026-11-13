@@ -40,8 +40,6 @@ export type CaseLabelContents = 'auto' | 'always' | 'never';
 
 export type CaseLabelOptions = {
 	layout?: CaseLabelLayout;
-	/** The tiles with each product's picture (default), or with its count large in its place. */
-	pictures?: boolean;
 	contents?: CaseLabelContents;
 	/** The tiles' pictures by `imagePath`, already fitted into `gridPictureBox`. */
 	images?: Map<string, LabelBitmap>;
@@ -801,42 +799,26 @@ function tileGrid(columns: number, rows: number, room: number): TileGrid {
 	return { columns, tileWidth, tileHeight, picture, countFont, nameFont, nameRows, textHeight };
 }
 
-/** Without pictures a tile's box only holds its count, which needs far less. */
-const MIN_COUNT_BOX = 90;
-const MAX_COUNT_BOX = 170;
-
 /**
  * How the tiles are laid out: on one label in the arrangement that draws the
  * pictures largest, else three across at a fixed height over several labels.
- * Without pictures the box over a tile's name only holds its count, so the
- * tiles are as tall as that needs and no taller.
  */
-function chooseGrid(
-	count: number,
-	room: number,
-	pictures: boolean
-): { grid: TileGrid; paged: boolean } {
-	const least = pictures ? MIN_PICTURE : MIN_COUNT_BOX;
-	const cap = (grid: TileGrid): TileGrid => {
-		if (pictures || grid.picture <= MAX_COUNT_BOX) return grid;
-		const spare = grid.picture - MAX_COUNT_BOX;
-		return { ...grid, picture: MAX_COUNT_BOX, tileHeight: grid.tileHeight - spare };
-	};
+function chooseGrid(count: number, room: number): { grid: TileGrid; paged: boolean } {
 	let best: TileGrid | null = null;
 	for (const columns of [1, 2, 3, 4]) {
 		const grid = tileGrid(columns, Math.ceil(count / columns), room);
-		if (grid.picture >= least && (!best || grid.picture > best.picture)) best = grid;
+		if (grid.picture >= MIN_PICTURE && (!best || grid.picture > best.picture)) best = grid;
 	}
-	if (best) return { grid: cap(best), paged: false };
+	if (best) return { grid: best, paged: false };
 	// Too many for one label: three across, each just tall enough.
 	const { textHeight } = tileGrid(3, 1, 10_000);
-	return { grid: tileGrid(3, 1, least + textHeight), paged: true };
+	return { grid: tileGrid(3, 1, MIN_PICTURE + textHeight), paged: true };
 }
 
 /** The tiles' grid for these contents, and so the box their pictures are fetched for. */
-function largeGrid(data: CaseLabelData, logo: LabelBitmap | null, pictures = true) {
+function largeGrid(data: CaseLabelData, logo: LabelBitmap | null) {
 	const frame = largeFrame(data, logo);
-	return { frame, ...chooseGrid(Math.max(1, data.lines.length), frame.single, pictures) };
+	return { frame, ...chooseGrid(Math.max(1, data.lines.length), frame.single) };
 }
 
 /**
@@ -900,13 +882,11 @@ function tile(
 function renderLargeGrid(
 	data: CaseLabelData,
 	logo: LabelBitmap | null,
-	images: Map<string, LabelBitmap> | undefined,
-	pictures: boolean
+	images: Map<string, LabelBitmap> | undefined
 ) {
 	const { M } = LARGE;
-	const { frame, grid: chosen, paged } = largeGrid(data, logo, pictures);
+	const { frame, grid: chosen, paged } = largeGrid(data, logo);
 	const grid = { ...chosen, nameFont: tileNameFont(data.lines, chosen) };
-	if (!pictures) images = undefined;
 	const rowHeight = grid.tileHeight + TILE_GAP;
 	// Rows of tiles, paged like list lines: a unit's accessories are tiles of
 	// their own here, so a row never has to stay with the next.
@@ -1090,7 +1070,7 @@ export function renderCaseLabel(
 	if (size === 'small') return renderSmall(data, logo, options.contents ?? 'auto');
 	const drawn =
 		options.layout === 'grid' && data.lines.length > 0
-			? renderLargeGrid(data, logo, options.images, options.pictures ?? true)
+			? renderLargeGrid(data, logo, options.images)
 			: renderLargeList(data, logo);
 	return { ...drawn, contentsShown: data.lines.length > 0 };
 }

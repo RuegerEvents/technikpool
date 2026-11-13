@@ -472,8 +472,8 @@ Both send the label's text to Labelary, which is why the screen says so — unle
 has **`LABEL_RENDER_URL`** (a zebrash-api, `deinticketshop/zebrash-api`, internal network only):
 then `CaseLabel.previews` carries one PNG per label from it and the app shows those instead
 (`renderPreviews` in `case-label-request.ts`). Its third path segment is dots per millimetre,
-not dpi, and the image needs `user: root`. `pictures=false` draws tiles with their counts
-instead of pictures. Text widths are
+not dpi, and the image needs `user: root`. A tile whose product has no picture shows its
+count large in its place. Text widths are
 estimated from per-glyph widths measured off Labelary's ^A0 (`GLYPH`, plus 8% `SLACK`), since
 nothing on the printer reports them; long contents names wrap to a second row rather than being cut. Label text is German, like
 the PDFs.

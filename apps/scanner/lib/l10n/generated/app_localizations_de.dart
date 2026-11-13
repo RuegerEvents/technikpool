@@ -1393,13 +1393,6 @@ class SDe extends S {
       'Das Etikett klebt auf diesem Behälter, darum fehlt er standardmäßig im Inhalt.';
 
   @override
-  String get caseLabelPictures => 'Produktbilder';
-
-  @override
-  String get caseLabelPicturesHint =>
-      'Ohne Bilder zeigt jede Kachel groß die Anzahl, und es passen mehr auf ein Etikett.';
-
-  @override
   String get caseLabelPreviewHintServer =>
       'Vorschau von deinem Technikpool-Server gerendert. Der Drucker zeichnet Schriften womöglich etwas anders.';
 

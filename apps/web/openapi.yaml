@@ -1695,7 +1695,6 @@ paths:
             $ref: '#/components/schemas/CaseLabelSize'
         - $ref: '#/components/parameters/CaseLabelLayout'
         - $ref: '#/components/parameters/CaseLabelContents'
-        - $ref: '#/components/parameters/CaseLabelPictures'
         - name: includeCase
           in: query
           required: false
@@ -2197,7 +2196,6 @@ paths:
             $ref: '#/components/schemas/CaseLabelSize'
         - $ref: '#/components/parameters/CaseLabelLayout'
         - $ref: '#/components/parameters/CaseLabelContents'
-        - $ref: '#/components/parameters/CaseLabelPictures'
       responses:
         '200':
           description: The label, ready to send
@@ -2698,16 +2696,6 @@ components:
         black and white, its count and name. Ignored on the small label.
       schema:
         $ref: '#/components/schemas/CaseLabelLayout'
-    CaseLabelPictures:
-      name: pictures
-      in: query
-      required: false
-      description: |
-        Draw each tile's product picture (`layout=grid`). Without them a tile
-        shows its count large over the name, and the tiles take less room.
-      schema:
-        type: boolean
-        default: true
     CaseLabelContents:
       name: contents
       in: query

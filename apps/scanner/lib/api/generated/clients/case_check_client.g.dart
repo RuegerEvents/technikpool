@@ -112,7 +112,6 @@ class _CaseCheckClient implements CaseCheckClient {
   Future<CaseLabel> getCaseLabel({
     required CaseKind kind,
     required String id,
-    bool? pictures = true,
     bool? includeCase = false,
     CaseLabelSize? size,
     CaseLabelLayout? layout,
@@ -120,7 +119,6 @@ class _CaseCheckClient implements CaseCheckClient {
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
-      r'pictures': pictures,
       r'includeCase': includeCase,
       r'size': size?.toJson(),
       r'layout': layout?.toJson(),
