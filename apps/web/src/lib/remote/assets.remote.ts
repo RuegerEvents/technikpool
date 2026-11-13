@@ -1996,6 +1996,8 @@ const updateProductSchema = v.object({
 	cable: v.optional(v.nullable(cableAttrsSchema)),
 	/** Whether units of this product are licences carrying credentials. */
 	isLicense: v.optional(v.boolean()),
+	/** Its units are never swapped for one another — see services/unit-swap.ts. */
+	notInterchangeable: v.optional(v.boolean()),
 	/** What the team calls it, and the longer notes. `''` clears either. */
 	caption: v.optional(v.string()),
 	details: v.optional(v.string())

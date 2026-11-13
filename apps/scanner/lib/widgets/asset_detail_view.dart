@@ -149,6 +149,10 @@ class AssetDetailView extends StatelessWidget {
             ?inspection?.inspectorName,
             if (inspection?.markedBroken ?? false) l10n.inspectionMarkedBroken,
           ],
+          if (tx.swap case final swap?)
+            swap.now == null
+                ? l10n.historySwapLoose(swap.partnerLabel)
+                : l10n.historySwapNow(swap.partnerLabel, swap.now!),
           when,
           ?tx.userName,
           ?tx.productionName,

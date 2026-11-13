@@ -17,6 +17,8 @@ import { canPlaceAt } from './locations';
 import { kitByTag, resolveScannedCode, type TaggedKit } from './asset-lookup';
 import { onProductionSide } from './production-check';
 import { overdueInspections, recordReturnChecks, type OverdueInspection } from './inspections';
+import { bookedWithPlace, seeksSwap } from '#lib/unit-swap.js';
+import { applySwap, loadSwapRows, swapCheck, type SwapNotice, type SwapRow } from './unit-swap';
 
 // Scan/checkout behaviour lives here rather than in checkout.remote.ts so the
 // /api/v1 endpoints and the web UI share one implementation. These functions
@@ -60,7 +62,18 @@ export interface ScanResult {
 	kit?: ScanKit | null;
 	/** Checking out: what of it is overdue for which inspection. Never a refusal. */
 	overdueInspections?: OverdueInspection[];
+	/**
+	 * Checking out: the scanned unit took the place of a linked unit of the same
+	 * product booked here, and the two swapped places — see `findStandIns`.
+	 */
+	swap?: SwapNotice | null;
 }
+
+/**
+ * Whether a unit handed out may swap places with a linked one booked here.
+ * Off on take-back and for a kit's sticker, whose units are the kit.
+ */
+export type CheckoutOptions = { swap?: boolean };
 
 export interface ScanKit {
 	id: string;
@@ -298,7 +311,21 @@ function handoverOnCheckout(lent: boolean, borrower: boolean, userId: string) {
 	};
 }
 
-type StandIn = { id: string; assetId: string };
+type StandIn = {
+	id: string;
+	assetId: string;
+	/** Set when the booked unit is linked — in a kit, or on a unit — and the two swap places. */
+	swap?: { scanned: SwapRow; partner: SwapRow };
+};
+
+type StandInCandidate = {
+	id: string;
+	productId: string;
+	organizationId: string;
+	parentAssetId: string | null;
+	bundleId: string | null;
+	bundle?: { parentBundleId: string | null } | null;
+};
 
 /**
  * Booked units the scanned ones can take the place of. A booking names one
@@ -311,17 +338,42 @@ type StandIn = { id: string; assetId: string };
  * the same owner. Not one booked as part of a kit, whose case holds that very
  * unit, and not an accessory, which goes wherever its parent goes. Each booked
  * item stands in for one scanned unit at most, lowest unit number first.
+ *
+ * Failing that, with `swap` on, a booked unit that *is* linked: booked as part
+ * of the kit it is in, or as an accessory of the unit it hangs off. Then the
+ * two swap places as well (`applySwap`): the scanned unit goes into the kit or
+ * onto the unit, and the booked one takes the scanned one's old place. That is
+ * how ring 2's adapter goes out with ring 1. Under the rules of #lib/unit-swap
+ * — same product and org, the scanned unit free, the product not marked "not
+ * interchangeable", and no booking of either clashing. A scanned unit whose own
+ * kit or parent is booked here joins that booking instead.
  */
 async function findStandIns(
-	productionId: string,
-	assets: { id: string; productId: string; organizationId: string; parentAssetId: string | null }[],
+	production: { id: string; startDate: Date | null; endDate: Date | null },
+	assets: StandInCandidate[],
 	/** Everything going out in this act: a unit booked for itself stands in for nobody. */
-	goingOut: string[]
+	goingOut: string[],
+	options: CheckoutOptions = {}
 ): Promise<Map<string, StandIn>> {
 	const candidates = assets.filter((a) => !a.parentAssetId);
 	const standIns = new Map<string, StandIn>();
-	if (candidates.length === 0) return standIns;
+	if (candidates.length > 0) await looseStandIns(production.id, candidates, goingOut, standIns);
+	if (options.swap === false) return standIns;
+	await swapStandIns(
+		production,
+		assets.filter((a) => !standIns.has(a.id)),
+		goingOut,
+		standIns
+	);
+	return standIns;
+}
 
+async function looseStandIns(
+	productionId: string,
+	candidates: StandInCandidate[],
+	goingOut: string[],
+	standIns: Map<string, StandIn>
+) {
 	const items = await prisma.productionItem.findMany({
 		where: {
 			productionId,
@@ -352,13 +404,108 @@ async function findStandIns(
 		taken.add(item.id);
 		standIns.set(asset.id, { id: item.id, assetId: item.assetId });
 	}
-	return standIns;
+}
+
+/** The linked half of `findStandIns`. */
+async function swapStandIns(
+	production: { id: string; startDate: Date | null; endDate: Date | null },
+	rest: StandInCandidate[],
+	goingOut: string[],
+	standIns: Map<string, StandIn>
+) {
+	if (rest.length === 0) return;
+	const productionId = production.id;
+	// Joining its own kit's or parent's booking beats taking another's place,
+	// and an accessory going out with its parent travels with it.
+	const kits = await bookedKits(
+		productionId,
+		rest.flatMap((a) => [a.bundleId, a.bundle?.parentBundleId ?? null])
+	);
+	const parentIds = rest.flatMap((a) => (a.parentAssetId ? [a.parentAssetId] : []));
+	const parentsBooked = new Set(
+		parentIds.length === 0
+			? []
+			: (
+					await prisma.productionItem.findMany({
+						where: { productionId, assetId: { in: parentIds } },
+						select: { assetId: true }
+					})
+				).map((i) => i.assetId)
+	);
+	const seekers = rest.filter((a) =>
+		seeksSwap(a, { bookedKits: kits, bookedUnits: parentsBooked, goingOut })
+	);
+	if (seekers.length === 0) return;
+
+	const items = await prisma.productionItem.findMany({
+		where: {
+			productionId,
+			status: 'APPROVED',
+			assetId: { notIn: goingOut },
+			OR: [{ sourceBundleId: { not: null } }, { sourceParentAssetId: { not: null } }],
+			asset: {
+				OR: seekers.map((a) => ({ productId: a.productId, organizationId: a.organizationId }))
+			}
+		},
+		select: {
+			id: true,
+			assetId: true,
+			sourceBundleId: true,
+			sourceParentAssetId: true,
+			asset: {
+				select: {
+					productId: true,
+					organizationId: true,
+					bundleId: true,
+					parentAssetId: true,
+					bundle: { select: { parentBundleId: true } }
+				}
+			}
+		},
+		orderBy: { asset: { orgIndex: 'asc' } }
+	});
+	const linked = items.filter((i) => bookedWithPlace(i, i.asset));
+	if (linked.length === 0) return;
+
+	const rows = new Map(
+		(await loadSwapRows([...seekers.map((a) => a.id), ...linked.map((i) => i.assetId)])).map(
+			(r) => [r.id, r]
+		)
+	);
+	const taken = new Set<string>();
+	for (const asset of seekers) {
+		const scanned = rows.get(asset.id);
+		if (!scanned) continue;
+		for (const item of linked) {
+			if (taken.has(item.id)) continue;
+			if (item.asset.productId !== asset.productId) continue;
+			if (item.asset.organizationId !== asset.organizationId) continue;
+			const partner = rows.get(item.assetId);
+			if (!partner || (await swapCheck(scanned, partner, production))) continue;
+			taken.add(item.id);
+			standIns.set(asset.id, { id: item.id, assetId: item.assetId, swap: { scanned, partner } });
+			break;
+		}
+	}
+}
+
+/** Where a unit is after its stand-in moved it, for what it is offered to book along. */
+function placedAfter<T extends { bundleId: string | null; parentAssetId: string | null }>(
+	asset: T,
+	standIn: StandIn | undefined
+): T {
+	const partner = standIn?.swap?.partner;
+	return partner
+		? { ...asset, bundleId: partner.bundleId, parentAssetId: partner.parentAssetId }
+		: asset;
 }
 
 /**
  * Hands a booked item over to the unit actually scanned, which goes out on it.
  * The booked unit stays on the shelf and is free again, so its accessories that
  * were booked with it go too, and its history says where its booking went.
+ * A linked one swaps places with the scanned unit first; its SWAPPED entry
+ * then says where the booking went.
  */
 async function checkOutInPlaceOf(
 	tx: Prisma.TransactionClient,
@@ -367,7 +514,13 @@ async function checkOutInPlaceOf(
 	production: { id: string; name: string },
 	handover: ReturnType<typeof handoverOnCheckout>,
 	userId: string
-) {
+): Promise<SwapNotice | null> {
+	const swap = standIn.swap
+		? await applySwap(tx, userId, standIn.swap.scanned, standIn.swap.partner, {
+				kind: 'handout',
+				production
+			})
+		: null;
 	await tx.productionItem.update({
 		where: { id: standIn.id },
 		data: { assetId: scanned.id, status: 'CHECKED_OUT', ...handover }
@@ -379,6 +532,7 @@ async function checkOutInPlaceOf(
 			status: 'APPROVED'
 		}
 	});
+	if (swap) return swap;
 	await tx.assetTransaction.create({
 		data: {
 			assetId: standIn.assetId,
@@ -395,6 +549,7 @@ async function checkOutInPlaceOf(
 			} satisfies BookingReplacedData
 		}
 	});
+	return null;
 }
 
 /**
@@ -428,7 +583,8 @@ async function assertAssetAccess(userId: string, organizationId: string) {
  */
 export async function performScan(
 	userId: string,
-	input: ScanInput
+	input: ScanInput,
+	options: CheckoutOptions = {}
 ): Promise<{ result: ScanResult; affected: AffectedRecords }> {
 	const match = await resolveScannedCode(userId, input.assetTag);
 
@@ -586,7 +742,7 @@ export async function performScan(
 	const alreadyBooked = new Set(existingItems.map((i) => i.assetId));
 	const standIn = alreadyBooked.has(asset.id)
 		? undefined
-		: (await findStandIns(production.id, [asset], touchedIds)).get(asset.id);
+		: (await findStandIns(production, [asset], touchedIds, options)).get(asset.id);
 	// Accessories follow the unit they hang off, booked or not.
 	const addedByLender =
 		!role.asProduction && !standIn
@@ -600,11 +756,12 @@ export async function performScan(
 				asset,
 				await bookedKits(production.id, [asset.bundleId, asset.bundle?.parentBundleId ?? null])
 			);
-	await prisma.$transaction(async (tx) => {
+	const swap = await prisma.$transaction(async (tx) => {
 		await checkOutExisting(tx, existingItems, lent, role.borrower, userId);
+		let swap: SwapNotice | null = null;
 		if (standIn) {
 			const handover = handoverOnCheckout(lent, role.borrower, userId);
-			await checkOutInPlaceOf(tx, standIn, asset, production, handover, userId);
+			swap = await checkOutInPlaceOf(tx, standIn, asset, production, handover, userId);
 		}
 		// The scanned unit itself went out on the item it took over.
 		const newIds = touchedIds.filter(
@@ -638,9 +795,17 @@ export async function performScan(
 				}
 			}))
 		});
+		return swap;
 	});
 
 	mergeAffected(affected, { productionIds: [production.id] });
+	if (standIn?.swap) {
+		const { partner } = standIn.swap;
+		mergeAffected(affected, {
+			assetIds: [partner.id],
+			bundleIds: [asset.bundleId, partner.bundleId].filter((id): id is string => id !== null)
+		});
+	}
 
 	return {
 		result: {
@@ -648,8 +813,9 @@ export async function performScan(
 			action: 'CHECKED_OUT',
 			targetName: production.name,
 			returnedFrom: [],
-			group: await scanGroup(asset, input),
-			overdueInspections: await overdueInspections(touchedIds)
+			group: await scanGroup(placedAfter(asset, standIn), input),
+			overdueInspections: await overdueInspections(touchedIds),
+			swap
 		},
 		affected
 	};
@@ -765,7 +931,12 @@ async function performKitScan(
 					include: { production: { select: RETURNED_FROM_SELECT } }
 				})
 			: [];
-	const { result, affected } = await performBulkCheckout(userId, { ...input, assetIds: ids });
+	// The kit's own units are the kit: none of them takes another kit's place.
+	const { result, affected } = await performBulkCheckout(
+		userId,
+		{ ...input, assetIds: ids },
+		{ swap: false }
+	);
 	return {
 		result: {
 			...kitScanResult(kit, units, {
@@ -923,8 +1094,12 @@ export interface BulkCheckoutInput {
 /** Move a hand-picked set of assets in one go (the web UI's bulk action). */
 export async function performBulkCheckout(
 	userId: string,
-	input: BulkCheckoutInput
-): Promise<{ result: { count: number; targetName: string }; affected: AffectedRecords }> {
+	input: BulkCheckoutInput,
+	options: CheckoutOptions = {}
+): Promise<{
+	result: { count: number; targetName: string; swaps: SwapNotice[] };
+	affected: AffectedRecords;
+}> {
 	const [orgIds, systemAdmin] = await Promise.all([writableOrgIds(userId), isSystemAdmin(userId)]);
 
 	// Everything attached to a picked unit is picked with it, before anything
@@ -1055,7 +1230,7 @@ export async function performBulkCheckout(
 		// where its units are, so a half-moved one reads differently too.
 		mergeAffected(affected, { bundleIds });
 
-		return { result: { count: assets.length, targetName: location.name }, affected };
+		return { result: { count: assets.length, targetName: location.name, swaps: [] }, affected };
 	}
 
 	const production = await prisma.production.findUniqueOrThrow({ where: { id: input.targetId } });
@@ -1067,9 +1242,10 @@ export async function performBulkCheckout(
 		select: { id: true, assetId: true, status: true }
 	});
 	const standIns = await findStandIns(
-		production.id,
+		production,
 		assets.filter((a) => selected.has(a.id) && !existingItems.some((i) => i.assetId === a.id)),
-		assetIds
+		assetIds,
+		options
 	);
 	const addedByLender = role.asProduction
 		? new Set<string>()
@@ -1085,6 +1261,7 @@ export async function performBulkCheckout(
 		assets.flatMap((a) => [a.bundleId, a.bundle?.parentBundleId ?? null])
 	);
 
+	const swaps: SwapNotice[] = [];
 	for (const asset of assets) {
 		const existing = existingItems.find((i) => i.assetId === asset.id);
 		const standIn = standIns.get(asset.id);
@@ -1096,9 +1273,17 @@ export async function performBulkCheckout(
 			);
 		} else if (standIn) {
 			const handover = handoverOnCheckout(lent, role.borrower, userId);
-			await prisma.$transaction((tx) =>
+			const swap = await prisma.$transaction((tx) =>
 				checkOutInPlaceOf(tx, standIn, asset, production, handover, userId)
 			);
+			if (swap && standIn.swap) {
+				swaps.push(swap);
+				const { partner } = standIn.swap;
+				mergeAffected(affected, {
+					assetIds: [partner.id],
+					bundleIds: [asset.bundleId, partner.bundleId].filter((id): id is string => id !== null)
+				});
+			}
 		} else {
 			await prisma.productionItem.create({
 				data: {
@@ -1130,7 +1315,7 @@ export async function performBulkCheckout(
 
 	mergeAffected(affected, { productionIds: [production.id] });
 
-	return { result: { count: assets.length, targetName: production.name }, affected };
+	return { result: { count: assets.length, targetName: production.name, swaps }, affected };
 }
 
 /**

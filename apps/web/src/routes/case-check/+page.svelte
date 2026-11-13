@@ -14,11 +14,12 @@
 	import { CameraScanButton } from '#lib/components/ui/camera-scan/index.js';
 	import StocktakeProgress from '#lib/components/stocktake-progress.svelte';
 	import { getErrorMessage } from '#lib/utils.js';
+	import { swapNoticeText } from '#lib/swap-notice.svelte.js';
 	import {
-		describeCode,
 		findCaseByCode,
 		getCaseCheck,
-		recordCaseCheck
+		recordCaseCheck,
+		scanCaseCode
 	} from '#lib/remote/case-checks.remote.js';
 
 	// Checking a case: scan the case (or open it from its page), then scan or
@@ -138,7 +139,24 @@
 				}
 				return;
 			}
-			const name = await describeCode(value);
+			// Not on the list: maybe a unit of the same product as a missing one,
+			// which then takes its place — see services/case-check.ts.
+			const outcome = await scanCaseCode({ ref, code: value, foundAssetIds: [...found] });
+			if (outcome.outcome === 'found' || outcome.outcome === 'swapped') {
+				found.add(outcome.assetId);
+				const name =
+					(outcome.outcome === 'swapped' ? outcome.check : check).items.find(
+						(i) => i.assetId === outcome.assetId
+					)?.name ?? value;
+				if (outcome.outcome === 'swapped') {
+					const swap = swapNoticeText(outcome.swap);
+					feedback = { tone: 'good', title: `${name}: ${swap.title}`, detail: swap.detail };
+				} else {
+					feedback = { tone: 'good', title: `Found: ${name}`, detail: value };
+				}
+				return;
+			}
+			const name = outcome.name;
 			if (!foreign.some((f) => f.code === value)) foreign = [...foreign, { code: value, name }];
 			feedback = {
 				tone: 'warn',

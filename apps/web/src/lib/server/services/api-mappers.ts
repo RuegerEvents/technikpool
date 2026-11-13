@@ -226,6 +226,7 @@ export function toProduct(product: ProductRow): Schemas['Product'] {
 export function toCatalogProduct(
 	product: ProductRow & {
 		isLicense: boolean;
+		notInterchangeable: boolean;
 		inspectionTypes: { typeId: string; required: boolean }[];
 		category: { inspectionTypes: { typeId: string }[] };
 		ports: {
@@ -253,6 +254,7 @@ export function toCatalogProduct(
 			override: inspectionOverride(product, typeId)
 		})),
 		isLicense: product.isLicense,
+		notInterchangeable: product.notInterchangeable,
 		mainsConnectors: extra.mainsConnectors,
 		ports: product.ports.map((p) => ({
 			connector: p.connector.name,
@@ -342,6 +344,19 @@ function transactionInspection(data: unknown): Schemas['TransactionInspection'] 
 	return null;
 }
 
+/** The other unit and the places of a SWAPPED entry; null for any other. */
+function transactionSwap(data: unknown): Schemas['TransactionSwap'] | null {
+	const tx = data as TransactionData | null | undefined;
+	if (tx?.type !== 'SWAPPED') return null;
+	return {
+		partnerAssetId: tx.partnerAssetId,
+		partnerLabel: tx.partnerLabel,
+		now: tx.to?.name ?? null,
+		before: tx.from?.name ?? null,
+		via: tx.via
+	};
+}
+
 export function toAssetTransaction(tx: TransactionRow): Schemas['AssetTransaction'] {
 	return {
 		id: tx.id,
@@ -349,7 +364,8 @@ export function toAssetTransaction(tx: TransactionRow): Schemas['AssetTransactio
 		createdAt: tx.createdAt.toISOString(),
 		userName: tx.user?.name ?? tx.user?.email ?? null,
 		productionName: tx.production?.name ?? null,
-		inspection: transactionInspection(tx.data)
+		inspection: transactionInspection(tx.data),
+		swap: transactionSwap(tx.data)
 	};
 }
 
@@ -500,7 +516,8 @@ export function toScanResult(result: ScanResult): Schemas['ScanResult'] {
 		returnedFrom: result.returnedFrom,
 		group: toScanGroup(result.group),
 		kit: toScanKit(result.kit),
-		overdueInspections: (result.overdueInspections ?? []).map((o) => ({ ...o }))
+		overdueInspections: (result.overdueInspections ?? []).map((o) => ({ ...o })),
+		swap: result.swap ? { ...result.swap } : null
 	};
 }
 

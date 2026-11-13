@@ -142,6 +142,11 @@ class DemoBackend {
     if (method == 'POST' && path == '/api/v1/case-checks') {
       return _recordCase(options);
     }
+    // ['', 'api', 'v1', 'case-checks', kind, id, 'scans']
+    if (method == 'POST' && path.startsWith('/api/v1/case-checks/') && path.endsWith('/scans')) {
+      final segments = path.split('/');
+      return _scanIntoCase(options, CaseKind.fromJson(segments[4]), segments[5]);
+    }
     if (method == 'POST' &&
         path.startsWith('/api/v1/productions/') &&
         path.endsWith('/checks')) {
@@ -437,6 +442,7 @@ class DemoBackend {
     String action,
     String targetName, {
     TransactionInspection? inspection,
+    TransactionSwap? swap,
   }) {
     (_history[asset.id] ??= []).insert(
       0,
@@ -447,7 +453,122 @@ class DemoBackend {
         userName: DemoData.user.name,
         productionName: action == 'CHECKED_OUT' ? targetName : null,
         inspection: inspection,
+        swap: swap,
       ),
+    );
+  }
+
+  // ---------------------------------------------------------------------------
+  // Swapping linked units — mirrors services/unit-swap.ts. A unit of the same
+  // product and org as one linked in a kit or on a unit takes its place, and
+  // that one takes the scanned one's old place, or becomes loose. The demo has
+  // no production dates, so there are no booking clashes to weigh.
+
+  /// The first of [candidates] the scanned unit may take the place of.
+  Asset? _swapPartner(Asset scanned, Iterable<Asset> candidates) {
+    if (scanned.status != AssetStatus.available || _checkedOutTo.containsKey(scanned.id)) {
+      return null;
+    }
+    bool hasAccessories(Asset a) => _units.any((u) => u.parentAssetId == a.id);
+    for (final partner in candidates) {
+      if (partner.id == scanned.id ||
+          partner.product.id != scanned.product.id ||
+          partner.organization.id != scanned.organization.id ||
+          (partner.bundleId == null && partner.parentAssetId == null) ||
+          (partner.bundleId == scanned.bundleId &&
+              partner.parentAssetId == scanned.parentAssetId) ||
+          _checkedOutTo.containsKey(partner.id) ||
+          partner.parentAssetId == scanned.id ||
+          scanned.parentAssetId == partner.id ||
+          (partner.parentAssetId != null && hasAccessories(scanned)) ||
+          (scanned.parentAssetId != null && hasAccessories(partner))) {
+        continue;
+      }
+      return partner;
+    }
+    return null;
+  }
+
+  /// A kit's or a unit's name, as the server names a place.
+  String? _placeName(Asset unit) {
+    if (unit.parentAssetId case final parentId?) {
+      final parent = _units.where((a) => a.id == parentId).firstOrNull;
+      if (parent == null) return parentId;
+      final name = withCaption(parent.product.name, parent.product.caption);
+      return '$name (${parent.assetTag ?? '#${parent.orgIndex}'})';
+    }
+    if (unit.bundleId case final bundleId?) {
+      final kit = _bundles[bundleId];
+      if (kit == null) return bundleId;
+      return kit.tag == null ? kit.name : '${kit.name} (${kit.tag})';
+    }
+    return null;
+  }
+
+  /// Puts a unit somewhere, its accessories along.
+  void _place(Asset unit, String? bundleId, String? parentAssetId, Location location) {
+    Asset moved(Asset a, {String? parent}) => Asset(
+      id: a.id,
+      assetTag: a.assetTag,
+      serialNumber: a.serialNumber,
+      orgIndex: a.orgIndex,
+      status: a.status,
+      product: a.product,
+      location: location,
+      organization: a.organization,
+      bundleId: bundleId,
+      parentAssetId: parent,
+    );
+    for (var i = 0; i < _assets.length; i++) {
+      final a = _assets[i];
+      if (a.id == unit.id) _assets[i] = moved(a, parent: parentAssetId);
+      if (a.parentAssetId == unit.id) _assets[i] = moved(a, parent: a.parentAssetId);
+    }
+  }
+
+  /// Swaps the two units' places and writes it into both histories.
+  ScanSwap _swap(Asset scanned, Asset partner, {Production? production}) {
+    final scannedLinked = scanned.bundleId != null || scanned.parentAssetId != null;
+    final joined = _placeName(partner) ?? '';
+    final partnerTo = scannedLinked ? _placeName(scanned) : null;
+    final scannedLabel = scanned.assetTag ?? '#${scanned.orgIndex}';
+    final partnerLabel = partner.assetTag ?? '#${partner.orgIndex}';
+    _place(scanned, partner.bundleId, partner.parentAssetId, partner.location);
+    if (scannedLinked) {
+      _place(partner, scanned.bundleId, scanned.parentAssetId, scanned.location);
+    } else {
+      _place(partner, null, null, partner.location);
+    }
+    final via = production == null ? TransactionSwapVia.caseCheck : TransactionSwapVia.handout;
+    _log(
+      scanned,
+      'SWAPPED',
+      production?.name ?? '',
+      swap: TransactionSwap(
+        partnerAssetId: partner.id,
+        partnerLabel: partnerLabel,
+        now: joined,
+        before: partnerTo,
+        via: via,
+      ),
+    );
+    _log(
+      partner,
+      'SWAPPED',
+      production?.name ?? '',
+      swap: TransactionSwap(
+        partnerAssetId: scanned.id,
+        partnerLabel: scannedLabel,
+        now: partnerTo,
+        before: joined,
+        via: via,
+      ),
+    );
+    return ScanSwap(
+      partnerAssetId: partner.id,
+      partnerLabel: partnerLabel,
+      joined: joined,
+      partnerTo: partnerTo,
     );
   }
 
@@ -1141,7 +1262,17 @@ class DemoBackend {
           manufacturerName: asset.product.manufacturerName,
         );
         if (mode == HandoutMode.checkout) {
-          _handOut(asset, production);
+          // Not booked itself: it may take the place of a linked unit that is.
+          final booked = _booked[production.id] ?? const <String>{};
+          final partner = booked.contains(asset.id)
+              ? null
+              : _swapPartner(asset, [
+                  for (final u in _units)
+                    if (booked.contains(u.id) && !_isOut(u, production)) u,
+                ]);
+          final swap = partner == null ? null : _swap(asset, partner, production: production);
+          if (partner != null) _booked[production.id]?.remove(partner.id);
+          _handOut(_assets.firstWhere((a) => a.id == asset.id, orElse: () => asset), production);
           return _ok(
             options,
             ScanResult(
@@ -1149,6 +1280,7 @@ class DemoBackend {
               action: ScanResultAction.checkedOut,
               targetName: production.name,
               returnedFrom: const [],
+              swap: swap,
             ),
           );
         }
@@ -1453,6 +1585,64 @@ class DemoBackend {
           'units': 'mm',
           'zpl': text,
         }).toString(),
+      ),
+    );
+  }
+
+  /// A code the case check did not find on its list — mirrors `scanIntoCase`.
+  Response<dynamic> _scanIntoCase(RequestOptions options, CaseKind kind, String id) {
+    final body = options.data is Map ? options.data as Map : const {};
+    final code = '${body['code'] ?? ''}'.trim();
+    final found = {...(body['foundAssetIds'] as List? ?? const []).whereType<String>()};
+    final check = _case(kind, id, null);
+    final asset = _resolve(code).asset;
+    CaseCheckScanResult foreign(String? name) =>
+        CaseCheckScanResult(
+          outcome: CaseCheckScanResultOutcome.foreign,
+          assetId: null,
+          name: name,
+          swap: null,
+          check: null,
+        );
+    if (asset == null) {
+      final kit = _bundles.values.where((b) => b.tag == code).firstOrNull;
+      return _ok(options, foreign(kit?.name));
+    }
+    if (check.items.any((i) => i.assetId == asset.id)) {
+      return _ok(
+        options,
+        CaseCheckScanResult(
+          outcome: CaseCheckScanResultOutcome.found,
+          assetId: asset.id,
+          name: null,
+          swap: null,
+          check: null,
+        ),
+      );
+    }
+    final open = {
+      for (final item in check.items)
+        if (!found.contains(item.assetId) &&
+            item.awayOn == null &&
+            !(kind == CaseKind.asset && item.assetId == id))
+          item.assetId,
+    };
+    final partner = _swapPartner(asset, [
+      for (final u in _units)
+        if (open.contains(u.id)) u,
+    ]);
+    if (partner == null) {
+      return _ok(options, foreign(productLabel(asset.product.manufacturerName, asset.product.name)));
+    }
+    final swap = _swap(asset, partner);
+    return _ok(
+      options,
+      CaseCheckScanResult(
+        outcome: CaseCheckScanResultOutcome.swapped,
+        assetId: asset.id,
+        name: null,
+        swap: swap,
+        check: _case(kind, id, null),
       ),
     );
   }

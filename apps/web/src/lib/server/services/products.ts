@@ -125,6 +125,11 @@ export type ProductUpdateInput = {
 	cable?: CableAttrsInput | null;
 	/** Whether units of this product are licences carrying credentials. */
 	isLicense?: boolean;
+	/**
+	 * Its units are never swapped for one another in a kit or on a unit — see
+	 * services/unit-swap.ts.
+	 */
+	notInterchangeable?: boolean;
 	/** What the team calls it, and the longer notes. `''` clears either. */
 	caption?: string;
 	details?: string;
@@ -161,6 +166,7 @@ export async function updateProduct(userId: string, input: ProductUpdateInput) {
 				connectorBRef: { select: { name: true } },
 				lengthCm: true,
 				isLicense: true,
+				notInterchangeable: true,
 				caption: true,
 				details: true,
 				inspectionTypes: { select: { typeId: true, required: true } }
@@ -187,6 +193,11 @@ export async function updateProduct(userId: string, input: ProductUpdateInput) {
 	const nextIsLicense =
 		input.isLicense === undefined ? undefined : input.isLicense && !nextCable?.cableType;
 	const licenseChanged = nextIsLicense !== undefined && nextIsLicense !== previousProduct.isLicense;
+	// Whether its units may be swapped is a fact about the product every org
+	// that holds units of it lives with, so it is identity as well.
+	const interchangeChanged =
+		input.notInterchangeable !== undefined &&
+		input.notInterchangeable !== previousProduct.notInterchangeable;
 	const waysChanged = nextWays !== undefined && !sameWays(previousWays, nextWays);
 	const cableChanged =
 		waysChanged ||
@@ -220,6 +231,7 @@ export async function updateProduct(userId: string, input: ProductUpdateInput) {
 		(input.categoryId !== undefined && input.categoryId !== previousProduct.categoryId) ||
 		cableChanged ||
 		licenseChanged ||
+		interchangeChanged ||
 		inspectionChanged;
 
 	// A first picture is a contribution and open to anyone who works in an org
@@ -278,6 +290,9 @@ export async function updateProduct(userId: string, input: ProductUpdateInput) {
 			imagePath: nextImagePath,
 			...(storedCable ?? {}),
 			...(nextIsLicense !== undefined ? { isLicense: nextIsLicense } : {}),
+			...(input.notInterchangeable !== undefined
+				? { notInterchangeable: input.notInterchangeable }
+				: {}),
 			...(nextCaption !== undefined ? { caption: nextCaption } : {}),
 			...(nextDetails !== undefined ? { details: nextDetails } : {})
 		},
@@ -300,6 +315,9 @@ export async function updateProduct(userId: string, input: ProductUpdateInput) {
 				}
 			: {}),
 		...(nextIsLicense !== undefined ? { isLicense: nextIsLicense } : {}),
+		...(input.notInterchangeable !== undefined
+			? { notInterchangeable: input.notInterchangeable }
+			: {}),
 		...(nextCaption !== undefined ? { caption: nextCaption } : {}),
 		...(nextDetails !== undefined ? { details: nextDetails } : {})
 	});
@@ -746,7 +764,9 @@ export async function mergeProducts(
 					lengthCm: source.lengthCm
 				}
 			: {}),
-		...(source.isLicense && !target.isLicense ? { isLicense: true } : {})
+		...(source.isLicense && !target.isLicense ? { isLicense: true } : {}),
+		// Likewise "not interchangeable": whoever said so had a reason.
+		...(source.notInterchangeable && !target.notInterchangeable ? { notInterchangeable: true } : {})
 	};
 
 	await prisma.$transaction(async (tx) => {
@@ -842,6 +862,7 @@ const REVERTIBLE_PRODUCT_FIELDS = [
 	'connectorB',
 	'lengthCm',
 	'isLicense',
+	'notInterchangeable',
 	'caption',
 	'details'
 ] as const;

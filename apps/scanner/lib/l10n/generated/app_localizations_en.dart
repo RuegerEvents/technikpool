@@ -1689,4 +1689,32 @@ class SEn extends S {
 
   @override
   String get inventorySearch => 'Search, or enter a tag';
+
+  @override
+  String get actionSwapped => 'Swapped places';
+
+  @override
+  String swapIn(String partner, String place) {
+    return 'Swapped in for $partner ($place)';
+  }
+
+  @override
+  String swapPartnerMoved(String partner, String place) {
+    return '$partner now belongs to $place';
+  }
+
+  @override
+  String swapPartnerLoose(String partner) {
+    return '$partner is now loose';
+  }
+
+  @override
+  String historySwapNow(String partner, String place) {
+    return 'With $partner, now in $place';
+  }
+
+  @override
+  String historySwapLoose(String partner) {
+    return 'With $partner, now loose';
+  }
 }

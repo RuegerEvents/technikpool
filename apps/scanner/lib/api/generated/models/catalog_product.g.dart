@@ -31,6 +31,7 @@ CatalogProduct _$CatalogProductFromJson(
         (e) => ProductInspectionRequirement.fromJson(e as Map<String, dynamic>),
       )
       .toList(),
+  notInterchangeable: json['notInterchangeable'] as bool?,
   ports: (json['ports'] as List<dynamic>?)
       ?.map((e) => ProductPort.fromJson(e as Map<String, dynamic>))
       .toList(),
@@ -50,6 +51,7 @@ Map<String, dynamic> _$CatalogProductToJson(CatalogProduct instance) =>
       'inspectionRequired': instance.inspectionRequired,
       'inspections': ?instance.inspections,
       'isLicense': instance.isLicense,
+      'notInterchangeable': ?instance.notInterchangeable,
       'mainsConnectors': instance.mainsConnectors,
       'ports': ?instance.ports,
       'units': instance.units,

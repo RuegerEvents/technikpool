@@ -467,11 +467,12 @@ export async function scanIntoHandout(
 			select: { id: true }
 		}));
 	if (booked) {
-		const step = await performScan(userId, {
-			assetTag: code,
-			targetType: 'production',
-			targetId: productionId
-		});
+		// Taking back never swaps a unit into a kit: it only books what was booked.
+		const step = await performScan(
+			userId,
+			{ assetTag: code, targetType: 'production', targetId: productionId },
+			{ swap: false }
+		);
 		mergeAffected(affected, step.affected);
 	}
 
@@ -538,11 +539,12 @@ export async function setHandoutDone(
 
 	if (mode === 'checkout' && !done) return undoCheckout(userId, productionId, assetIds);
 	if (mode === 'checkout' || !done) {
-		const { result, affected } = await performBulkCheckout(userId, {
-			assetIds,
-			targetType: 'production',
-			targetId: productionId
-		});
+		// An untick on the take-back list books the unit out again as it was.
+		const { result, affected } = await performBulkCheckout(
+			userId,
+			{ assetIds, targetType: 'production', targetId: productionId },
+			{ swap: mode === 'checkout' }
+		);
 		return { result: { count: result.count }, affected };
 	}
 
@@ -554,11 +556,15 @@ export async function setHandoutDone(
 		select: { assetId: true }
 	});
 	if (unshipped.length > 0) {
-		const step = await performBulkCheckout(userId, {
-			assetIds: unshipped.map((i) => i.assetId),
-			targetType: 'production',
-			targetId: productionId
-		});
+		const step = await performBulkCheckout(
+			userId,
+			{
+				assetIds: unshipped.map((i) => i.assetId),
+				targetType: 'production',
+				targetId: productionId
+			},
+			{ swap: false }
+		);
 		mergeAffected(affected, step.affected);
 	}
 

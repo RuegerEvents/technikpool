@@ -2844,6 +2844,42 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Search, or enter a tag'**
   String get inventorySearch;
+
+  /// The SWAPPED history entry: this unit and another of the same product changed places in a kit or on a unit.
+  ///
+  /// In en, this message translates to:
+  /// **'Swapped places'**
+  String get actionSwapped;
+
+  /// Scan result: the scanned unit took the place of a linked unit of the same product.
+  ///
+  /// In en, this message translates to:
+  /// **'Swapped in for {partner} ({place})'**
+  String swapIn(String partner, String place);
+
+  /// No description provided for @swapPartnerMoved.
+  ///
+  /// In en, this message translates to:
+  /// **'{partner} now belongs to {place}'**
+  String swapPartnerMoved(String partner, String place);
+
+  /// No description provided for @swapPartnerLoose.
+  ///
+  /// In en, this message translates to:
+  /// **'{partner} is now loose'**
+  String swapPartnerLoose(String partner);
+
+  /// No description provided for @historySwapNow.
+  ///
+  /// In en, this message translates to:
+  /// **'With {partner}, now in {place}'**
+  String historySwapNow(String partner, String place);
+
+  /// No description provided for @historySwapLoose.
+  ///
+  /// In en, this message translates to:
+  /// **'With {partner}, now loose'**
+  String historySwapLoose(String partner);
 }
 
 class _SDelegate extends LocalizationsDelegate<S> {

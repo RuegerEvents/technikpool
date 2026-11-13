@@ -1574,6 +1574,54 @@ paths:
         '409':
           $ref: '#/components/responses/Conflict'
 
+  /api/v1/case-checks/{kind}/{id}/scans:
+    post:
+      operationId: scanCaseCheck
+      tags: [caseCheck]
+      summary: A code scanned into a case that is not on its list
+      description: |
+        Ticking happens on the client; this is for a code it does not find
+        on the case's list. A unit of the same product and organization as
+        one the case still lacks — not in `foundAssetIds`, not out on another
+        job — takes that one's place: the two swap (see `ScanSwap`), the
+        answer is `swapped` with the case as it is now, and the client ticks
+        `assetId`. Only for whoever may record the check (`canRecord`), and
+        never for a product marked `notInterchangeable`. A unit already on the
+        list answers `found`; anything else `foreign`, with its name where the
+        caller may see it.
+      parameters:
+        - name: kind
+          in: path
+          required: true
+          schema:
+            $ref: '#/components/schemas/CaseKind'
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CaseCheckScanRequest'
+      responses:
+        '200':
+          description: What the code turned out to be
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CaseCheckScanResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
   /api/v1/case-checks/{kind}/{id}/label:
     get:
       operationId: getCaseLabel
@@ -3092,6 +3140,12 @@ components:
                 $ref: '#/components/schemas/ProductInspectionRequirement'
             isLicense:
               type: boolean
+            notInterchangeable:
+              type: boolean
+              description: |
+                Its units are never swapped for one another in a kit or on a
+                unit (see `ScanSwap`). Not required, so an older client keeps
+                compiling.
             mainsConnectors:
               type: array
               description: |
@@ -3168,6 +3222,12 @@ components:
         isLicense:
           type: boolean
           description: A cable is never a licence; `true` on a cable is ignored.
+        notInterchangeable:
+          type: boolean
+          description: |
+            `true` keeps its units from being swapped for one another when
+            handing out or checking a case (see `ScanSwap`) — a calibrated lens
+            that belongs to exactly one camera. Identity like the name.
         requiresInspection:
           type: [boolean, 'null']
           description: The electrical type. Null follows the category again.
@@ -3547,6 +3607,33 @@ components:
           oneOf:
             - $ref: '#/components/schemas/TransactionInspection'
             - type: 'null'
+        swap:
+          description: |
+            For `SWAPPED`: the unit it changed places with, and where this one
+            is now. Null for every other action. Not required, so an older
+            client keeps compiling.
+          oneOf:
+            - $ref: '#/components/schemas/TransactionSwap'
+            - type: 'null'
+
+    TransactionSwap:
+      type: object
+      required: [partnerAssetId, partnerLabel, now, before, via]
+      properties:
+        partnerAssetId:
+          type: string
+        partnerLabel:
+          type: string
+          description: The other unit's tag, else its number.
+        now:
+          type: [string, 'null']
+          description: The kit or unit this one is in since, by name. Null is loose.
+        before:
+          type: [string, 'null']
+          description: Where it was before. Null is loose.
+        via:
+          type: string
+          enum: [handout, case_check]
 
     TransactionInspection:
       type: object
@@ -3639,6 +3726,41 @@ components:
             required, so an older client keeps compiling.
           items:
             $ref: '#/components/schemas/OverdueInspection'
+        swap:
+          description: |
+            Checking out: the scanned unit went out in the place of a linked
+            unit of the same product booked here — one booked as part of its
+            kit, or as an accessory of its unit — and the two swapped places.
+            Show it; nothing to confirm. Null otherwise. Not required, so an
+            older client keeps compiling.
+          oneOf:
+            - $ref: '#/components/schemas/ScanSwap'
+            - type: 'null'
+
+    ScanSwap:
+      type: object
+      description: |
+        Units stay linked — an accessory on its unit, a unit in its kit — but
+        whoever packs takes the one at hand. When a unit of the same product
+        and organization as a linked one is handed out (or found in that one's
+        case), the scanned unit takes its place, and the other takes the
+        scanned one's old place, or becomes loose if it had none. Never on
+        take-back or in a stocktake, and never for a product marked
+        `notInterchangeable`. Both units' histories say so (`SWAPPED`).
+      required: [partnerAssetId, partnerLabel, joined, partnerTo]
+      properties:
+        partnerAssetId:
+          type: string
+          description: The unit whose place the scanned one took.
+        partnerLabel:
+          type: string
+          description: Its tag, else its number ("#12").
+        joined:
+          type: string
+          description: The kit, or the unit, the scanned unit is in now, by name.
+        partnerTo:
+          type: [string, 'null']
+          description: Where the other unit went, by name. Null when it is now loose.
 
     OverdueInspection:
       type: object
@@ -3976,6 +4098,14 @@ components:
           description: Units booked, accessories taken along included.
         targetName:
           type: string
+        swaps:
+          type: array
+          description: |
+            Checking out: the units that went out in a linked unit's place and
+            swapped with it — see `ScanSwap`. Not required, so an older client
+            keeps compiling.
+          items:
+            $ref: '#/components/schemas/ScanSwap'
 
     ScannedAsset:
       type: object
@@ -4556,6 +4686,43 @@ components:
           type: array
           items:
             type: string
+
+    CaseCheckScanRequest:
+      type: object
+      required: [code, foundAssetIds]
+      properties:
+        code:
+          type: string
+          minLength: 1
+        foundAssetIds:
+          type: array
+          description: The units ticked so far; none of them is swapped away.
+          items:
+            type: string
+
+    CaseCheckScanResult:
+      type: object
+      required: [outcome, assetId, name, swap, check]
+      properties:
+        outcome:
+          type: string
+          enum: [found, swapped, foreign]
+        assetId:
+          type: [string, 'null']
+          description: '`found` and `swapped`: the unit to tick.'
+        name:
+          type: [string, 'null']
+          description: '`foreign`: what the code is, if known and visible to the caller.'
+        swap:
+          description: '`swapped`: what changed places.'
+          oneOf:
+            - $ref: '#/components/schemas/ScanSwap'
+            - type: 'null'
+        check:
+          description: '`swapped`: the case as it is now, with the scanned unit in it.'
+          oneOf:
+            - $ref: '#/components/schemas/CaseCheck'
+            - type: 'null'
 
     CaseCheckResult:
       type: object

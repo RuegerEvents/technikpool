@@ -23,6 +23,7 @@
 	} from '#lib/remote/production-handout.remote.js';
 	import { reportDefect } from '#lib/remote/inspections.remote.js';
 	import { inspectionTypeLabel } from '#lib/inspection-ui.svelte.js';
+	import { swapNoticeText } from '#lib/swap-notice.svelte.js';
 	import { Modal } from '#lib/components/ui/modal/index.js';
 	import { Label } from '#lib/components/ui/label/index.js';
 	import { SvelteSet } from 'svelte/reactivity';
@@ -213,6 +214,8 @@
 			};
 		}
 		const name = makerAndName(result.asset.manufacturerName, result.asset.productName);
+		// It took the place of a linked unit of the same product, and the two swapped.
+		const swap = result.swap ? swapNoticeText(result.swap) : null;
 		const rest = (result.group?.units ?? []).filter((u) => !u.done);
 		// Taking back puts any unit on its shelf, but only one that came from this
 		// production is a return; anything else is said so.
@@ -230,6 +233,7 @@
 				result.asset.assetTag,
 				result.returnedFrom.length > 0 ? `From ${result.returnedFrom.join(', ')}` : null,
 				foreign ? `Put back on ${result.targetName}` : null,
+				swap ? `${swap.title} · ${swap.detail}` : null,
 				overdue.length > 0 ? `Inspection overdue: ${overdue.join(', ')}` : null
 			]
 				.filter(Boolean)

@@ -15,6 +15,7 @@ ProductUpdateRequest _$ProductUpdateRequestFromJson(
   manufacturerId: json['manufacturerId'] as String?,
   categoryId: json['categoryId'] as String?,
   isLicense: json['isLicense'] as bool?,
+  notInterchangeable: json['notInterchangeable'] as bool?,
   requiresInspection: json['requiresInspection'] as bool?,
   inspections: (json['inspections'] as Map<String, dynamic>?)?.map(
     (k, e) => MapEntry(k, e as bool?),
@@ -36,6 +37,7 @@ Map<String, dynamic> _$ProductUpdateRequestToJson(
   'manufacturerId': ?instance.manufacturerId,
   'categoryId': ?instance.categoryId,
   'isLicense': ?instance.isLicense,
+  'notInterchangeable': ?instance.notInterchangeable,
   'requiresInspection': ?instance.requiresInspection,
   'inspections': ?instance.inspections,
   'cable': ?instance.cable,

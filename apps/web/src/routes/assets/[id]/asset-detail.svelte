@@ -1537,6 +1537,39 @@
 														? ''
 														: 'underline underline-offset-2'}">{tx.productionName}</a
 												>
+											{:else if tx?.type === 'SWAPPED'}
+												Swapped with
+												<a
+													href={resolve(`assets/${tx.partnerAssetId}`)}
+													class="text-foreground underline underline-offset-2">{tx.partnerLabel}</a
+												>
+												<span class="font-normal text-muted-foreground">
+													{#if tx.to}
+														— now in
+														<a
+															href={tx.to.kind === 'kit'
+																? resolve(`assets/bundles/${tx.to.id}`)
+																: resolve(`assets/${tx.to.id}`)}
+															class="font-medium text-foreground underline underline-offset-2"
+															>{tx.to.name}</a
+														>
+													{:else}
+														— now loose
+													{/if}
+													{#if tx.productionId && tx.productionName}
+														· handed out for
+														<a
+															href={item.productionRestricted
+																? undefined
+																: resolve(`productions/${tx.productionId}`)}
+															class="font-medium text-foreground {item.productionRestricted
+																? ''
+																: 'underline underline-offset-2'}">{tx.productionName}</a
+														>
+													{:else if tx.via === 'case_check'}
+														· found in a case check
+													{/if}
+												</span>
 											{:else if tx?.type === 'ACCESSORY_ATTACHED'}
 												Attached as an accessory of
 												<a

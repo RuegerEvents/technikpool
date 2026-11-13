@@ -8,6 +8,7 @@ import 'overdue_inspection.dart';
 import 'scan_group.dart';
 import 'scan_kit.dart';
 import 'scan_result_action.dart';
+import 'scan_swap.dart';
 import 'scanned_asset.dart';
 
 part 'scan_result.g.dart';
@@ -22,6 +23,7 @@ class ScanResult {
     this.group,
     this.kit,
     this.overdueInspections,
+    this.swap,
   });
   
   factory ScanResult.fromJson(Map<String, Object?> json) => _$ScanResultFromJson(json);
@@ -56,6 +58,14 @@ class ScanResult {
   /// required, so an older client keeps compiling.
   ///
   final List<OverdueInspection>? overdueInspections;
+
+  /// Checking out: the scanned unit went out in the place of a linked.
+  /// unit of the same product booked here — one booked as part of its.
+  /// kit, or as an accessory of its unit — and the two swapped places.
+  /// Show it; nothing to confirm. Null otherwise. Not required, so an.
+  /// older client keeps compiling.
+  ///
+  final ScanSwap? swap;
 
   Map<String, Object?> toJson() => _$ScanResultToJson(this);
 }

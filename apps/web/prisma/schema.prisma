@@ -591,6 +591,13 @@ model Product {
   /// Resolume licence is Video like the media server it runs on.
   isLicense Boolean @default(false)
 
+  /// Its units are not to be swapped for one another: a calibrated lens that
+  /// belongs to exactly this camera. Off by default, so a scanned unit of the
+  /// same product takes the place of the one linked in a kit or on a unit
+  /// (see "Swapping linked units" in CLAUDE.md, services/unit-swap.ts).
+  /// Identity like the name: answers to productControl and is logged.
+  notInterchangeable Boolean @default(false)
+
   /// Per inspection type, whether this product's units need it: a row
   /// overrides the category's default (CategoryInspectionType), no row follows it.
   inspectionTypes        ProductInspectionType[]

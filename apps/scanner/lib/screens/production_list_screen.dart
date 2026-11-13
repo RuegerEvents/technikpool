@@ -11,6 +11,7 @@ import '../natural_sort.dart';
 import '../product_label.dart';
 import '../scan/camera_scan_screen.dart';
 import '../scan/scan_tones.dart';
+import '../scan/swap_notice.dart';
 import '../state/providers.dart';
 import '../theme.dart';
 import '../widgets/accessory_dialog.dart';
@@ -631,6 +632,8 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
         result.asset.assetTag,
         Labels.scanAction(l10n, result.action),
         if (returned.isNotEmpty) l10n.returnedFrom(returned.join(', ')),
+        // It went out in a linked unit's place, and the two swapped.
+        if (result.swap case final swap?) swapNotice(l10n, swap),
         if (overdue.isNotEmpty) l10n.inspectionOverdueOf(overdue.join(', ')),
       ].join(' · '),
       fine ? ScanTone.ok : ScanTone.attention,

@@ -300,6 +300,31 @@ refused; the pure rules are in `src/lib/bundle-nesting.ts` (`nestingRefusal`, `i
 - Plan and what comes next (swapping interchangeable units, pack cases):
   `docs/plans/bundles-nested-swap-packcases.md`.
 
+## Swapping linked units (Austausch)
+
+Units stay fixed-linked — a unit in its kit, an accessory on its unit — but whoever packs takes the
+one at hand. So when a unit X is **handed out** (`performScan` / `performBulkCheckout`: handout lists,
+scanner session) or **found in a case check** (`scanIntoCase`, `POST /api/v1/case-checks/{kind}/{id}/scans`)
+in the place of a linked unit Y of the same product and org, the two **swap places**: X takes Y's
+(kit, or parent), Y takes X's old one, or becomes loose on its own shelf if X was loose. No
+prompt; the result carries `swap` (`ScanSwap`), both histories get `SWAPPED`. Never on take-back,
+for a kit's sticker or in a stocktake (`CheckoutOptions.swap: false`).
+
+- **Rules** are pure in `src/lib/unit-swap.ts` (`swapRefusal`, `swapPlacements`, `bookedWithPlace`,
+  `swapBookingClash`, `seeksSwap`); the database half is `services/unit-swap.ts` (`swapCheck`,
+  `applySwap`). X must be `AVAILABLE` and not out, Y not out, accessories stay one level deep, and
+  the product must not be `Product.notInterchangeable` (editable like the name: `productControl`,
+  catalog log, `PATCH /api/v1/products/{id}`).
+- **Handing out** is the stand-in rule extended (`findStandIns` in `checkout.ts`): a loose booked
+  unit is replaced as before; failing that, an APPROVED item booked with its place
+  (`bookedWithPlace`: the kit it is still in, inner kits included, or the parent it still hangs
+  off) is taken over by X after the swap. A unit whose own kit or parent is booked joins that
+  booking instead.
+- **Bookings follow the place.** Open bookings of either unit that were made through its place
+  move to the unit now in it; the rest stay. The swap is refused when that would leave a unit with
+  two overlapping bookings (`swapBookingClash`).
+- **Case check**: only a unit the case still lacks (not ticked, not away), only for `canRecord`.
+
 ## Case labels (Kistenetikett)
 
 A kit, or a unit with its accessories (the same "case" as Kiste checken), gets a label for its

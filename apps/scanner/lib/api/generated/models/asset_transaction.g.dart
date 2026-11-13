@@ -18,6 +18,9 @@ AssetTransaction _$AssetTransactionFromJson(Map<String, dynamic> json) =>
           : TransactionInspection.fromJson(
               json['inspection'] as Map<String, dynamic>,
             ),
+      swap: json['swap'] == null
+          ? null
+          : TransactionSwap.fromJson(json['swap'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$AssetTransactionToJson(AssetTransaction instance) =>
@@ -28,4 +31,5 @@ Map<String, dynamic> _$AssetTransactionToJson(AssetTransaction instance) =>
       'userName': ?instance.userName,
       'productionName': ?instance.productionName,
       'inspection': ?instance.inspection,
+      'swap': ?instance.swap,
     };

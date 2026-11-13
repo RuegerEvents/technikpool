@@ -22,6 +22,9 @@ ScanResult _$ScanResultFromJson(Map<String, dynamic> json) => ScanResult(
   overdueInspections: (json['overdueInspections'] as List<dynamic>?)
       ?.map((e) => OverdueInspection.fromJson(e as Map<String, dynamic>))
       .toList(),
+  swap: json['swap'] == null
+      ? null
+      : ScanSwap.fromJson(json['swap'] as Map<String, dynamic>),
 );
 
 Map<String, dynamic> _$ScanResultToJson(ScanResult instance) =>
@@ -33,4 +36,5 @@ Map<String, dynamic> _$ScanResultToJson(ScanResult instance) =>
       'group': ?instance.group,
       'kit': ?instance.kit,
       'overdueInspections': ?instance.overdueInspections,
+      'swap': ?instance.swap,
     };

@@ -97,6 +97,32 @@ export type BookingReplacedData = {
 	replacedByLabel: string;
 };
 
+/** A place a unit can sit in: a kit, or a unit it is an accessory of. Null is loose. */
+export type SwapPlace = {
+	kind: 'kit' | 'unit';
+	id: string;
+	/** The kit's name and tag, or the unit's product and tag — as it read at the time. */
+	name: string;
+};
+
+/**
+ * This unit and another of the same product changed places — one was handed
+ * out or found in the other's case (see services/unit-swap.ts). Written on both
+ * units. `from`/`to` are this unit's own places; null is loose.
+ */
+export type SwappedData = {
+	type: 'SWAPPED';
+	partnerAssetId: string;
+	/** The partner's tag, else its number: same product, so this is what tells them apart. */
+	partnerLabel: string;
+	from: SwapPlace | null;
+	to: SwapPlace | null;
+	via: 'handout' | 'case_check';
+	/** Handing out: the production whose booking moved to the unit that went out. */
+	productionId?: string;
+	productionName?: string;
+};
+
 export type AccessoryAttachedData = {
 	type: 'ACCESSORY_ATTACHED';
 	parentAssetId: string;
@@ -216,6 +242,7 @@ export type TransactionData =
 	| DeclinedData
 	| BookingCancelledData
 	| BookingReplacedData
+	| SwappedData
 	| AccessoryAttachedData
 	| AccessoryDetachedData
 	| CredentialsSetData

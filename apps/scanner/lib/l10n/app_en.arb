@@ -624,5 +624,17 @@
   "inventoryAllDevices": "All Devices",
   "productScanViewMode": "Nothing was changed. To tag units, choose “Tag units” in the ⋮ menu.",
   "productTagDone": "Done assigning tags",
-  "inventorySearch": "Search, or enter a tag"
+  "inventorySearch": "Search, or enter a tag",
+  "actionSwapped": "Swapped places",
+  "@actionSwapped": {"description": "The SWAPPED history entry: this unit and another of the same product changed places in a kit or on a unit."},
+  "swapIn": "Swapped in for {partner} ({place})",
+  "@swapIn": {"description": "Scan result: the scanned unit took the place of a linked unit of the same product.", "placeholders": {"partner": {"type": "String"}, "place": {"type": "String"}}},
+  "swapPartnerMoved": "{partner} now belongs to {place}",
+  "@swapPartnerMoved": {"placeholders": {"partner": {"type": "String"}, "place": {"type": "String"}}},
+  "swapPartnerLoose": "{partner} is now loose",
+  "@swapPartnerLoose": {"placeholders": {"partner": {"type": "String"}}},
+  "historySwapNow": "With {partner}, now in {place}",
+  "@historySwapNow": {"placeholders": {"partner": {"type": "String"}, "place": {"type": "String"}}},
+  "historySwapLoose": "With {partner}, now loose",
+  "@historySwapLoose": {"placeholders": {"partner": {"type": "String"}}}
 }

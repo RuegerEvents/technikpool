@@ -5,10 +5,10 @@ import { appError, type AppErrorCode } from '#lib/errors.js';
 import {
 	CASE_CHECK_ERROR_STATUS,
 	CaseCheckError,
-	describeCode as describe,
 	findCase,
 	getCaseCheck as load,
-	recordCaseCheck as record
+	recordCaseCheck as record,
+	scanIntoCase
 } from '#lib/server/services/case-check.js';
 import { getAssetHistory } from './assets.remote';
 
@@ -46,11 +46,24 @@ export const findCaseByCode = command(v.string(), async (code) => {
 	return await withCaseErrors(() => findCase(user.id, code));
 });
 
-/** A code scanned into a case it is not part of: what it is, or null. */
-export const describeCode = command(v.string(), async (code) => {
-	const user = await requireAuth();
-	return await describe(user.id, code);
-});
+/**
+ * A code scanned into a case that is not on the page's list: a unit that takes
+ * the place of a missing one of the same product (they swap, and the case comes
+ * back as it is now), or what it is, for "not part of this case".
+ */
+export const scanCaseCode = command(
+	v.object({ ref: caseRef, code: v.string(), foundAssetIds: v.array(v.string()) }),
+	async ({ ref, code, foundAssetIds }) => {
+		const user = await requireAuth();
+		const outcome = await withCaseErrors(() => scanIntoCase(user.id, ref, code, foundAssetIds));
+		if (outcome.outcome === 'swapped') {
+			getCaseCheck(ref).refresh();
+			getAssetHistory(outcome.assetId).refresh();
+			getAssetHistory(outcome.swap.partnerAssetId).refresh();
+		}
+		return outcome;
+	}
+);
 
 export const recordCaseCheck = command(
 	v.object({ ref: caseRef, foundAssetIds: v.array(v.string()) }),

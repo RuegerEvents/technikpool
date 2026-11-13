@@ -10,6 +10,7 @@ import '../l10n/generated/app_localizations.dart';
 import '../product_label.dart';
 import '../scan/scan_tones.dart';
 import '../scan/camera_scan_screen.dart';
+import '../scan/swap_notice.dart';
 import '../state/providers.dart';
 import '../theme.dart';
 import '../widgets/product_thumb.dart';
@@ -113,10 +114,12 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
               result.asset.productCaption,
             ),
           },
-          detail: returned.isEmpty
-              ? Labels.scanAction(l10n, result.action)
-              : '${Labels.scanAction(l10n, result.action)} · '
-                    '${l10n.returnedFrom(returned.join(', '))}',
+          detail: [
+            Labels.scanAction(l10n, result.action),
+            if (returned.isNotEmpty) l10n.returnedFrom(returned.join(', ')),
+            // It went out in a linked unit's place, and the two swapped.
+            if (result.swap case final swap?) swapNotice(l10n, swap),
+          ].join(' · '),
         ),
       );
       // Warehouse users watch the shelf, not the screen — the feedback has to

@@ -877,6 +877,34 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/case-checks/{kind}/{id}/scans": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * A code scanned into a case that is not on its list
+         * @description Ticking happens on the client; this is for a code it does not find
+         *     on the case's list. A unit of the same product and organization as
+         *     one the case still lacks — not in `foundAssetIds`, not out on another
+         *     job — takes that one's place: the two swap (see `ScanSwap`), the
+         *     answer is `swapped` with the case as it is now, and the client ticks
+         *     `assetId`. Only for whoever may record the check (`canRecord`), and
+         *     never for a product marked `notInterchangeable`. A unit already on the
+         *     list answers `found`; anything else `foreign`, with its name where the
+         *     caller may see it.
+         */
+        post: operations["scanCaseCheck"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/case-checks/{kind}/{id}/label": {
         parameters: {
             query?: never;
@@ -1771,6 +1799,12 @@ export interface components {
             inspections?: components["schemas"]["ProductInspectionRequirement"][];
             isLicense: boolean;
             /**
+             * @description Its units are never swapped for one another in a kit or on a
+             *     unit (see `ScanSwap`). Not required, so an older client keeps
+             *     compiling.
+             */
+            notInterchangeable?: boolean;
+            /**
              * @description Connectors carrying mains voltage it has — on its panel, at a
              *     cable end or on a loom's way. A product with one is electrical
              *     equipment and normally needs inspecting.
@@ -1811,6 +1845,12 @@ export interface components {
             categoryId?: string;
             /** @description A cable is never a licence; `true` on a cable is ignored. */
             isLicense?: boolean;
+            /**
+             * @description `true` keeps its units from being swapped for one another when
+             *     handing out or checking a case (see `ScanSwap`) — a calibrated lens
+             *     that belongs to exactly one camera. Identity like the name.
+             */
+            notInterchangeable?: boolean;
             /** @description The electrical type. Null follows the category again. */
             requiresInspection?: boolean | null;
             /**
@@ -2023,6 +2063,23 @@ export interface components {
              *     client keeps compiling.
              */
             inspection?: components["schemas"]["TransactionInspection"] | null;
+            /**
+             * @description For `SWAPPED`: the unit it changed places with, and where this one
+             *     is now. Null for every other action. Not required, so an older
+             *     client keeps compiling.
+             */
+            swap?: components["schemas"]["TransactionSwap"] | null;
+        };
+        TransactionSwap: {
+            partnerAssetId: string;
+            /** @description The other unit's tag, else its number. */
+            partnerLabel: string;
+            /** @description The kit or unit this one is in since, by name. Null is loose. */
+            now: string | null;
+            /** @description Where it was before. Null is loose. */
+            before: string | null;
+            /** @enum {string} */
+            via: "handout" | "case_check";
         };
         TransactionInspection: {
             /** @description Not required, so an older client keeps compiling. */
@@ -2082,6 +2139,33 @@ export interface components {
              *     required, so an older client keeps compiling.
              */
             overdueInspections?: components["schemas"]["OverdueInspection"][];
+            /**
+             * @description Checking out: the scanned unit went out in the place of a linked
+             *     unit of the same product booked here — one booked as part of its
+             *     kit, or as an accessory of its unit — and the two swapped places.
+             *     Show it; nothing to confirm. Null otherwise. Not required, so an
+             *     older client keeps compiling.
+             */
+            swap?: components["schemas"]["ScanSwap"] | null;
+        };
+        /**
+         * @description Units stay linked — an accessory on its unit, a unit in its kit — but
+         *     whoever packs takes the one at hand. When a unit of the same product
+         *     and organization as a linked one is handed out (or found in that one's
+         *     case), the scanned unit takes its place, and the other takes the
+         *     scanned one's old place, or becomes loose if it had none. Never on
+         *     take-back or in a stocktake, and never for a product marked
+         *     `notInterchangeable`. Both units' histories say so (`SWAPPED`).
+         */
+        ScanSwap: {
+            /** @description The unit whose place the scanned one took. */
+            partnerAssetId: string;
+            /** @description Its tag, else its number ("#12"). */
+            partnerLabel: string;
+            /** @description The kit, or the unit, the scanned unit is in now, by name. */
+            joined: string;
+            /** @description Where the other unit went, by name. Null when it is now loose. */
+            partnerTo: string | null;
         };
         OverdueInspection: {
             typeId: string;
@@ -2289,6 +2373,12 @@ export interface components {
             /** @description Units booked, accessories taken along included. */
             count: number;
             targetName: string;
+            /**
+             * @description Checking out: the units that went out in a linked unit's place and
+             *     swapped with it — see `ScanSwap`. Not required, so an older client
+             *     keeps compiling.
+             */
+            swaps?: components["schemas"]["ScanSwap"][];
         };
         ScannedAsset: {
             id: string;
@@ -2608,6 +2698,23 @@ export interface components {
             kind: components["schemas"]["CaseKind"];
             id: string;
             foundAssetIds: string[];
+        };
+        CaseCheckScanRequest: {
+            code: string;
+            /** @description The units ticked so far; none of them is swapped away. */
+            foundAssetIds: string[];
+        };
+        CaseCheckScanResult: {
+            /** @enum {string} */
+            outcome: "found" | "swapped" | "foreign";
+            /** @description `found` and `swapped`: the unit to tick. */
+            assetId: string | null;
+            /** @description `foreign`: what the code is, if known and visible to the caller. */
+            name: string | null;
+            /** @description `swapped`: what changed places. */
+            swap: components["schemas"]["ScanSwap"] | null;
+            /** @description `swapped`: the case as it is now, with the scanned unit in it. */
+            check: components["schemas"]["CaseCheck"] | null;
         };
         CaseCheckResult: {
             found: number;
@@ -4379,6 +4486,37 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["CaseCheckResult"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    scanCaseCheck: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                kind: components["schemas"]["CaseKind"];
+                id: string;
+            };
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["CaseCheckScanRequest"];
+            };
+        };
+        responses: {
+            /** @description What the code turned out to be */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CaseCheckScanResult"];
                 };
             };
             400: components["responses"]["BadRequest"];

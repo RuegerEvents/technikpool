@@ -457,5 +457,11 @@
   "inventoryAllDevices": "Alle Geräte",
   "productScanViewMode": "Nichts geändert. Zum Vergeben „Inventarnummern vergeben“ im ⋮-Menü wählen.",
   "productTagDone": "Vergeben beenden",
-  "inventorySearch": "Suchen oder Inventarnummer eingeben"
+  "inventorySearch": "Suchen oder Inventarnummer eingeben",
+  "actionSwapped": "Getauscht",
+  "swapIn": "Getauscht mit {partner} ({place})",
+  "swapPartnerMoved": "{partner} gehört jetzt zu {place}",
+  "swapPartnerLoose": "{partner} ist jetzt lose",
+  "historySwapNow": "Mit {partner}, jetzt in {place}",
+  "historySwapLoose": "Mit {partner}, jetzt lose"
 }

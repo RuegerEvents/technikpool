@@ -29,6 +29,7 @@ class CatalogProduct {
     this.imageUrl,
     this.cable,
     this.inspections,
+    this.notInterchangeable,
     this.ports,
   });
   
@@ -76,6 +77,12 @@ class CatalogProduct {
   ///
   final List<ProductInspectionRequirement>? inspections;
   final bool isLicense;
+
+  /// Its units are never swapped for one another in a kit or on a.
+  /// unit (see `ScanSwap`). Not required, so an older client keeps.
+  /// compiling.
+  ///
+  final bool? notInterchangeable;
 
   /// Connectors carrying mains voltage it has — on its panel, at a.
   /// cable end or on a loom's way. A product with one is electrical.

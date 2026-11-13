@@ -77,6 +77,38 @@ class _CaseCheckClient implements CaseCheckClient {
   }
 
   @override
+  Future<CaseCheckScanResult> scanCaseCheck({
+    required CaseKind kind,
+    required String id,
+    required CaseCheckScanRequest body,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    final _data = <String, dynamic>{};
+    _data.addAll(body.toJson());
+    final _options = _setStreamType<CaseCheckScanResult>(
+      Options(method: 'POST', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v1/case-checks/${kind.toJson()}/${id}/scans',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, Object?>>(_options);
+    late CaseCheckScanResult _value;
+    try {
+      _value = CaseCheckScanResult.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
   Future<CaseLabel> getCaseLabel({
     required CaseKind kind,
     required String id,

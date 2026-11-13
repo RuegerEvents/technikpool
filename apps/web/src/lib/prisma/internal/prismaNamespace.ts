@@ -5241,6 +5241,7 @@ export const ProductScalarFieldEnum = {
 	connectorBId: 'connectorBId',
 	lengthCm: 'lengthCm',
 	isLicense: 'isLicense',
+	notInterchangeable: 'notInterchangeable',
 	createdById: 'createdById',
 	createdAt: 'createdAt',
 	updatedAt: 'updatedAt'

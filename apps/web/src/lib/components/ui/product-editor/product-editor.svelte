@@ -193,6 +193,7 @@
 	// already exists.
 	let captionDraft = $state('');
 	let detailsDraft = $state('');
+	let notInterchangeableDraft = $state(false);
 	let manufacturer = $state<{ id: string | null; name: string } | null>(null);
 	// A cleared field means no manufacturer, the same as picking that entry.
 	let chosenManufacturerId = $derived(manufacturer ? manufacturerIdOf(manufacturer) : null);
@@ -225,6 +226,7 @@
 		};
 		captionDraft = product.caption ?? '';
 		detailsDraft = product.details ?? '';
+		notInterchangeableDraft = product.notInterchangeable;
 		portRows = portDraftsFrom(product.ports);
 	});
 
@@ -261,6 +263,7 @@
 				draft.isLicense !== product.isLicense ||
 				captionDraft.trim() !== (product.caption ?? '') ||
 				detailsDraft.trim() !== (product.details ?? '') ||
+				notInterchangeableDraft !== product.notInterchangeable ||
 				cableDirty)
 	);
 	let imageDirty = $derived(seeded && draft.imagePath.trim() !== (product.imagePath ?? ''));
@@ -333,7 +336,8 @@
 								cable: cableDraftInput,
 								isLicense: draft.isLicense,
 								caption: captionDraft,
-								details: detailsDraft
+								details: detailsDraft,
+								notInterchangeable: notInterchangeableDraft
 							}),
 					imagePath: draft.imagePath
 				}).updates(...PRODUCT_VIEWS);
@@ -665,6 +669,22 @@
 			></textarea>
 			<p class="text-xs text-muted-foreground">
 				Handling notes and anything else worth knowing. Shown with the product only.
+			</p>
+		</div>
+		<div class="mt-4 space-y-1">
+			<label class="flex cursor-pointer items-center gap-2 text-sm select-none">
+				<input
+					type="checkbox"
+					bind:checked={notInterchangeableDraft}
+					disabled={identityLocked}
+					class="h-4 w-4 rounded border-input"
+				/>
+				Not interchangeable
+			</label>
+			<p class="text-xs text-muted-foreground">
+				Units of this product stay where they are linked. Otherwise handing out or checking a case
+				with another unit of the same product swaps the two, e.g. the adapters of two DMX rings.
+				Tick it for a calibrated lens that belongs to exactly one camera.
 			</p>
 		</div>
 		{#if hasPanel}

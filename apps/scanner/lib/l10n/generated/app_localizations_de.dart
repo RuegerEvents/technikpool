@@ -1693,4 +1693,32 @@ class SDe extends S {
 
   @override
   String get inventorySearch => 'Suchen oder Inventarnummer eingeben';
+
+  @override
+  String get actionSwapped => 'Getauscht';
+
+  @override
+  String swapIn(String partner, String place) {
+    return 'Getauscht mit $partner ($place)';
+  }
+
+  @override
+  String swapPartnerMoved(String partner, String place) {
+    return '$partner gehört jetzt zu $place';
+  }
+
+  @override
+  String swapPartnerLoose(String partner) {
+    return '$partner ist jetzt lose';
+  }
+
+  @override
+  String historySwapNow(String partner, String place) {
+    return 'Mit $partner, jetzt in $place';
+  }
+
+  @override
+  String historySwapLoose(String partner) {
+    return 'Mit $partner, jetzt lose';
+  }
 }

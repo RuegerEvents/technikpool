@@ -9,6 +9,7 @@ import '../demo/demo_data.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../scan/camera_scan_screen.dart';
 import '../scan/scan_tones.dart';
+import '../scan/swap_notice.dart';
 import '../state/providers.dart';
 import '../theme.dart';
 import 'bundle_screen.dart';
@@ -115,16 +116,35 @@ class _CaseCheckScreenState extends ConsumerState<CaseCheckScreen> {
       return;
     }
 
-    // Not on the list: ask what it is, so "not part of this case" can say.
+    // Not on the list: a unit of the same product as one still missing takes
+    // its place (the two swap, and the case comes back as it is now) — else
+    // ask what it is, so "not part of this case" can say.
     setState(() => _busy = true);
     String? name;
     try {
-      final asset = await api.inventory.getAssetByTag(tag: code);
-      name = asset.product.manufacturerName == null
-          ? asset.product.name
-          : '${asset.product.manufacturerName} ${asset.product.name}';
+      final answer = await api.caseCheck.scanCaseCheck(
+        kind: check.kind,
+        id: check.id,
+        body: CaseCheckScanRequest(code: code, foundAssetIds: _found.toList()),
+      );
+      if (!mounted) return;
+      final assetId = answer.assetId;
+      if (answer.outcome != CaseCheckScanResultOutcome.foreign && assetId != null) {
+        final now = answer.check ?? check;
+        setState(() {
+          _case = now;
+          _found.add(assetId);
+        });
+        final item = now.items.where((i) => i.assetId == assetId).firstOrNull;
+        _report(_Tone.good, item?.name ?? code, switch (answer.swap) {
+          final swap? => swapNotice(l10n, swap),
+          null => item?.assetTag ?? code,
+        }, ScanTone.ok);
+        return;
+      }
+      name = answer.name;
     } catch (_) {
-      name = null;
+      name = await _describe(api, code);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -138,6 +158,18 @@ class _CaseCheckScreenState extends ConsumerState<CaseCheckScreen> {
       code,
       ScanTone.attention,
     );
+  }
+
+  /// What a code is, for a server older than case-check scans.
+  Future<String?> _describe(ApiClient api, String code) async {
+    try {
+      final asset = await api.inventory.getAssetByTag(tag: code);
+      return asset.product.manufacturerName == null
+          ? asset.product.name
+          : '${asset.product.manufacturerName} ${asset.product.name}';
+    } catch (_) {
+      return null;
+    }
   }
 
   Future<void> _open(ApiClient api, S l10n, String code) async {

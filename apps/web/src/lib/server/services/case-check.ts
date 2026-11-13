@@ -16,6 +16,7 @@ import { bundleTypeSpec } from './bundle-spec';
 import type { CaseCheckedData } from '#lib/types/asset-transaction.js';
 import { caseLabelLines, type CaseLabelData } from '#lib/server/case-label-zpl.js';
 import { kitAssetsWhere } from '#lib/bundle-nesting.js';
+import { applySwap, loadSwapRows, swapCheck, type SwapNotice } from './unit-swap';
 
 // Checking a case (Kiste checken): open one kit, or one unit with its
 // accessories, and tick off what is in it. A stocktake for one box — but
@@ -429,6 +430,82 @@ export async function recordCaseCheck(
 		})
 	});
 	return summary;
+}
+
+/**
+ * A code scanned inside a case, when the client does not have it on its list.
+ *
+ * A unit of the same product and org as one the case still lacks takes that
+ * one's place: they swap (see services/unit-swap.ts), the result says so, and
+ * the case comes back as it is now, the scanned unit in it. That is the only
+ * thing a check changes, and only for whoever may record one. Anything else is
+ * `foreign`, named if it can be. `foundAssetIds` are the ticks so far, which no
+ * swap takes away.
+ */
+export async function scanIntoCase(
+	userId: string,
+	ref: CaseRef,
+	code: string,
+	foundAssetIds: string[]
+): Promise<CaseScanOutcome> {
+	const trimmed = code.trim();
+	const { loaded, items } = await readCase(userId, ref);
+	const match = trimmed ? await resolveScannedCode(userId, trimmed) : null;
+	if (match?.kind === 'match') {
+		const assetId = match.assetId;
+		if (items.some((i) => i.assetId === assetId)) return { outcome: 'found', assetId };
+		if (await canWrite(userId, loaded.organizationId)) {
+			const swapped = await swapIntoCase(userId, ref, assetId, items, new Set(foundAssetIds));
+			if (swapped) {
+				return {
+					outcome: 'swapped',
+					assetId,
+					swap: swapped,
+					check: await getCaseCheck(userId, ref)
+				};
+			}
+		}
+	}
+	return { outcome: 'foreign', name: await describeCode(userId, trimmed) };
+}
+
+export type CaseScanOutcome =
+	| { outcome: 'found'; assetId: string }
+	| { outcome: 'swapped'; assetId: string; swap: SwapNotice; check: CaseCheck }
+	| { outcome: 'foreign'; name: string | null };
+
+/**
+ * The swap itself: the first unit the case still lacks — not ticked, not out
+ * on another job, not the unit a unit-case is about — that the scanned one may
+ * take the place of. Null when there is none.
+ */
+async function swapIntoCase(
+	userId: string,
+	ref: CaseRef,
+	assetId: string,
+	items: CaseCheckItem[],
+	found: Set<string>
+): Promise<SwapNotice | null> {
+	const open = items.filter(
+		(i) => !found.has(i.assetId) && !i.awayOn && !(ref.kind === 'asset' && i.assetId === ref.id)
+	);
+	if (open.length === 0) return null;
+	const rows = new Map(
+		(await loadSwapRows([assetId, ...open.map((i) => i.assetId)])).map((r) => [r.id, r])
+	);
+	const scanned = rows.get(assetId);
+	if (!scanned) return null;
+	const partners = open
+		.map((i) => rows.get(i.assetId))
+		.filter((r) => r !== undefined && r.productId === scanned.productId)
+		.sort((a, b) => a!.orgIndex - b!.orgIndex);
+	for (const partner of partners) {
+		if (!partner || (await swapCheck(scanned, partner))) continue;
+		return prisma.$transaction((tx) =>
+			applySwap(tx, userId, scanned, partner, { kind: 'case_check' })
+		);
+	}
+	return null;
 }
 
 /** What a code outside the case is, for "not in this case" — its name, or null if unknown. */

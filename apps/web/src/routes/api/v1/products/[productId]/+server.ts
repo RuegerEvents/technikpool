@@ -22,6 +22,7 @@ const bodySchema = v.strictObject({
 	manufacturerId: v.optional(v.nullable(v.pipe(v.string(), v.minLength(1)))),
 	categoryId: v.optional(v.pipe(v.string(), v.minLength(1))),
 	isLicense: v.optional(v.boolean()),
+	notInterchangeable: v.optional(v.boolean()),
 	requiresInspection: v.optional(v.nullable(v.boolean())),
 	inspections: v.optional(v.record(v.string(), v.nullable(v.boolean()))),
 	cable: v.optional(
@@ -112,6 +113,7 @@ export const PATCH: RequestHandler = ({ locals, params, request }) =>
 		// Resolved before anything is written, so a misspelt connector changes nothing.
 		const ports = await portInputs(body.ports);
 		const { name, manufacturerId, caption, details, categoryId, isLicense } = body;
+		const { notInterchangeable } = body;
 		const { requiresInspection, inspections, cable } = body;
 		const { unitsChanged } = await updateProduct(user.id, {
 			productId: params.productId,
@@ -121,6 +123,7 @@ export const PATCH: RequestHandler = ({ locals, params, request }) =>
 			details,
 			categoryId,
 			isLicense,
+			notInterchangeable,
 			inspections:
 				requiresInspection === undefined && inspections === undefined
 					? undefined

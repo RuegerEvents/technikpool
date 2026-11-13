@@ -18,6 +18,7 @@ class ProductUpdateRequest {
     this.manufacturerId,
     this.categoryId,
     this.isLicense,
+    this.notInterchangeable,
     this.requiresInspection,
     this.inspections,
     this.cable,
@@ -40,6 +41,12 @@ class ProductUpdateRequest {
 
   /// A cable is never a licence; `true` on a cable is ignored.
   final bool? isLicense;
+
+  /// `true` keeps its units from being swapped for one another when.
+  /// handing out or checking a case (see `ScanSwap`) — a calibrated lens.
+  /// that belongs to exactly one camera. Identity like the name.
+  ///
+  final bool? notInterchangeable;
 
   /// The electrical type. Null follows the category again.
   final bool? requiresInspection;

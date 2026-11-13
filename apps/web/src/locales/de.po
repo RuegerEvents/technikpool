@@ -9609,8 +9609,10 @@ msgid "Unexpected: {0}"
 msgstr "Unerwartet: {0}"
 
 #. 0: item.name
+#. 0: name
 #. 0: result.productName
 #. 0: name
+#: src/routes/case-check/+page.svelte
 #: src/routes/case-check/+page.svelte
 #: src/routes/productions/[id]/check/[checkId]/check-detail.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
@@ -14187,3 +14189,51 @@ msgstr[1] "# hinzufügen"
 #: src/lib/error-messages.svelte.ts
 msgid "The bundle \"{0}\" holds bundles of its own, and bundles nest only one level deep."
 msgstr "Das Bundle „{0}“ enthält selbst Bundles, und Bundles lassen sich nur eine Ebene tief verschachteln."
+
+#. 0: swap.partnerLabel; 1: swap.joined
+#: src/lib/swap-notice.svelte.ts
+msgid "Swapped in for {0} ({1})"
+msgstr "Getauscht mit {0} ({1})"
+
+#. 0: swap.partnerLabel
+#: src/lib/swap-notice.svelte.ts
+msgid "Swapped in for {0}"
+msgstr "Getauscht mit {0}"
+
+#. 0: swap.partnerLabel; 1: swap.partnerTo
+#: src/lib/swap-notice.svelte.ts
+msgid "{0} now belongs to {1}"
+msgstr "{0} gehört jetzt zu {1}"
+
+#. 0: swap.partnerLabel
+#: src/lib/swap-notice.svelte.ts
+msgid "{0} is now loose"
+msgstr "{0} ist jetzt lose"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "— now in <0/>"
+msgstr "— jetzt in <0/>"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "— now loose"
+msgstr "— jetzt lose"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "· handed out for <0/>"
+msgstr "· beim Ausgeben für <0/>"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "· found in a case check"
+msgstr "· beim Kiste-Checken gefunden"
+
+#: src/routes/assets/[id]/asset-detail.svelte
+msgid "Swapped with <0/> <1><0/> <1/></1>"
+msgstr "Getauscht mit <0/> <1><0/> <1/></1>"
+
+#: src/lib/components/ui/product-editor/product-editor.svelte
+msgid "<0/> Not interchangeable"
+msgstr "<0/> Nicht austauschbar"
+
+#: src/lib/components/ui/product-editor/product-editor.svelte
+msgid "Units of this product stay where they are linked. Otherwise handing out or checking a case with another unit of the same product swaps the two, e.g. the adapters of two DMX rings. Tick it for a calibrated lens that belongs to exactly one camera."
+msgstr "Geräte dieses Produkts bleiben, wo sie verknüpft sind. Sonst tauscht das Ausgeben oder Kiste-Checken mit einem anderen Gerät desselben Produkts die beiden, etwa die Adapter zweier DMX-Ringe. Anhaken für ein kalibriertes Objektiv, das zu genau einer Kamera gehört."

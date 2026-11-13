@@ -39,6 +39,7 @@ class Labels {
     'DECLINED' => l10n.actionDeclined,
     'BOOKING_CANCELLED' => l10n.actionBookingCancelled,
     'BOOKING_REPLACED' => l10n.actionBookingReplaced,
+    'SWAPPED' => l10n.actionSwapped,
     'ACCESSORY_ATTACHED' => l10n.actionAccessoryAttached,
     'ACCESSORY_DETACHED' => l10n.actionAccessoryDetached,
     'CREDENTIALS_SET' => l10n.actionCredentialsSet,

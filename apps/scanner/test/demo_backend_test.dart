@@ -1149,4 +1149,100 @@ void main() {
     expect(untagged.assetTag, isNull);
     expect(untagged.product.name, 'Schuko 5 m');
   });
+
+  group('swapping linked units', () {
+    // A loose XLR beside the kit's two, so one can take a kit member's place.
+    ApiClient withSpareXlr({AssetStatus status = AssetStatus.available}) {
+      final assets = DemoData.assets();
+      final kitXlr = assets.firstWhere((a) => a.assetTag == '40000013');
+      return demoApiClient(
+        DemoBackend(
+          assets: [
+            ...assets,
+            Asset(
+              id: 'asset_demo_spare',
+              assetTag: '40000099',
+              orgIndex: 99,
+              status: status,
+              product: kitXlr.product,
+              location: DemoData.locations[1],
+              organization: kitXlr.organization,
+            ),
+          ],
+        ),
+      );
+    }
+
+    test('handing out a loose unit takes the place of a booked kit member', () async {
+      final api = withSpareXlr();
+      final scan = await api.productionHandout.scanIntoProductionHandout(
+        productionId: 'prdn_demo_festival',
+        mode: HandoutMode.checkout,
+        body: const ProductionCheckScanRequest(code: '40000099'),
+      );
+      expect(scan.swap?.partnerLabel, '40000013');
+      expect(scan.swap?.joined, contains(DemoData.cableKit.tag));
+      // The spare was loose, so the one it replaced is loose now.
+      expect(scan.swap?.partnerTo, isNull);
+
+      final spare = await api.inventory.getAssetByTag(tag: '40000099');
+      expect(spare.bundleId, DemoData.cableKit.id);
+      expect(spare.history.map((t) => t.action), contains('SWAPPED'));
+      final replaced = await api.inventory.getAssetByTag(tag: '40000013');
+      expect(replaced.bundleId, isNull);
+      expect(replaced.history.first.swap?.partnerLabel, '40000099');
+
+      // The booking went with the place: the replaced unit is off the list.
+      final list = await api.productionHandout.getProductionHandout(
+        productionId: 'prdn_demo_festival',
+        mode: HandoutMode.checkout,
+      );
+      final ids = list.items.map((i) => i.assetId);
+      expect(ids, contains('asset_demo_spare'));
+      expect(ids, isNot(contains('asset_demo_40000013')));
+    });
+
+    test('a case check swaps a unit of the same product in for a missing one', () async {
+      final api = withSpareXlr();
+      final answer = await api.caseCheck.scanCaseCheck(
+        kind: CaseKind.bundle,
+        id: DemoData.cableKit.id,
+        body: const CaseCheckScanRequest(
+          code: '40000099',
+          foundAssetIds: ['asset_demo_40000013'],
+        ),
+      );
+      expect(answer.outcome, CaseCheckScanResultOutcome.swapped);
+      expect(answer.assetId, 'asset_demo_spare');
+      // 13 was ticked, so the spare took 14's place.
+      expect(answer.swap?.partnerLabel, '40000014');
+      final tags = answer.check!.items.map((i) => i.assetTag);
+      expect(tags, containsAll(['40000013', '40000099']));
+      expect(tags, isNot(contains('40000014')));
+    });
+
+    test('a unit not fit to go in a case is only foreign', () async {
+      final api = withSpareXlr(status: AssetStatus.broken);
+      final answer = await api.caseCheck.scanCaseCheck(
+        kind: CaseKind.bundle,
+        id: DemoData.cableKit.id,
+        body: const CaseCheckScanRequest(code: '40000099', foundAssetIds: []),
+      );
+      expect(answer.outcome, CaseCheckScanResultOutcome.foreign);
+      expect(answer.name, isNotNull);
+      expect(answer.swap, isNull);
+    });
+
+    test('taking back never swaps', () async {
+      final api = withSpareXlr();
+      final scan = await api.productionHandout.scanIntoProductionHandout(
+        productionId: 'prdn_demo_festival',
+        mode: HandoutMode.checkin,
+        body: const ProductionCheckScanRequest(code: '40000099'),
+      );
+      expect(scan.swap, isNull);
+      final spare = await api.inventory.getAssetByTag(tag: '40000099');
+      expect(spare.bundleId, isNull);
+    });
+  });
 }
