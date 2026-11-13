@@ -296,7 +296,13 @@ refused; the pure rules are in `src/lib/bundle-nesting.ts` (`nestingRefusal`, `i
 - **Bundle types count kit types.** `bundleTypeSpec` lines carry `kind` and `key` (a product id
   or `bundle:<templateId>`), and every spec helper counts by `key`.
 - **Shown:** one line on the case label ("1× PowerCon-Set") and one tile on the inventory list;
-  expanded on the delivery note, packing list, Kiste checken and the stocktake.
+  expanded on the delivery note, packing list, Kiste checken and the stocktake. The bundle
+  overview names an inner kit's outer one ("in FOH Case") in place of its shelf.
+- **Copying** an outer kit (`duplicateBundle`, `planBundleCopy`) gives every copy a kit of each
+  inner kit's type: with "from stock" a free one comes off the shelf whole (in no kit, holding
+  none, nothing out), else one is built, its units drawn from the same pool as the outer kit's.
+- **Converting to a device** (`convertBundleToAccessories`) refuses a kit that holds kits
+  (`bundle_convert_has_kits`); an inner kit converted leaves its device in the outer kit.
 - Plan and what comes next (swapping interchangeable units, pack cases):
   `docs/plans/bundles-nested-swap-packcases.md`.
 
@@ -442,6 +448,11 @@ change. Its `category*` columns snapshot a per-org `ServiceCategory`, not a `Cat
 `categorySortOrder`/`position` decide where it prints: `groupBillingItems` puts service sections
 after the equipment and never merges two service lines. Every copy of a document (revision,
 copy to customer, invoice) goes through `copyItem`, so a new item column has to be added there.
+
+**Offer to sign.** `/api/billing-documents/offers/[id]?signature=1` ("PDF to sign" on the offer
+page) renders the offer with a line for the customer to sign the order on
+(`acceptanceSignature` in `generateBillingPdf`). It is never archived: a finalized offer is
+rendered again from what it froze on finalizing, and the archived PDF stays as issued.
 
 ## Rental terms (Miet-AGB)
 
@@ -709,8 +720,20 @@ every translated string (`$.get(_w_runtime_)(499)`), so a component only renders
 the catalog it was transformed for. An external rewrite of the catalogs can renumber them, and
 wuchale's HMR reloads the catalogs but not the modules that index into them — so every string on
 an already-transformed page renders one or more positions off. `wuchaleCatalogReload()` in
-`vite.config.ts` closes that: a `.po` write that no source change preceded forces a full
-re-transform. Source-triggered writes are left alone, so ordinary HMR is untouched.
+`vite.config.ts` closes that: every `.po` write forces a full re-transform and reload. It is a
+`hotUpdate` hook listed after `wuchale()`, so it runs only once wuchale has re-read and
+recompiled the catalog; it used to listen on the file watcher, which fires first, and the pages
+were re-transformed against the stale catalog (which is why a second `touch` used to "fix" it).
+`hmrDelayThreshold: 200` keeps a hand-filled msgstr saved right after a source edit from being
+taken for wuchale's own write and never re-read.
+
+**Nothing else may run wuchale while `pnpm dev` does.** Every process that loads `vite.config.ts`
+with the plugin extracts afresh and rewrites `src/locales/.wuchale/*.compiled.js` with slots
+numbered from zero; the dev server ignores changes to those files and serves them to modules
+numbered against its own index, so every string after the first difference renders off. That is
+what `pnpm test` did until the plugin was left out under vitest (`process.env.VITEST`), and it
+is what `pnpm build` or `npx wuchale` still do. If strings are shifted, touch any `.svelte`
+file the page uses: the dev server recompiles its catalog and the page is right again.
 
 **Extraction rules (what gets extracted):**
 

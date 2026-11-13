@@ -90,6 +90,12 @@ export async function generateBillingPdf(
 		 * a draft must not carry an XML that a recipient's software would book.
 		 */
 		eInvoice?: EInvoiceSource;
+		/**
+		 * An offer only: a line under the closing text for the customer to sign
+		 * the order on. Chosen when downloading, never archived — the copy sent
+		 * back signed is the customer's, the archived one stays as issued.
+		 */
+		acceptanceSignature?: boolean;
 	} = {}
 ) {
 	validateDocument(kind, data);
@@ -340,6 +346,26 @@ export async function generateBillingPdf(
 		// Back from a top edge to the baseline paragraph() expects.
 		y -= 14 + capHeight(regular, 9);
 		paragraph(closingText, 9, 0);
+	}
+	if (kind === 'offer' && options.acceptanceSignature) {
+		const SIGN_H = 66;
+		ensure(SIGN_H);
+		const lineY = y - 46;
+		const signWidth = (CONTENT_W - 36) / 2;
+		page.drawLine({
+			start: { x: LEFT, y: lineY },
+			end: { x: LEFT + signWidth, y: lineY },
+			thickness: 0.6
+		});
+		draw(
+			'Auftrag erteilt: Ort, Datum, Unterschrift, Stempel',
+			LEFT,
+			lineY - 11,
+			7.5,
+			regular,
+			muted
+		);
+		y = lineY - 20;
 	}
 	const giroCode =
 		kind === 'invoice' && data.number && data.organization.iban

@@ -105,7 +105,7 @@ const NESTING_SELECT = {
 	_count: { select: { childBundles: true } }
 } as const;
 
-type NestingRow = {
+export type NestingRow = {
 	id: string;
 	parentBundleId: string | null;
 	template: { organizationId: string };
@@ -128,7 +128,7 @@ function nestingKit(row: NestingRow) {
  * it holds) to the outer kit's location. Returns the kit it came out of, if
  * `moveFromOtherBundles` let it change kits — the same question a unit is asked.
  */
-async function moveBundleIntoBundle(
+export async function moveBundleIntoBundle(
 	tx: Tx,
 	outer: NestingRow & { locationId: string | null },
 	innerId: string,

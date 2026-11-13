@@ -13,6 +13,7 @@
 	import { Input } from '#lib/components/ui/input/index.js';
 	import { Label } from '#lib/components/ui/label/index.js';
 	import { DropdownMenu } from 'bits-ui';
+	import { ChevronDown } from '@lucide/svelte';
 	import { resolve } from '$app/paths';
 	import { goto } from '$app/navigation';
 	import { toast } from 'svelte-sonner';
@@ -64,6 +65,9 @@
 					organization: organizationFromSnapshot(offer)
 				})
 	);
+	let pdfUrl = $derived(`/api/billing-documents/offers/${offerId}`);
+	// An archived PDF is always there to open; a draft only renders once complete.
+	let pdfBlocked = $derived(!offer.pdfPath && pdfIssues.length > 0);
 	let staleness = $derived(await getOfferStaleness(offerId));
 	let versions = $derived(await getOfferVersions(offerId));
 	// Only the newest version of an offer moves on — to an invoice or to another
@@ -314,22 +318,56 @@
 					? resolve(`productions/${offer.production.id}/equipment`)
 					: resolve('offers')}
 			/>
-			{#if offer.pdfPath}
+			<!-- One button for the PDF, the copy to sign behind its arrow. The copy to
+			     sign is rendered on demand and never archived, so an archived PDF stays
+			     as issued; on a draft both are previews. -->
+			<div class="flex">
 				<Button
-					icon="download"
+					icon={offer.pdfPath ? 'download' : 'print'}
 					variant="outline"
-					href={`/api/billing-documents/offers/${offerId}`}
-					target="_blank">Open archived PDF</Button
+					class="rounded-r-none"
+					href={pdfUrl}
+					disabled={pdfBlocked}
+					target="_blank">{offer.pdfPath ? 'Open archived PDF' : 'Preview PDF'}</Button
 				>
-			{:else}
-				<Button
-					icon="print"
-					variant="outline"
-					href={`/api/billing-documents/offers/${offerId}`}
-					disabled={pdfIssues.length > 0}
-					target="_blank">Preview PDF</Button
-				>
-			{/if}
+				<DropdownMenu.Root>
+					<DropdownMenu.Trigger disabled={pdfBlocked}>
+						{#snippet child({ props })}
+							<button
+								{...props}
+								type="button"
+								class="flex h-9 w-8 items-center justify-center rounded-r-md border border-l-0 border-input bg-background text-muted-foreground transition-colors hover:bg-muted hover:text-foreground disabled:pointer-events-none disabled:opacity-50"
+								aria-label="More PDF versions"
+							>
+								<ChevronDown class="h-4 w-4" />
+							</button>
+						{/snippet}
+					</DropdownMenu.Trigger>
+					<DropdownMenu.Portal>
+						<DropdownMenu.Content
+							align="end"
+							sideOffset={4}
+							class="z-50 min-w-[220px] overflow-hidden rounded-md border bg-popover p-1 text-popover-foreground shadow-md"
+						>
+							<DropdownMenu.Item
+								onSelect={() => window.open(pdfUrl, '_blank')}
+								class="flex cursor-pointer items-center rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent data-[highlighted]:bg-accent"
+							>
+								{offer.pdfPath ? 'Archived PDF' : 'Preview'}
+							</DropdownMenu.Item>
+							<DropdownMenu.Item
+								onSelect={() => window.open(`${pdfUrl}?signature=1`, '_blank')}
+								class="flex cursor-pointer flex-col items-start rounded-sm px-2 py-1.5 text-sm transition-colors outline-none hover:bg-accent data-[highlighted]:bg-accent"
+							>
+								<span>PDF to sign</span>
+								<span class="text-xs text-muted-foreground"
+									>With a line for the customer to sign the order on</span
+								>
+							</DropdownMenu.Item>
+						</DropdownMenu.Content>
+					</DropdownMenu.Portal>
+				</DropdownMenu.Root>
+			</div>
 			{#if !offer.finalizedAt}
 				<Button disabled={finalizing || pdfIssues.length > 0} onclick={handleFinalize}
 					>{finalizing ? 'Finalizing…' : 'Finalize offer'}</Button

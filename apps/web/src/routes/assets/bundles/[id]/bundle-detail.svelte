@@ -104,7 +104,8 @@
 	}
 
 	let copyPlan = $derived(copyOpen ? await getBundleCopyPlan({ bundleId, copies }) : null);
-	let canCopyFromStock = $derived((copyPlan?.fromStock ?? 0) > 0);
+	let kitsFromStock = $derived(copyPlan?.kits.reduce((sum, kit) => sum + kit.fromStock, 0) ?? 0);
+	let canCopyFromStock = $derived((copyPlan?.fromShelf.fromStock ?? 0) > 0 || kitsFromStock > 0);
 	let copyFromStock = $derived(canCopyFromStock && copyReuse);
 
 	function openCopy() {
@@ -130,6 +131,8 @@
 			// Both numbers, because they mean different things to whoever counts the
 			// shelf afterwards.
 			const parts: string[] = [];
+			if (result.kitsReused > 0)
+				parts.push(plural(result.kitsReused, ['1 kit from stock', '# kits from stock']));
 			if (result.reused > 0) parts.push(plural(result.reused, ['1 from stock', '# from stock']));
 			if (result.created > 0)
 				parts.push(plural(result.created, ['1 newly created', '# newly created']));
@@ -1032,7 +1035,7 @@
 	{#snippet children()}
 		{#if copyPlan}
 			<div class="space-y-5">
-				{#if copyPlan.needed === 0}
+				{#if copyPlan.needed === 0 && copyPlan.kits.length === 0}
 					<p class="text-sm text-muted-foreground">
 						This bundle is empty, so the copy will be too.
 					</p>
@@ -1055,6 +1058,19 @@
 								</li>
 							{/each}
 						</ul>
+						{#if copyPlan.kits.length > 0}
+							<p class="pt-1 text-sm font-medium">Kits inside, counted in the units above</p>
+							<ul class="space-y-1 text-sm text-muted-foreground">
+								{#each copyPlan.kits as kit (kit.templateId)}
+									<li>
+										{kit.needed}× {kit.name}
+										{#if kit.fromStock > 0}
+											<span class="text-xs">— {kit.fromStock} free on the shelf, taken whole</span>
+										{/if}
+									</li>
+								{/each}
+							</ul>
+						{/if}
 					</div>
 					<div class="space-y-3">
 						<label
@@ -1076,11 +1092,21 @@
 									{#if !canCopyFromStock}
 										Nothing free to take right now — what the pool holds is already in a kit,
 										attached, or booked.
-									{:else if copyPlan.fromStock >= copyPlan.needed}
-										Everything comes off the shelf. Nothing new is registered.
 									{:else}
-										{copyPlan.fromStock} come off the shelf; the remaining {copyPlan.needed -
-											copyPlan.fromStock} are registered as new units.
+										{#if kitsFromStock > 0}
+											{plural(kitsFromStock, [
+												'1 kit comes off the shelf whole.',
+												'# kits come off the shelf whole.'
+											])}
+										{/if}
+										{#if copyPlan.fromShelf.fromStock >= copyPlan.fromShelf.needed && kitsFromStock > 0}
+											Everything else comes off the shelf. Nothing new is registered.
+										{:else if copyPlan.fromShelf.fromStock >= copyPlan.fromShelf.needed}
+											Everything comes off the shelf. Nothing new is registered.
+										{:else}
+											{copyPlan.fromShelf.fromStock} units come off the shelf; the remaining {copyPlan
+												.fromShelf.needed - copyPlan.fromShelf.fromStock} are registered as new units.
+										{/if}
 									{/if}
 								</span>
 							</span>
@@ -1184,6 +1210,20 @@
 	{/snippet}
 	{#snippet children()}
 		<div class="space-y-4">
+			{#if bundle.childBundles.length > 0}
+				<p class="rounded-md border border-destructive/40 p-3 text-sm text-destructive">
+					This bundle holds other bundles ({bundle.childBundles
+						.map((kit) => withCaption(kit.template.name, kit.template.caption))
+						.join(', ')}). Take them out first — a device cannot hold a bundle.
+				</p>
+			{:else if bundle.parentBundle}
+				<p class="text-sm text-muted-foreground">
+					The device stays in {withCaption(
+						bundle.parentBundle.template.name,
+						bundle.parentBundle.template.caption
+					)}, in this bundle's place.
+				</p>
+			{/if}
 			<fieldset class="space-y-2" aria-label="Choose main device">
 				{#each bundle.assets as asset (asset.id)}
 					<label
@@ -1215,7 +1255,10 @@
 		</div>
 	{/snippet}
 	{#snippet footer()}
-		<Button disabled={converting || !mainAssetId} onclick={handleConvert}>
+		<Button
+			disabled={converting || !mainAssetId || bundle.childBundles.length > 0}
+			onclick={handleConvert}
+		>
 			{converting ? 'Converting…' : 'Convert bundle'}
 		</Button>
 		<Button

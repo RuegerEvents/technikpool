@@ -11,12 +11,22 @@
 	import { AssetPlace, sharedPlace } from '#lib/components/ui/asset-place/index.js';
 	import { Layers } from '@lucide/svelte';
 	import { imageSrc } from '#lib/images.js';
+	import { withCaption } from '#lib/product-label.js';
 	import { BundleVsAccessoryInfo } from '#lib/components/ui/bundle-vs-accessory-info/index.js';
 
 	let templatesQuery = $derived(getBundleTemplates());
 	let templates = $derived(templatesQuery.current ?? []);
 
 	let differenceOpen = $state(false);
+
+	/** The kit an inner one sits in, by name and, where it has one, its tag. */
+	function outerKitName(kit: {
+		tag: string | null;
+		template: { name: string; caption: string | null };
+	}) {
+		const name = withCaption(kit.template.name, kit.template.caption);
+		return kit.tag ? `${name} ${kit.tag}` : name;
+	}
 
 	// No confirmation: there is nothing behind an empty bundle type to lose, and
 	// the command refuses it the moment a case turns up under it.
@@ -113,6 +123,8 @@
 									>
 										{instance.tag ?? `Instance ${i + 1}`}{#if place?.kind === 'production'}
 											· <AssetPlace {place} link={false} />
+										{:else if instance.parentBundle}
+											· in {outerKitName(instance.parentBundle)}
 										{:else if instance.location}
 											· {instance.location.name}
 										{/if}

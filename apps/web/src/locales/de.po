@@ -5587,8 +5587,9 @@ msgstr "Angebot gelöscht"
 msgid "Open archived PDF"
 msgstr "Archivierte PDF öffnen"
 
-#~ msgid "Preview"
-#~ msgstr ""
+#: src/routes/offers/[id]/offer-detail.svelte
+msgid "Preview"
+msgstr "Vorschau"
 
 #: src/routes/invoices/[id]/invoice-detail.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
@@ -7227,9 +7228,7 @@ msgid "All {0} come off the shelf. Nothing new is registered."
 msgstr "Alle {0} kommen aus dem Bestand. Es wird nichts neu angelegt."
 
 #. 0: fanoutPlan.reusable; 1: fanoutPlan.missing - fanoutPlan.reusable
-#. 0: copyPlan.fromStock; 1: copyPlan.needed - copyPlan.fromStock
 #: src/routes/assets/[id]/asset-detail.svelte
-#: src/routes/assets/bundles/[id]/bundle-detail.svelte
 msgid "{0} come off the shelf; the remaining {1} are registered as new units."
 msgstr "{0} kommen aus dem Bestand, die übrigen {1} werden als neue Einheiten angelegt."
 
@@ -14167,7 +14166,9 @@ msgstr "Enthaltene Bundles"
 msgid "Packed in this case and booked with it."
 msgstr "In dieser Kiste verpackt und mit ihr gebucht."
 
+#. 0: outerKitName(instance.parentBundle)
 #. 0: withCaption(kit.inside.template.name, kit.inside.template.caption)
+#: src/routes/assets/bundles/+page.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 msgid "· in {0}"
 msgstr "· in {0}"
@@ -14484,3 +14485,64 @@ msgstr "PDF öffnen"
 #: src/routes/assets/bundles/[id]/inventory-list-menu.svelte
 msgid "List the case itself <0>The container the kit travels in, which this sheet is usually stuck to.</0>"
 msgstr "Kiste selbst mit aufführen <0>Der Behälter, in dem das Kit reist und an dem diese Liste meist klebt.</0>"
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "1 kit from stock"
+msgid_plural "# kits from stock"
+msgstr[0] "1 Kit aus dem Bestand"
+msgstr[1] "# Kits aus dem Bestand"
+
+#. 0: kit.fromStock
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "— {0} free on the shelf, taken whole"
+msgstr "— {0} frei im Lager, wird komplett übernommen"
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "Kits inside, counted in the units above"
+msgstr "Enthaltene Kits, in den Geräten oben mitgezählt"
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "1 kit comes off the shelf whole."
+msgid_plural "# kits come off the shelf whole."
+msgstr[0] "1 Kit kommt komplett aus dem Bestand."
+msgstr[1] "# Kits kommen komplett aus dem Bestand."
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "Everything else comes off the shelf. Nothing new is registered."
+msgstr "Alles andere kommt aus dem Bestand. Es wird nichts neu angelegt."
+
+#. 0: copyPlan.fromShelf.fromStock; 1: copyPlan .fromShelf.needed - copyPlan.fromShelf.fromStock
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "{0} units come off the shelf; the remaining {1} are registered as new units."
+msgstr "{0} Geräte kommen aus dem Bestand, die übrigen {1} werden neu angelegt."
+
+#. 0: p0
+#. 0: bundle.childBundles .map((kit) => withCaption(kit.template.name, kit.template.caption)) .join(', ')
+#: src/lib/error-messages.svelte.ts
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "This bundle holds other bundles ({0}). Take them out first — a device cannot hold a bundle."
+msgstr "Dieses Bundle enthält andere Bundles ({0}). Nimm sie zuerst heraus – ein Gerät kann kein Bundle enthalten."
+
+#. 0: withCaption( bundle.parentBundle.template.name, bundle.parentBundle.template.caption )
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "The device stays in {0}, in this bundle's place."
+msgstr "Das Gerät bleibt in {0}, an der Stelle dieses Bundles."
+
+#~ msgid "· in {0}<0/>"
+#~ msgstr "· in {0}<0/>"
+
+#: src/routes/offers/[id]/offer-detail.svelte
+msgid "PDF to sign"
+msgstr "PDF zum Unterschreiben"
+
+#: src/routes/offers/[id]/offer-detail.svelte
+msgid "More PDF versions"
+msgstr "Weitere PDF-Fassungen"
+
+#: src/routes/offers/[id]/offer-detail.svelte
+msgid "Archived PDF"
+msgstr "Archivierte PDF"
+
+#: src/routes/offers/[id]/offer-detail.svelte
+msgid "With a line for the customer to sign the order on"
+msgstr "Mit Feld, auf dem der Kunde den Auftrag unterschreibt"

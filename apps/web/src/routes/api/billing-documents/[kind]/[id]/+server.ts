@@ -10,7 +10,7 @@ import {
 	documentRentalTermsVersionId
 } from '#lib/server/services/rental-terms.js';
 
-export const GET: RequestHandler = async ({ params, locals }) => {
+export const GET: RequestHandler = async ({ params, locals, url }) => {
 	if (!locals.user) error(401, 'Unauthorized');
 	const document =
 		params.kind === 'offers'
@@ -38,8 +38,13 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 	} else {
 		await requireOrgInventory(document.organizationId, 'billing_manage_forbidden');
 	}
+	// `?signature=1` on an offer: the same offer with a line for the customer
+	// to sign the order on. A finalized one is rendered again from what it
+	// froze on finalizing (texts, org snapshot, rental terms) rather than
+	// stamped onto the archive, which stays the offer as it was issued.
+	const signature = params.kind === 'offers' && url.searchParams.get('signature') === '1';
 	let bytes: Uint8Array;
-	if (document.pdfPath) bytes = (await getObject(document.pdfPath)).bytes;
+	if (document.pdfPath && !signature) bytes = (await getObject(document.pdfPath)).bytes;
 	else {
 		try {
 			// Draft previews render from the document's org snapshot too — the
@@ -47,7 +52,8 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 			const kind = params.kind === 'offers' ? 'offer' : 'invoice';
 			const rentalTermsVersionId = await documentRentalTermsVersionId(kind, {
 				...document,
-				issued: false
+				// Archived means finalized: its rental terms are the ones it froze.
+				issued: !!document.pdfPath
 			});
 			bytes = await generateBillingPdf(
 				kind,
@@ -56,7 +62,7 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 					organization: organizationFromSnapshot(document),
 					rentalTerms: await citedRentalTerms(rentalTermsVersionId)
 				},
-				{ draft: true }
+				{ draft: !document.pdfPath, acceptanceSignature: signature }
 			);
 		} catch (cause) {
 			// The document pages list what is missing before linking here, so this
@@ -69,14 +75,17 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 	const filename =
 		params.kind === 'invoices'
 			? `Rechnung-${document.number}.pdf`
-			: `Angebot-${document.number}.pdf`;
+			: signature
+				? `Angebot-${document.number}-zur-Unterschrift.pdf`
+				: `Angebot-${document.number}.pdf`;
 	return new Response(bytes as BodyInit, {
 		headers: {
 			'content-type': 'application/pdf',
 			'content-disposition': `inline; filename="${filename}"`,
-			'cache-control': document.pdfPath
-				? 'private, immutable, max-age=31536000'
-				: 'private, no-store'
+			'cache-control':
+				document.pdfPath && !signature
+					? 'private, immutable, max-age=31536000'
+					: 'private, no-store'
 		}
 	});
 };

@@ -41,6 +41,7 @@ import {
 	addToBundle,
 	assertBundleTagAvailable,
 	createBundle,
+	moveBundleIntoBundle,
 	removeBundleFromBundle,
 	removeUnitFromBundle
 } from '#lib/server/services/bundles.js';
@@ -93,7 +94,7 @@ import {
 	type StockUnit
 } from '#lib/server/services/asset-create.js';
 import { appError } from '#lib/errors.js';
-import { productLabel } from '#lib/product-label.js';
+import { productLabel, withCaption } from '#lib/product-label.js';
 import {
 	mergeManufacturers as mergeManufacturersRecord,
 	updateManufacturer as updateManufacturerRecord
@@ -2492,6 +2493,10 @@ export const getBundleTemplates = query(v.optional(v.string()), async (organizat
 			instances: {
 				include: {
 					location: true,
+					// The kit it sits in, which the overview names in place of a shelf.
+					parentBundle: {
+						select: { id: true, tag: true, template: { select: { name: true, caption: true } } }
+					},
 					assets: {
 						include: {
 							product: {
@@ -3202,6 +3207,11 @@ type BundleCopySlot = {
 };
 
 type BundleCopyMember = BundleCopySlot & {
+	/**
+	 * The source's inner kit this unit belongs to, or null for one of the outer
+	 * kit's own. A copy that builds the inner kit afresh puts it there.
+	 */
+	innerKitId: string | null;
 	/** Where the original lives, as the last fallback for its counterpart. */
 	locationId: string;
 	/** What hangs off the original, and therefore has to hang off the copy. */
@@ -3213,7 +3223,10 @@ type BundleCopyMember = BundleCopySlot & {
  * hang off rather than listed beside it: `assets` carries both, because an
  * accessory mirrors its parent's `bundleId`.
  */
-function bundleCopyMembers(assets: BundleCopyAsset[]): BundleCopyMember[] {
+function bundleCopyMembers(
+	assets: BundleCopyAsset[],
+	innerKitId: string | null = null
+): BundleCopyMember[] {
 	const byParent = new Map<string, BundleCopyAsset[]>();
 	for (const asset of assets) {
 		if (!asset.parentAssetId) continue;
@@ -3246,6 +3259,7 @@ function bundleCopyMembers(assets: BundleCopyAsset[]): BundleCopyMember[] {
 			}
 			return {
 				...slotOf(asset),
+				innerKitId,
 				locationId: asset.locationId,
 				accessories: [...tally.values()]
 			};
@@ -3274,14 +3288,14 @@ async function allocateBundleCopy(
 	client: Pick<typeof prisma, 'asset'>,
 	args: {
 		organizationId: string;
-		members: BundleCopyMember[];
-		copies: number;
+		/** What each copy needs, one list per copy: they differ once inner kits come off the shelf. */
+		copies: BundleCopyMember[][];
 		locationId: string;
 		reuse: boolean;
 	}
 ): Promise<BundleCopyAllocation[]> {
 	const empty = () => new Map<string, StockUnit[]>();
-	const copies = Array.from({ length: args.copies }, () => args.members);
+	const copies = args.copies;
 
 	// Members are served before accessories, and across every copy, because the
 	// two draw on one shelf: a cable that is a member of the kit in its own right
@@ -3289,7 +3303,7 @@ async function allocateBundleCopy(
 	const memberPool = args.reuse
 		? await stockPool(client, {
 				organizationId: args.organizationId,
-				productIds: args.members.map((member) => member.productId),
+				productIds: copies.flat().map((member) => member.productId),
 				locationId: args.locationId,
 				bundleId: null
 			})
@@ -3340,6 +3354,149 @@ async function allocateBundleCopy(
 			}))
 		}))
 	);
+}
+
+// ── Inner kits ───────────────────────────────────────────────────────────────
+// A kit holding kits (the PowerCon set in the FOH case) is copied with them:
+// every copy gets a kit of each inner kit's type. With `reuse`, a free kit of
+// that type comes off the shelf whole — one that sits in no other kit, holds
+// none itself and has nothing out — and only where there is none is one built
+// afresh, its units drawn from the same pool as the outer kit's own.
+
+/** What the copy reads of the source and of its inner kits. */
+const BUNDLE_COPY_SOURCE_SELECT = {
+	id: true,
+	templateId: true,
+	locationId: true,
+	netPurchasePrice: true,
+	template: { select: { organizationId: true } },
+	assets: {
+		where: ACTIVE_ASSET_WHERE,
+		select: BUNDLE_COPY_ASSET_SELECT,
+		orderBy: ASSET_ORDER_BY
+	},
+	childBundles: {
+		select: {
+			id: true,
+			templateId: true,
+			netPurchasePrice: true,
+			template: { select: { name: true, caption: true } },
+			assets: {
+				where: ACTIVE_ASSET_WHERE,
+				select: BUNDLE_COPY_ASSET_SELECT,
+				orderBy: ASSET_ORDER_BY
+			}
+		},
+		orderBy: { id: 'asc' }
+	}
+} satisfies Prisma.AssetBundleSelect;
+
+type BundleCopySource = Prisma.AssetBundleGetPayload<{
+	select: typeof BUNDLE_COPY_SOURCE_SELECT;
+}>;
+
+type BundleCopyInnerKit = {
+	id: string;
+	templateId: string;
+	name: string;
+	netPurchasePrice: BundleCopySource['childBundles'][number]['netPurchasePrice'];
+	members: BundleCopyMember[];
+};
+
+function bundleCopyInnerKits(source: BundleCopySource): BundleCopyInnerKit[] {
+	return source.childBundles.map((kit) => ({
+		id: kit.id,
+		templateId: kit.templateId,
+		name: withCaption(kit.template.name, kit.template.caption),
+		netPurchasePrice: kit.netPurchasePrice,
+		members: bundleCopyMembers(kit.assets, kit.id)
+	}));
+}
+
+type BundleCopyPlan = {
+	allocations: BundleCopyAllocation[];
+	/** Per copy, per inner kit of the source: the free kit that goes in, or null to build one. */
+	kits: { inner: BundleCopyInnerKit; take: { id: string } | null }[][];
+};
+
+/**
+ * Decide every copy: which inner kits come off the shelf, then — for the
+ * outer kit's own units and those of every inner kit built afresh — which
+ * units do. One function for the dialog and the command, like
+ * `allocateBundleCopy`.
+ */
+async function planBundleCopy(
+	client: Pick<typeof prisma, 'asset' | 'assetBundle'>,
+	args: {
+		source: BundleCopySource;
+		copies: number;
+		locationId: string;
+		reuse: boolean;
+	}
+): Promise<BundleCopyPlan> {
+	const { source } = args;
+	const innerKits = bundleCopyInnerKits(source);
+	const members = bundleCopyMembers(source.assets);
+
+	const kitPool = new Map<string, { id: string }[]>();
+	if (args.reuse && innerKits.length > 0) {
+		const free = await client.assetBundle.findMany({
+			where: {
+				templateId: { in: [...new Set(innerKits.map((kit) => kit.templateId))] },
+				template: { organizationId: source.template.organizationId },
+				parentBundleId: null,
+				childBundles: { none: {} },
+				id: { not: source.id },
+				// A kit that is out somewhere cannot go into a case here.
+				assets: { none: { status: 'CHECKED_OUT' } }
+			},
+			select: { id: true, templateId: true, locationId: true },
+			orderBy: { id: 'asc' }
+		});
+		// The ones already on the copy's shelf first.
+		free.sort(
+			(a, b) => Number(b.locationId === args.locationId) - Number(a.locationId === args.locationId)
+		);
+		for (const kit of free) {
+			const list = kitPool.get(kit.templateId);
+			if (list) list.push({ id: kit.id });
+			else kitPool.set(kit.templateId, [{ id: kit.id }]);
+		}
+	}
+
+	const kits = Array.from({ length: args.copies }, () =>
+		innerKits.map((inner) => ({ inner, take: kitPool.get(inner.templateId)?.shift() ?? null }))
+	);
+	const allocations = await allocateBundleCopy(client, {
+		organizationId: source.template.organizationId,
+		copies: kits.map((copy) => [
+			...members,
+			...copy.flatMap(({ inner, take }) => (take ? [] : inner.members))
+		]),
+		locationId: args.locationId,
+		reuse: args.reuse
+	});
+	return { allocations, kits };
+}
+
+/** Per kit type, how many the copies need and how many come off the shelf whole. */
+function bundleCopyKitSummary(kits: BundleCopyPlan['kits']) {
+	const lines = new Map<
+		string,
+		{ templateId: string; name: string; needed: number; fromStock: number }
+	>();
+	for (const { inner, take } of kits.flat()) {
+		const line = lines.get(inner.templateId) ?? {
+			templateId: inner.templateId,
+			name: inner.name,
+			needed: 0,
+			fromStock: 0
+		};
+		line.needed++;
+		if (take) line.fromStock++;
+		lines.set(inner.templateId, line);
+	}
+	return [...lines.values()].sort((a, b) => naturalCompare(a.name, b.name));
 }
 
 /** Per product, how many the copies need and how many of those the shelf covers. */
@@ -3412,34 +3569,35 @@ const bundleCopyPlanSchema = v.object({
  */
 export const getBundleCopyPlan = query(bundleCopyPlanSchema, async ({ bundleId, copies }) => {
 	const user = await requireAuth();
-	const bundle = await prisma.assetBundle.findUniqueOrThrow({
+	const source = await prisma.assetBundle.findUniqueOrThrow({
 		where: { id: bundleId },
-		select: {
-			locationId: true,
-			template: { select: { organizationId: true } },
-			assets: {
-				where: ACTIVE_ASSET_WHERE,
-				select: BUNDLE_COPY_ASSET_SELECT,
-				orderBy: ASSET_ORDER_BY
-			}
-		}
+		select: BUNDLE_COPY_SOURCE_SELECT
 	});
 
 	const orgIds = await userOrgIds(user.id);
-	if (!orgIds.includes(bundle.template.organizationId) && !(await isSystemAdmin(user.id))) {
+	if (!orgIds.includes(source.template.organizationId) && !(await isSystemAdmin(user.id))) {
 		appError(403, 'unauthorized');
 	}
 
-	const members = bundleCopyMembers(bundle.assets);
-	return bundleCopySummary(
-		await allocateBundleCopy(prisma, {
-			organizationId: bundle.template.organizationId,
-			members,
-			copies,
-			locationId: bundle.locationId ?? members[0]?.locationId ?? '',
-			reuse: true
-		})
-	);
+	const locationId = source.locationId ?? source.assets[0]?.locationId ?? '';
+	const [fromShelf, allNew] = await Promise.all([
+		planBundleCopy(prisma, { source, copies, locationId, reuse: true }),
+		planBundleCopy(prisma, { source, copies, locationId, reuse: false })
+	]);
+	const shelf = bundleCopySummary(fromShelf.allocations);
+	const fresh = bundleCopySummary(allNew.allocations);
+	const freeOf = new Map(shelf.lines.map((line) => [line.productId, line.fromStock]));
+	return {
+		/** Every unit the copies hold, inner kits' included, as if all were new. */
+		needed: fresh.needed,
+		/**
+		 * Taking from stock: the units still to place once whole kits are taken,
+		 * and how many of them the shelf covers.
+		 */
+		fromShelf: { needed: shelf.needed, fromStock: shelf.fromStock },
+		lines: fresh.lines.map((line) => ({ ...line, fromStock: freeOf.get(line.productId) ?? 0 })),
+		kits: bundleCopyKitSummary(fromShelf.kits)
+	};
 });
 
 /**
@@ -3493,17 +3651,7 @@ export const duplicateBundle = command(duplicateBundleSchema, async (data) => {
 	const user = await requireAuth();
 	const source = await prisma.assetBundle.findUniqueOrThrow({
 		where: { id: data.bundleId },
-		select: {
-			templateId: true,
-			locationId: true,
-			netPurchasePrice: true,
-			template: { select: { organizationId: true } },
-			assets: {
-				where: ACTIVE_ASSET_WHERE,
-				select: BUNDLE_COPY_ASSET_SELECT,
-				orderBy: ASSET_ORDER_BY
-			}
-		}
+		select: BUNDLE_COPY_SOURCE_SELECT
 	});
 	const organizationId = source.template.organizationId;
 	await requireOrgInventory(organizationId);
@@ -3520,7 +3668,6 @@ export const duplicateBundle = command(duplicateBundleSchema, async (data) => {
 		if (!(await canPlaceAt(user.id, location, organizationId))) appError(400, 'location_invalid');
 	}
 
-	const members = bundleCopyMembers(source.assets);
 	// A kit with no location of its own leaves each unit where its counterpart is.
 	const bundleLocationId = data.locationId ?? source.locationId ?? null;
 
@@ -3534,20 +3681,21 @@ export const duplicateBundle = command(duplicateBundleSchema, async (data) => {
 
 			// Every copy is allocated before any of it is written, so the shelf is
 			// divided up once rather than raided copy by copy.
-			const allocations = await allocateBundleCopy(tx, {
-				organizationId,
-				members,
+			const { allocations, kits } = await planBundleCopy(tx, {
+				source,
 				copies,
-				locationId: bundleLocationId ?? members[0]?.locationId ?? '',
+				locationId: bundleLocationId ?? source.assets[0]?.locationId ?? '',
 				reuse: data.reuseExistingAssets === true
 			});
 
 			let reused = 0;
 			let created = 0;
+			let kitsReused = 0;
 			const bundleIds: string[] = [];
 			const touched: string[] = [];
+			const touchedKits: string[] = [];
 
-			for (const allocation of allocations) {
+			for (const [copyIndex, allocation] of allocations.entries()) {
 				const copy = await tx.assetBundle.create({
 					data: {
 						templateId: source.templateId,
@@ -3560,14 +3708,48 @@ export const duplicateBundle = command(duplicateBundleSchema, async (data) => {
 				});
 				bundleIds.push(copy.id);
 
+				// The inner kits first, so the units built for one have a kit to go into.
+				const innerCopyIds = new Map<string, string>();
+				for (const { inner, take } of kits[copyIndex]) {
+					if (take) {
+						await moveBundleIntoBundle(
+							tx,
+							{
+								id: copy.id,
+								locationId: bundleLocationId,
+								parentBundleId: null,
+								template: { organizationId },
+								_count: { childBundles: 0 }
+							},
+							take.id
+						);
+						kitsReused++;
+						touchedKits.push(take.id);
+						continue;
+					}
+					const innerCopy = await tx.assetBundle.create({
+						data: {
+							templateId: inner.templateId,
+							parentBundleId: copy.id,
+							locationId: bundleLocationId,
+							netPurchasePrice: inner.netPurchasePrice
+						},
+						select: { id: true }
+					});
+					innerCopyIds.set(inner.id, innerCopy.id);
+				}
+
 				for (const entry of allocation) {
+					const kitId = entry.member.innerKitId
+						? innerCopyIds.get(entry.member.innerKitId)!
+						: copy.id;
 					const locationId = bundleLocationId ?? entry.take?.locationId ?? entry.member.locationId;
 					let parent: AccessoryParent;
 
-					if (entry.take && (await claimIntoBundle(tx, entry.take.id, copy.id, locationId))) {
+					if (entry.take && (await claimIntoBundle(tx, entry.take.id, kitId, locationId))) {
 						reused++;
 						touched.push(entry.take.id);
-						parent = { ...entry.take, locationId, bundleId: copy.id };
+						parent = { ...entry.take, locationId, bundleId: kitId };
 					} else {
 						const unit = await tx.asset.create({
 							data: {
@@ -3576,7 +3758,7 @@ export const duplicateBundle = command(duplicateBundleSchema, async (data) => {
 								locationId,
 								assetTag: copyTag(entry.member.tagged),
 								status: 'AVAILABLE',
-								bundleId: copy.id,
+								bundleId: kitId,
 								...inspection(entry.member.productId),
 								transactions: {
 									create: [{ userId: user.id, action: 'CREATED', data: { type: 'CREATED' } }]
@@ -3589,7 +3771,7 @@ export const duplicateBundle = command(duplicateBundleSchema, async (data) => {
 							}
 						});
 						created++;
-						parent = { ...unit, locationId, bundleId: copy.id };
+						parent = { ...unit, locationId, bundleId: kitId };
 					}
 
 					for (const slot of entry.accessories) {
@@ -3612,7 +3794,7 @@ export const duplicateBundle = command(duplicateBundleSchema, async (data) => {
 			}
 
 			await tags.done();
-			return { bundleIds, reused, created, touched };
+			return { bundleIds, reused, created, kitsReused, touched, touchedKits };
 		},
 		{ timeout: BUNDLE_COPY_TIMEOUT_MS, maxWait: 15_000 }
 	);
@@ -3640,12 +3822,21 @@ export const duplicateBundle = command(duplicateBundleSchema, async (data) => {
 		// Units that came off the shelf changed kit and possibly shelf, and the
 		// products involved have less loose stock than they did.
 		...result.touched.flatMap((id) => [getAsset(id).refresh(), getAssetHistory(id).refresh()]),
-		...[...new Set(members.map((member) => member.productId))].map((productId) =>
-			getProductAccessoryProfile({ productId, organizationId }).refresh()
-		)
+		// A kit that came off the shelf now sits in the copy.
+		...result.touchedKits.map((id) => getBundle(id).refresh()),
+		...[
+			...new Set(
+				[source, ...source.childBundles].flatMap((kit) => kit.assets.map((a) => a.productId))
+			)
+		].map((productId) => getProductAccessoryProfile({ productId, organizationId }).refresh())
 	]);
 
-	return { bundleIds: result.bundleIds, reused: result.reused, created: result.created };
+	return {
+		bundleIds: result.bundleIds,
+		reused: result.reused,
+		created: result.created,
+		kitsReused: result.kitsReused
+	};
 });
 
 const convertBundleToAccessoriesSchema = v.object({
@@ -3667,11 +3858,26 @@ export const convertBundleToAccessories = command(
 					include: {
 						product: { select: { name: true, manufacturer: { select: { name: true } } } }
 					}
-				}
+				},
+				parentBundle: { select: { id: true, templateId: true } },
+				childBundles: { select: { template: { select: { name: true, caption: true } } } }
 			}
 		});
 
 		await requireOrgInventory(bundle.template.organizationId);
+
+		// A device holds accessories, not kits, and silently letting the inner kits
+		// fall out onto the shelf is not what anyone converting the case meant.
+		if (bundle.childBundles.length > 0) {
+			appError(409, 'bundle_convert_has_kits', [
+				bundle.childBundles
+					.map((kit) => withCaption(kit.template.name, kit.template.caption))
+					.join(', ')
+			]);
+		}
+		// An inner kit converted stays where it was: the device, and with it its
+		// accessories, goes into the outer kit in the inner kit's place.
+		const outer = bundle.parentBundle;
 
 		if (bundle.assets.length < 2) {
 			appError(409, 'bundle_too_small');
@@ -3698,11 +3904,19 @@ export const convertBundleToAccessories = command(
 			// selected device is the only parent and every other member follows it.
 			await tx.asset.updateMany({
 				where: { bundleId, id: { not: main.id } },
-				data: { parentAssetId: main.id, bundleId: null, locationId: main.locationId }
+				data: {
+					parentAssetId: main.id,
+					bundleId: outer?.id ?? null,
+					locationId: main.locationId
+				}
 			});
-			await tx.asset.update({ where: { id: main.id }, data: { bundleId: null } });
+			await tx.asset.update({
+				where: { id: main.id },
+				data: { bundleId: outer?.id ?? null }
+			});
 			// A production booking remains intact, but it no longer points at a bundle
-			// that will cease to exist.
+			// that will cease to exist. One made through the outer kit carries the
+			// outer kit's id and still finds the units in it.
 			await tx.productionItem.updateMany({
 				where: { sourceBundleId: bundleId },
 				data: { sourceBundleId: null }
@@ -3740,6 +3954,9 @@ export const convertBundleToAccessories = command(
 			getBundles().refresh(),
 			getBundleTemplates(main.organizationId).refresh(),
 			getBundleTemplates().refresh(),
+			...(outer
+				? [getBundle(outer.id).refresh(), getBundleTypeSpec(outer.templateId).refresh()]
+				: []),
 			getProductAccessoryProfile({
 				productId: main.productId,
 				organizationId: main.organizationId

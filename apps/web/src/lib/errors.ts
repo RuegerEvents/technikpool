@@ -149,6 +149,7 @@ export type AppErrorCode =
 	| 'bundle_nest_self'
 	| 'bundle_nest_outer_nested'
 	| 'bundle_nest_inner_has_kits'
+	| 'bundle_convert_has_kits'
 	| 'bundle_nest_org_mismatch'
 	| 'bundle_in_other_bundle'
 	| 'bundle_kit_not_in_type'

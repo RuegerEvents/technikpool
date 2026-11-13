@@ -258,6 +258,8 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return `This bundle sits inside "${p0}" itself, and bundles nest only one level deep.`;
 		case 'bundle_nest_inner_has_kits':
 			return `The bundle "${p0}" holds bundles of its own, and bundles nest only one level deep.`;
+		case 'bundle_convert_has_kits':
+			return `This bundle holds other bundles (${p0}). Take them out first — a device cannot hold a bundle.`;
 		case 'bundle_nest_org_mismatch':
 			return 'A bundle can only go inside a bundle of the same organization.';
 		case 'bundle_in_other_bundle':
