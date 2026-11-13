@@ -24,10 +24,16 @@ class BundleUnit {
     required this.productImageUrl,
     required this.location,
     required this.checkedOutTo,
+    this.lengthCm,
   });
   
   factory BundleUnit.fromJson(Map<String, Object?> json) => _$BundleUnitFromJson(json);
   
+  /// The product's length in whole centimetres, null when it has none —.
+  /// with the kit's organization, what the cable colour is read off (see.
+  /// `GET /api/v1/cable-colors`). Not required, so an older client keeps compiling.
+  ///
+  final int? lengthCm;
   final String id;
   final String? assetTag;
   final String? serialNumber;

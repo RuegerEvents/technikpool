@@ -13,11 +13,21 @@ class ScannedAsset {
     required this.assetTag,
     required this.productName,
     required this.manufacturerName,
+    this.ownerOrgId,
+    this.lengthCm,
     this.productCaption,
   });
   
   factory ScannedAsset.fromJson(Map<String, Object?> json) => _$ScannedAssetFromJson(json);
   
+  /// The organization the unit belongs to. With `lengthCm`, what the.
+  /// cable colour is read off (see `GET /api/v1/cable-colors`). Not.
+  /// required, so an older client keeps compiling.
+  ///
+  final String? ownerOrgId;
+
+  /// The product's length in whole centimetres; null when it has none.
+  final int? lengthCm;
   final String id;
   final String assetTag;
   final String productName;

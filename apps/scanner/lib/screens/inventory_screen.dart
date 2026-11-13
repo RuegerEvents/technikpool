@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../api/client.dart';
 import '../api/generated/export.dart';
+import '../cable_colors.dart';
 import '../cable_format.dart';
 import '../demo/demo_data.dart';
 import '../inventory_rows.dart';
@@ -15,6 +16,7 @@ import '../product_label.dart';
 import '../scan/camera_scan_screen.dart';
 import '../scan/scan_tones.dart';
 import '../state/providers.dart';
+import '../widgets/cable_color_dot.dart';
 import '../widgets/category_pill.dart';
 import '../widgets/product_thumb.dart';
 import 'asset_detail_screen.dart';
@@ -38,6 +40,10 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
 
   String? _locationId;
   String? _categoryId;
+
+  /// The cable colour schemes, as of the last build. Kept here because the
+  /// rows are built lazily, outside build, where nothing may be watched.
+  CableColors _cableColors = CableColors.empty;
   String _query = '';
   Timer? _debounce;
 
@@ -280,6 +286,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     // Units registered elsewhere — the "+" on the home screen — are not in
     // the pages in hand, so the list starts over.
     ref.listen(unitsChangedProvider, (_, _) => _load(reset: true));
+    _cableColors = ref.watch(cableColorLookupProvider);
     final grouping =
         ref.watch(inventoryGroupingProvider).value ?? InventoryGrouping.bundles;
     final locations = ref.watch(locationsProvider).value ?? const <Location>[];
@@ -544,6 +551,12 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
             spacing: 8,
             children: [
               CategoryPill(asset.product.category, dense: true),
+              if (_cableColors.colorFor(
+                    asset.organization.id,
+                    asset.product.cable?.lengthCm,
+                  )
+                  case final color?)
+                CableColorDot(color),
               Expanded(
                 child: Text(
                   [
@@ -664,6 +677,12 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
         spacing: 8,
         children: [
           CategoryPill(row.product.category, dense: true),
+          if (_cableColors.colorFor(
+                row.counts.organizationId,
+                row.product.cable?.lengthCm,
+              )
+              case final color?)
+            CableColorDot(color),
           Expanded(
             child: Text(
               [

@@ -1,4 +1,5 @@
 import '../api/generated/export.dart';
+import '../cable_colors.dart';
 import 'generated/app_localizations.dart';
 
 /// Labels for the enum-ish values the API returns. Kept apart from the UI copy
@@ -80,5 +81,25 @@ class Labels {
     'out_of_scope' => l10n.reasonOutOfScope,
     null => l10n.stocktakeUnexpected,
     _ => reason,
+  };
+
+  /// A cable colour's name. A palette key is server vocabulary like a status
+  /// (`red` on the wire, "rot" on screen); one this client doesn't know yet
+  /// falls through as-is. An org's own colour brings its own name.
+  static String cableColor(S l10n, CableColor color) => switch (color.paletteKey) {
+    'red' => l10n.cableColorRed,
+    'blue' => l10n.cableColorBlue,
+    'green' => l10n.cableColorGreen,
+    'yellow' => l10n.cableColorYellow,
+    'white' => l10n.cableColorWhite,
+    'black' => l10n.cableColorBlack,
+    'orange' => l10n.cableColorOrange,
+    'brown' => l10n.cableColorBrown,
+    'grey' => l10n.cableColorGrey,
+    'violet' => l10n.cableColorViolet,
+    'pink' => l10n.cableColorPink,
+    'turquoise' => l10n.cableColorTurquoise,
+    final String key => key,
+    null => color.customName ?? '—',
   };
 }

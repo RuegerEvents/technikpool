@@ -71,6 +71,8 @@ void main() {
     await tester.pumpAndSettle();
     // Both XLR cables, one row each.
     expect(find.text('XLR 10 m'), findsNWidgets(2));
+    // Each with its owner's tape colour: 10 m is yellow at Nordlicht.
+    expect(find.byTooltip('yellow'), findsNWidgets(2));
   });
 
   testWidgets('a unit without a tag opens its detail from all devices', (tester) async {

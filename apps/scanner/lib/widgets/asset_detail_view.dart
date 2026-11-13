@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../api/generated/export.dart';
 import '../cable_format.dart';
@@ -7,7 +8,9 @@ import '../l10n/generated/app_localizations.dart';
 import '../l10n/labels.dart';
 import '../legal.dart';
 import '../product_label.dart';
+import '../state/providers.dart';
 import '../theme.dart';
+import 'cable_color_dot.dart';
 import 'category_pill.dart';
 
 /// Everything known about one unit: what it is, where, its inspections and
@@ -75,6 +78,21 @@ class AssetDetailView extends StatelessWidget {
             _row(context, l10n.connectors, cableConnectors(cable)),
           if (cableLength(cable, l10n.localeName) case final length?)
             _row(context, l10n.cableLength, length),
+          // The tape on it, by its owner's scheme: dot and name, since two
+          // colours can look alike on a handheld's screen.
+          Consumer(
+            builder: (context, ref, _) {
+              final color = ref
+                  .watch(cableColorLookupProvider)
+                  .colorFor(asset.organization.id, cable.lengthCm);
+              if (color == null) return const SizedBox.shrink();
+              return _rowWith(
+                context,
+                l10n.cableColor,
+                CableColorLabel(color, style: const TextStyle(fontWeight: FontWeight.w500)),
+              );
+            },
+          ),
         ],
         if (asset.currentProduction != null)
           _row(context, l10n.checkedOutTo, asset.currentProduction!.name),
@@ -248,7 +266,16 @@ class AssetDetailView extends StatelessWidget {
     ];
   }
 
-  Widget _row(BuildContext context, String label, String value, {Color? color}) => Padding(
+  Widget _row(BuildContext context, String label, String value, {Color? color}) => _rowWith(
+    context,
+    label,
+    Text(
+      value,
+      style: TextStyle(fontWeight: FontWeight.w500, color: color),
+    ),
+  );
+
+  Widget _rowWith(BuildContext context, String label, Widget value) => Padding(
     padding: const EdgeInsets.symmetric(vertical: 6),
     child: Row(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -260,12 +287,7 @@ class AssetDetailView extends StatelessWidget {
             style: TextStyle(color: Theme.of(context).colorScheme.onSurfaceVariant),
           ),
         ),
-        Expanded(
-          child: Text(
-            value,
-            style: TextStyle(fontWeight: FontWeight.w500, color: color),
-          ),
-        ),
+        Expanded(child: value),
       ],
     ),
   );

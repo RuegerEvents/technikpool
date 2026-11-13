@@ -27,6 +27,8 @@ class ProductionCheckItem {
     required this.received,
     required this.returnReported,
     required this.tick,
+    this.ownerOrgId,
+    this.lengthCm,
     this.productImageUrl,
     this.kit,
     this.packCase,
@@ -35,6 +37,14 @@ class ProductionCheckItem {
   
   factory ProductionCheckItem.fromJson(Map<String, Object?> json) => _$ProductionCheckItemFromJson(json);
   
+  /// The organization the unit belongs to. With `lengthCm`, what the.
+  /// cable colour is read off (see `GET /api/v1/cable-colors`). Not.
+  /// required, so an older client keeps compiling.
+  ///
+  final String? ownerOrgId;
+
+  /// The product's length in whole centimetres; null when it has none.
+  final int? lengthCm;
   final String assetId;
   final String? assetTag;
   final String productName;

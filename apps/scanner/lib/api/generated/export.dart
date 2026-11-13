@@ -24,6 +24,8 @@ export 'models/device_token_response.dart';
 export 'models/sign_in_response.dart';
 export 'models/user.dart';
 export 'models/organization.dart';
+export 'models/cable_color_scheme.dart';
+export 'models/cable_color_band.dart';
 export 'models/legal_link.dart';
 export 'models/current_user.dart';
 export 'models/member_organization.dart';

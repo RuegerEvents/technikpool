@@ -11,6 +11,7 @@ import '../product_label.dart';
 import '../scan/camera_scan_screen.dart';
 import '../scan/scan_tones.dart';
 import '../state/providers.dart';
+import '../widgets/cable_color_dot.dart';
 import '../widgets/scan_outcome_band.dart';
 import 'asset_detail_screen.dart';
 import 'device_new_screen.dart';
@@ -300,12 +301,18 @@ class _ProductUnitsScreenState extends ConsumerState<ProductUnitsScreen> {
         title: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
-              withCaption(
-                productLabel(widget.product.manufacturerName, widget.product.name),
-                widget.product.caption,
+            // Every unit here is one product of one org, so they share a colour.
+            withCableColorDot(
+              Text(
+                withCaption(
+                  productLabel(widget.product.manufacturerName, widget.product.name),
+                  widget.product.caption,
+                ),
+                overflow: TextOverflow.ellipsis,
               ),
-              overflow: TextOverflow.ellipsis,
+              ref
+                  .watch(cableColorLookupProvider)
+                  .colorFor(widget.organization.id, widget.product.cable?.lengthCm),
             ),
             Text(
               widget.organization.name,

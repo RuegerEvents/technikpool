@@ -295,6 +295,126 @@ abstract class S {
   /// **'Length'**
   String get cableLength;
 
+  /// Asset detail row: the colour of tape that marks the cable's length.
+  ///
+  /// In en, this message translates to:
+  /// **'Colour code'**
+  String get cableColor;
+
+  /// No description provided for @cableColors.
+  ///
+  /// In en, this message translates to:
+  /// **'Cable colours'**
+  String get cableColors;
+
+  /// No description provided for @cableColorsHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Which tape colour marks which cable length'**
+  String get cableColorsHint;
+
+  /// No description provided for @cableColorsEmpty.
+  ///
+  /// In en, this message translates to:
+  /// **'No organization marks its cables with colours yet.'**
+  String get cableColorsEmpty;
+
+  /// No description provided for @cableColorsOtherOrg.
+  ///
+  /// In en, this message translates to:
+  /// **'Another organization'**
+  String get cableColorsOtherOrg;
+
+  /// No description provided for @cableColorUpTo.
+  ///
+  /// In en, this message translates to:
+  /// **'up to {length}'**
+  String cableColorUpTo(String length);
+
+  /// A colour band in the legend: from is a bare number, to carries the unit.
+  ///
+  /// In en, this message translates to:
+  /// **'over {from} up to {to}'**
+  String cableColorRange(String from, String to);
+
+  /// No description provided for @cableColorsLonger.
+  ///
+  /// In en, this message translates to:
+  /// **'Longer than {length}: no colour'**
+  String cableColorsLonger(String length);
+
+  /// No description provided for @cableColorRed.
+  ///
+  /// In en, this message translates to:
+  /// **'red'**
+  String get cableColorRed;
+
+  /// No description provided for @cableColorBlue.
+  ///
+  /// In en, this message translates to:
+  /// **'blue'**
+  String get cableColorBlue;
+
+  /// No description provided for @cableColorGreen.
+  ///
+  /// In en, this message translates to:
+  /// **'green'**
+  String get cableColorGreen;
+
+  /// No description provided for @cableColorYellow.
+  ///
+  /// In en, this message translates to:
+  /// **'yellow'**
+  String get cableColorYellow;
+
+  /// No description provided for @cableColorWhite.
+  ///
+  /// In en, this message translates to:
+  /// **'white'**
+  String get cableColorWhite;
+
+  /// No description provided for @cableColorBlack.
+  ///
+  /// In en, this message translates to:
+  /// **'black'**
+  String get cableColorBlack;
+
+  /// No description provided for @cableColorOrange.
+  ///
+  /// In en, this message translates to:
+  /// **'orange'**
+  String get cableColorOrange;
+
+  /// No description provided for @cableColorBrown.
+  ///
+  /// In en, this message translates to:
+  /// **'brown'**
+  String get cableColorBrown;
+
+  /// No description provided for @cableColorGrey.
+  ///
+  /// In en, this message translates to:
+  /// **'grey'**
+  String get cableColorGrey;
+
+  /// No description provided for @cableColorViolet.
+  ///
+  /// In en, this message translates to:
+  /// **'violet'**
+  String get cableColorViolet;
+
+  /// No description provided for @cableColorPink.
+  ///
+  /// In en, this message translates to:
+  /// **'pink'**
+  String get cableColorPink;
+
+  /// No description provided for @cableColorTurquoise.
+  ///
+  /// In en, this message translates to:
+  /// **'turquoise'**
+  String get cableColorTurquoise;
+
   /// No description provided for @checkedOutTo.
   ///
   /// In en, this message translates to:

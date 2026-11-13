@@ -78,6 +78,9 @@ class DemoBackend {
     if (method == 'GET' && path == '/api/v1/legal') {
       return _ok(options, <Object>[]);
     }
+    if (method == 'GET' && path == '/api/v1/cable-colors') {
+      return _ok(options, DemoData.cableColors);
+    }
     if (method == 'GET' && path == '/api/v1/locations') {
       return _ok(options, DemoData.locations);
     }
@@ -365,6 +368,8 @@ class DemoBackend {
       productName: asset.product.name,
       productCaption: asset.product.caption,
       manufacturerName: asset.product.manufacturerName,
+      ownerOrgId: asset.organization.id,
+      lengthCm: asset.product.cable?.lengthCm,
     );
 
     if (toProduction) {
@@ -1062,6 +1067,8 @@ class DemoBackend {
           productName: units.first.product.name,
           productCaption: units.first.product.caption,
           manufacturerName: units.first.product.manufacturerName,
+          ownerOrgId: units.first.organization.id,
+          lengthCm: units.first.product.cable?.lengthCm,
           lentBy: units.first.organization.id == production.organization.id
               ? null
               : units.first.organization.shortName ?? units.first.organization.name,
@@ -1106,6 +1113,8 @@ class DemoBackend {
             productName: asset.product.name,
             productCaption: asset.product.caption,
             manufacturerName: asset.product.manufacturerName,
+            ownerOrgId: asset.organization.id,
+            lengthCm: asset.product.cable?.lengthCm,
             lentBy: asset.organization.id == check.production.organization.id
                 ? null
                 : asset.organization.shortName ?? asset.organization.name,
@@ -1279,6 +1288,8 @@ class DemoBackend {
           productName: asset.product.name,
           productCaption: asset.product.caption,
           manufacturerName: asset.product.manufacturerName,
+          ownerOrgId: asset.organization.id,
+          lengthCm: asset.product.cable?.lengthCm,
         );
         if (mode == HandoutMode.checkout) {
           // Not booked itself: it may take the place of a linked unit that is.
@@ -1461,6 +1472,8 @@ class DemoBackend {
             productName: asset.product.name,
             productCaption: asset.product.caption,
             manufacturerName: asset.product.manufacturerName,
+            ownerOrgId: asset.organization.id,
+            lengthCm: asset.product.cable?.lengthCm,
             lentBy: asset.organization.id == p.organization.id
                 ? null
                 : asset.organization.shortName ?? asset.organization.name,
@@ -2460,6 +2473,7 @@ class DemoBackend {
             status: a.status.toJson(),
             parentAssetId: ids.contains(a.parentAssetId) ? a.parentAssetId : null,
             productId: a.product.id,
+            lengthCm: a.product.cable?.lengthCm,
             productName: a.product.name,
             productCaption: a.product.caption,
             manufacturerName: a.product.manufacturerName,

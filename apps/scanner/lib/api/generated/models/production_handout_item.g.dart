@@ -21,6 +21,8 @@ ProductionHandoutItem _$ProductionHandoutItemFromJson(
   done: json['done'] as bool,
   received: json['received'] as bool,
   returnReported: json['returnReported'] as bool,
+  ownerOrgId: json['ownerOrgId'] as String?,
+  lengthCm: (json['lengthCm'] as num?)?.toInt(),
   productImageUrl: json['productImageUrl'] as String?,
   kit: json['kit'] == null
       ? null
@@ -36,6 +38,8 @@ ProductionHandoutItem _$ProductionHandoutItemFromJson(
 Map<String, dynamic> _$ProductionHandoutItemToJson(
   ProductionHandoutItem instance,
 ) => <String, dynamic>{
+  'ownerOrgId': ?instance.ownerOrgId,
+  'lengthCm': ?instance.lengthCm,
   'assetId': instance.assetId,
   'assetTag': ?instance.assetTag,
   'productName': instance.productName,

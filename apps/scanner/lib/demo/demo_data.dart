@@ -198,6 +198,47 @@ class DemoData {
     ),
   );
 
+  /// Nordlicht's cable colours, so the demo's cables carry a dot: the XLR
+  /// (10 m) is yellow, the loom (20 m) the org's own neon green. Bühnenwerk
+  /// has none, which is the other case worth seeing.
+  static const cableColors = [
+    CableColorScheme(
+      organizationId: 'org_demo_nordlicht',
+      bands: [
+        CableColorBand(
+          maxLengthCm: 100,
+          paletteKey: 'red',
+          customName: null,
+          customHex: null,
+        ),
+        CableColorBand(
+          maxLengthCm: 300,
+          paletteKey: 'blue',
+          customName: null,
+          customHex: null,
+        ),
+        CableColorBand(
+          maxLengthCm: 500,
+          paletteKey: 'green',
+          customName: null,
+          customHex: null,
+        ),
+        CableColorBand(
+          maxLengthCm: 1000,
+          paletteKey: 'yellow',
+          customName: null,
+          customHex: null,
+        ),
+        CableColorBand(
+          maxLengthCm: 2500,
+          paletteKey: null,
+          customName: 'neongrün',
+          customHex: '#39ff14',
+        ),
+      ],
+    ),
+  ];
+
   /// A cable, so the structured half of a product is visible somewhere: the
   /// name says "XLR 10 m" and `cable` says the same thing in a form a filter
   /// can read. No manufacturer, like most cables: the name is the whole label.

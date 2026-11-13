@@ -113,6 +113,73 @@ class SEn extends S {
   String get cableLength => 'Length';
 
   @override
+  String get cableColor => 'Colour code';
+
+  @override
+  String get cableColors => 'Cable colours';
+
+  @override
+  String get cableColorsHint => 'Which tape colour marks which cable length';
+
+  @override
+  String get cableColorsEmpty =>
+      'No organization marks its cables with colours yet.';
+
+  @override
+  String get cableColorsOtherOrg => 'Another organization';
+
+  @override
+  String cableColorUpTo(String length) {
+    return 'up to $length';
+  }
+
+  @override
+  String cableColorRange(String from, String to) {
+    return 'over $from up to $to';
+  }
+
+  @override
+  String cableColorsLonger(String length) {
+    return 'Longer than $length: no colour';
+  }
+
+  @override
+  String get cableColorRed => 'red';
+
+  @override
+  String get cableColorBlue => 'blue';
+
+  @override
+  String get cableColorGreen => 'green';
+
+  @override
+  String get cableColorYellow => 'yellow';
+
+  @override
+  String get cableColorWhite => 'white';
+
+  @override
+  String get cableColorBlack => 'black';
+
+  @override
+  String get cableColorOrange => 'orange';
+
+  @override
+  String get cableColorBrown => 'brown';
+
+  @override
+  String get cableColorGrey => 'grey';
+
+  @override
+  String get cableColorViolet => 'violet';
+
+  @override
+  String get cableColorPink => 'pink';
+
+  @override
+  String get cableColorTurquoise => 'turquoise';
+
+  @override
   String get checkedOutTo => 'Checked out to';
 
   @override

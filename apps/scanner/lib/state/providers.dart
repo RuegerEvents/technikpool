@@ -7,6 +7,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../api/auth_service.dart';
 import '../api/client.dart';
 import '../api/generated/export.dart';
+import '../cable_colors.dart';
 import '../demo/demo_api.dart';
 import '../inventory_rows.dart';
 import '../print/label_printer.dart';
@@ -432,6 +433,25 @@ final productionsProvider = FutureProvider<List<Production>>(
 /// already returns them in display order.
 final categoriesProvider = FutureProvider<List<Category>>(
   (ref) => _requireApi(ref).inventory.listCategories(),
+);
+
+/// The cable colour schemes of every organization the user sees: their own
+/// and those lending to their productions. Loaded once; the legend's pull to
+/// refresh reads them again. A server that predates them (404), or any other
+/// failure, answers "no schemes" — a colour is never worth failing a list for.
+final cableColorsProvider = FutureProvider<CableColors>((ref) async {
+  final api = ref.watch(apiClientProvider);
+  if (api == null) return CableColors.empty;
+  try {
+    return CableColors(await api.inventory.listCableColors());
+  } catch (_) {
+    return CableColors.empty;
+  }
+});
+
+/// [cableColorsProvider] as far as it is in: no colours while it loads.
+final cableColorLookupProvider = Provider<CableColors>(
+  (ref) => ref.watch(cableColorsProvider).value ?? CableColors.empty,
 );
 
 /// The inspection types (electrical, lifting, visual …), in display order.

@@ -11,6 +11,7 @@ import '../models/asset_create_result.dart';
 import '../models/asset_detail.dart';
 import '../models/asset_page.dart';
 import '../models/asset_tag_request.dart';
+import '../models/cable_color_scheme.dart';
 import '../models/category.dart';
 import '../models/inventory_product.dart';
 import '../models/location.dart';
@@ -22,6 +23,19 @@ part 'inventory_client.g.dart';
 @RestApi()
 abstract class InventoryClient {
   factory InventoryClient(Dio dio, {String? baseUrl}) = _InventoryClient;
+
+  /// The cable colour codes the user's equipment is marked with.
+  ///
+  /// One scheme per organization: the colour of tape that marks each cable.
+  /// length. Every organization the user belongs to, plus every organization.
+  /// that has a unit on one of their productions — a lent cable carries its.
+  /// owner's colour. An organization without bands is left out.
+  ///
+  /// A unit's colour is the band of its owner's scheme with the smallest.
+  /// `maxLengthCm` that is at least the product's `cable.lengthCm`; a longer.
+  /// cable, or a product without a length, has none.
+  @GET('/api/v1/cable-colors')
+  Future<List<CableColorScheme>> listCableColors();
 
   /// Locations a unit can be put at.
   ///

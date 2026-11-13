@@ -10,6 +10,7 @@ import '../scan/scan_channel.dart';
 import '../scan/scan_settings.dart';
 import '../scan/scan_tones.dart';
 import '../state/providers.dart';
+import 'cable_colors_screen.dart';
 import 'diagnostics_screen.dart';
 import 'whats_new_screen.dart';
 
@@ -140,6 +141,14 @@ class SettingsScreen extends ConsumerWidget {
             ),
             trailing: const Icon(Icons.chevron_right),
             onTap: () => editLabelPrinter(context, ref),
+          ),
+          ListTile(
+            leading: const Icon(Icons.palette_outlined),
+            title: Text(l10n.cableColors),
+            subtitle: Text(l10n.cableColorsHint),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => Navigator.of(context)
+                .push(MaterialPageRoute<void>(builder: (_) => const CableColorsScreen())),
           ),
           // Both of these configure the Android broadcast bridge, which does
           // not exist on a device that scans with its camera.

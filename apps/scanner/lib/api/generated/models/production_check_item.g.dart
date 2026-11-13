@@ -24,6 +24,8 @@ ProductionCheckItem _$ProductionCheckItemFromJson(Map<String, dynamic> json) =>
       tick: json['tick'] == null
           ? null
           : ProductionCheckTick.fromJson(json['tick'] as Map<String, dynamic>),
+      ownerOrgId: json['ownerOrgId'] as String?,
+      lengthCm: (json['lengthCm'] as num?)?.toInt(),
       productImageUrl: json['productImageUrl'] as String?,
       kit: json['kit'] == null
           ? null
@@ -37,6 +39,8 @@ ProductionCheckItem _$ProductionCheckItemFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$ProductionCheckItemToJson(
   ProductionCheckItem instance,
 ) => <String, dynamic>{
+  'ownerOrgId': ?instance.ownerOrgId,
+  'lengthCm': ?instance.lengthCm,
   'assetId': instance.assetId,
   'assetTag': ?instance.assetTag,
   'productName': instance.productName,

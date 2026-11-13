@@ -11,11 +11,15 @@ ScannedAsset _$ScannedAssetFromJson(Map<String, dynamic> json) => ScannedAsset(
   assetTag: json['assetTag'] as String,
   productName: json['productName'] as String,
   manufacturerName: json['manufacturerName'] as String?,
+  ownerOrgId: json['ownerOrgId'] as String?,
+  lengthCm: (json['lengthCm'] as num?)?.toInt(),
   productCaption: json['productCaption'] as String?,
 );
 
 Map<String, dynamic> _$ScannedAssetToJson(ScannedAsset instance) =>
     <String, dynamic>{
+      'ownerOrgId': ?instance.ownerOrgId,
+      'lengthCm': ?instance.lengthCm,
       'id': instance.id,
       'assetTag': instance.assetTag,
       'productName': instance.productName,

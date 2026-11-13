@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../api/client.dart';
 import '../api/generated/export.dart';
+import '../cable_colors.dart';
 import '../l10n/generated/app_localizations.dart';
 import '../l10n/labels.dart';
 import '../natural_sort.dart';
@@ -15,9 +16,11 @@ import '../scan/swap_notice.dart';
 import '../state/providers.dart';
 import '../theme.dart';
 import '../widgets/accessory_dialog.dart';
+import '../widgets/cable_color_dot.dart';
 import '../widgets/count_dialog.dart';
 import '../widgets/count_search_sheet.dart';
 import '../widgets/product_thumb.dart';
+import 'cable_colors_screen.dart';
 import 'case_label_screen.dart';
 
 /// What working through a production's list does with a tick.
@@ -76,6 +79,8 @@ class _Unit {
     this.optional = false,
     this.packCase,
     this.isPackCase = false,
+    this.ownerOrgId,
+    this.lengthCm,
   });
 
   final String assetId;
@@ -103,6 +108,10 @@ class _Unit {
   /// The pack case it is listed under — its own for a case.
   final PackCase? packCase;
   final bool isPackCase;
+
+  /// Owner and product length, for the cable colour; null from an older server.
+  final String? ownerOrgId;
+  final int? lengthCm;
 }
 
 /// "3", or "#12" for a pack case without a tag.
@@ -281,6 +290,48 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
     }
   }
 
+  /// The cable colour of a unit on this production, by its owner's scheme
+  /// (a lent cable carries its lender's). None when an older server sends no
+  /// owner or length.
+  CableColor? _cableColor(String? ownerOrgId, int? lengthCm) =>
+      ref.watch(cableColorLookupProvider).colorFor(ownerOrgId, lengthCm);
+
+  /// Every owner on the list with a cable that has a colour, lenders included.
+  Set<String> get _colorOwners {
+    final colors = ref.read(cableColorLookupProvider);
+    return {
+      for (final item in _check?.items ?? const <ProductionCheckItem>[])
+        if (colors.colorFor(item.ownerOrgId, item.lengthCm) != null) item.ownerOrgId!,
+      for (final item in _handout?.items ?? const <ProductionHandoutItem>[])
+        if (colors.colorFor(item.ownerOrgId, item.lengthCm) != null) item.ownerOrgId!,
+      for (final line in _lines)
+        if (colors.colorFor(line.ownerOrgId, line.lengthCm) != null) line.ownerOrgId!,
+    };
+  }
+
+  /// The legend for [_colorOwners], named as the list names them.
+  void _openCableColors() {
+    final names = <String, String>{
+      for (final p in ref.read(productionsProvider).value ?? const <Production>[])
+        if (p.id == widget.productionId) p.organization.id: p.organization.name,
+      for (final side in _handout?.sides ?? const <ProductionCheckSide>[])
+        side.organizationId: side.organizationName,
+      if (_check?.side case final side?) side.organizationId: side.organizationName,
+      // A lender is named on its units' rows.
+      for (final item in _check?.items ?? const <ProductionCheckItem>[])
+        if ((item.lentBy, item.ownerOrgId) case (final name?, final owner?)) owner: name,
+      for (final item in _handout?.items ?? const <ProductionHandoutItem>[])
+        if ((item.lentBy, item.ownerOrgId) case (final name?, final owner?)) owner: name,
+      for (final line in _lines)
+        if ((line.lentBy, line.ownerOrgId) case (final name?, final owner?)) owner: name,
+    };
+    Navigator.of(context).push<void>(
+      MaterialPageRoute(
+        builder: (_) => CableColorsScreen(organizationIds: _colorOwners, names: names),
+      ),
+    );
+  }
+
   Future<void> _fetch(ApiClient api) async {
     if (_isCheck) {
       final check = _check;
@@ -348,6 +399,8 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
             doneBy: item.tick != null && !item.tick!.mine ? item.tick!.userName : null,
             packCase: item.packCase,
             isPackCase: item.isPackCase == true,
+            ownerOrgId: item.ownerOrgId,
+            lengthCm: item.lengthCm,
             note: _checkNote(l10n, item),
             noteWarn:
                 item.lentBy != null &&
@@ -372,6 +425,8 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
           locked: false,
           packCase: item.packCase,
           isPackCase: item.isPackCase == true,
+          ownerOrgId: item.ownerOrgId,
+          lengthCm: item.lengthCm,
           note: _handoutNote(l10n, item),
           noteWarn:
               item.kitAddition == true ||
@@ -1516,6 +1571,20 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
               onPressed: _openCamera,
               icon: const Icon(Icons.photo_camera_outlined),
             ),
+          // Only for a list with a coloured cable on it.
+          if (!ref.watch(cableColorLookupProvider).isEmpty && _colorOwners.isNotEmpty)
+            PopupMenuButton<String>(
+              onSelected: (_) => _openCableColors(),
+              itemBuilder: (_) => [
+                PopupMenuItem(
+                  value: 'cableColors',
+                  child: ListTile(
+                    leading: const Icon(Icons.palette_outlined),
+                    title: Text(l10n.cableColors),
+                  ),
+                ),
+              ],
+            ),
         ],
       ),
       body: Column(
@@ -1761,7 +1830,10 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
           : widget.mode == ProductionListMode.checkout && open && unit.accessoryOf == null
           ? _unitPackMenu(l10n, unit)
           : null,
-      title: Text(unit.productName, style: const TextStyle(fontWeight: FontWeight.w600)),
+      title: withCableColorDot(
+        Text(unit.productName, style: const TextStyle(fontWeight: FontWeight.w600)),
+        _cableColor(unit.ownerOrgId, unit.lengthCm),
+      ),
       subtitle: Text.rich(
         TextSpan(
           children: [
@@ -1802,7 +1874,11 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
           ProductThumb(url: line.productImageUrl),
         ],
       ),
-      title: Text(line.productName, style: const TextStyle(fontWeight: FontWeight.w600)),
+      // One product of one owner, so its first unit's colour is the line's.
+      title: withCableColorDot(
+        Text(line.productName, style: const TextStyle(fontWeight: FontWeight.w600)),
+        _cableColor(line.ownerOrgId, line.lengthCm),
+      ),
       subtitle: Text([l10n.listCountedLine, ?line.productCaption].join(' · ')),
       trailing: Row(
         mainAxisSize: MainAxisSize.min,

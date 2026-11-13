@@ -13,17 +13,29 @@ import '../scan/camera_scan_screen.dart';
 import '../scan/swap_notice.dart';
 import '../state/providers.dart';
 import '../theme.dart';
+import '../widgets/cable_color_dot.dart';
 import '../widgets/product_thumb.dart';
 
 
 class _Entry {
-  _Entry({required this.tag, required this.ok, required this.title, required this.detail})
-    : at = DateTime.now();
+  _Entry({
+    required this.tag,
+    required this.ok,
+    required this.title,
+    required this.detail,
+    this.ownerOrgId,
+    this.lengthCm,
+  }) : at = DateTime.now();
 
   final String tag;
   final bool ok;
   final String title;
   final String detail;
+
+  /// The owner and length of the one unit the scan booked, for its cable
+  /// colour; null for a kit, a group, a failure or an older server.
+  final String? ownerOrgId;
+  final int? lengthCm;
   final DateTime at;
 
   CameraScanFeedback get feedback =>
@@ -106,6 +118,8 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
         _Entry(
           tag: tag,
           ok: true,
+          ownerOrgId: result.kit == null ? result.asset.ownerOrgId : null,
+          lengthCm: result.kit == null ? result.asset.lengthCm : null,
           // A kit's sticker moved everything in it.
           title: switch (result.kit) {
             final kit? => l10n.kitScanned(kit.name, kit.units.length),
@@ -276,9 +290,20 @@ class _SessionScreenState extends ConsumerState<SessionScreen> {
                           color: e.ok ? status.success : scheme.error,
                           size: 30,
                         ),
-                        title: Text(
-                          e.title,
-                          style: const TextStyle(fontWeight: FontWeight.w600),
+                        title: Row(
+                          children: [
+                            UnitCableColorDot(
+                              organizationId: e.ownerOrgId,
+                              lengthCm: e.lengthCm,
+                              gap: 6,
+                            ),
+                            Flexible(
+                              child: Text(
+                                e.title,
+                                style: const TextStyle(fontWeight: FontWeight.w600),
+                              ),
+                            ),
+                          ],
                         ),
                         subtitle: Text('${e.tag} · ${e.detail}'),
                       );

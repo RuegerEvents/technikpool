@@ -12,6 +12,7 @@ import '../scan/camera_scan_screen.dart';
 import '../scan/scan_tones.dart';
 import '../state/providers.dart';
 import '../theme.dart';
+import '../widgets/cable_color_dot.dart';
 import '../widgets/count_search_sheet.dart';
 import '../widgets/product_thumb.dart';
 import 'case_check_screen.dart';
@@ -674,16 +675,29 @@ class _BundleScreenState extends ConsumerState<BundleScreen> {
               url: unit.productImageUrl,
               size: unit.parentAssetId == null ? 36 : 28,
             ),
-            title: Text(
-              withCaption(
-                productLabel(unit.manufacturerName, unit.productName),
-                unit.productCaption,
-              ),
-              style: TextStyle(
-                fontWeight: unit.parentAssetId == null
-                    ? FontWeight.w600
-                    : FontWeight.normal,
-              ),
+            // A kit holds its own org's units only, so the kit's org is the
+            // owner whose colours they carry.
+            title: Row(
+              children: [
+                UnitCableColorDot(
+                  organizationId: bundle.organizationId,
+                  lengthCm: unit.lengthCm,
+                  gap: 6,
+                ),
+                Flexible(
+                  child: Text(
+                    withCaption(
+                      productLabel(unit.manufacturerName, unit.productName),
+                      unit.productCaption,
+                    ),
+                    style: TextStyle(
+                      fontWeight: unit.parentAssetId == null
+                          ? FontWeight.w600
+                          : FontWeight.normal,
+                    ),
+                  ),
+                ),
+              ],
             ),
             subtitle: Text.rich(
               TextSpan(

@@ -48,5 +48,10 @@ String _ends(String? connectorA, String? connectorB) {
 String? cableLength(CableSpec cable, String localeName) {
   final cm = cable.lengthCm;
   if (cm == null) return null;
-  return '${NumberFormat.decimalPattern(localeName).format(cm / 100)} m';
+  return '${metres(cm, localeName)} m';
 }
+
+/// Centimetres as metres without the unit — "10", "1,5" — for a range that
+/// names the unit once ("über 1 bis 3 m").
+String metres(int cm, String localeName) =>
+    NumberFormat.decimalPattern(localeName).format(cm / 100);

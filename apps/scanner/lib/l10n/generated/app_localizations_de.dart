@@ -113,6 +113,73 @@ class SDe extends S {
   String get cableLength => 'Länge';
 
   @override
+  String get cableColor => 'Farbcode';
+
+  @override
+  String get cableColors => 'Kabelfarben';
+
+  @override
+  String get cableColorsHint => 'Welche Bandfarbe welche Kabellänge markiert';
+
+  @override
+  String get cableColorsEmpty =>
+      'Noch keine Organisation markiert ihre Kabel mit Farben.';
+
+  @override
+  String get cableColorsOtherOrg => 'Andere Organisation';
+
+  @override
+  String cableColorUpTo(String length) {
+    return 'bis $length';
+  }
+
+  @override
+  String cableColorRange(String from, String to) {
+    return 'über $from bis $to';
+  }
+
+  @override
+  String cableColorsLonger(String length) {
+    return 'Länger als $length: keine Farbe';
+  }
+
+  @override
+  String get cableColorRed => 'rot';
+
+  @override
+  String get cableColorBlue => 'blau';
+
+  @override
+  String get cableColorGreen => 'grün';
+
+  @override
+  String get cableColorYellow => 'gelb';
+
+  @override
+  String get cableColorWhite => 'weiß';
+
+  @override
+  String get cableColorBlack => 'schwarz';
+
+  @override
+  String get cableColorOrange => 'orange';
+
+  @override
+  String get cableColorBrown => 'braun';
+
+  @override
+  String get cableColorGrey => 'grau';
+
+  @override
+  String get cableColorViolet => 'violett';
+
+  @override
+  String get cableColorPink => 'pink';
+
+  @override
+  String get cableColorTurquoise => 'türkis';
+
+  @override
   String get checkedOutTo => 'Ausgegeben an';
 
   @override

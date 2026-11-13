@@ -20,10 +20,12 @@ BundleUnit _$BundleUnitFromJson(Map<String, dynamic> json) => BundleUnit(
   productImageUrl: json['productImageUrl'] as String?,
   location: LocationRef.fromJson(json['location'] as Map<String, dynamic>),
   checkedOutTo: json['checkedOutTo'] as String?,
+  lengthCm: (json['lengthCm'] as num?)?.toInt(),
 );
 
 Map<String, dynamic> _$BundleUnitToJson(BundleUnit instance) =>
     <String, dynamic>{
+      'lengthCm': ?instance.lengthCm,
       'id': instance.id,
       'assetTag': ?instance.assetTag,
       'serialNumber': ?instance.serialNumber,

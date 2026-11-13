@@ -22,12 +22,23 @@ class ProductionListLine {
     required this.total,
     required this.done,
     required this.floor,
+    this.ownerOrgId,
+    this.lengthCm,
     this.productImageUrl,
     this.packCase,
   });
   
   factory ProductionListLine.fromJson(Map<String, Object?> json) => _$ProductionListLineFromJson(json);
   
+  /// The organization the unit belongs to. With `lengthCm`, what the.
+  /// cable colour is read off (see `GET /api/v1/cable-colors`). Not.
+  /// required, so an older client keeps compiling.
+  ///
+  final String? ownerOrgId;
+
+  /// The product's length in whole centimetres; null when it has none.
+  final int? lengthCm;
+
   /// Identifies the line for a count; opaque to clients.
   final String key;
   final String productName;

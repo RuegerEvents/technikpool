@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:technikpool_scanner/cable_colors.dart';
 import 'package:technikpool_scanner/cable_format.dart';
 import 'package:technikpool_scanner/api/client.dart';
 import 'package:technikpool_scanner/api/generated/export.dart';
@@ -75,6 +76,45 @@ void main() {
     // the mapper is inventing one.
     final lamp = await api.inventory.getAssetByTag(tag: '40000001');
     expect(lamp.product.cable, isNull);
+  });
+
+  test('the cables carry their owner\'s colour code', () async {
+    final colors = CableColors(await api.inventory.listCableColors());
+    // Nordlicht marks its cables; Bühnenwerk does not, and is left out.
+    expect(colors.organizationIds, [DemoData.nordlicht.id]);
+    final xlr = await api.inventory.getAssetByTag(tag: '40000013');
+    expect(
+      colors.colorFor(xlr.organization.id, xlr.product.cable?.lengthCm)?.paletteKey,
+      'yellow',
+    );
+    final loom = await api.inventory.getAssetByTag(tag: '40000015');
+    final own = colors.colorFor(loom.organization.id, loom.product.cable?.lengthCm);
+    expect(own?.paletteKey, isNull);
+    expect(own?.customName, 'neongrün');
+    // A lamp has no length, so no colour.
+    final lamp = await api.inventory.getAssetByTag(tag: '40000001');
+    expect(colors.colorFor(lamp.organization.id, lamp.product.cable?.lengthCm), isNull);
+  });
+
+  test('lists and scans carry the owner and length a colour needs', () async {
+    final handout = await api.productionHandout.getProductionHandout(
+      productionId: 'prdn_demo_festival',
+      mode: HandoutMode.checkout,
+    );
+    final xlr = handout.items.firstWhere((i) => i.assetTag == '40000013');
+    expect(xlr.ownerOrgId, DemoData.nordlicht.id);
+    expect(xlr.lengthCm, 1000);
+    final scan = await api.scanning.createScan(
+      body: ScanRequest(
+        assetTag: '40000015',
+        targetType: ScanRequestTargetType.location,
+        targetId: DemoData.locations.first.id,
+      ),
+    );
+    expect(scan.asset.ownerOrgId, DemoData.nordlicht.id);
+    expect(scan.asset.lengthCm, 2000);
+    final kit = await api.bundles.getBundle(bundleId: DemoData.cableKit.id);
+    expect(kit.units.map((u) => u.lengthCm), containsAll([1000, 2000]));
   });
 
   test('a loom carries its ways instead of a pair of ends', () async {
