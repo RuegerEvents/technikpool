@@ -14857,3 +14857,15 @@ msgstr "<0/> Take back ({0})"
 #: src/routes/assets/by-location/+page.svelte
 msgid "<0/> Show productions separately"
 msgstr "<0/> Show productions separately"
+
+#: src/lib/error-messages.svelte.ts
+msgid "This code is not valid. Check it against the one the device shows."
+msgstr "This code is not valid. Check it against the one the device shows."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This code has expired. Start pairing on the device again for a new one."
+msgstr "This code has expired. Start pairing on the device again for a new one."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This code has already been used. Start pairing on the device again for a new one."
+msgstr "This code has already been used. Start pairing on the device again for a new one."

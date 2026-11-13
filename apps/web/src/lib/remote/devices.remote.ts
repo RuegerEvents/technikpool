@@ -32,14 +32,34 @@ async function claimCode(userCode: string) {
 	return await auth.api.deviceVerify({ query: { user_code: userCode }, headers });
 }
 
+/**
+ * Better-auth's device errors carry `error` / `error_description` and no message, so
+ * thrown as they are they reach the page as a bare 500 "Internal Error". A mistyped
+ * code is the commonest thing to happen here, so each refusal gets a code of its own.
+ */
+async function asDeviceError<T>(run: () => Promise<T>): Promise<T> {
+	try {
+		return await run();
+	} catch (err) {
+		const body = (err as { body?: { error?: unknown; error_description?: unknown } }).body;
+		const kind = body?.error;
+		const description = String(body?.error_description ?? '');
+		if (kind === 'expired_token') appError(410, 'device_code_expired');
+		if (/already processed/i.test(description)) appError(409, 'device_code_used');
+		if (kind === 'invalid_request') appError(400, 'device_code_invalid');
+		if (kind === 'access_denied') appError(403, 'unauthorized');
+		throw err;
+	}
+}
+
 export const approveDevice = command(userCodeSchema, async ({ userCode }) => {
 	await requireAuth();
 	const event = await getRequestEvent();
 
-	const pending = await claimCode(userCode);
-	await auth.api.deviceApprove({
-		body: { userCode },
-		headers: event.request.headers
+	const pending = await asDeviceError(async () => {
+		const claimed = await claimCode(userCode);
+		await auth.api.deviceApprove({ body: { userCode }, headers: event.request.headers });
+		return claimed;
 	});
 
 	return { clientId: pending.client_id ?? null };
@@ -49,10 +69,9 @@ export const denyDevice = command(userCodeSchema, async ({ userCode }) => {
 	await requireAuth();
 	const event = await getRequestEvent();
 
-	await claimCode(userCode);
-	await auth.api.deviceDeny({
-		body: { userCode },
-		headers: event.request.headers
+	await asDeviceError(async () => {
+		await claimCode(userCode);
+		await auth.api.deviceDeny({ body: { userCode }, headers: event.request.headers });
 	});
 
 	return { ok: true };
@@ -115,10 +134,22 @@ function describeUserAgent(ua: string | null | undefined): { kind: DeviceKind; l
 }
 
 export const getConnectedDevices = query(async () => {
-	await requireAuth();
+	const user = await requireAuth();
 	const event = await getRequestEvent();
 
-	const sessions = await auth.api.listSessions({ headers: event.request.headers });
+	// Read directly rather than through auth.api.listSessions, which refuses a session
+	// older than a day ("Session is not fresh") and took this whole list down with it.
+	const sessions = await prisma.session.findMany({
+		where: { userId: user.id, expiresAt: { gt: new Date() } },
+		select: {
+			id: true,
+			userAgent: true,
+			ipAddress: true,
+			createdAt: true,
+			updatedAt: true,
+			expiresAt: true
+		}
+	});
 	const currentId = event.locals.session?.id ?? null;
 
 	// The session token is a bearer credential — it never leaves the server.

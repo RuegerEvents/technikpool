@@ -241,6 +241,10 @@ export type AppErrorCode =
 	| 'check_closed'
 	| 'check_not_your_tick'
 	| 'check_receipt_forbidden'
+	// Pairing a scanner at /devices (better-auth's device flow)
+	| 'device_code_invalid'
+	| 'device_code_expired'
+	| 'device_code_used'
 	// Sticker sheets (their own endpoint, not a remote function)
 	| 'sticker_config_invalid'
 	// Org logo upload (its own endpoint: a command takes no file)

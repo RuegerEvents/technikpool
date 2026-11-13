@@ -14,6 +14,12 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 	const p1 = String(params[1] ?? '');
 
 	switch (code) {
+		case 'device_code_invalid':
+			return 'This code is not valid. Check it against the one the device shows.';
+		case 'device_code_expired':
+			return 'This code has expired. Start pairing on the device again for a new one.';
+		case 'device_code_used':
+			return 'This code has already been used. Start pairing on the device again for a new one.';
 		case 'record_not_found':
 			return 'This does not exist (any more).';
 		// Authentication and permissions
