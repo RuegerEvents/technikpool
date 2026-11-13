@@ -1,5 +1,23 @@
 [
 	{
+		"version": "0.39.0",
+		"date": "2026-11-13",
+		"en": [
+			"Pairing a scanner: a mistyped, expired or already used code now says exactly that instead of \"Internal Error\", and the list of connected devices no longer fails when you signed in more than a day ago.",
+			"Case labels read better: long names are hyphenated instead of breaking one word per line, a trailing \"Kit\" or \"Bundle\" is left off the title, a short contents list prints large with its names in one column, and the org name fills the footer when there is no logo. Arrows in product names print as \"auf\".",
+			"A kit's own case is no longer listed among its contents (it can be switched back on), and the small label now carries the contents where they fit, as plain totals on one line each.",
+			"New on the large label: tiles with each product's picture, count and name instead of the list — set on the scanner with its next update.",
+			"Label previews can now be drawn by your own server (LABEL_RENDER_URL, a zebrash-api) instead of labelary.com, so a label's text no longer leaves your network and the preview appears in a fraction of a second."
+		],
+		"de": [
+			"Scanner verbinden: Ein vertippter, abgelaufener oder schon benutzter Code sagt jetzt genau das statt „Internal Error“, und die Liste der verbundenen Geräte bricht nicht mehr ab, wenn deine Anmeldung älter als ein Tag ist.",
+			"Kistenetiketten lesen sich besser: Lange Namen werden getrennt, statt ein Wort pro Zeile umzubrechen, ein angehängtes „Kit“ oder „Bundle“ fällt im Titel weg, eine kurze Inhaltsliste kommt groß und mit den Namen in einer Spalte, und ohne Logo füllt der Org-Name den Fuß. Pfeile in Produktnamen werden als „auf“ gedruckt.",
+			"Der eigene Behälter eines Kits steht nicht mehr im Inhalt (lässt sich wieder einschalten), und das kleine Etikett trägt jetzt den Inhalt, wo er passt, als schlichte Gesamtzahlen je eine Zeile.",
+			"Neu auf dem großen Etikett: Kacheln mit Bild, Anzahl und Name jedes Produkts statt der Liste — einstellbar im Scanner mit seinem nächsten Update.",
+			"Die Etikett-Vorschau kann jetzt dein eigener Server zeichnen (LABEL_RENDER_URL, eine zebrash-api) statt labelary.com: Der Etikett-Text verlässt dein Netz nicht mehr, und die Vorschau ist in Sekundenbruchteilen da."
+		]
+	},
+	{
 		"version": "0.38.0",
 		"date": "2026-11-13",
 		"en": [
