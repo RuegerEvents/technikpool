@@ -1,5 +1,29 @@
 [
 	{
+		"version": "0.38.0",
+		"date": "2026-11-13",
+		"en": [
+			"Faster everywhere equipment moves: ticking a unit on the hand-out or take-back list, scanning, moving, editing units and kits, inspections and creating units or cables no longer send the whole device and kit lists back with every click — only what the page shows. Kit, unit, product and production pages open without waiting for the full device list or catalogue, and the device list itself is less than half its size.",
+			"Still to take back: once an event is over and units of yours are still out on it, the productions list shows “Take back (n)” instead of “Pack” and the production no longer greys out, and the dashboard lists it under its own heading. This works for your own productions and the ones you lend to.",
+			"By location: “Show productions separately” puts everything that is out on a production into a column for that production instead of greyed on its shelf. A kit's card now counts its accessories, so it no longer looks smaller than it is.",
+			"Searching for an inventory number finds exactly that unit again, and its last digits find it too (“115” for 40000115). Typos are only forgiven in words, never in numbers.",
+			"Organization page in tabs: members, general, equipment (locations, value), billing (rates, services) and data. Billing details and text presets read as text until you edit them.",
+			"Cable colours: each organization sets which colour of tape marks which cable lengths. Every list shows a cable's colour as a dot, the search finds it by colour, and delivery note, packing list and customer link carry it with a legend.",
+			"Copying a kit brings its inner kits along, the kit overview names the kit an inner one sits in, and an offer can be downloaded as a PDF for the customer to sign.",
+			"Bank details, tax numbers and billing templates of an organization are only sent to its admins and owners, not to every member."
+		],
+		"de": [
+			"Schneller überall, wo Geräte bewegt werden: Abhaken auf der Ausgabe- und Rücknahmeliste, Scannen, Umlagern, Geräte und Kits bearbeiten, Prüfungen sowie Geräte oder Kabel anlegen schicken nicht mehr bei jedem Klick die ganze Geräte- und Kitliste zurück – nur, was die Seite zeigt. Kit-, Geräte-, Produkt- und Produktionsseiten öffnen, ohne auf die komplette Geräteliste oder den Katalog zu warten, und die Geräteliste selbst ist weniger als halb so groß.",
+			"Noch zurückzunehmen: Ist ein Event vorbei und sind noch Geräte von euch darauf, zeigt die Produktionsliste „Zurücknehmen (n)“ statt „Packen“ und graut die Produktion nicht mehr aus, und das Dashboard führt sie unter eigener Überschrift. Das gilt für eigene Produktionen ebenso wie für solche, an die ihr verleiht.",
+			"Nach Lagerort: „Produktionen extra anzeigen“ legt alles, was auf einer Produktion ist, in eine Spalte dieser Produktion statt ausgegraut an seinen Lagerort. Die Karte eines Kits zählt jetzt sein Zubehör mit und wirkt nicht mehr kleiner, als es ist.",
+			"Die Suche nach einer Inventarnummer findet wieder genau dieses Gerät, und auch seine letzten Ziffern finden es („115“ für 40000115). Tippfehler werden nur noch in Wörtern verziehen, nie in Zahlen.",
+			"Organisationsseite in Tabs: Mitglieder, Allgemein, Equipment (Lagerorte, Wert), Abrechnung (Sätze, Leistungen) und Daten. Abrechnungsdaten und Textvorlagen sind lesbar, bis du sie bearbeitest.",
+			"Kabelfarben: Jede Organisation legt fest, welche Klebebandfarbe welche Kabellängen kennzeichnet. Jede Liste zeigt die Farbe eines Kabels als Punkt, die Suche findet es über die Farbe, und Lieferschein, Packliste und Kundenlink führen sie mit Legende.",
+			"Ein kopiertes Kit bringt seine inneren Kits mit, die Kitübersicht nennt das Kit, in dem ein inneres steckt, und ein Angebot lässt sich als PDF zum Unterschreiben für den Kunden herunterladen.",
+			"Bankdaten, Steuernummern und Abrechnungsvorlagen einer Organisation gehen nur noch an ihre Admins und Owner, nicht mehr an jedes Mitglied."
+		]
+	},
+	{
 		"version": "0.37.0",
 		"date": "2026-11-13",
 		"en": [
