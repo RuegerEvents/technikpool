@@ -826,6 +826,16 @@ model AssetBundle {
   assets          Asset[]
   productionItems ProductionItem[]
 
+  // The kit this one sits inside (the PowerCon adapter set in the FOH case).
+  // One level deep: a kit with kits inside sits in none, and the guards for
+  // that are in services/bundles.ts. The inner kit follows the outer one's
+  // location. Units booked through the outer kit carry its id as
+  // ProductionItem.sourceBundleId; the inner kit they are in is still read off
+  // Asset.bundleId, which is how lists head them by both.
+  parentBundleId String?
+  parentBundle   AssetBundle?  @relation("NestedBundles", fields: [parentBundleId], references: [id], onDelete: SetNull)
+  childBundles   AssetBundle[] @relation("NestedBundles")
+
   // If set, offers/invoices bill this bundle as a single line at this price —
   // the individual assets in the bundle don't each need their own price.
   netPurchasePrice Decimal? @db.Decimal(10, 2)
@@ -837,6 +847,8 @@ model AssetBundle {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([parentBundleId])
 }
 
 model Production {

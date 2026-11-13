@@ -67,6 +67,21 @@ type Pick = { kind: 'product'; assetIds: string[] } | { kind: 'bundle'; bundleId
 
 export type CopyPlan = { lines: CopyLine[]; picks: Map<string, Pick> };
 
+/**
+ * A kit's units with those of the kits inside it, which a booking of the kit
+ * brings along, and the inner kits' ids.
+ */
+function withInnerAssets<A, K extends { assets: A[]; childBundles: { id: string; assets: A[] }[] }>(
+	kit: K
+) {
+	const { childBundles, ...rest } = kit;
+	return {
+		...rest,
+		assets: [...kit.assets, ...childBundles.flatMap((inner) => inner.assets)],
+		innerIds: new Set(childBundles.map((inner) => inner.id))
+	};
+}
+
 function lineMeta(category: CategoryInfo, org: OrgInfo) {
 	return {
 		categoryId: category.id,
@@ -301,18 +316,26 @@ export async function planEquipmentCopy(sourceId: string, targetId: string): Pro
 		activeTarget.map((item) => item.sourceBundleId).filter((id): id is string => id !== null)
 	);
 	const bundleValues = [...bundleLines.values()];
-	const instances = bundleValues.length
-		? await prisma.assetBundle.findMany({
-				where: { templateId: { in: [...bundleSource.values()].map((o) => o.templateId) } },
-				select: {
-					id: true,
-					templateId: true,
-					tag: true,
-					assets: { select: { id: true, status: true, parentAssetId: true } }
-				},
-				orderBy: [{ tag: { sort: 'asc', nulls: 'last' } }, { id: 'asc' }]
-			})
-		: [];
+	const instances = (
+		bundleValues.length
+			? await prisma.assetBundle.findMany({
+					where: { templateId: { in: [...bundleSource.values()].map((o) => o.templateId) } },
+					select: {
+						id: true,
+						templateId: true,
+						tag: true,
+						assets: { select: { id: true, status: true, parentAssetId: true } },
+						childBundles: {
+							select: {
+								id: true,
+								assets: { select: { id: true, status: true, parentAssetId: true } }
+							}
+						}
+					},
+					orderBy: [{ tag: { sort: 'asc', nulls: 'last' } }, { id: 'asc' }]
+				})
+			: []
+	).map(withInnerAssets);
 	const busyInKits = await busyAssetIds(
 		instances.flatMap((kit) => kit.assets.map((asset) => asset.id)),
 		target
@@ -416,13 +439,17 @@ export async function copyEquipment(
 		const pick = plan.picks.get(line.key);
 		return pick?.kind === 'bundle' ? pick.bundleIds : [];
 	});
-	const kits = await prisma.assetBundle.findMany({
-		where: { id: { in: kitIds } },
-		select: {
-			id: true,
-			assets: { select: { id: true, status: true, organizationId: true, parentAssetId: true } }
-		}
-	});
+	const unitSelect = { id: true, status: true, organizationId: true, parentAssetId: true } as const;
+	const kits = (
+		await prisma.assetBundle.findMany({
+			where: { id: { in: kitIds } },
+			select: {
+				id: true,
+				assets: { select: unitSelect },
+				childBundles: { select: { id: true, assets: { select: unitSelect } } }
+			}
+		})
+	).map(withInnerAssets);
 	const kitAssetIds = kits.flatMap((kit) => kit.assets.map((asset) => asset.id));
 	const busy = await busyAssetIds(kitAssetIds, target);
 	// Same as adding a kit by hand: a unit that cannot go is left behind, one
@@ -432,7 +459,7 @@ export async function copyEquipment(
 		for (const asset of kit.assets) {
 			const existing = inTarget.get(asset.id);
 			if (existing) {
-				if (existing.sourceBundleId === null)
+				if (existing.sourceBundleId === null || kit.innerIds.has(existing.sourceBundleId))
 					adoptions.push({ itemId: existing.id, bundleId: kit.id });
 				continue;
 			}

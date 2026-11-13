@@ -189,6 +189,21 @@ describe('caseLabelLines', () => {
 		expect(lines[1]).toEqual({ count: 3, name: 'Bracket', accessory: true, each: null });
 		expect(lines[3]).toEqual({ count: 2, name: 'Netzteil', accessory: true, each: null });
 	});
+
+	it('prints a kit inside the case as one line, ahead of its own units', () => {
+		const set = { id: 'k1', name: 'PowerCon-Set' };
+		const lines = caseLabelLines([
+			unit('a', 'Gender Changer'),
+			unit('b', 'Gender Changer'),
+			{ ...unit('p1', 'PowerCon-Adapter'), innerKit: set },
+			{ ...unit('p2', 'PowerCon-Adapter'), innerKit: set },
+			{ ...unit('p3', 'PowerCon-Kabel'), innerKit: set }
+		]);
+		expect(lines).toEqual([
+			{ count: 1, name: 'PowerCon-Set', accessory: false, each: null },
+			{ count: 2, name: 'Gender Changer', accessory: false, each: null }
+		]);
+	});
 });
 
 describe('dataMatrixModules', () => {

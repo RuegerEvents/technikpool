@@ -363,9 +363,14 @@
 			// and comparing the nested view against the flat one would report every
 			// kit that contains an accessory as diverged.
 			const sectionItems = section.items.flatMap((i) => [i, ...i.accessories]);
-			const bundleAssetIds = new Set(currentBundle.assets.map((a) => a.id));
+			// A kit inside it is booked with it, so its units are the kit's too.
+			const kitAssets = [
+				...currentBundle.assets,
+				...allBundles.filter((b) => b.parentBundleId === section.bundleId).flatMap((b) => b.assets)
+			];
+			const bundleAssetIds = new Set(kitAssets.map((a) => a.id));
 			const productionAssetIds = new Set(sectionItems.map((i) => i.assetId));
-			const addedCount = currentBundle.assets.filter((a) => !productionAssetIds.has(a.id)).length;
+			const addedCount = kitAssets.filter((a) => !productionAssetIds.has(a.id)).length;
 			const removedCount = sectionItems.filter((i) => !bundleAssetIds.has(i.assetId)).length;
 			if (addedCount > 0 || removedCount > 0) {
 				map.set(section.bundleId, { addedCount, removedCount });

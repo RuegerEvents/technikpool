@@ -17,7 +17,7 @@ class BundleScanRequest {
   
   final String code;
 
-  /// The user agreed to take the unit out of the kit it is in.
+  /// The user agreed to take the unit (or kit) out of the kit it is in.
   final bool? moveFromOtherBundle;
 
   Map<String, Object?> toJson() => _$BundleScanRequestToJson(this);

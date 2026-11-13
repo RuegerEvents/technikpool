@@ -1430,7 +1430,8 @@ class SEn extends S {
       'Only an admin of its organization can change this kit.';
 
   @override
-  String get bundleScanHint => 'Scan a device to put it in the kit';
+  String get bundleScanHint =>
+      'Scan a device, or another kit\'s tag, to put it in the kit';
 
   @override
   String get bundleNoTag => 'No tag';
@@ -1474,6 +1475,19 @@ class SEn extends S {
   @override
   String get bundleScanIsBundle =>
       'That is a kit\'s own tag. Kits do not go into kits.';
+
+  @override
+  String bundleInside(String kit) {
+    return 'Inside $kit';
+  }
+
+  @override
+  String get bundleInnerKits => 'Kits inside';
+
+  @override
+  String bundleInnerRemoveQuestion(String name) {
+    return 'Take $name out of this kit? It stays where it is, with everything in it.';
+  }
 
   @override
   String get bundleScanUnknown =>

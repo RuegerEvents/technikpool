@@ -1434,7 +1434,8 @@ class SDe extends S {
       'Nur ein Admin der Organisation kann dieses Bundle ändern.';
 
   @override
-  String get bundleScanHint => 'Gerät scannen, um es ins Bundle zu legen';
+  String get bundleScanHint =>
+      'Gerät oder Etikett eines anderen Bundles scannen, um es hineinzulegen';
 
   @override
   String get bundleNoTag => 'Ohne Etikett';
@@ -1478,6 +1479,19 @@ class SDe extends S {
   @override
   String get bundleScanIsBundle =>
       'Das ist die Nummer eines Bundles. Bundles kommen nicht in Bundles.';
+
+  @override
+  String bundleInside(String kit) {
+    return 'Steckt in $kit';
+  }
+
+  @override
+  String get bundleInnerKits => 'Enthaltene Bundles';
+
+  @override
+  String bundleInnerRemoveQuestion(String name) {
+    return '$name aus diesem Bundle herausnehmen? Es bleibt, wo es ist, mit allem, was darin ist.';
+  }
 
   @override
   String get bundleScanUnknown =>

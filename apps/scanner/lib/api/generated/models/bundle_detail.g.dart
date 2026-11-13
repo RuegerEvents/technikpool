@@ -18,8 +18,14 @@ BundleDetail _$BundleDetailFromJson(Map<String, dynamic> json) => BundleDetail(
       ? null
       : LocationRef.fromJson(json['location'] as Map<String, dynamic>),
   unitCount: (json['unitCount'] as num).toInt(),
+  parentBundle: json['parentBundle'] == null
+      ? null
+      : KitRef.fromJson(json['parentBundle'] as Map<String, dynamic>),
   units: (json['units'] as List<dynamic>)
       .map((e) => BundleUnit.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  innerBundles: (json['innerBundles'] as List<dynamic>)
+      .map((e) => InnerBundle.fromJson(e as Map<String, dynamic>))
       .toList(),
   canEdit: json['canEdit'] as bool,
 );
@@ -35,6 +41,8 @@ Map<String, dynamic> _$BundleDetailToJson(BundleDetail instance) =>
       'organizationId': instance.organizationId,
       'location': ?instance.location,
       'unitCount': instance.unitCount,
+      'parentBundle': ?instance.parentBundle,
       'units': instance.units,
+      'innerBundles': instance.innerBundles,
       'canEdit': instance.canEdit,
     };

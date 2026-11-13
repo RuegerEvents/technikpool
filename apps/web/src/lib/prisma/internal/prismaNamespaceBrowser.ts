@@ -493,6 +493,7 @@ export const AssetBundleScalarFieldEnum = {
 	templateId: 'templateId',
 	tag: 'tag',
 	locationId: 'locationId',
+	parentBundleId: 'parentBundleId',
 	netPurchasePrice: 'netPurchasePrice',
 	imagePath: 'imagePath',
 	imageFingerprint: 'imageFingerprint',

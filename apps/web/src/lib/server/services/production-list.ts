@@ -22,26 +22,36 @@ import {
 
 export type { ListGroup, ListKit, ListLine };
 
-export const KIT_SELECT = {
+const KIT_REF_SELECT = {
 	id: true,
 	tag: true,
 	template: { select: { name: true, caption: true } }
 } satisfies Prisma.AssetBundleSelect;
 
-/** A unit's kit as the list shows it — see `ListKit`. */
-export function kitOf(
-	bundle: {
-		id: string;
-		tag: string | null;
-		template: { name: string; caption: string | null };
-	} | null
-): ListKit | null {
+export const KIT_SELECT = {
+	...KIT_REF_SELECT,
+	parentBundleId: true,
+	parentBundle: { select: KIT_REF_SELECT }
+} satisfies Prisma.AssetBundleSelect;
+
+type KitRow = {
+	id: string;
+	tag: string | null;
+	template: { name: string; caption: string | null };
+};
+
+/**
+ * A unit's kit as the list shows it — see `ListKit`. A kit inside another one
+ * is headed by its own name, with the outer kit as `parent`.
+ */
+export function kitOf(bundle: (KitRow & { parentBundle?: KitRow | null }) | null): ListKit | null {
+	const ref = (kit: KitRow) => ({
+		id: kit.id,
+		name: withCaption(kit.template.name, kit.template.caption),
+		tag: kit.tag
+	});
 	return bundle
-		? {
-				id: bundle.id,
-				name: withCaption(bundle.template.name, bundle.template.caption),
-				tag: bundle.tag
-			}
+		? { ...ref(bundle), parent: bundle.parentBundle ? ref(bundle.parentBundle) : null }
 		: null;
 }
 
@@ -125,9 +135,15 @@ export function nestAndSort<
 	const byName = (a: T, b: T) =>
 		naturalCompare(a.productName, b.productName) ||
 		naturalCompare(a.assetTag ?? '', b.assetTag ?? '');
+	// A kit inside another one is placed by the outer kit, right after its
+	// own units, so the case reads top to bottom as it is packed.
+	const outer = (t: T) => t.kit?.parent ?? t.kit;
 	const byKit = (a: T, b: T) =>
-		naturalCompare(a.kit?.name ?? a.productName, b.kit?.name ?? b.productName) ||
-		naturalCompare(a.kit?.tag ?? '', b.kit?.tag ?? '') ||
+		naturalCompare(outer(a)?.name ?? a.productName, outer(b)?.name ?? b.productName) ||
+		naturalCompare(outer(a)?.tag ?? '', outer(b)?.tag ?? '') ||
+		naturalCompare(outer(a)?.id ?? '', outer(b)?.id ?? '') ||
+		Number(!!a.kit?.parent) - Number(!!b.kit?.parent) ||
+		naturalCompare(a.kit?.name ?? '', b.kit?.name ?? '') ||
 		naturalCompare(a.kit?.id ?? '', b.kit?.id ?? '');
 	const ids = new Set(items.map((i) => i.assetId));
 	const tops = items

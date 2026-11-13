@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { CameraScanButton } from '#lib/components/ui/camera-scan/index.js';
 	import { naturalCompare } from '#lib/sort.js';
-	import { makerAndName } from '#lib/product-label.js';
+	import { makerAndName, withCaption } from '#lib/product-label.js';
 	import { getErrorMessage, orgLabel, plural } from '#lib/utils.js';
 	import { canManageInventory } from '#lib/roles.js';
 	import * as Card from '#lib/components/ui/card/index.js';
@@ -18,9 +18,10 @@
 		getPlaceableLocations,
 		getBundleTemplates,
 		getBundleTypeSpec,
+		getBundles,
 		createBundleInstance
 	} from '#lib/remote/assets.remote.js';
-	import { countProducts, matchesSpec, specShortfall } from '#lib/bundle-spec.js';
+	import { bundleKey, countProducts, matchesSpec, specShortfall } from '#lib/bundle-spec.js';
 	import { getMyOrgs } from '#lib/remote/orgs.remote.js';
 	import { goto } from '$app/navigation';
 	import { resolve } from '$app/paths';
@@ -93,7 +94,34 @@
 	let specQuery = $derived(bundleType?.id ? getBundleTypeSpec(bundleType.id) : null);
 	let spec = $derived(specQuery?.current ?? null);
 	let specLines = $derived(spec?.lines ?? []);
-	let selectedCounts = $derived(countProducts(selectedAssets));
+	// A type with a kit inside (the adapter set in the FOH case) needs one in
+	// every case: the org's kits of that type that may go inside are offered.
+	let kitLines = $derived(specLines.filter((line) => line.kind === 'bundle'));
+	let orgBundlesQuery = $derived(
+		selectedOrgId && kitLines.length > 0 ? getBundles(selectedOrgId) : null
+	);
+	let orgBundles = $derived(orgBundlesQuery?.current ?? []);
+	let pickerKits = $derived(
+		orgBundles
+			.filter((b) => kitLines.some((line) => line.templateId === b.templateId))
+			// One level deep: a kit with kits of its own can't go inside.
+			.filter((b) => !orgBundles.some((o) => o.parentBundleId === b.id))
+			.map((b) => ({
+				id: b.id,
+				templateId: b.templateId,
+				name: withCaption(b.template.name, b.template.caption),
+				tag: b.tag,
+				inside: orgBundles.find((o) => o.id === b.parentBundleId) ?? null
+			}))
+	);
+	let selectedKitIds = $state<string[]>([]);
+	let selectedKits = $derived(pickerKits.filter((k) => selectedKitIds.includes(k.id)));
+	function toggleKit(id: string) {
+		selectedKitIds = selectedKitIds.includes(id)
+			? selectedKitIds.filter((k) => k !== id)
+			: [...selectedKitIds, id];
+	}
+	let selectedCounts = $derived(countProducts(selectedAssets, selectedKits));
 	let shortfall = $derived(specShortfall(specLines, selectedCounts));
 	let stillMissing = $derived(shortfall.reduce((total, line) => total + line.missing, 0));
 	let fitsType = $derived(specLines.length === 0 || matchesSpec(specLines, selectedCounts));
@@ -126,14 +154,21 @@
 	// The kits the picked units come out of, named before they are emptied.
 	let movedUnits = $derived(pickerUnits.filter((u) => u.bundle && selectedIds.includes(u.id)));
 	let movedFrom = $derived(
-		[...new Set(movedUnits.map((u) => u.bundle!.name))].sort(naturalCompare)
+		[
+			...new Set([
+				...movedUnits.map((u) => u.bundle!.name),
+				...selectedKits
+					.filter((k) => k.inside)
+					.map((k) => withCaption(k.inside!.template.name, k.inside!.template.caption))
+			])
+		].sort(naturalCompare)
 	);
 
 	// A type that is already on the shelf holds a fixed number of each product,
 	// and nothing it doesn't hold; a new type takes whatever it is given.
 	function limitFor(productId: string) {
 		if (specLines.length === 0) return Infinity;
-		return specLines.find((line) => line.productId === productId)?.quantity ?? 0;
+		return specLines.find((line) => line.key === productId)?.quantity ?? 0;
 	}
 
 	function removeSelected(id: string) {
@@ -170,6 +205,7 @@
 				categoryId: isNewBundleType ? bundleCategoryId : undefined,
 				tag: bundleTag.trim() || undefined,
 				assetIds: selectedIds,
+				bundleIds: selectedKitIds.length > 0 ? selectedKitIds : undefined,
 				moveFromOtherBundles: movedFrom.length > 0 || undefined
 			});
 			toast.success('Bundle created!');
@@ -303,7 +339,7 @@
 							{/if}
 						</p>
 						<ul class="mt-2 space-y-1 text-sm">
-							{#each shortfall as { line, have, missing } (line.productId)}
+							{#each shortfall as { line, have, missing } (line.key)}
 								<li class="flex items-center gap-2 {missing > 0 ? 'text-muted-foreground' : ''}">
 									<span class="font-mono text-xs">{have}/{line.quantity}</span>
 									<ProductThumb path={line.imagePath} alt={line.name} size={24} />
@@ -357,6 +393,48 @@
 								</tbody>
 							</table>
 						</div>
+					</div>
+				{/if}
+
+				{#if pickerKits.length > 0}
+					<div class="space-y-1">
+						<p class="text-sm font-medium">Bundles to put inside</p>
+						<ul class="divide-y rounded-md border">
+							{#each pickerKits as kit (kit.id)}
+								{@const checked = selectedKitIds.includes(kit.id)}
+								{@const full =
+									(selectedCounts.get(bundleKey(kit.templateId)) ?? 0) >=
+									limitFor(bundleKey(kit.templateId))}
+								<li>
+									<label
+										class="flex items-center gap-3 px-3 py-2 text-sm {!checked && full
+											? 'opacity-50'
+											: 'cursor-pointer'}"
+									>
+										<input
+											type="checkbox"
+											{checked}
+											disabled={!checked && full}
+											onchange={() => toggleKit(kit.id)}
+										/>
+										<span class="min-w-0 flex-1">
+											<span class="font-medium">{kit.name}</span>
+											{#if kit.tag}<span class="ml-1 font-mono text-xs text-muted-foreground"
+													>{kit.tag}</span
+												>{/if}
+											{#if kit.inside}
+												<span class="block text-xs text-muted-foreground"
+													>in {withCaption(
+														kit.inside.template.name,
+														kit.inside.template.caption
+													)}</span
+												>
+											{/if}
+										</span>
+									</label>
+								</li>
+							{/each}
+						</ul>
 					</div>
 				{/if}
 

@@ -4,6 +4,7 @@
 
 import 'package:json_annotation/json_annotation.dart';
 
+import 'kit_ref.dart';
 import 'location_ref.dart';
 
 part 'bundle_summary.g.dart';
@@ -20,6 +21,7 @@ class BundleSummary {
     required this.organizationId,
     required this.location,
     required this.unitCount,
+    required this.parentBundle,
   });
   
   factory BundleSummary.fromJson(Map<String, Object?> json) => _$BundleSummaryFromJson(json);
@@ -37,8 +39,11 @@ class BundleSummary {
   /// The kit's own location; null for one that is wherever its units are.
   final LocationRef? location;
 
-  /// Units in it, not counting accessories.
+  /// Units in it, not counting accessories or the units of kits inside it.
   final int unitCount;
+
+  /// The kit this one sits inside, if any. Kits nest one level deep.
+  final KitRef? parentBundle;
 
   Map<String, Object?> toJson() => _$BundleSummaryToJson(this);
 }

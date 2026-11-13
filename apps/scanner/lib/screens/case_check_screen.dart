@@ -390,14 +390,34 @@ class _CaseCheckScreenState extends ConsumerState<CaseCheckScreen> {
             ),
           ),
         const Divider(),
-        for (final item in check.items)
+        for (final (index, item) in check.items.indexed) ...[
+          // A kit inside the case is expanded under its own name, after the
+          // case's own units.
+          if (item.innerKit case final kit?
+              when index == 0 || check.items[index - 1].innerKit?.id != kit.id)
+            Padding(
+              padding: const EdgeInsets.fromLTRB(16, 12, 16, 4),
+              child: Row(
+                children: [
+                  const Icon(Icons.inventory_2_outlined, size: 18),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      [kit.name, ?kit.tag].join(' · '),
+                      style: const TextStyle(fontWeight: FontWeight.w600),
+                    ),
+                  ),
+                ],
+              ),
+            ),
           CheckboxListTile(
             value: _found.contains(item.assetId),
             onChanged: _result == null ? (_) => _toggle(item) : null,
             controlAffinity: ListTileControlAffinity.leading,
             dense: true,
             contentPadding: EdgeInsets.only(
-              left: item.accessoryOf == null ? 8 : 40,
+              left:
+                  (item.accessoryOf == null ? 8 : 40) + (item.innerKit == null ? 0 : 16),
               right: 16,
             ),
             title: Text(item.name, style: const TextStyle(fontWeight: FontWeight.w600)),
@@ -410,6 +430,7 @@ class _CaseCheckScreenState extends ConsumerState<CaseCheckScreen> {
               ].join(' · '),
             ),
           ),
+        ],
         if (_foreign.isNotEmpty) ...[
           const Divider(),
           Padding(

@@ -1357,14 +1357,17 @@ export interface paths {
         get?: never;
         put?: never;
         /**
-         * Put a scanned unit into the kit
+         * Put a scanned unit, or another kit, into the kit
          * @description A unit's tag or unique serial number puts the unit in; an accessory's
-         *     puts in the unit it hangs off. A unit in another kit is moved only with
-         *     `moveFromOtherBundle` — without it the answer is `in_other_bundle`,
-         *     naming that kit, so the client can ask first. A bundle's own tag is
-         *     `is_bundle`: kits do not go into kits. Answers 200 for every outcome;
-         *     an error status means the unit could not go in (retired, unavailable,
-         *     no room in the bundle type).
+         *     puts in the unit it hangs off. Another bundle's tag puts that bundle
+         *     inside this one (`scannedBundle` names it), one level deep: a bundle
+         *     that sits inside another, or one that holds bundles itself, cannot take
+         *     part, and neither can a bundle go inside itself — those answer 409. A
+         *     unit or bundle in another kit is moved only with `moveFromOtherBundle`
+         *     — without it the answer is `in_other_bundle`, naming that kit, so the
+         *     client can ask first. Answers 200 for every outcome; an error status
+         *     means it could not go in (retired, unavailable, no room in the bundle
+         *     type, the nesting rules).
          */
         post: operations["scanIntoBundle"];
         delete?: never;
@@ -1388,6 +1391,26 @@ export interface paths {
          * @description Its accessories leave with it. The unit stays where it is.
          */
         delete: operations["removeFromBundle"];
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/bundles/{bundleId}/bundles/{innerBundleId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        /**
+         * Take a kit out of the kit it sits in
+         * @description The inner kit stays where it is, with everything in it.
+         */
+        delete: operations["removeBundleFromBundle"];
         options?: never;
         head?: never;
         patch?: never;
@@ -2080,13 +2103,17 @@ export interface components {
         /**
          * @description The kit a unit on a list is in. A kit's units arrive one after another
          *     within their section, so a client starts a kit heading whenever it
-         *     changes. An accessory carries its parent's kit.
+         *     changes. An accessory carries its parent's kit. A kit inside another
+         *     kit is a kit of its own here, with `parent` set, and its units follow
+         *     the outer kit's.
          */
         ListKit: {
             id: string;
             /** @description The kit's name with its caption. */
             name: string;
             tag: string | null;
+            /** @description The kit this one sits inside, if any. */
+            parent?: components["schemas"]["KitRef"] | null;
         };
         ScanGroup: {
             /**
@@ -2533,6 +2560,12 @@ export interface components {
              *     counts as away, not missing.
              */
             awayOn: string | null;
+            /**
+             * @description The kit inside the case that this unit is in (the adapter set in the
+             *     FOH case). Its units come after the case's own, one kit after
+             *     another, so a client starts a sub-heading whenever it changes.
+             */
+            innerKit?: components["schemas"]["KitRef"] | null;
         };
         CaseCheck: {
             kind: components["schemas"]["CaseKind"];
@@ -2543,10 +2576,14 @@ export interface components {
             name: string;
             /** @description The production the case as a whole is out on, if any. */
             checkedOutTo: string | null;
-            /** @description What the case should hold, each unit followed by its accessories. */
+            /**
+             * @description What the case should hold, each unit followed by its accessories:
+             *     the case's own units first, then those of each kit inside it.
+             */
             items: components["schemas"]["CaseCheckItem"][];
             /**
-             * @description Kits only: products other cases of the same kit type hold more of.
+             * @description Kits only: products (and kits inside, by type) other cases of the
+             *     same kit type hold more of.
              *     A unit taken out of the kit for good is no longer on the list, so
              *     this is the only place it shows.
              */
@@ -2871,6 +2908,26 @@ export interface components {
             organizationId: string;
             /** @description The kit's own location; null for one that is wherever its units are. */
             location: components["schemas"]["LocationRef"] | null;
+            /** @description Units in it, not counting accessories or the units of kits inside it. */
+            unitCount: number;
+            /** @description The kit this one sits inside, if any. Kits nest one level deep. */
+            parentBundle: components["schemas"]["KitRef"] | null;
+        };
+        /** @description A kit, named for a heading or a link. */
+        KitRef: {
+            id: string;
+            /** @description The kit's name with its caption. */
+            name: string;
+            tag: string | null;
+        };
+        /** @description A kit that sits inside another one. */
+        InnerBundle: {
+            id: string;
+            /** @description The bundle type's name. */
+            name: string;
+            caption: string | null;
+            tag: string | null;
+            imageUrl: string | null;
             /** @description Units in it, not counting accessories. */
             unitCount: number;
         };
@@ -2896,8 +2953,13 @@ export interface components {
             checkedOutTo: string | null;
         };
         BundleDetail: components["schemas"]["BundleSummary"] & {
-            /** @description Each unit followed by its accessories, by product name. */
+            /**
+             * @description Each unit followed by its accessories, by product name. The
+             *     units of kits inside it are theirs, not listed here.
+             */
             units: components["schemas"]["BundleUnit"][];
+            /** @description The kits that sit inside this one, by name. */
+            innerBundles: components["schemas"]["InnerBundle"][];
             /** @description Whether the caller may change what it holds (ADMIN or above). */
             canEdit: boolean;
         };
@@ -2911,15 +2973,22 @@ export interface components {
         };
         BundleScanRequest: {
             code: string;
-            /** @description The user agreed to take the unit out of the kit it is in. */
+            /** @description The user agreed to take the unit (or kit) out of the kit it is in. */
             moveFromOtherBundle?: boolean;
         };
-        /** @enum {string} */
+        /**
+         * @description `is_bundle` is no longer sent: a bundle's tag now puts that bundle
+         *     inside (`scannedBundle`). It stays in the list for older clients.
+         * @enum {string}
+         */
         BundleScanOutcome: "added" | "already_in" | "in_other_bundle" | "not_found" | "ambiguous" | "is_bundle";
         BundleScanResult: {
             outcome: components["schemas"]["BundleScanOutcome"];
+            /** @description The unit that went in (or already was). Null for a kit. */
             assetId?: string | null;
-            /** @description With `in_other_bundle`, the kit the unit is in now. */
+            /** @description When the code was another kit's tag, that kit. */
+            scannedBundle?: components["schemas"]["LocationRef"] | null;
+            /** @description With `in_other_bundle`, the kit the unit (or scanned kit) is in now. */
             otherBundle?: components["schemas"]["LocationRef"] | null;
             bundle: components["schemas"]["BundleDetail"];
         };
@@ -5007,6 +5076,32 @@ export interface operations {
         requestBody?: never;
         responses: {
             /** @description The kit as it is now */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["BundleDetail"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+        };
+    };
+    removeBundleFromBundle: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                bundleId: components["parameters"]["BundleId"];
+                innerBundleId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The outer kit as it is now */
             200: {
                 headers: {
                     [name: string]: unknown;

@@ -16,15 +16,21 @@ class BundleScanResult {
     required this.outcome,
     required this.bundle,
     this.assetId,
+    this.scannedBundle,
     this.otherBundle,
   });
   
   factory BundleScanResult.fromJson(Map<String, Object?> json) => _$BundleScanResultFromJson(json);
   
   final BundleScanOutcome outcome;
+
+  /// The unit that went in (or already was). Null for a kit.
   final String? assetId;
 
-  /// With `in_other_bundle`, the kit the unit is in now.
+  /// When the code was another kit's tag, that kit.
+  final LocationRef? scannedBundle;
+
+  /// With `in_other_bundle`, the kit the unit (or scanned kit) is in now.
   final LocationRef? otherBundle;
   final BundleDetail bundle;
 

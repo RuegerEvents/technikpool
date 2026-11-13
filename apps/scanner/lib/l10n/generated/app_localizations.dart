@@ -2452,7 +2452,7 @@ abstract class S {
   /// No description provided for @bundleScanHint.
   ///
   /// In en, this message translates to:
-  /// **'Scan a device to put it in the kit'**
+  /// **'Scan a device, or another kit\'s tag, to put it in the kit'**
   String get bundleScanHint;
 
   /// No description provided for @bundleNoTag.
@@ -2508,6 +2508,24 @@ abstract class S {
   /// In en, this message translates to:
   /// **'That is a kit\'s own tag. Kits do not go into kits.'**
   String get bundleScanIsBundle;
+
+  /// No description provided for @bundleInside.
+  ///
+  /// In en, this message translates to:
+  /// **'Inside {kit}'**
+  String bundleInside(String kit);
+
+  /// No description provided for @bundleInnerKits.
+  ///
+  /// In en, this message translates to:
+  /// **'Kits inside'**
+  String get bundleInnerKits;
+
+  /// No description provided for @bundleInnerRemoveQuestion.
+  ///
+  /// In en, this message translates to:
+  /// **'Take {name} out of this kit? It stays where it is, with everything in it.'**
+  String bundleInnerRemoveQuestion(String name);
 
   /// No description provided for @bundleScanUnknown.
   ///

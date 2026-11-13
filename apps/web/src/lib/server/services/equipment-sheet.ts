@@ -3,7 +3,8 @@ import type { Prisma } from '#lib/prisma/client.js';
 import { naturalCompare } from '#lib/sort.js';
 import { prisma } from '#lib/server/auth.js';
 import { summarizeContents } from '#lib/billing-lines.js';
-import { productLabel } from '#lib/product-label.js';
+import { productLabel, withCaption } from '#lib/product-label.js';
+import { inBookedKit } from '#lib/bundle-nesting.js';
 import { customerRecipient, orgLabel } from '#lib/utils.js';
 import { ACTIVE_ASSET_WHERE, BOOKABLE_ASSET_WHERE } from '#lib/asset-status.js';
 import { ROLE_FOR } from '#lib/roles.js';
@@ -33,6 +34,20 @@ import {
 
 const ORG_INCLUDE = { address: true } as const;
 
+/** What a sheet needs to know about a kit: its picture, type and location. */
+const BUNDLE_INCLUDE = {
+	location: { select: { name: true } },
+	template: {
+		include: { category: true, featuredProducts: { select: { id: true } } }
+	},
+	assets: {
+		select: {
+			parentAssetId: true,
+			product: { select: { id: true, imagePath: true } }
+		}
+	}
+} satisfies Prisma.AssetBundleInclude;
+
 /** What a sheet needs to know about a unit: its picture, kit and accessories. */
 const ASSET_INCLUDE = {
 	product: { include: { manufacturer: true, category: true } },
@@ -45,19 +60,10 @@ const ASSET_INCLUDE = {
 	accessories: { include: { product: true } },
 	location: { select: { name: true } },
 	organization: { select: { name: true, shortName: true } },
+	// A unit of a kit inside another one is listed on the outer kit's line
+	// when it was booked through it, under the inner kit's name.
 	bundle: {
-		include: {
-			location: { select: { name: true } },
-			template: {
-				include: { category: true, featuredProducts: { select: { id: true } } }
-			},
-			assets: {
-				select: {
-					parentAssetId: true,
-					product: { select: { id: true, imagePath: true } }
-				}
-			}
-		}
+		include: { ...BUNDLE_INCLUDE, parentBundle: { include: BUNDLE_INCLUDE } }
 	}
 } satisfies Prisma.AssetInclude;
 
@@ -96,7 +102,7 @@ type Unit = {
 	sourceBundleId: string | null;
 	asset: Prisma.AssetGetPayload<{ include: typeof ASSET_INCLUDE }>;
 };
-type Bundle = NonNullable<Unit['asset']['bundle']>;
+type Bundle = Prisma.AssetBundleGetPayload<{ include: typeof BUNDLE_INCLUDE }>;
 type Org = Production['organization'];
 
 function categoryName(category: { name: string; nameDe: string | null }) {
@@ -290,16 +296,20 @@ async function sheetGroups(
 		line.units.push(...units);
 	};
 
-	const bundles = new Map<string, Unit[]>();
+	const bundles = new Map<string, { bundle: Bundle; items: Unit[] }>();
 	for (const item of loose) {
 		// Booking source, not current membership, and only while the unit is
-		// still in that bundle — the same rule billing uses for a kit line.
-		const bundle =
-			item.sourceBundleId !== null && item.asset.bundleId === item.sourceBundleId
+		// still in that bundle — the same rule billing uses for a kit line. A
+		// unit of a kit inside the booked one is on the outer kit's line.
+		const bundle = inBookedKit(item)
+			? item.asset.bundleId === item.sourceBundleId
 				? item.asset.bundle
-				: null;
+				: (item.asset.bundle?.parentBundle ?? null)
+			: null;
 		if (bundle) {
-			bundles.set(bundle.id, [...(bundles.get(bundle.id) ?? []), item]);
+			const entry = bundles.get(bundle.id) ?? { bundle, items: [] };
+			entry.items.push(item);
+			bundles.set(bundle.id, entry);
 			continue;
 		}
 		const asset = item.asset;
@@ -327,9 +337,8 @@ async function sheetGroups(
 			[asset, ...accessories.map((a) => a.asset)]
 		);
 	}
-	for (const bundleItems of bundles.values()) {
-		const bundle = bundleItems[0].asset.bundle!;
-		const contents = summarizeContents(bundleItems.flatMap(contentsOf));
+	for (const { bundle, items: bundleItems } of bundles.values()) {
+		const contents = kitContents(bundle.id, bundleItems, contentsOf);
 		const group = grouping.ofBundle(bundle, bundleItems[0]);
 		add(
 			`${groupKey(group)}|bundle:${bundle.templateId}|${contents}`,
@@ -337,7 +346,7 @@ async function sheetGroups(
 				group,
 				units: [],
 				label: bundle.template.name,
-				subtitle: `bestehend aus: ${contents}`,
+				subtitle: contents,
 				identifiers: [],
 				quantity: 0,
 				unitPrice: pricing ? pricing.bundle(bundle, bundleItems) : undefined,
@@ -399,6 +408,33 @@ async function sheetGroups(
 					naturalCompare(a.label, b.label) || naturalCompare(a.subtitle ?? '', b.subtitle ?? '')
 			)
 		}));
+}
+
+/**
+ * "bestehend aus: …" for a kit's line. A kit inside it is expanded below, one
+ * line each with the inner kit's name as its heading:
+ *
+ *     bestehend aus: 4× Gender Changer
+ *     PowerCon-Set: 2× PowerCon-Adapter, PowerCon-Kabel
+ */
+function kitContents(bundleId: string, items: Unit[], contentsOf: (item: Unit) => string[]) {
+	const own = items.filter((item) => item.asset.bundleId === bundleId);
+	const inner = new Map<string, { name: string; items: Unit[] }>();
+	for (const item of items) {
+		if (item.asset.bundleId === bundleId || !item.asset.bundle) continue;
+		const kit = item.asset.bundle;
+		const entry = inner.get(kit.id) ?? {
+			name: withCaption(kit.template.name, kit.template.caption),
+			items: []
+		};
+		entry.items.push(item);
+		inner.set(kit.id, entry);
+	}
+	const head = `bestehend aus:${own.length ? ` ${summarizeContents(own.flatMap(contentsOf))}` : ''}`;
+	const subs = [...inner.values()]
+		.sort((a, b) => naturalCompare(a.name, b.name))
+		.map((kit) => `${kit.name}: ${summarizeContents(kit.items.flatMap(contentsOf))}`);
+	return [head, ...subs].join('\n');
 }
 
 function addressLines(address: Production['address']) {
@@ -604,7 +640,8 @@ async function orgListSheet(
 	// A kit's line holds the units that are in it now.
 	const units = assets.map((asset) => ({
 		assetId: asset.id,
-		sourceBundleId: asset.bundleId,
+		// A kit inside another one is listed on the outer kit's line.
+		sourceBundleId: asset.bundle?.parentBundleId ?? asset.bundleId,
 		asset
 	}));
 	const groups = await sheetGroups(

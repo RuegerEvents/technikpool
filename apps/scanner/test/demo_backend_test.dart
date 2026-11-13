@@ -826,6 +826,14 @@ void main() {
   group('bundles', () {
     final kitId = DemoData.cableKit.id;
 
+    Matcher failsWith(String code) => throwsA(
+      isA<Object>().having(
+        (e) => (unwrapError(e) as ApiException).code,
+        'code',
+        code,
+      ),
+    );
+
     test('lists the kit, finds it by what is in it, and opens it', () async {
       final all = await api.bundles.listBundles();
       expect(all.map((b) => b.id), contains(kitId));
@@ -860,11 +868,14 @@ void main() {
       );
       expect(unknown.outcome, BundleScanOutcome.notFound);
 
-      final itself = await api.bundles.scanIntoBundle(
-        bundleId: kitId,
-        body: BundleScanRequest(code: DemoData.cableKit.tag),
+      // A kit does not go inside itself.
+      await expectLater(
+        api.bundles.scanIntoBundle(
+          bundleId: kitId,
+          body: BundleScanRequest(code: DemoData.cableKit.tag),
+        ),
+        failsWith('conflict'),
       );
-      expect(itself.outcome, BundleScanOutcome.isBundle);
 
       // A second kit: the unit is in the first, so it is moved only on request.
       final other = await api.bundles.createBundle(
@@ -899,6 +910,48 @@ void main() {
         assetId: 'asset_demo_40000004',
       );
       expect(out.units, isEmpty);
+    });
+
+    test('a kit\'s sticker puts that kit inside, one level deep', () async {
+      final set = await api.bundles.createBundle(
+        body: const BundleCreateRequest(
+          organizationId: 'org_demo_nordlicht',
+          name: 'PowerCon-Set',
+          categoryId: 'catg_demo_light',
+          tag: 'K-0003',
+        ),
+      );
+      final added = await api.bundles.scanIntoBundle(
+        bundleId: kitId,
+        body: const BundleScanRequest(code: 'K-0003'),
+      );
+      expect(added.outcome, BundleScanOutcome.added);
+      expect(added.scannedBundle?.id, set.id);
+      expect(added.bundle.innerBundles.single.name, 'PowerCon-Set');
+      final inner = await api.bundles.getBundle(bundleId: set.id);
+      expect(inner.parentBundle?.id, kitId);
+
+      final again = await api.bundles.scanIntoBundle(
+        bundleId: kitId,
+        body: const BundleScanRequest(code: 'K-0003'),
+      );
+      expect(again.outcome, BundleScanOutcome.alreadyIn);
+
+      // Two levels deep is refused both ways round.
+      await expectLater(
+        api.bundles.scanIntoBundle(
+          bundleId: set.id,
+          body: BundleScanRequest(code: DemoData.cableKit.tag),
+        ),
+        failsWith('conflict'),
+      );
+
+      final out = await api.bundles.removeBundleFromBundle(
+        bundleId: kitId,
+        innerBundleId: set.id,
+      );
+      expect(out.innerBundles, isEmpty);
+      expect((await api.bundles.getBundle(bundleId: set.id)).parentBundle, isNull);
     });
 
     test('loose cables go in by name, untagged first', () async {

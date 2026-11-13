@@ -10,7 +10,7 @@ import {
 	requiredInspectionTypes
 } from '#lib/inspection-due.js';
 import { portRequirement } from '#lib/ports.js';
-import { bundleLabel } from '#lib/product-label.js';
+import { bundleLabel, withCaption } from '#lib/product-label.js';
 import { withCableNames } from '#lib/server/services/cable-ends.js';
 import {
 	itemState,
@@ -561,7 +561,8 @@ export function toCaseCheck(check: CaseCheck, scannedAssetId: string | null): Sc
 			name: i.name,
 			caption: i.caption,
 			accessoryOf: i.accessoryOf,
-			awayOn: i.awayOn
+			awayOn: i.awayOn,
+			innerKit: i.innerKit
 		})),
 		shortOfType: check.shortOfType.map((l) => ({ name: l.name, missing: l.missing })),
 		lastCheck: check.lastCheck && {
@@ -697,11 +698,22 @@ export function toConnector(
 
 // ── Bundles ─────────────────────────────────────────────────────────────────
 
+type KitRefRow = {
+	id: string;
+	tag: string | null;
+	template: { name: string; caption: string | null };
+};
+
+export function toKitRef(kit: KitRefRow): Schemas['KitRef'] {
+	return { id: kit.id, name: withCaption(kit.template.name, kit.template.caption), tag: kit.tag };
+}
+
 type BundleSummaryRow = {
 	id: string;
 	tag: string | null;
 	imagePath: string | null;
 	location: { id: string; name: string } | null;
+	parentBundle: KitRefRow | null;
 	template: {
 		name: string;
 		caption: string | null;
@@ -723,7 +735,8 @@ export function toBundleSummary(
 		categoryName: bundle.template.category.name,
 		organizationId: bundle.template.organizationId,
 		location: bundle.location ? { id: bundle.location.id, name: bundle.location.name } : null,
-		unitCount
+		unitCount,
+		parentBundle: bundle.parentBundle ? toKitRef(bundle.parentBundle) : null
 	};
 }
 
@@ -763,8 +776,14 @@ function toBundleUnit(unit: BundleUnitRow): Schemas['BundleUnit'] {
 	};
 }
 
+type InnerBundleRow = KitRefRow & { imagePath: string | null; unitCount: number };
+
 export function toBundleDetail(
-	bundle: BundleSummaryRow & { assets: BundleUnitRow[]; canEdit: boolean }
+	bundle: BundleSummaryRow & {
+		assets: BundleUnitRow[];
+		innerBundles: InnerBundleRow[];
+		canEdit: boolean;
+	}
 ): Schemas['BundleDetail'] {
 	const units = bundle.assets.filter((a) => !a.parentAssetId);
 	const byName = (a: BundleUnitRow, b: BundleUnitRow) =>
@@ -780,6 +799,14 @@ export function toBundleDetail(
 	return {
 		...toBundleSummary(bundle, units.length),
 		units: ordered.map(toBundleUnit),
+		innerBundles: bundle.innerBundles.map((kit) => ({
+			id: kit.id,
+			name: kit.template.name,
+			caption: kit.template.caption,
+			tag: kit.tag,
+			imageUrl: imageSrc(kit.imagePath),
+			unitCount: kit.unitCount
+		})),
 		canEdit: bundle.canEdit
 	};
 }

@@ -38,6 +38,8 @@
 		getPlaceableLocations,
 		addAssetsToBundle,
 		removeAssetFromBundle,
+		removeInnerBundle,
+		getBundles,
 		updateBundleTemplate,
 		updateBundle,
 		regenerateBundleImage,
@@ -67,7 +69,10 @@
 		type PickerUnit
 	} from '#lib/components/ui/unit-picker/index.js';
 	import { isBookableStatus } from '#lib/asset-status.js';
-	import { countProducts, roomFor, specShortfall } from '#lib/bundle-spec.js';
+	import { bundleKey, countProducts, roomFor, specShortfall } from '#lib/bundle-spec.js';
+	import { nestingRefusal } from '#lib/bundle-nesting.js';
+	import { withCaption } from '#lib/product-label.js';
+	import InventoryListMenu from './inventory-list-menu.svelte';
 
 	// Mirrors MAX_BUNDLE_COPIES on the command, which refuses anything above it.
 	const MAX_COPIES = 20;
@@ -345,7 +350,12 @@
 	let typeSpec = $derived(await getBundleTypeSpec(bundle.templateId));
 	// A type's only case *is* the type: there is nothing for it to match.
 	let specLines = $derived(typeSpec.instanceCount > 1 ? typeSpec.lines : []);
-	let memberCounts = $derived(countProducts(bundle.assets.filter((a) => a.parentAssetId === null)));
+	let memberCounts = $derived(
+		countProducts(
+			bundle.assets.filter((a) => a.parentAssetId === null),
+			bundle.childBundles
+		)
+	);
 	let shortfall = $derived(specShortfall(specLines, memberCounts));
 	let missingUnits = $derived(shortfall.reduce((total, line) => total + line.missing, 0));
 	let specTotal = $derived(specLines.reduce((total, line) => total + line.quantity, 0));
@@ -411,6 +421,76 @@
 		return roomFor(specLines, memberCounts, productId);
 	}
 	let pickedIds = $state<string[]>([]);
+
+	// ── Kits inside this one ─────────────────────────────────────────────────
+	// A kit can hold other kits of its org, one level deep (the adapter set in
+	// the FOH case). The picker offers them beside the units, under the same
+	// rules the server applies, and a kit sitting in another case is offered
+	// marked as such: picking it moves it, as it moves a unit.
+	let orgBundles = $derived(showAddModal ? await getBundles(bundleOrgId) : []);
+	let pickerKits = $derived.by(() => {
+		const childCount = (id: string) => orgBundles.filter((b) => b.parentBundleId === id).length;
+		const outer = {
+			id: bundle.id,
+			organizationId: bundleOrgId,
+			parentBundleId: bundle.parentBundleId,
+			childCount: bundle.childBundles.length
+		};
+		return orgBundles
+			.filter((b) => b.parentBundleId !== bundle.id)
+			.filter(
+				(b) =>
+					!nestingRefusal(outer, {
+						id: b.id,
+						organizationId: b.template.organizationId,
+						parentBundleId: b.parentBundleId,
+						childCount: childCount(b.id)
+					})
+			)
+			.filter(
+				(b) =>
+					changeType ||
+					specLines.length === 0 ||
+					roomFor(specLines, memberCounts, bundleKey(b.templateId)) > 0
+			)
+			.map((b) => ({
+				id: b.id,
+				name: withCaption(b.template.name, b.template.caption),
+				tag: b.tag,
+				imagePath: b.imagePath,
+				unitCount: b.assets.filter((a) => !a.parentAssetId).length,
+				inside: orgBundles.find((o) => o.id === b.parentBundleId) ?? null
+			}));
+	});
+	let pickedKitIds = $state<string[]>([]);
+	$effect(() => {
+		const offered = new Set(pickerKits.map((k) => k.id));
+		const kept = pickedKitIds.filter((id) => offered.has(id));
+		if (kept.length !== pickedKitIds.length) pickedKitIds = kept;
+	});
+	let movedKitsFrom = $derived(
+		pickerKits
+			.filter((k) => k.inside && pickedKitIds.includes(k.id))
+			.map((k) => withCaption(k.inside!.template.name, k.inside!.template.caption))
+	);
+	function toggleKit(id: string) {
+		pickedKitIds = pickedKitIds.includes(id)
+			? pickedKitIds.filter((k) => k !== id)
+			: [...pickedKitIds, id];
+	}
+	let pickedTotal = $derived(pickedIds.length + pickedKitIds.length);
+
+	async function handleRemoveInner(innerBundleId: string) {
+		working = true;
+		try {
+			await removeInnerBundle({ bundleId, innerBundleId });
+			toast.success('Bundle taken out');
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			working = false;
+		}
+	}
 	// The kits the picked units come out of, named before they are emptied.
 	let movedFrom = $derived(
 		[
@@ -449,19 +529,23 @@
 	}
 
 	async function handleAdd() {
-		if (pickedIds.length === 0) return;
+		if (pickedTotal === 0) return;
 		working = true;
 		try {
 			await addAssetsToBundle({
 				bundleId,
 				assetIds: pickedIds,
+				bundleIds: pickedKitIds.length > 0 ? pickedKitIds : undefined,
 				allowTypeChange: changeType || undefined,
-				moveFromOtherBundles: movedFrom.length > 0 || undefined
+				moveFromOtherBundles: movedFrom.length + movedKitsFrom.length > 0 || undefined
 			});
 			toast.success(
-				plural(pickedIds.length, ['Device added to bundle', '# devices added to bundle'])
+				pickedIds.length > 0
+					? plural(pickedIds.length, ['Device added to bundle', '# devices added to bundle'])
+					: plural(pickedKitIds.length, ['Bundle put inside', '# bundles put inside'])
 			);
 			pickedIds = [];
+			pickedKitIds = [];
 			showAddModal = false;
 		} catch (err) {
 			toast.error(getErrorMessage(err));
@@ -551,18 +635,25 @@
 								<Tag class="size-3 text-muted-foreground" />{bundle.tag}
 							</span>
 						{/if}
+						{#if bundle.parentBundle}
+							<a
+								href={resolve(`assets/bundles/${bundle.parentBundle.id}`)}
+								class="inline-flex items-center gap-1 rounded-md border px-2 py-0.5 text-xs transition-colors hover:bg-muted"
+							>
+								<Layers class="size-3 text-muted-foreground" />
+								<span
+									>Inside {withCaption(
+										bundle.parentBundle.template.name,
+										bundle.parentBundle.template.caption
+									)}{bundle.parentBundle.tag ? ` (${bundle.parentBundle.tag})` : ''}</span
+								>
+							</a>
+						{/if}
 					</div>
 				</div>
 				<div class="flex flex-wrap gap-2">
 					<Button icon="edit" variant="outline" onclick={() => (editingBundle = true)}>Edit</Button>
-					<Button
-						icon="print"
-						variant="outline"
-						href={resolve(`assets/bundles/${bundleId}/inventory-list`)}
-						target="_blank"
-					>
-						Print Inventory List
-					</Button>
+					<InventoryListMenu {bundleId} />
 					<Button variant="outline" href={`${resolve('case-check')}?bundle=${bundleId}`}
 						>Check case</Button
 					>
@@ -676,6 +767,11 @@
 			<dl class="mt-auto grid gap-4 border-t pt-4 sm:grid-cols-3">
 				<Fact icon={Boxes} label="Devices">
 					{mainDeviceCount}
+					{#if bundle.childBundles.length > 0}
+						<span class="font-normal text-muted-foreground">
+							+ {plural(bundle.childBundles.length, ['1 bundle', '# bundles'])}
+						</span>
+					{/if}
 					{#if accessoryCount > 0}
 						<span class="font-normal text-muted-foreground">
 							+ {plural(accessoryCount, ['1 accessory', '# accessories'])}
@@ -721,6 +817,45 @@
 			</dl>
 		</div>
 	</div>
+
+	{#if bundle.childBundles.length > 0}
+		<!-- Kits inside this one: each a row linking to it, taken out like a unit. -->
+		<Card.Root>
+			<Card.Header>
+				<Card.Title>Bundles inside</Card.Title>
+				<Card.Description>Packed in this case and booked with it.</Card.Description>
+			</Card.Header>
+			<Card.Content class="px-0">
+				<ul class="divide-y border-y">
+					{#each bundle.childBundles as inner (inner.id)}
+						<li class="flex items-center gap-3 px-6 py-3 text-sm">
+							<ProductThumb
+								path={inner.imagePath}
+								alt={withCaption(inner.template.name, inner.template.caption)}
+							/>
+							<div class="min-w-0 flex-1">
+								<a
+									href={resolve(`assets/bundles/${inner.id}`)}
+									class="font-medium underline-offset-2 hover:underline"
+									>{withCaption(inner.template.name, inner.template.caption)}</a
+								>
+								<p class="text-xs text-muted-foreground">
+									{#if inner.tag}<span class="font-mono">{inner.tag}</span> ·{/if}
+									{plural(inner.assets.length, ['1 device', '# devices'])}
+								</p>
+							</div>
+							<Button
+								size="sm"
+								variant="outline"
+								disabled={working}
+								onclick={() => handleRemoveInner(inner.id)}>Remove</Button
+							>
+						</li>
+					{/each}
+				</ul>
+			</Card.Content>
+		</Card.Root>
+	{/if}
 
 	<!-- Contained assets -->
 	<!-- The card clips to its rounded corners, cutting off any picker that
@@ -1120,6 +1255,35 @@
 				<span>Also show other organizations' units</span>
 			</label>
 		{/if}
+		{#if pickerKits.length > 0}
+			<div class="mb-3 space-y-1">
+				<p class="text-xs font-medium text-muted-foreground">Bundles to put inside</p>
+				<ul class="divide-y rounded-md border">
+					{#each pickerKits as kit (kit.id)}
+						<li>
+							<label class="flex cursor-pointer items-center gap-3 px-3 py-2 text-sm">
+								<input
+									type="checkbox"
+									checked={pickedKitIds.includes(kit.id)}
+									onchange={() => toggleKit(kit.id)}
+								/>
+								<ProductThumb path={kit.imagePath} alt={kit.name} />
+								<span class="min-w-0 flex-1">
+									<span class="font-medium">{kit.name}</span>
+									{#if kit.tag}<span class="ml-1 font-mono text-xs text-muted-foreground"
+											>{kit.tag}</span
+										>{/if}
+									<span class="block text-xs text-muted-foreground">
+										{plural(kit.unitCount, ['1 device', '# devices'])}{#if kit.inside}
+											· in {withCaption(kit.inside.template.name, kit.inside.template.caption)}{/if}
+									</span>
+								</span>
+							</label>
+						</li>
+					{/each}
+				</ul>
+			</div>
+		{/if}
 		<UnitPicker
 			units={pickerUnits}
 			bind:selected={pickedIds}
@@ -1137,6 +1301,17 @@
 				{movedFrom.join(', ')}
 			</p>
 		{/if}
+		{#if movedKitsFrom.length > 0}
+			<p
+				class="mt-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900 dark:border-amber-700 dark:bg-amber-950/40 dark:text-amber-200"
+			>
+				{plural(movedKitsFrom.length, [
+					'1 bundle is taken out of the case it is in:',
+					'# bundles are taken out of the cases they are in:'
+				])}
+				{movedKitsFrom.join(', ')}
+			</p>
+		{/if}
 
 		<!-- The catalogue, under the units. Everything above is a unit standing
 		     loose in the warehouse; below is every product the system knows, so a
@@ -1151,8 +1326,12 @@
 		/>
 	{/snippet}
 	{#snippet footer()}
-		<Button icon="add" disabled={working || pickedIds.length === 0} onclick={handleAdd}>
-			{pickedIds.length === 0 ? 'Add' : plural(pickedIds.length, ['Add 1 device', 'Add # devices'])}
+		<Button icon="add" disabled={working || pickedTotal === 0} onclick={handleAdd}>
+			{pickedTotal === 0
+				? 'Add'
+				: pickedKitIds.length === 0
+					? plural(pickedIds.length, ['Add 1 device', 'Add # devices'])
+					: plural(pickedTotal, ['Add 1', 'Add #'])}
 		</Button>
 		<Button variant="outline" onclick={() => (showAddModal = false)}>Cancel</Button>
 	{/snippet}

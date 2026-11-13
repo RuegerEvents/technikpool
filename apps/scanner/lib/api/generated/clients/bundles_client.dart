@@ -44,15 +44,18 @@ abstract class BundlesClient {
     @Path('bundleId') required String bundleId,
   });
 
-  /// Put a scanned unit into the kit.
+  /// Put a scanned unit, or another kit, into the kit.
   ///
   /// A unit's tag or unique serial number puts the unit in; an accessory's.
-  /// puts in the unit it hangs off. A unit in another kit is moved only with.
-  /// `moveFromOtherBundle` — without it the answer is `in_other_bundle`,.
-  /// naming that kit, so the client can ask first. A bundle's own tag is.
-  /// `is_bundle`: kits do not go into kits. Answers 200 for every outcome;.
-  /// an error status means the unit could not go in (retired, unavailable,.
-  /// no room in the bundle type).
+  /// puts in the unit it hangs off. Another bundle's tag puts that bundle.
+  /// inside this one (`scannedBundle` names it), one level deep: a bundle.
+  /// that sits inside another, or one that holds bundles itself, cannot take.
+  /// part, and neither can a bundle go inside itself — those answer 409. A.
+  /// unit or bundle in another kit is moved only with `moveFromOtherBundle`.
+  /// — without it the answer is `in_other_bundle`, naming that kit, so the.
+  /// client can ask first. Answers 200 for every outcome; an error status.
+  /// means it could not go in (retired, unavailable, no room in the bundle.
+  /// type, the nesting rules).
   @POST('/api/v1/bundles/{bundleId}/scans')
   Future<BundleScanResult> scanIntoBundle({
     @Path('bundleId') required String bundleId,
@@ -66,6 +69,15 @@ abstract class BundlesClient {
   Future<BundleDetail> removeFromBundle({
     @Path('bundleId') required String bundleId,
     @Path('assetId') required String assetId,
+  });
+
+  /// Take a kit out of the kit it sits in.
+  ///
+  /// The inner kit stays where it is, with everything in it.
+  @DELETE('/api/v1/bundles/{bundleId}/bundles/{innerBundleId}')
+  Future<BundleDetail> removeBundleFromBundle({
+    @Path('bundleId') required String bundleId,
+    @Path('innerBundleId') required String innerBundleId,
   });
 
   /// Find loose units for the kit by name.

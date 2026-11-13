@@ -46,6 +46,12 @@ export interface ListKit {
 	/** The kit's name with its caption. */
 	name: string;
 	tag: string | null;
+	/**
+	 * The kit this one sits inside — the FOH case around the adapter set. The
+	 * inner kit is a heading of its own, placed right after the outer one's
+	 * units. Absent on lists built before kits could nest.
+	 */
+	parent?: { id: string; name: string; tag: string | null } | null;
 }
 
 const GROUP_ORDER: Record<ListGroup['kind'], number> = { location: 0, none: 1, lender: 2 };

@@ -172,6 +172,7 @@ void main() {
           organizationId: 'org_demo_nordlicht',
           location: null,
           unitCount: 3,
+          parentBundle: null,
         ),
       ],
     );

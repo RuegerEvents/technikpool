@@ -565,20 +565,41 @@ export function renderCaseLabel(
  * The contents as the label lists them: identical units as one line, and under
  * each such line the accessories its units carry, counted per unit where they
  * all carry the same. `items` come in case order, each unit before its own
- * accessories (see `ordered` in services/case-check.ts).
+ * accessories (see `ordered` in services/case-check.ts). A kit inside the case
+ * is one line of its own ("1× PowerCon-Set"), its contents being on its own
+ * label; those lines come first, as the bundle type lists them.
  */
 export function caseLabelLines(
-	items: { assetId: string; name: string; accessoryOf: string | null }[]
+	items: {
+		assetId: string;
+		name: string;
+		accessoryOf: string | null;
+		innerKit?: { id: string; name: string } | null;
+	}[]
 ): CaseLabelLine[] {
+	const kits = new Map<string, Set<string>>();
+	for (const item of items) {
+		if (!item.innerKit) continue;
+		const ids = kits.get(item.innerKit.name) ?? new Set<string>();
+		ids.add(item.innerKit.id);
+		kits.set(item.innerKit.name, ids);
+	}
+	const kitLines: CaseLabelLine[] = [...kits].map(([name, ids]) => ({
+		count: ids.size,
+		name,
+		accessory: false,
+		each: null
+	}));
+
 	const groups: { name: string; ids: string[] }[] = [];
 	for (const item of items) {
-		if (item.accessoryOf) continue;
+		if (item.accessoryOf || item.innerKit) continue;
 		const group = groups.find((g) => g.name === item.name);
 		if (group) group.ids.push(item.assetId);
 		else groups.push({ name: item.name, ids: [item.assetId] });
 	}
 
-	const lines: CaseLabelLine[] = [];
+	const lines: CaseLabelLine[] = kitLines;
 	for (const group of groups) {
 		lines.push({ count: group.ids.length, name: group.name, accessory: false, each: null });
 		const members = new Set(group.ids);

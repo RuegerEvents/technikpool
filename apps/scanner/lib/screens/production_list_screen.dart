@@ -1427,16 +1427,28 @@ class _ProductionListScreenState extends ConsumerState<ProductionListScreen> {
     final muted = Theme.of(context).colorScheme.onSurfaceVariant;
     return Container(
       color: Theme.of(context).colorScheme.surfaceContainerHighest.withValues(alpha: 0.5),
-      padding: const EdgeInsets.fromLTRB(16, 4, 8, 4),
+      // A kit inside another one sits indented under it, and says which.
+      padding: EdgeInsets.fromLTRB(head.kit.parent == null ? 16 : 32, 4, 8, 4),
       child: Row(
         children: [
           Icon(Icons.inventory_2_outlined, size: 18, color: muted),
           const SizedBox(width: 8),
           Expanded(
-            child: Text(
-              [head.kit.name, ?head.kit.tag].join(' · '),
-              style: const TextStyle(fontWeight: FontWeight.w600),
-              overflow: TextOverflow.ellipsis,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  [head.kit.name, ?head.kit.tag].join(' · '),
+                  style: const TextStyle(fontWeight: FontWeight.w600),
+                  overflow: TextOverflow.ellipsis,
+                ),
+                if (head.kit.parent case final parent?)
+                  Text(
+                    l10n.bundleInside(parent.name),
+                    style: TextStyle(color: muted, fontSize: 12),
+                    overflow: TextOverflow.ellipsis,
+                  ),
+              ],
             ),
           ),
           Text(

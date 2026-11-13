@@ -14,6 +14,7 @@ import {
 	writableOrgIds
 } from './access';
 import { kitByTag, resolveScannedCode } from './asset-lookup';
+import { inKit as isInKit } from '#lib/bundle-nesting.js';
 import type { ScanGroup, ScanGroupUnit, ScanKit } from './checkout';
 import {
 	buildLines,
@@ -553,9 +554,7 @@ async function tickKit(
 ): Promise<CheckScanResult> {
 	const listed = await listedItems(productionId, side);
 	const inKit = new Set(
-		listed
-			.filter((i) => i.asset.bundleId === kit.id && !i.asset.parentAssetId)
-			.map((i) => i.assetId)
+		listed.filter((i) => isInKit(i.asset, kit.id) && !i.asset.parentAssetId).map((i) => i.assetId)
 	);
 	const members = listed.filter(
 		(i) => inKit.has(i.assetId) || (i.asset.parentAssetId && inKit.has(i.asset.parentAssetId))

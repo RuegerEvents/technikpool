@@ -30,6 +30,12 @@ const CONFLICT_STATUSES = ['PENDING', 'APPROVED', 'CHECKED_OUT'] as const;
 // well — it holds nothing back elsewhere, but here it is part of the list.
 const HERE_STATUSES = ['DRAFT', ...ACTIVE_STATUSES] as const;
 
+/** A kit's unit as the planner's kit rows read it. */
+const KIT_ASSET_INCLUDE = {
+	product: { include: { manufacturer: true } },
+	location: { select: { id: true, name: true, address: { select: { city: true } } } }
+} as const;
+
 // Full-page equipment editor (categories | available | booked) — replaces the
 // per-Asset add/remove flow with per-Product-x-org-x-location quantities.
 export const getEquipmentEditorData = query(v.string(), async (productionId: string) => {
@@ -207,17 +213,19 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 			// Same exclusion as above: an accessory mirrors its parent's bundleId,
 			// so it is in this kit — but it is not a unit anyone books, and
 			// counting it would make the kit look bigger than it is orderable.
-			assets: {
-				where: { parentAssetId: null },
-				include: {
-					product: { include: { manufacturer: true } },
-					location: { select: { id: true, name: true, address: { select: { city: true } } } }
-				}
+			assets: { where: { parentAssetId: null }, include: KIT_ASSET_INCLUDE },
+			// Booking a kit books the kits inside it, so their units are its own here.
+			childBundles: {
+				select: { assets: { where: { parentAssetId: null }, include: KIT_ASSET_INCLUDE } }
 			}
 		}
 	});
 
 	const bundles = assetBundles
+		.map(({ childBundles, ...kit }) => ({
+			...kit,
+			assets: [...kit.assets, ...childBundles.flatMap((inner) => inner.assets)]
+		}))
 		.map((b) => {
 			// Only units this production booked *through this bundle* count as the
 			// bundle's. One that was added individually stays on its product row
@@ -227,7 +235,12 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 			let availableCount = 0;
 			for (const a of b.assets) {
 				const status = assetStatus.get(a.id);
-				if (status?.bookedFromBundleId === b.id) bookedHere++;
+				// An inner kit booked through the kit it sits in is booked too.
+				if (
+					status?.bookedFromBundleId === b.id ||
+					(b.parentBundleId !== null && status?.bookedFromBundleId === b.parentBundleId)
+				)
+					bookedHere++;
 				else if (!status?.unavailableElsewhere) availableCount++;
 			}
 			// Where the kit is, for the location filter. Most kits have no location

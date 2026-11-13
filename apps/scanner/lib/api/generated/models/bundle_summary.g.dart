@@ -19,6 +19,9 @@ BundleSummary _$BundleSummaryFromJson(Map<String, dynamic> json) =>
           ? null
           : LocationRef.fromJson(json['location'] as Map<String, dynamic>),
       unitCount: (json['unitCount'] as num).toInt(),
+      parentBundle: json['parentBundle'] == null
+          ? null
+          : KitRef.fromJson(json['parentBundle'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$BundleSummaryToJson(BundleSummary instance) =>
@@ -32,4 +35,5 @@ Map<String, dynamic> _$BundleSummaryToJson(BundleSummary instance) =>
       'organizationId': instance.organizationId,
       'location': ?instance.location,
       'unitCount': instance.unitCount,
+      'parentBundle': ?instance.parentBundle,
     };

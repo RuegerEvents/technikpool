@@ -206,12 +206,19 @@
 				{#each section.rows as row (row.kind === 'line' ? `line:${row.line.key}` : row.kind === 'kit' ? `kit:${row.kit.id}` : row.unit.assetId)}
 					{#if row.kind === 'kit'}
 						{@const k = kitTally(row.units)}
-						<li class="flex items-center gap-3 bg-muted/40 px-3 py-1.5">
+						<li
+							class="flex items-center gap-3 bg-muted/40 px-3 py-1.5 {row.kit.parent ? 'pl-8' : ''}"
+						>
 							<Package aria-hidden="true" class="size-4 shrink-0 text-muted-foreground" />
 							<span class="min-w-0 flex-1 truncate text-sm font-medium">
 								{row.kit.name}{#if row.kit.tag}<span class="ml-1 font-normal text-muted-foreground"
 										>· {row.kit.tag}</span
 									>{/if}
+								{#if row.kit.parent}
+									<span class="ml-1 text-xs font-normal text-muted-foreground"
+										>in {row.kit.parent.name}</span
+									>
+								{/if}
 							</span>
 							<span class="text-xs text-muted-foreground tabular-nums">{k.done} / {k.total}</span>
 							{#if enabled && k.open.length > 0}

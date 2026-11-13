@@ -11,6 +11,7 @@ import {
 	writableOrgIds
 } from './access';
 import { ACTIVE_ASSET_WHERE, isBookableStatus, isRetiredStatus } from '#lib/asset-status.js';
+import { bookedKitFor, kitAssetsWhere } from '#lib/bundle-nesting.js';
 import { withAccessories } from './accessories';
 import { canPlaceAt } from './locations';
 import { kitByTag, resolveScannedCode, type TaggedKit } from './asset-lookup';
@@ -448,7 +449,8 @@ export async function performScan(
 		where: { id: match.assetId },
 		include: {
 			product: { include: { manufacturer: true } },
-			location: true
+			location: true,
+			bundle: { select: { parentBundleId: true } }
 		}
 	});
 
@@ -592,8 +594,12 @@ export async function performScan(
 			: new Set<string>();
 
 	const lent = asset.organizationId !== production.organizationId;
-	const kit =
-		!alreadyBooked.has(asset.id) && (await bookedKits(production.id, [asset.bundleId])).size > 0;
+	const kit = alreadyBooked.has(asset.id)
+		? null
+		: bookedKitFor(
+				asset,
+				await bookedKits(production.id, [asset.bundleId, asset.bundle?.parentBundleId ?? null])
+			);
 	await prisma.$transaction(async (tx) => {
 		await checkOutExisting(tx, existingItems, lent, role.borrower, userId);
 		if (standIn) {
@@ -612,7 +618,7 @@ export async function performScan(
 					sourceParentAssetId: accessories.some((accessory) => accessory.id === assetId)
 						? asset.id
 						: null,
-					sourceBundleId: assetId === asset.id && kit ? asset.bundleId : null,
+					sourceBundleId: assetId === asset.id ? kit : null,
 					status: 'CHECKED_OUT',
 					...handoverOnCheckout(lent, role.borrower, userId)
 				}))
@@ -651,7 +657,8 @@ export async function performScan(
 
 /**
  * The units of a kit a scan of its sticker books, by name: the top-level ones
- * this user may book — accessories come along with their unit, as always.
+ * this user may book, those of the kits inside it included — accessories come
+ * along with their unit, as always.
  * `only` narrows them to the ones a list has. A unit marked unavailable stays
  * behind when the scan goes to a production, as a scan of it alone would.
  */
@@ -664,7 +671,7 @@ export async function kitScanUnits(
 	const [orgIds, systemAdmin] = await Promise.all([writableOrgIds(userId), isSystemAdmin(userId)]);
 	const name = withCaption(kit.template.name, kit.template.caption);
 	const units = await prisma.asset.findMany({
-		where: { bundleId: kit.id, parentAssetId: null, ...ACTIVE_ASSET_WHERE },
+		where: { ...kitAssetsWhere(kit.id), parentAssetId: null, ...ACTIVE_ASSET_WHERE },
 		select: {
 			id: true,
 			assetTag: true,
@@ -935,6 +942,7 @@ export async function performBulkCheckout(
 			productId: true,
 			organizationId: true,
 			bundleId: true,
+			bundle: { select: { parentBundleId: true } },
 			parentAssetId: true,
 			status: true
 		}
@@ -1074,7 +1082,7 @@ export async function performBulkCheckout(
 			);
 	const kits = await bookedKits(
 		production.id,
-		assets.map((a) => a.bundleId)
+		assets.flatMap((a) => [a.bundleId, a.bundle?.parentBundleId ?? null])
 	);
 
 	for (const asset of assets) {
@@ -1097,7 +1105,7 @@ export async function performBulkCheckout(
 					productionId: input.targetId,
 					assetId: asset.id,
 					sourceParentAssetId: asset.parentAssetId,
-					sourceBundleId: asset.bundleId && kits.has(asset.bundleId) ? asset.bundleId : null,
+					sourceBundleId: bookedKitFor(asset, kits),
 					status: 'CHECKED_OUT',
 					...handoverOnCheckout(lent, role.borrower, userId)
 				}

@@ -10,6 +10,7 @@ import {
 	writableOrgIds
 } from './access';
 import { kitByTag, resolveScannedCode, type TaggedKit } from './asset-lookup';
+import { kitAssetsWhere } from '#lib/bundle-nesting.js';
 import {
 	CheckoutError,
 	emptyAffected,
@@ -253,9 +254,11 @@ async function kitAdditions(scope: Scope) {
 		distinct: ['sourceBundleId']
 	});
 	if (kits.length === 0) return [];
+	const kitIds = kits.map((k) => k.sourceBundleId!);
 	const assets = await prisma.asset.findMany({
 		where: {
-			bundleId: { in: kits.map((k) => k.sourceBundleId!) },
+			// The kits inside a booked kit came along with it.
+			OR: [{ bundleId: { in: kitIds } }, { bundle: { parentBundleId: { in: kitIds } } }],
 			parentAssetId: null,
 			...BOOKABLE_ASSET_WHERE,
 			...(scope.organizationIds ? { organizationId: { in: scope.organizationIds } } : {}),
@@ -495,7 +498,7 @@ async function takeBackKit(userId: string, productionId: string, kit: TaggedKit)
 		where: {
 			productionId,
 			status: { in: ['APPROVED', 'CHECKED_OUT'] },
-			asset: { bundleId: kit.id, parentAssetId: null }
+			asset: { ...kitAssetsWhere(kit.id), parentAssetId: null }
 		},
 		select: { assetId: true }
 	});

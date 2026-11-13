@@ -51,7 +51,7 @@
 	}
 
 	let isAuthRoute = $derived(page.url.pathname.startsWith('/auth'));
-	let isPrintRoute = $derived(/\/(crew-passes|inventory-list|print)$/.test(page.url.pathname));
+	let isPrintRoute = $derived(/\/(crew-passes|print)$/.test(page.url.pathname));
 	// A customer's info link is the operator's page, not the app: no navigation
 	// into places the visitor has no account for. Same for an org's rental terms,
 	// which its customers open from a printed offer.

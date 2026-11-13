@@ -4,6 +4,8 @@
 
 import 'package:json_annotation/json_annotation.dart';
 
+import 'kit_ref.dart';
+
 part 'case_check_item.g.dart';
 
 @JsonSerializable()
@@ -17,6 +19,7 @@ class CaseCheckItem {
     required this.caption,
     required this.accessoryOf,
     required this.awayOn,
+    this.innerKit,
   });
   
   factory CaseCheckItem.fromJson(Map<String, Object?> json) => _$CaseCheckItemFromJson(json);
@@ -40,6 +43,12 @@ class CaseCheckItem {
   /// counts as away, not missing.
   ///
   final String? awayOn;
+
+  /// The kit inside the case that this unit is in (the adapter set in the.
+  /// FOH case). Its units come after the case's own, one kit after.
+  /// another, so a client starts a sub-heading whenever it changes.
+  ///
+  final KitRef? innerKit;
 
   Map<String, Object?> toJson() => _$CaseCheckItemToJson(this);
 }

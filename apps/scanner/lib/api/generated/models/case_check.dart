@@ -40,10 +40,13 @@ class CaseCheck {
   /// The production the case as a whole is out on, if any.
   final String? checkedOutTo;
 
-  /// What the case should hold, each unit followed by its accessories.
+  /// What the case should hold, each unit followed by its accessories:.
+  /// the case's own units first, then those of each kit inside it.
+  ///
   final List<CaseCheckItem> items;
 
-  /// Kits only: products other cases of the same kit type hold more of.
+  /// Kits only: products (and kits inside, by type) other cases of the.
+  /// same kit type hold more of.
   /// A unit taken out of the kit for good is no longer on the list, so.
   /// this is the only place it shows.
   ///

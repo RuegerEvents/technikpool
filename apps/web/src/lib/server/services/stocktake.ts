@@ -1,4 +1,5 @@
 import { bundleLabel, withCaption } from '#lib/product-label.js';
+import { kitAssetsWhere } from '#lib/bundle-nesting.js';
 import { naturalCompare } from '#lib/sort.js';
 import { prisma } from '#lib/server/auth.js';
 import type { Prisma } from '#lib/prisma/client.js';
@@ -1233,11 +1234,20 @@ export async function scanIntoStocktake(
 				})
 			: null;
 		if (!bundle) throw new StocktakeError('asset_not_found', `Tag "${code}" not found`, code);
-		const members = await prisma.asset.findMany({
-			where: { bundleId: bundle.id, ...ACTIVE_ASSET_WHERE },
-			select: CONFIRM_SELECT,
+		// The kits inside come along, as in a case check: opening the case
+		// means opening them.
+		const found = await prisma.asset.findMany({
+			where: { ...kitAssetsWhere(bundle.id), ...ACTIVE_ASSET_WHERE },
+			select: { ...CONFIRM_SELECT, bundleId: true },
 			orderBy: [{ product: { name: 'asc' } }, { assetTag: 'asc' }]
 		});
+		// The case's own units first, then each inner kit's.
+		const members = [
+			...found.filter((a) => a.bundleId === bundle.id),
+			...found
+				.filter((a) => a.bundleId !== bundle.id)
+				.sort((a, b) => naturalCompare(a.bundleId ?? '', b.bundleId ?? ''))
+		];
 		return {
 			outcome: 'bundle',
 			bundle: {

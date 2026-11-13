@@ -33,9 +33,10 @@ import {
 } from '#lib/asset-status.js';
 import { syncAccessories } from '#lib/server/services/accessories.js';
 import {
-	addUnitsToBundle,
+	addToBundle,
 	assertBundleTagAvailable,
 	createBundle,
+	removeBundleFromBundle,
 	removeUnitFromBundle
 } from '#lib/server/services/bundles.js';
 import { CHECKED_OUT_TO_INCLUDE, checkedOutTo } from '#lib/server/services/checked-out-to.js';
@@ -2591,6 +2592,24 @@ export const getBundle = query(v.string(), async (id: string) => {
 					...CHECKED_OUT_TO_INCLUDE
 				},
 				orderBy: ASSET_ORDER_BY
+			},
+			// One level of nesting: the kit it sits in, and the kits inside it.
+			parentBundle: {
+				select: { id: true, tag: true, template: { select: { name: true, caption: true } } }
+			},
+			childBundles: {
+				select: {
+					id: true,
+					tag: true,
+					imagePath: true,
+					templateId: true,
+					template: { select: { name: true, caption: true } },
+					assets: {
+						where: { parentAssetId: null },
+						select: { id: true, product: { select: { name: true } } }
+					}
+				},
+				orderBy: [{ template: { name: 'asc' } }, { tag: { sort: 'asc', nulls: 'last' } }]
 			}
 		}
 	});
@@ -2646,6 +2665,8 @@ const createBundleInstanceSchema = v.object({
 	// time in between as a case that is not the kit, and a failure halfway
 	// through would leave it that way for good.
 	assetIds: v.optional(v.array(v.string())),
+	// Kits that go inside the new case, as a type with an inner kit demands.
+	bundleIds: v.optional(v.array(v.string())),
 	// As on `addAssetsToBundle`: the picker showed that some of them sit in
 	// another kit, and they move out of it.
 	moveFromOtherBundles: v.optional(v.boolean())
@@ -2810,10 +2831,22 @@ export const updateBundle = command(updateBundleSchema, async (input) => {
 			include: { template: { include: { organization: true, category: true } }, location: true }
 		});
 		if (input.locationId) {
+			// The kits inside follow the kit they sit in.
+			await tx.assetBundle.updateMany({
+				where: { parentBundleId: input.bundleId },
+				data: { locationId: input.locationId }
+			});
 			// `parent.bundleId` catches accessories whose own bundleId hasn't been
 			// mirrored yet — an accessory is wherever its parent is either way.
 			await tx.asset.updateMany({
-				where: { OR: [{ bundleId: input.bundleId }, { parent: { bundleId: input.bundleId } }] },
+				where: {
+					OR: [
+						{ bundleId: input.bundleId },
+						{ parent: { bundleId: input.bundleId } },
+						{ bundle: { parentBundleId: input.bundleId } },
+						{ parent: { bundle: { parentBundleId: input.bundleId } } }
+					]
+				},
 				data: { locationId: input.locationId }
 			});
 		}
@@ -2834,7 +2867,9 @@ const addAssetsToBundleSchema = v.object({
 	bundleId: v.string(),
 	// Several at once, in one transaction: "all 4" either lands in the case or
 	// leaves it as it was, never three of them.
-	assetIds: v.pipe(v.array(v.string()), v.minLength(1)),
+	assetIds: v.array(v.string()),
+	// Other kits of the org to put inside this one (one level deep).
+	bundleIds: v.optional(v.array(v.string())),
 	// Set only after the user has been told what it means: the unit does not fit
 	// what this bundle type holds, and putting it in changes the type for every
 	// case of it. See `assertAdditionsFitType`.
@@ -2846,16 +2881,34 @@ const addAssetsToBundleSchema = v.object({
 
 export const addAssetsToBundle = command(
 	addAssetsToBundleSchema,
-	async ({ bundleId, assetIds, allowTypeChange, moveFromOtherBundles }) => {
+	async ({ bundleId, assetIds, bundleIds = [], allowTypeChange, moveFromOtherBundles }) => {
 		const user = await requireAuth();
-		const { bundle, left } = await addUnitsToBundle(user.id, bundleId, assetIds, {
-			allowTypeChange,
-			moveFromOtherBundles
-		});
+		if (assetIds.length + bundleIds.length === 0) appError(400, 'assets_not_found');
+		const { bundle, left } = await addToBundle(
+			user.id,
+			bundleId,
+			{ assetIds, bundleIds },
+			{ allowTypeChange, moveFromOtherBundles }
+		);
 		await refreshBundleViews(bundle, left);
-		return { bundleId, assetIds };
+		for (const innerId of bundleIds) await getBundle(innerId).refresh();
+		return { bundleId, assetIds, bundleIds };
 	}
 );
+
+const bundleInnerSchema = v.object({ bundleId: v.string(), innerBundleId: v.string() });
+
+/** Takes a kit out of the kit it sits in, as a unit is taken out. */
+export const removeInnerBundle = command(bundleInnerSchema, async ({ bundleId, innerBundleId }) => {
+	const user = await requireAuth();
+	const bundle = await removeBundleFromBundle(user.id, bundleId, innerBundleId);
+	const inner = await prisma.assetBundle.findUniqueOrThrow({
+		where: { id: innerBundleId },
+		select: { id: true, templateId: true }
+	});
+	await refreshBundleViews(bundle, [inner]);
+	return { bundleId, innerBundleId };
+});
 
 export const removeAssetFromBundle = command(bundleAssetSchema, async ({ bundleId, assetId }) => {
 	const user = await requireAuth();

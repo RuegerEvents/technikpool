@@ -4,6 +4,9 @@
 
 import 'package:json_annotation/json_annotation.dart';
 
+/// `is_bundle` is no longer sent: a bundle's tag now puts that bundle.
+/// inside (`scannedBundle`). It stays in the list for older clients.
+///
 @JsonEnum()
 enum BundleScanOutcome {
   @JsonValue('added')

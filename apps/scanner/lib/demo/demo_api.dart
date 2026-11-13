@@ -1769,6 +1769,13 @@ class DemoBackend {
         if (asset == null) return _error(options, 404, 'not_found', 'Not in this kit');
         _putInKit(asset, null);
         return _ok(options, _bundleDetail(kit));
+      case ('DELETE', 'bundles') when parts.length > 6:
+        final inner = _bundles[Uri.decodeComponent(parts[6])];
+        if (inner == null || inner.parentBundleId != kit.id) {
+          return _error(options, 404, 'not_found', 'Not in this kit');
+        }
+        inner.parentBundleId = null;
+        return _ok(options, _bundleDetail(kit));
       case ('POST', 'loose'):
         final key = '${body['productId']}|${body['locationId']}';
         final count = (body['count'] as num? ?? 0).toInt();
@@ -1814,8 +1821,17 @@ class DemoBackend {
           organizationId: kit.organization.id,
           location: _kitLocation(kit),
           unitCount: _units.where((a) => a.bundleId == kit.id).length,
+          parentBundle: _parentRef(kit),
         ),
     ];
+  }
+
+  /// The kit [kit] sits inside, as the API names it.
+  KitRef? _parentRef(_DemoBundle kit) {
+    final parent = _bundles[kit.parentBundleId];
+    if (parent == null) return null;
+    final name = parent.caption == null ? parent.name : '${parent.name} — ${parent.caption}';
+    return KitRef(id: parent.id, name: name, tag: parent.tag);
   }
 
   Response<dynamic> _createBundle(RequestOptions options, Map body) {
@@ -1865,16 +1881,49 @@ class DemoBackend {
     final code = '${body['code'] ?? ''}'.trim();
     if (code.isEmpty) return _error(options, 400, 'invalid_request', 'code is required.');
     final move = body['moveFromOtherBundle'] == true;
-    BundleScanResult answer(BundleScanOutcome outcome, {String? assetId, LocationRef? other}) =>
-        BundleScanResult(
-          outcome: outcome,
-          assetId: assetId,
-          otherBundle: other,
-          bundle: _bundleDetail(kit),
-        );
+    BundleScanResult answer(
+      BundleScanOutcome outcome, {
+      String? assetId,
+      LocationRef? scanned,
+      LocationRef? other,
+    }) => BundleScanResult(
+      outcome: outcome,
+      assetId: assetId,
+      scannedBundle: scanned,
+      otherBundle: other,
+      bundle: _bundleDetail(kit),
+    );
 
-    if (_bundles.values.any((b) => b.tag == code)) {
-      return _ok(options, answer(BundleScanOutcome.isBundle));
+    // Another kit's sticker puts that kit inside, one level deep.
+    if (_bundles.values.where((b) => b.tag == code).firstOrNull case final inner?) {
+      final scanned = LocationRef(id: inner.id, name: inner.name);
+      if (inner.id == kit.id) {
+        return _error(options, 409, 'conflict', 'A bundle cannot go inside itself.');
+      }
+      if (inner.organization.id != kit.organization.id) {
+        return _error(options, 409, 'conflict', 'That bundle belongs to another organization.');
+      }
+      if (kit.parentBundleId != null) {
+        return _error(options, 409, 'conflict', 'This bundle sits inside another one itself.');
+      }
+      if (_bundles.values.any((b) => b.parentBundleId == inner.id)) {
+        return _error(options, 409, 'conflict', '${inner.name} holds bundles of its own.');
+      }
+      if (inner.parentBundleId == kit.id) {
+        return _ok(options, answer(BundleScanOutcome.alreadyIn, scanned: scanned));
+      }
+      if (_bundles[inner.parentBundleId] case final other? when !move) {
+        return _ok(
+          options,
+          answer(
+            BundleScanOutcome.inOtherBundle,
+            scanned: scanned,
+            other: LocationRef(id: other.id, name: other.name),
+          ),
+        );
+      }
+      inner.parentBundleId = kit.id;
+      return _ok(options, answer(BundleScanOutcome.added, scanned: scanned));
     }
     final match = _resolve(code);
     if (match.ambiguous) return _ok(options, answer(BundleScanOutcome.ambiguous));
@@ -1964,7 +2013,21 @@ class DemoBackend {
       categoryName: kit.categoryName,
       organizationId: kit.organization.id,
       location: _kitLocation(kit),
-      unitCount: inKit.length,
+      unitCount: inKit.where((a) => !ids.contains(a.parentAssetId)).length,
+      parentBundle: _parentRef(kit),
+      innerBundles: [
+        for (final inner in _bundles.values.where((b) => b.parentBundleId == kit.id))
+          InnerBundle(
+            id: inner.id,
+            name: inner.name,
+            caption: inner.caption,
+            tag: inner.tag,
+            imageUrl: null,
+            unitCount: _units
+                .where((a) => a.bundleId == inner.id && a.parentAssetId == null)
+                .length,
+          ),
+      ]..sort((a, b) => naturalCompare(a.name, b.name)),
       canEdit: _mayEditKit(kit),
       units: [
         for (final a in ordered)
@@ -2641,6 +2704,9 @@ class _DemoBundle {
   final String? tag;
   final String categoryName;
   final Organization organization;
+
+  /// The kit this one sits inside, one level deep, as on the server.
+  String? parentBundleId;
 }
 
 /// A production check held in memory — see `_startCheck`.

@@ -252,6 +252,20 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return 'This bundle type does not contain that product. Every case of a type holds the same gear.';
 		case 'bundle_product_quantity_exceeded':
 			return `This bundle type holds no more ${p0} than it already has.`;
+		case 'bundle_nest_self':
+			return 'A bundle cannot go inside itself.';
+		case 'bundle_nest_outer_nested':
+			return `This bundle sits inside "${p0}" itself, and bundles nest only one level deep.`;
+		case 'bundle_nest_inner_has_kits':
+			return `The bundle "${p0}" holds bundles of its own, and bundles nest only one level deep.`;
+		case 'bundle_nest_org_mismatch':
+			return 'A bundle can only go inside a bundle of the same organization.';
+		case 'bundle_in_other_bundle':
+			return `This bundle is already inside "${p0}" — take it out there first.`;
+		case 'bundle_kit_not_in_type':
+			return 'This bundle type does not hold a bundle of that type. Every case of a type holds the same gear.';
+		case 'bundle_kit_quantity_exceeded':
+			return `This bundle type holds no more "${p0}" than it already has.`;
 		case 'bundle_composition_incomplete':
 			return `A case of this bundle type is still short of ${p0}× ${p1}.`;
 		case 'bundle_members_org_mismatch':

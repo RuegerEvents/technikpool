@@ -16,6 +16,9 @@ CaseCheckItem _$CaseCheckItemFromJson(Map<String, dynamic> json) =>
       caption: json['caption'] as String?,
       accessoryOf: json['accessoryOf'] as String?,
       awayOn: json['awayOn'] as String?,
+      innerKit: json['innerKit'] == null
+          ? null
+          : KitRef.fromJson(json['innerKit'] as Map<String, dynamic>),
     );
 
 Map<String, dynamic> _$CaseCheckItemToJson(CaseCheckItem instance) =>
@@ -28,4 +31,5 @@ Map<String, dynamic> _$CaseCheckItemToJson(CaseCheckItem instance) =>
       'caption': ?instance.caption,
       'accessoryOf': ?instance.accessoryOf,
       'awayOn': ?instance.awayOn,
+      'innerKit': ?instance.innerKit,
     };

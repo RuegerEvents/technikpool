@@ -21,8 +21,10 @@ import 'device_new_screen.dart';
 /// One kit (Bundle) and everything in it. Opens to be looked at: nothing a
 /// scan or a tap does changes it. For whoever may edit it (ADMIN+ of its
 /// organization, `canEdit`), the pencil turns it into where it is filled:
-/// every scan while this screen is in front puts the unit in, a unit is taken
-/// out from its row, and loose cables without a tag are added by name. See
+/// every scan while this screen is in front puts the unit in — or, for
+/// another kit's tag, that kit (one level deep) — a unit or inner kit is taken
+/// out from its row, and loose cables without a tag are added by name. The
+/// kit it sits in and the kits inside it open their own screen. See
 /// services/bundles.ts on the web.
 class BundleScreen extends ConsumerStatefulWidget {
   const BundleScreen({
@@ -164,7 +166,10 @@ class _BundleScreenState extends ConsumerState<BundleScreen> {
     _changed(result.bundle);
 
     final unit = result.bundle.units.where((u) => u.id == result.assetId).firstOrNull;
-    final name = unit == null
+    final kit = result.scannedBundle;
+    final name = kit != null
+        ? kit.name
+        : unit == null
         ? code
         : productLabel(unit.manufacturerName, unit.productName);
     final detail = unit?.assetTag ?? code;
@@ -175,7 +180,7 @@ class _BundleScreenState extends ConsumerState<BundleScreen> {
       case BundleScanOutcome.alreadyIn:
         _report(_Tone.info, l10n.bundleScanAlreadyIn(name), detail, ScanTone.already);
       case BundleScanOutcome.inOtherBundle:
-        await _offerMove(api, l10n, code, result.otherBundle?.name ?? '');
+        await _offerMove(api, l10n, code, result.otherBundle?.name ?? '', kit?.name);
       case BundleScanOutcome.notFound:
         _report(_Tone.warn, l10n.errorAssetNotFound, code, ScanTone.error);
       case BundleScanOutcome.ambiguous:
@@ -188,16 +193,25 @@ class _BundleScreenState extends ConsumerState<BundleScreen> {
   }
 
   /// The unit is in another kit: say which, and move it only when asked to.
-  Future<void> _offerMove(ApiClient api, S l10n, String code, String otherName) async {
+  Future<void> _offerMove(
+    ApiClient api,
+    S l10n,
+    String code,
+    String otherName,
+    String? kitName,
+  ) async {
     _tone(ScanTone.attention);
     // The answer names the other kit but not the unit, which is not in this
-    // one yet; asking costs a round trip and makes the question readable.
-    var unitName = code;
-    try {
-      final asset = await api.inventory.getAssetByTag(tag: code);
-      unitName = productLabel(asset.product.manufacturerName, asset.product.name);
-    } catch (_) {
-      // The code is name enough.
+    // one yet; asking costs a round trip and makes the question readable. A
+    // scanned kit is named in the answer already.
+    var unitName = kitName ?? code;
+    if (kitName == null) {
+      try {
+        final asset = await api.inventory.getAssetByTag(tag: code);
+        unitName = productLabel(asset.product.manufacturerName, asset.product.name);
+      } catch (_) {
+        // The code is name enough.
+      }
     }
     if (!mounted) return;
     final move = await showDialog<bool>(
@@ -273,6 +287,49 @@ class _BundleScreenState extends ConsumerState<BundleScreen> {
       if (mounted) setState(() => _busy = false);
     }
   }
+
+  Future<void> _removeInner(InnerBundle inner) async {
+    final bundle = _bundle;
+    final api = ref.read(apiClientProvider);
+    if (bundle == null || api == null) return;
+    final l10n = S.of(context);
+    final name = withCaption(inner.name, inner.caption);
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: Text(l10n.bundleRemoveTitle),
+        content: Text(l10n.bundleInnerRemoveQuestion(name)),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(dialogContext).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.of(dialogContext).pop(true),
+            child: Text(l10n.bundleRemove),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    setState(() => _busy = true);
+    try {
+      final fresh = await api.bundles.removeBundleFromBundle(
+        bundleId: bundle.id,
+        innerBundleId: inner.id,
+      );
+      _changed(fresh);
+      _report(_Tone.info, l10n.bundleRemoved(name), inner.tag, ScanTone.ok);
+    } catch (error) {
+      _report(_Tone.bad, describeError(l10n, error), null, ScanTone.error);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  /// Another kit — the one this sits in, or one inside it — on its own screen.
+  void _openKit(String id, String name) =>
+      _openAside(BundleScreen(bundleId: id, name: name));
 
   Future<void> _addLoose() async {
     final bundle = _bundle;
@@ -545,8 +602,48 @@ class _BundleScreenState extends ConsumerState<BundleScreen> {
             ],
           ),
         ),
+        if (bundle.parentBundle case final parent?)
+          ListTile(
+            dense: true,
+            leading: const Icon(Icons.inventory_2_outlined),
+            title: Text(l10n.bundleInside(parent.name)),
+            subtitle: parent.tag == null ? null : Text(parent.tag!),
+            trailing: const Icon(Icons.chevron_right),
+            onTap: () => _openKit(parent.id, parent.name),
+          ),
         const Divider(),
-        if (bundle.units.isEmpty)
+        if (bundle.innerBundles.isNotEmpty) ...[
+          Padding(
+            padding: const EdgeInsets.fromLTRB(16, 4, 16, 0),
+            child: Text(l10n.bundleInnerKits, style: theme.textTheme.labelLarge),
+          ),
+          for (final inner in bundle.innerBundles)
+            ListTile(
+              dense: true,
+              contentPadding: EdgeInsets.only(left: 16, right: _canChange ? 4 : 16),
+              leading: ProductThumb(url: inner.imageUrl, size: 36),
+              title: Text(
+                withCaption(inner.name, inner.caption),
+                style: const TextStyle(fontWeight: FontWeight.w600),
+              ),
+              subtitle: Text(
+                [
+                  inner.tag ?? l10n.bundleNoTag,
+                  l10n.bundleUnitCount(inner.unitCount),
+                ].join(' · '),
+              ),
+              onTap: () => _openKit(inner.id, inner.name),
+              trailing: _canChange
+                  ? IconButton(
+                      tooltip: l10n.bundleRemove,
+                      onPressed: _busy ? null : () => _removeInner(inner),
+                      icon: const Icon(Icons.remove_circle_outline),
+                    )
+                  : const Icon(Icons.chevron_right),
+            ),
+          const Divider(),
+        ],
+        if (bundle.units.isEmpty && bundle.innerBundles.isEmpty)
           Padding(
             padding: const EdgeInsets.all(24),
             child: Text(

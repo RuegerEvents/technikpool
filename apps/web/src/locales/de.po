@@ -74,7 +74,6 @@ msgstr "Crewmitglied hinzugefügt"
 #: src/lib/components/ui/back-button/back-button.svelte
 #: src/lib/components/ui/image-upload/image-upload.svelte
 #: src/routes/+error.svelte
-#: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
 #: src/routes/productions/[id]/crew-passes/+page.svelte
 #: src/routes/productions/[id]/handout-detail.svelte
 msgid "Back"
@@ -128,7 +127,6 @@ msgstr "Keine Geräte gefunden."
 msgid "Product"
 msgstr "Produkt"
 
-#: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
 #: src/routes/products/[id]/product-detail.svelte
 msgid "S/N"
 msgstr "S/N"
@@ -320,6 +318,7 @@ msgstr "E-Mail"
 #: src/lib/components/ui/product-documents/product-documents.svelte
 #: src/lib/components/ui/product-ports/product-ports.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
 #: src/routes/orgs/[id]/org-logo-card.svelte
@@ -337,7 +336,6 @@ msgstr "Entfernen"
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
-#: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
 msgid "Manufacturer"
@@ -504,7 +502,6 @@ msgstr "Gerät hinzufügen"
 #: src/routes/assets/+page.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
-#: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
 #: src/routes/checkout/+page.svelte
 #: src/routes/products/[id]/product-detail.svelte
 msgid "Tag"
@@ -1093,7 +1090,6 @@ msgstr "Wird geladen…"
 msgid "No assets in this bundle yet. Click \"Add Assets\" to get started."
 msgstr "Noch keine Geräte in diesem Bundle. Klicken Sie auf „Geräte hinzufügen\"."
 
-#: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
 #: src/routes/productions/[id]/crew-passes/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
@@ -1163,18 +1159,14 @@ msgstr "Menge"
 #~ msgid "Packing List - {0}"
 #~ msgstr "Packliste – {0}"
 
-#. 0: new Date().toLocaleDateString()
-#: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
-msgid "Date: {0}"
-msgstr "Datum: {0}"
+#~ msgid "Date: {0}"
+#~ msgstr "Datum: {0}"
 
-#: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
-msgid "Check"
-msgstr "Haken"
+#~ msgid "Check"
+#~ msgstr "Haken"
 
-#: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
-msgid "Item Description"
-msgstr "Artikelbeschreibung"
+#~ msgid "Item Description"
+#~ msgstr "Artikelbeschreibung"
 
 #~ msgid "Source Org"
 #~ msgstr "Herkunftsorg."
@@ -1182,9 +1174,8 @@ msgstr "Artikelbeschreibung"
 #~ msgid "Prepared By:"
 #~ msgstr "Vorbereitet von:"
 
-#: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
-msgid "Checked By:"
-msgstr "Geprüft von:"
+#~ msgid "Checked By:"
+#~ msgstr "Geprüft von:"
 
 #: src/routes/+layout.svelte
 #: src/routes/share/[id]/[signature]/+page.svelte
@@ -3850,31 +3841,23 @@ msgstr "Brutto"
 msgid "Enter a target amount"
 msgstr "Zielbetrag eingeben"
 
-#: src/routes/assets/bundles/[id]/bundle-detail.svelte
-msgid "Print Inventory List"
-msgstr "Inventarliste drucken"
+#~ msgid "Print Inventory List"
+#~ msgstr "Inventarliste drucken"
 
-#. 0: bundle.template.name
-#: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
-msgid "Inventory List - {0}"
-msgstr "Inventarliste - {0}"
+#~ msgid "Inventory List - {0}"
+#~ msgstr "Inventarliste - {0}"
 
-#: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
-msgid "Inventory List"
-msgstr "Inventarliste"
+#~ msgid "Inventory List"
+#~ msgstr "Inventarliste"
 
-#: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
-msgid "This bundle has no items yet."
-msgstr "Dieses Bundle hat noch keine Geräte."
+#~ msgid "This bundle has no items yet."
+#~ msgstr "Dieses Bundle hat noch keine Geräte."
 
-#. 0: bundle.assets.length
-#: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
-msgid "Total items: {0}"
-msgstr "Gesamtanzahl: {0}"
+#~ msgid "Total items: {0}"
+#~ msgstr "Gesamtanzahl: {0}"
 
-#: src/routes/assets/bundles/[id]/inventory-list/+page.svelte
-msgid "Date:"
-msgstr "Datum:"
+#~ msgid "Date:"
+#~ msgstr "Datum:"
 
 #~ msgid "{0} of {1} approvals failed."
 #~ msgstr "{0} von {1} Genehmigungen fehlgeschlagen."
@@ -10938,6 +10921,8 @@ msgstr "Für dieses Equipment sind noch keine Handbücher oder Datenblätter hin
 msgid "Ticks are kept in this browser only."
 msgstr "Die Häkchen werden nur in diesem Browser gespeichert."
 
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/by-location/+page.svelte
 #: src/routes/assets/by-location/+page.svelte
 #: src/routes/share/[id]/[signature]/+page.svelte
@@ -12683,6 +12668,7 @@ msgstr[0] "1 Organisation"
 msgstr[1] "# Organisationen"
 
 #: src/lib/equipment-sheet-download.svelte.ts
+#: src/routes/assets/bundles/[id]/inventory-list-menu.svelte
 msgid "Inventory list"
 msgstr "Inventarliste"
 
@@ -14095,3 +14081,109 @@ msgstr "· bei {0}"
 #: src/routes/assets/+page.svelte
 msgid "Import CSV…"
 msgstr "CSV importieren…"
+
+#: src/lib/error-messages.svelte.ts
+msgid "A bundle cannot go inside itself."
+msgstr "Ein Bundle kann nicht in sich selbst stecken."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "This bundle sits inside \"{0}\" itself, and bundles nest only one level deep."
+msgstr "Dieses Bundle steckt selbst in „{0}“, und Bundles lassen sich nur eine Ebene tief verschachteln."
+
+#: src/lib/error-messages.svelte.ts
+msgid "A bundle can only go inside a bundle of the same organization."
+msgstr "Ein Bundle kann nur in ein Bundle derselben Organisation gelegt werden."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "This bundle is already inside \"{0}\" — take it out there first."
+msgstr "Dieses Bundle steckt bereits in „{0}“ — bitte dort zuerst herausnehmen."
+
+#: src/lib/error-messages.svelte.ts
+msgid "This bundle type does not hold a bundle of that type. Every case of a type holds the same gear."
+msgstr "Dieser Bundle-Typ enthält kein Bundle dieses Typs. Jede Instanz eines Typs enthält dieselbe Ausstattung."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "This bundle type holds no more \"{0}\" than it already has."
+msgstr "Dieser Bundle-Typ enthält nicht mehr „{0}“, als schon drin sind."
+
+#: src/routes/assets/bundles/[id]/inventory-list-menu.svelte
+msgid "A4, tiles"
+msgstr "A4, Raster"
+
+#: src/routes/assets/bundles/[id]/inventory-list-menu.svelte
+msgid "A4, list"
+msgstr "A4, Liste"
+
+#: src/routes/assets/bundles/[id]/inventory-list-menu.svelte
+msgid "A5, tiles"
+msgstr "A5, Raster"
+
+#: src/routes/assets/bundles/[id]/inventory-list-menu.svelte
+msgid "A5, list"
+msgstr "A5, Liste"
+
+#. 0: row.kit.parent.name
+#. 0: withCaption(kit.inside.template.name, kit.inside.template.caption)
+#: src/lib/components/production-list/tick-list.svelte
+#: src/routes/assets/bundles/new/+page.svelte
+msgid "in {0}"
+msgstr "in {0}"
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "Bundle taken out"
+msgstr "Bundle herausgenommen"
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "Bundle put inside"
+msgid_plural "# bundles put inside"
+msgstr[0] "Bundle hineingelegt"
+msgstr[1] "# Bundles hineingelegt"
+
+#. 0: withCaption( bundle.parentBundle.template.name, bundle.parentBundle.template.caption ); 1: bundle.parentBundle.tag ? ` (${bundle.parentBundle.tag})` \\: ''
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "Inside {0}{1}"
+msgstr "In {0}{1}"
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "1 bundle"
+msgid_plural "# bundles"
+msgstr[0] "1 Bundle"
+msgstr[1] "# Bundles"
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "Bundles inside"
+msgstr "Enthaltene Bundles"
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "Packed in this case and booked with it."
+msgstr "In dieser Kiste verpackt und mit ihr gebucht."
+
+#. 0: withCaption(kit.inside.template.name, kit.inside.template.caption)
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "· in {0}"
+msgstr "· in {0}"
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+#: src/routes/assets/bundles/new/+page.svelte
+msgid "Bundles to put inside"
+msgstr "Bundles zum Hineinlegen"
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "1 bundle is taken out of the case it is in:"
+msgid_plural "# bundles are taken out of the cases they are in:"
+msgstr[0] "1 Bundle wird aus seiner Kiste genommen:"
+msgstr[1] "# Bundles werden aus ihren Kisten genommen:"
+
+#: src/routes/assets/bundles/[id]/bundle-detail.svelte
+msgid "Add 1"
+msgid_plural "Add #"
+msgstr[0] "1 hinzufügen"
+msgstr[1] "# hinzufügen"
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "The bundle \"{0}\" holds bundles of its own, and bundles nest only one level deep."
+msgstr "Das Bundle „{0}“ enthält selbst Bundles, und Bundles lassen sich nur eine Ebene tief verschachteln."

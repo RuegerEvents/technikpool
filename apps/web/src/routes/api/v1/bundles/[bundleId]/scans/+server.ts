@@ -17,6 +17,7 @@ export const POST: RequestHandler = ({ locals, params, request }) =>
 		return apiJson('BundleScanResult', {
 			outcome: scan.outcome,
 			assetId: 'assetId' in scan ? scan.assetId : null,
+			scannedBundle: 'scannedBundle' in scan ? scan.scannedBundle : null,
 			otherBundle: scan.outcome === 'in_other_bundle' ? scan.otherBundle : null,
 			bundle: await bundleResponse(user.id, params.bundleId)
 		});

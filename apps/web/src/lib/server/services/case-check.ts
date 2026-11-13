@@ -1,7 +1,7 @@
 import { prisma } from '#lib/server/auth.js';
 import { ACTIVE_ASSET_WHERE } from '#lib/asset-status.js';
 import { countProducts, specShortfall } from '#lib/bundle-spec.js';
-import { bundleLabel, makerAndName } from '#lib/product-label.js';
+import { bundleLabel, makerAndName, withCaption } from '#lib/product-label.js';
 import { naturalCompare } from '#lib/sort.js';
 import { userLabel } from '#lib/user-label.svelte.js';
 import {
@@ -15,6 +15,7 @@ import { resolveScannedCode } from './asset-lookup';
 import { bundleTypeSpec } from './bundle-spec';
 import type { CaseCheckedData } from '#lib/types/asset-transaction.js';
 import { caseLabelLines, type CaseLabelData } from '#lib/server/case-label-zpl.js';
+import { kitAssetsWhere } from '#lib/bundle-nesting.js';
 
 // Checking a case (Kiste checken): open one kit, or one unit with its
 // accessories, and tick off what is in it. A stocktake for one box — but
@@ -68,6 +69,12 @@ export type CaseCheckItem = {
 	 * no surprise, and it is reported as away rather than missing.
 	 */
 	awayOn: string | null;
+	/**
+	 * The kit inside the case this unit is in — the adapter set in the FOH
+	 * case. The check lists it expanded, under the inner kit's name; the label
+	 * prints the inner kit as one line.
+	 */
+	innerKit: { id: string; name: string; tag: string | null } | null;
 };
 
 export type CaseCheck = CaseRef & {
@@ -155,6 +162,8 @@ const ITEM_SELECT = {
 	parentAssetId: true,
 	productId: true,
 	organizationId: true,
+	bundleId: true,
+	bundle: { select: { id: true, tag: true, template: { select: { name: true, caption: true } } } },
 	product: {
 		select: {
 			name: true,
@@ -188,12 +197,14 @@ async function loadCaseRows(ref: CaseRef) {
 				id: true,
 				tag: true,
 				templateId: true,
-				template: { select: { name: true, caption: true, organizationId: true } }
+				template: { select: { name: true, caption: true, organizationId: true } },
+				childBundles: { select: { templateId: true } }
 			}
 		});
 		if (!bundle) return null;
+		// The kits inside come along, expanded: opening the case means opening them.
 		const rows = await prisma.asset.findMany({
-			where: { bundleId: bundle.id, ...ACTIVE_ASSET_WHERE },
+			where: { ...kitAssetsWhere(bundle.id), ...ACTIVE_ASSET_WHERE },
 			select: ITEM_SELECT
 		});
 		return {
@@ -205,6 +216,7 @@ async function loadCaseRows(ref: CaseRef) {
 			code: bundle.tag,
 			organizationId: bundle.template.organizationId,
 			templateId: bundle.templateId,
+			innerKits: bundle.childBundles,
 			rows
 		};
 	}
@@ -228,6 +240,7 @@ async function loadCaseRows(ref: CaseRef) {
 		code: head.assetTag,
 		organizationId: head.organizationId,
 		templateId: null,
+		innerKits: [],
 		rows: [head, ...accessories]
 	};
 }
@@ -276,7 +289,15 @@ async function readCase(userId: string, ref: CaseRef) {
 			caption: row.product.caption,
 			imagePath: row.product.imagePath,
 			accessoryOf: row.parentAssetId && inCase.has(row.parentAssetId) ? row.parentAssetId : null,
-			awayOn: production && production.id !== caseProductionId ? nameOf(production) : null
+			awayOn: production && production.id !== caseProductionId ? nameOf(production) : null,
+			innerKit:
+				ref.kind === 'bundle' && row.bundle && row.bundleId !== ref.id
+					? {
+							id: row.bundle.id,
+							name: withCaption(row.bundle.template.name, row.bundle.template.caption),
+							tag: row.bundle.tag
+						}
+					: null
 		};
 	});
 
@@ -289,11 +310,19 @@ async function readCase(userId: string, ref: CaseRef) {
 	};
 }
 
-/** Units by name, each followed by its own accessories — the order they sit in the box. */
+/**
+ * Units by name, each followed by its own accessories — the order they sit in
+ * the box. The case's own units first, then each kit inside it with its units.
+ */
 function ordered(items: CaseCheckItem[]) {
 	const byName = (a: CaseCheckItem, b: CaseCheckItem) =>
 		naturalCompare(a.name, b.name) || a.orgIndex - b.orgIndex;
-	const tops = items.filter((i) => !i.accessoryOf).sort(byName);
+	const byKit = (a: CaseCheckItem, b: CaseCheckItem) =>
+		Number(a.innerKit !== null) - Number(b.innerKit !== null) ||
+		naturalCompare(a.innerKit?.name ?? '', b.innerKit?.name ?? '') ||
+		naturalCompare(a.innerKit?.tag ?? '', b.innerKit?.tag ?? '') ||
+		naturalCompare(a.innerKit?.id ?? '', b.innerKit?.id ?? '');
+	const tops = items.filter((i) => !i.accessoryOf).sort((a, b) => byKit(a, b) || byName(a, b));
 	return tops.flatMap((top) => [
 		top,
 		...items.filter((i) => i.accessoryOf === top.assetId).sort(byName)
@@ -303,10 +332,13 @@ function ordered(items: CaseCheckItem[]) {
 export async function getCaseCheck(userId: string, ref: CaseRef): Promise<CaseCheck> {
 	const { loaded, items, checkedOutTo, rows } = await readCase(userId, ref);
 
+	// Measured on the case's own units and its inner kits by type: what is in
+	// an inner kit is that kit's type's business.
 	const shortOfType = loaded.templateId
 		? await typeShortfall(
 				loaded.templateId,
-				rows.filter((r) => !r.parentAssetId)
+				rows.filter((r) => !r.parentAssetId && r.bundleId === ref.id),
+				loaded.innerKits
 			)
 		: [];
 
@@ -342,9 +374,13 @@ export async function getCaseCheck(userId: string, ref: CaseRef): Promise<CaseCh
 	};
 }
 
-async function typeShortfall(templateId: string, members: { productId: string }[]) {
+async function typeShortfall(
+	templateId: string,
+	members: { productId: string }[],
+	innerKits: { templateId: string }[]
+) {
 	const spec = await bundleTypeSpec(templateId);
-	return specShortfall(spec.lines, countProducts(members))
+	return specShortfall(spec.lines, countProducts(members, innerKits))
 		.filter(({ missing }) => missing > 0)
 		.map(({ line, missing }) => ({
 			name: makerAndName(line.manufacturerName, line.name),

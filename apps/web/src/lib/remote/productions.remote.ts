@@ -1,6 +1,7 @@
 import { naturalCompare } from '#lib/sort.js';
 import { query, command } from '$app/server';
 import { prisma } from '#lib/server/auth.js';
+import { kitAssetsWhere } from '#lib/bundle-nesting.js';
 import type { Prisma } from '#lib/prisma/client.js';
 import { sendMail } from '#lib/server/mail.js';
 import { appBaseUrl } from '#lib/server/app-url.js';
@@ -1366,6 +1367,27 @@ export const getAwaitingApprovals = query(async () => {
 
 // ── Bundles in productions ────────────────────────────────────────────────────
 
+/**
+ * A kit with every unit it carries, those of the kits inside it included:
+ * booking the FOH case books the adapter set in it.
+ */
+async function kitWithInnerAssets(bundleId: string) {
+	const bundle = await prisma.assetBundle.findUniqueOrThrow({
+		where: { id: bundleId },
+		include: { childBundles: { select: { id: true } } }
+	});
+	const assets = await prisma.asset.findMany({ where: kitAssetsWhere(bundleId) });
+	return { ...bundle, assets, innerIds: new Set(bundle.childBundles.map((kit) => kit.id)) };
+}
+
+/**
+ * Whether a booked member moves under the kit being booked: one booked on its
+ * own, or one booked as an inner kit of it — the case now ships whole.
+ */
+function adoptableSource(bundle: { innerIds: Set<string> }, sourceBundleId: string | null) {
+	return sourceBundleId === null || bundle.innerIds.has(sourceBundleId);
+}
+
 const addBundleSchema = v.object({
 	productionId: v.string(),
 	bundleId: v.string()
@@ -1380,10 +1402,7 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 	});
 	requireOpenProduction(production);
 
-	const bundle = await prisma.assetBundle.findUniqueOrThrow({
-		where: { id: data.bundleId },
-		include: { assets: true }
-	});
+	const bundle = await kitWithInnerAssets(data.bundleId);
 	const { asLender } = await requireEquipmentWrite(production, [
 		...new Set(bundle.assets.map((a) => a.organizationId))
 	]);
@@ -1402,7 +1421,7 @@ export const addBundleToProduction = command(addBundleSchema, async (data) => {
 	// unit listed both individually and under the bundle.
 	const bundleAssetIds = new Set(bundle.assets.map((a) => a.id));
 	const adoptable = existingItems.filter(
-		(i) => bundleAssetIds.has(i.assetId) && i.sourceBundleId === null
+		(i) => bundleAssetIds.has(i.assetId) && adoptableSource(bundle, i.sourceBundleId)
 	);
 
 	// A unit the bundle carries but that cannot be planned with is simply left
@@ -1604,10 +1623,7 @@ export const syncBundleInProduction = command(syncBundleSchema, async (data) => 
 	});
 	requireOpenProduction(production);
 
-	const bundle = await prisma.assetBundle.findUniqueOrThrow({
-		where: { id: data.bundleId },
-		include: { assets: true }
-	});
+	const bundle = await kitWithInnerAssets(data.bundleId);
 
 	const currentItems = await prisma.productionItem.findMany({
 		where: { productionId: data.productionId, sourceBundleId: data.bundleId },
@@ -1634,7 +1650,7 @@ export const syncBundleInProduction = command(syncBundleSchema, async (data) => 
 	// Members that are booked here on their own move under the bundle rather
 	// than staying listed twice — same rule as adding the bundle.
 	const adoptable = allProductionItems.filter(
-		(i) => bundleAssetIds.has(i.assetId) && i.sourceBundleId === null
+		(i) => bundleAssetIds.has(i.assetId) && adoptableSource(bundle, i.sourceBundleId)
 	);
 
 	let toAdd = bundle.assets.filter(

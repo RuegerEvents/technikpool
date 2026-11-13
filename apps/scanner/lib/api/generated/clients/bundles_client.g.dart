@@ -172,6 +172,36 @@ class _BundlesClient implements BundlesClient {
   }
 
   @override
+  Future<BundleDetail> removeBundleFromBundle({
+    required String bundleId,
+    required String innerBundleId,
+  }) async {
+    final _extra = <String, dynamic>{};
+    final queryParameters = <String, dynamic>{};
+    final _headers = <String, dynamic>{};
+    const Map<String, dynamic>? _data = null;
+    final _options = _setStreamType<BundleDetail>(
+      Options(method: 'DELETE', headers: _headers, extra: _extra)
+          .compose(
+            _dio.options,
+            '/api/v1/bundles/${bundleId}/bundles/${innerBundleId}',
+            queryParameters: queryParameters,
+            data: _data,
+          )
+          .copyWith(baseUrl: _combineBaseUrls(_dio.options.baseUrl, baseUrl)),
+    );
+    final _result = await _dio.fetch<Map<String, Object?>>(_options);
+    late BundleDetail _value;
+    try {
+      _value = BundleDetail.fromJson(_result.data!);
+    } on Object catch (e, s) {
+      errorLogger?.logError(e, s, _options, response: _result);
+      rethrow;
+    }
+    return _value;
+  }
+
+  @override
   Future<List<LooseGroup>> searchLooseForBundle({
     required String bundleId,
     required String q,

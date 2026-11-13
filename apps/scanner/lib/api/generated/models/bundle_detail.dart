@@ -5,6 +5,8 @@
 import 'package:json_annotation/json_annotation.dart';
 
 import 'bundle_unit.dart';
+import 'inner_bundle.dart';
+import 'kit_ref.dart';
 import 'location_ref.dart';
 
 part 'bundle_detail.g.dart';
@@ -21,7 +23,9 @@ class BundleDetail {
     required this.organizationId,
     required this.location,
     required this.unitCount,
+    required this.parentBundle,
     required this.units,
+    required this.innerBundles,
     required this.canEdit,
   });
   
@@ -40,11 +44,19 @@ class BundleDetail {
   /// The kit's own location; null for one that is wherever its units are.
   final LocationRef? location;
 
-  /// Units in it, not counting accessories.
+  /// Units in it, not counting accessories or the units of kits inside it.
   final int unitCount;
 
-  /// Each unit followed by its accessories, by product name.
+  /// The kit this one sits inside, if any. Kits nest one level deep.
+  final KitRef? parentBundle;
+
+  /// Each unit followed by its accessories, by product name. The.
+  /// units of kits inside it are theirs, not listed here.
+  ///
   final List<BundleUnit> units;
+
+  /// The kits that sit inside this one, by name.
+  final List<InnerBundle> innerBundles;
 
   /// Whether the caller may change what it holds (ADMIN or above).
   final bool canEdit;

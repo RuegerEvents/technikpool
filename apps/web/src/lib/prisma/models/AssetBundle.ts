@@ -38,6 +38,7 @@ export type AssetBundleMinAggregateOutputType = {
 	templateId: string | null;
 	tag: string | null;
 	locationId: string | null;
+	parentBundleId: string | null;
 	netPurchasePrice: runtime.Decimal | null;
 	imagePath: string | null;
 	imageFingerprint: string | null;
@@ -50,6 +51,7 @@ export type AssetBundleMaxAggregateOutputType = {
 	templateId: string | null;
 	tag: string | null;
 	locationId: string | null;
+	parentBundleId: string | null;
 	netPurchasePrice: runtime.Decimal | null;
 	imagePath: string | null;
 	imageFingerprint: string | null;
@@ -62,6 +64,7 @@ export type AssetBundleCountAggregateOutputType = {
 	templateId: number;
 	tag: number;
 	locationId: number;
+	parentBundleId: number;
 	netPurchasePrice: number;
 	imagePath: number;
 	imageFingerprint: number;
@@ -83,6 +86,7 @@ export type AssetBundleMinAggregateInputType = {
 	templateId?: true;
 	tag?: true;
 	locationId?: true;
+	parentBundleId?: true;
 	netPurchasePrice?: true;
 	imagePath?: true;
 	imageFingerprint?: true;
@@ -95,6 +99,7 @@ export type AssetBundleMaxAggregateInputType = {
 	templateId?: true;
 	tag?: true;
 	locationId?: true;
+	parentBundleId?: true;
 	netPurchasePrice?: true;
 	imagePath?: true;
 	imageFingerprint?: true;
@@ -107,6 +112,7 @@ export type AssetBundleCountAggregateInputType = {
 	templateId?: true;
 	tag?: true;
 	locationId?: true;
+	parentBundleId?: true;
 	netPurchasePrice?: true;
 	imagePath?: true;
 	imageFingerprint?: true;
@@ -209,6 +215,7 @@ export type AssetBundleGroupByOutputType = {
 	templateId: string;
 	tag: string | null;
 	locationId: string | null;
+	parentBundleId: string | null;
 	netPurchasePrice: runtime.Decimal | null;
 	imagePath: string | null;
 	imageFingerprint: string | null;
@@ -241,6 +248,7 @@ export type AssetBundleWhereInput = {
 	templateId?: Prisma.StringFilter<'AssetBundle'> | string;
 	tag?: Prisma.StringNullableFilter<'AssetBundle'> | string | null;
 	locationId?: Prisma.StringNullableFilter<'AssetBundle'> | string | null;
+	parentBundleId?: Prisma.StringNullableFilter<'AssetBundle'> | string | null;
 	netPurchasePrice?:
 		| Prisma.DecimalNullableFilter<'AssetBundle'>
 		| runtime.Decimal
@@ -259,6 +267,11 @@ export type AssetBundleWhereInput = {
 	> | null;
 	assets?: Prisma.AssetListRelationFilter;
 	productionItems?: Prisma.ProductionItemListRelationFilter;
+	parentBundle?: Prisma.XOR<
+		Prisma.AssetBundleNullableScalarRelationFilter,
+		Prisma.AssetBundleWhereInput
+	> | null;
+	childBundles?: Prisma.AssetBundleListRelationFilter;
 };
 
 export type AssetBundleOrderByWithRelationInput = {
@@ -266,6 +279,7 @@ export type AssetBundleOrderByWithRelationInput = {
 	templateId?: Prisma.SortOrder;
 	tag?: Prisma.SortOrderInput | Prisma.SortOrder;
 	locationId?: Prisma.SortOrderInput | Prisma.SortOrder;
+	parentBundleId?: Prisma.SortOrderInput | Prisma.SortOrder;
 	netPurchasePrice?: Prisma.SortOrderInput | Prisma.SortOrder;
 	imagePath?: Prisma.SortOrderInput | Prisma.SortOrder;
 	imageFingerprint?: Prisma.SortOrderInput | Prisma.SortOrder;
@@ -275,6 +289,8 @@ export type AssetBundleOrderByWithRelationInput = {
 	location?: Prisma.LocationOrderByWithRelationInput;
 	assets?: Prisma.AssetOrderByRelationAggregateInput;
 	productionItems?: Prisma.ProductionItemOrderByRelationAggregateInput;
+	parentBundle?: Prisma.AssetBundleOrderByWithRelationInput;
+	childBundles?: Prisma.AssetBundleOrderByRelationAggregateInput;
 };
 
 export type AssetBundleWhereUniqueInput = Prisma.AtLeast<
@@ -286,6 +302,7 @@ export type AssetBundleWhereUniqueInput = Prisma.AtLeast<
 		NOT?: Prisma.AssetBundleWhereInput | Prisma.AssetBundleWhereInput[];
 		templateId?: Prisma.StringFilter<'AssetBundle'> | string;
 		locationId?: Prisma.StringNullableFilter<'AssetBundle'> | string | null;
+		parentBundleId?: Prisma.StringNullableFilter<'AssetBundle'> | string | null;
 		netPurchasePrice?:
 			| Prisma.DecimalNullableFilter<'AssetBundle'>
 			| runtime.Decimal
@@ -307,6 +324,11 @@ export type AssetBundleWhereUniqueInput = Prisma.AtLeast<
 		> | null;
 		assets?: Prisma.AssetListRelationFilter;
 		productionItems?: Prisma.ProductionItemListRelationFilter;
+		parentBundle?: Prisma.XOR<
+			Prisma.AssetBundleNullableScalarRelationFilter,
+			Prisma.AssetBundleWhereInput
+		> | null;
+		childBundles?: Prisma.AssetBundleListRelationFilter;
 	},
 	'id' | 'tag'
 >;
@@ -316,6 +338,7 @@ export type AssetBundleOrderByWithAggregationInput = {
 	templateId?: Prisma.SortOrder;
 	tag?: Prisma.SortOrderInput | Prisma.SortOrder;
 	locationId?: Prisma.SortOrderInput | Prisma.SortOrder;
+	parentBundleId?: Prisma.SortOrderInput | Prisma.SortOrder;
 	netPurchasePrice?: Prisma.SortOrderInput | Prisma.SortOrder;
 	imagePath?: Prisma.SortOrderInput | Prisma.SortOrder;
 	imageFingerprint?: Prisma.SortOrderInput | Prisma.SortOrder;
@@ -340,6 +363,7 @@ export type AssetBundleScalarWhereWithAggregatesInput = {
 	templateId?: Prisma.StringWithAggregatesFilter<'AssetBundle'> | string;
 	tag?: Prisma.StringNullableWithAggregatesFilter<'AssetBundle'> | string | null;
 	locationId?: Prisma.StringNullableWithAggregatesFilter<'AssetBundle'> | string | null;
+	parentBundleId?: Prisma.StringNullableWithAggregatesFilter<'AssetBundle'> | string | null;
 	netPurchasePrice?:
 		| Prisma.DecimalNullableWithAggregatesFilter<'AssetBundle'>
 		| runtime.Decimal
@@ -365,6 +389,8 @@ export type AssetBundleCreateInput = {
 	location?: Prisma.LocationCreateNestedOneWithoutAssetBundlesInput;
 	assets?: Prisma.AssetCreateNestedManyWithoutBundleInput;
 	productionItems?: Prisma.ProductionItemCreateNestedManyWithoutSourceBundleInput;
+	parentBundle?: Prisma.AssetBundleCreateNestedOneWithoutChildBundlesInput;
+	childBundles?: Prisma.AssetBundleCreateNestedManyWithoutParentBundleInput;
 };
 
 export type AssetBundleUncheckedCreateInput = {
@@ -372,6 +398,7 @@ export type AssetBundleUncheckedCreateInput = {
 	templateId: string;
 	tag?: string | null;
 	locationId?: string | null;
+	parentBundleId?: string | null;
 	netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
 	imagePath?: string | null;
 	imageFingerprint?: string | null;
@@ -379,6 +406,7 @@ export type AssetBundleUncheckedCreateInput = {
 	updatedAt?: Date | string;
 	assets?: Prisma.AssetUncheckedCreateNestedManyWithoutBundleInput;
 	productionItems?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutSourceBundleInput;
+	childBundles?: Prisma.AssetBundleUncheckedCreateNestedManyWithoutParentBundleInput;
 };
 
 export type AssetBundleUpdateInput = {
@@ -399,6 +427,8 @@ export type AssetBundleUpdateInput = {
 	location?: Prisma.LocationUpdateOneWithoutAssetBundlesNestedInput;
 	assets?: Prisma.AssetUpdateManyWithoutBundleNestedInput;
 	productionItems?: Prisma.ProductionItemUpdateManyWithoutSourceBundleNestedInput;
+	parentBundle?: Prisma.AssetBundleUpdateOneWithoutChildBundlesNestedInput;
+	childBundles?: Prisma.AssetBundleUpdateManyWithoutParentBundleNestedInput;
 };
 
 export type AssetBundleUncheckedUpdateInput = {
@@ -406,6 +436,7 @@ export type AssetBundleUncheckedUpdateInput = {
 	templateId?: Prisma.StringFieldUpdateOperationsInput | string;
 	tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	parentBundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	netPurchasePrice?:
 		| Prisma.NullableDecimalFieldUpdateOperationsInput
 		| runtime.Decimal
@@ -419,6 +450,7 @@ export type AssetBundleUncheckedUpdateInput = {
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	assets?: Prisma.AssetUncheckedUpdateManyWithoutBundleNestedInput;
 	productionItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutSourceBundleNestedInput;
+	childBundles?: Prisma.AssetBundleUncheckedUpdateManyWithoutParentBundleNestedInput;
 };
 
 export type AssetBundleCreateManyInput = {
@@ -426,6 +458,7 @@ export type AssetBundleCreateManyInput = {
 	templateId: string;
 	tag?: string | null;
 	locationId?: string | null;
+	parentBundleId?: string | null;
 	netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
 	imagePath?: string | null;
 	imageFingerprint?: string | null;
@@ -454,6 +487,7 @@ export type AssetBundleUncheckedUpdateManyInput = {
 	templateId?: Prisma.StringFieldUpdateOperationsInput | string;
 	tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	parentBundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	netPurchasePrice?:
 		| Prisma.NullableDecimalFieldUpdateOperationsInput
 		| runtime.Decimal
@@ -487,6 +521,7 @@ export type AssetBundleCountOrderByAggregateInput = {
 	templateId?: Prisma.SortOrder;
 	tag?: Prisma.SortOrder;
 	locationId?: Prisma.SortOrder;
+	parentBundleId?: Prisma.SortOrder;
 	netPurchasePrice?: Prisma.SortOrder;
 	imagePath?: Prisma.SortOrder;
 	imageFingerprint?: Prisma.SortOrder;
@@ -503,6 +538,7 @@ export type AssetBundleMaxOrderByAggregateInput = {
 	templateId?: Prisma.SortOrder;
 	tag?: Prisma.SortOrder;
 	locationId?: Prisma.SortOrder;
+	parentBundleId?: Prisma.SortOrder;
 	netPurchasePrice?: Prisma.SortOrder;
 	imagePath?: Prisma.SortOrder;
 	imageFingerprint?: Prisma.SortOrder;
@@ -515,6 +551,7 @@ export type AssetBundleMinOrderByAggregateInput = {
 	templateId?: Prisma.SortOrder;
 	tag?: Prisma.SortOrder;
 	locationId?: Prisma.SortOrder;
+	parentBundleId?: Prisma.SortOrder;
 	netPurchasePrice?: Prisma.SortOrder;
 	imagePath?: Prisma.SortOrder;
 	imageFingerprint?: Prisma.SortOrder;
@@ -726,12 +763,126 @@ export type AssetBundleUncheckedUpdateManyWithoutTemplateNestedInput = {
 	deleteMany?: Prisma.AssetBundleScalarWhereInput | Prisma.AssetBundleScalarWhereInput[];
 };
 
+export type AssetBundleCreateNestedOneWithoutChildBundlesInput = {
+	create?: Prisma.XOR<
+		Prisma.AssetBundleCreateWithoutChildBundlesInput,
+		Prisma.AssetBundleUncheckedCreateWithoutChildBundlesInput
+	>;
+	connectOrCreate?: Prisma.AssetBundleCreateOrConnectWithoutChildBundlesInput;
+	connect?: Prisma.AssetBundleWhereUniqueInput;
+};
+
+export type AssetBundleCreateNestedManyWithoutParentBundleInput = {
+	create?:
+		| Prisma.XOR<
+				Prisma.AssetBundleCreateWithoutParentBundleInput,
+				Prisma.AssetBundleUncheckedCreateWithoutParentBundleInput
+		  >
+		| Prisma.AssetBundleCreateWithoutParentBundleInput[]
+		| Prisma.AssetBundleUncheckedCreateWithoutParentBundleInput[];
+	connectOrCreate?:
+		| Prisma.AssetBundleCreateOrConnectWithoutParentBundleInput
+		| Prisma.AssetBundleCreateOrConnectWithoutParentBundleInput[];
+	createMany?: Prisma.AssetBundleCreateManyParentBundleInputEnvelope;
+	connect?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[];
+};
+
+export type AssetBundleUncheckedCreateNestedManyWithoutParentBundleInput = {
+	create?:
+		| Prisma.XOR<
+				Prisma.AssetBundleCreateWithoutParentBundleInput,
+				Prisma.AssetBundleUncheckedCreateWithoutParentBundleInput
+		  >
+		| Prisma.AssetBundleCreateWithoutParentBundleInput[]
+		| Prisma.AssetBundleUncheckedCreateWithoutParentBundleInput[];
+	connectOrCreate?:
+		| Prisma.AssetBundleCreateOrConnectWithoutParentBundleInput
+		| Prisma.AssetBundleCreateOrConnectWithoutParentBundleInput[];
+	createMany?: Prisma.AssetBundleCreateManyParentBundleInputEnvelope;
+	connect?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[];
+};
+
 export type NullableDecimalFieldUpdateOperationsInput = {
 	set?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
 	increment?: runtime.Decimal | runtime.DecimalJsLike | number | string;
 	decrement?: runtime.Decimal | runtime.DecimalJsLike | number | string;
 	multiply?: runtime.Decimal | runtime.DecimalJsLike | number | string;
 	divide?: runtime.Decimal | runtime.DecimalJsLike | number | string;
+};
+
+export type AssetBundleUpdateOneWithoutChildBundlesNestedInput = {
+	create?: Prisma.XOR<
+		Prisma.AssetBundleCreateWithoutChildBundlesInput,
+		Prisma.AssetBundleUncheckedCreateWithoutChildBundlesInput
+	>;
+	connectOrCreate?: Prisma.AssetBundleCreateOrConnectWithoutChildBundlesInput;
+	upsert?: Prisma.AssetBundleUpsertWithoutChildBundlesInput;
+	disconnect?: Prisma.AssetBundleWhereInput | boolean;
+	delete?: Prisma.AssetBundleWhereInput | boolean;
+	connect?: Prisma.AssetBundleWhereUniqueInput;
+	update?: Prisma.XOR<
+		Prisma.XOR<
+			Prisma.AssetBundleUpdateToOneWithWhereWithoutChildBundlesInput,
+			Prisma.AssetBundleUpdateWithoutChildBundlesInput
+		>,
+		Prisma.AssetBundleUncheckedUpdateWithoutChildBundlesInput
+	>;
+};
+
+export type AssetBundleUpdateManyWithoutParentBundleNestedInput = {
+	create?:
+		| Prisma.XOR<
+				Prisma.AssetBundleCreateWithoutParentBundleInput,
+				Prisma.AssetBundleUncheckedCreateWithoutParentBundleInput
+		  >
+		| Prisma.AssetBundleCreateWithoutParentBundleInput[]
+		| Prisma.AssetBundleUncheckedCreateWithoutParentBundleInput[];
+	connectOrCreate?:
+		| Prisma.AssetBundleCreateOrConnectWithoutParentBundleInput
+		| Prisma.AssetBundleCreateOrConnectWithoutParentBundleInput[];
+	upsert?:
+		| Prisma.AssetBundleUpsertWithWhereUniqueWithoutParentBundleInput
+		| Prisma.AssetBundleUpsertWithWhereUniqueWithoutParentBundleInput[];
+	createMany?: Prisma.AssetBundleCreateManyParentBundleInputEnvelope;
+	set?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[];
+	disconnect?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[];
+	delete?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[];
+	connect?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[];
+	update?:
+		| Prisma.AssetBundleUpdateWithWhereUniqueWithoutParentBundleInput
+		| Prisma.AssetBundleUpdateWithWhereUniqueWithoutParentBundleInput[];
+	updateMany?:
+		| Prisma.AssetBundleUpdateManyWithWhereWithoutParentBundleInput
+		| Prisma.AssetBundleUpdateManyWithWhereWithoutParentBundleInput[];
+	deleteMany?: Prisma.AssetBundleScalarWhereInput | Prisma.AssetBundleScalarWhereInput[];
+};
+
+export type AssetBundleUncheckedUpdateManyWithoutParentBundleNestedInput = {
+	create?:
+		| Prisma.XOR<
+				Prisma.AssetBundleCreateWithoutParentBundleInput,
+				Prisma.AssetBundleUncheckedCreateWithoutParentBundleInput
+		  >
+		| Prisma.AssetBundleCreateWithoutParentBundleInput[]
+		| Prisma.AssetBundleUncheckedCreateWithoutParentBundleInput[];
+	connectOrCreate?:
+		| Prisma.AssetBundleCreateOrConnectWithoutParentBundleInput
+		| Prisma.AssetBundleCreateOrConnectWithoutParentBundleInput[];
+	upsert?:
+		| Prisma.AssetBundleUpsertWithWhereUniqueWithoutParentBundleInput
+		| Prisma.AssetBundleUpsertWithWhereUniqueWithoutParentBundleInput[];
+	createMany?: Prisma.AssetBundleCreateManyParentBundleInputEnvelope;
+	set?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[];
+	disconnect?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[];
+	delete?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[];
+	connect?: Prisma.AssetBundleWhereUniqueInput | Prisma.AssetBundleWhereUniqueInput[];
+	update?:
+		| Prisma.AssetBundleUpdateWithWhereUniqueWithoutParentBundleInput
+		| Prisma.AssetBundleUpdateWithWhereUniqueWithoutParentBundleInput[];
+	updateMany?:
+		| Prisma.AssetBundleUpdateManyWithWhereWithoutParentBundleInput
+		| Prisma.AssetBundleUpdateManyWithWhereWithoutParentBundleInput[];
+	deleteMany?: Prisma.AssetBundleScalarWhereInput | Prisma.AssetBundleScalarWhereInput[];
 };
 
 export type AssetBundleCreateNestedOneWithoutProductionItemsInput = {
@@ -773,12 +924,15 @@ export type AssetBundleCreateWithoutLocationInput = {
 	template: Prisma.BundleTemplateCreateNestedOneWithoutInstancesInput;
 	assets?: Prisma.AssetCreateNestedManyWithoutBundleInput;
 	productionItems?: Prisma.ProductionItemCreateNestedManyWithoutSourceBundleInput;
+	parentBundle?: Prisma.AssetBundleCreateNestedOneWithoutChildBundlesInput;
+	childBundles?: Prisma.AssetBundleCreateNestedManyWithoutParentBundleInput;
 };
 
 export type AssetBundleUncheckedCreateWithoutLocationInput = {
 	id?: string;
 	templateId: string;
 	tag?: string | null;
+	parentBundleId?: string | null;
 	netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
 	imagePath?: string | null;
 	imageFingerprint?: string | null;
@@ -786,6 +940,7 @@ export type AssetBundleUncheckedCreateWithoutLocationInput = {
 	updatedAt?: Date | string;
 	assets?: Prisma.AssetUncheckedCreateNestedManyWithoutBundleInput;
 	productionItems?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutSourceBundleInput;
+	childBundles?: Prisma.AssetBundleUncheckedCreateNestedManyWithoutParentBundleInput;
 };
 
 export type AssetBundleCreateOrConnectWithoutLocationInput = {
@@ -837,6 +992,7 @@ export type AssetBundleScalarWhereInput = {
 	templateId?: Prisma.StringFilter<'AssetBundle'> | string;
 	tag?: Prisma.StringNullableFilter<'AssetBundle'> | string | null;
 	locationId?: Prisma.StringNullableFilter<'AssetBundle'> | string | null;
+	parentBundleId?: Prisma.StringNullableFilter<'AssetBundle'> | string | null;
 	netPurchasePrice?:
 		| Prisma.DecimalNullableFilter<'AssetBundle'>
 		| runtime.Decimal
@@ -861,6 +1017,8 @@ export type AssetBundleCreateWithoutAssetsInput = {
 	template: Prisma.BundleTemplateCreateNestedOneWithoutInstancesInput;
 	location?: Prisma.LocationCreateNestedOneWithoutAssetBundlesInput;
 	productionItems?: Prisma.ProductionItemCreateNestedManyWithoutSourceBundleInput;
+	parentBundle?: Prisma.AssetBundleCreateNestedOneWithoutChildBundlesInput;
+	childBundles?: Prisma.AssetBundleCreateNestedManyWithoutParentBundleInput;
 };
 
 export type AssetBundleUncheckedCreateWithoutAssetsInput = {
@@ -868,12 +1026,14 @@ export type AssetBundleUncheckedCreateWithoutAssetsInput = {
 	templateId: string;
 	tag?: string | null;
 	locationId?: string | null;
+	parentBundleId?: string | null;
 	netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
 	imagePath?: string | null;
 	imageFingerprint?: string | null;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 	productionItems?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutSourceBundleInput;
+	childBundles?: Prisma.AssetBundleUncheckedCreateNestedManyWithoutParentBundleInput;
 };
 
 export type AssetBundleCreateOrConnectWithoutAssetsInput = {
@@ -921,6 +1081,8 @@ export type AssetBundleUpdateWithoutAssetsInput = {
 	template?: Prisma.BundleTemplateUpdateOneRequiredWithoutInstancesNestedInput;
 	location?: Prisma.LocationUpdateOneWithoutAssetBundlesNestedInput;
 	productionItems?: Prisma.ProductionItemUpdateManyWithoutSourceBundleNestedInput;
+	parentBundle?: Prisma.AssetBundleUpdateOneWithoutChildBundlesNestedInput;
+	childBundles?: Prisma.AssetBundleUpdateManyWithoutParentBundleNestedInput;
 };
 
 export type AssetBundleUncheckedUpdateWithoutAssetsInput = {
@@ -928,6 +1090,7 @@ export type AssetBundleUncheckedUpdateWithoutAssetsInput = {
 	templateId?: Prisma.StringFieldUpdateOperationsInput | string;
 	tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	parentBundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	netPurchasePrice?:
 		| Prisma.NullableDecimalFieldUpdateOperationsInput
 		| runtime.Decimal
@@ -940,6 +1103,7 @@ export type AssetBundleUncheckedUpdateWithoutAssetsInput = {
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	productionItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutSourceBundleNestedInput;
+	childBundles?: Prisma.AssetBundleUncheckedUpdateManyWithoutParentBundleNestedInput;
 };
 
 export type AssetBundleCreateWithoutTemplateInput = {
@@ -953,12 +1117,15 @@ export type AssetBundleCreateWithoutTemplateInput = {
 	location?: Prisma.LocationCreateNestedOneWithoutAssetBundlesInput;
 	assets?: Prisma.AssetCreateNestedManyWithoutBundleInput;
 	productionItems?: Prisma.ProductionItemCreateNestedManyWithoutSourceBundleInput;
+	parentBundle?: Prisma.AssetBundleCreateNestedOneWithoutChildBundlesInput;
+	childBundles?: Prisma.AssetBundleCreateNestedManyWithoutParentBundleInput;
 };
 
 export type AssetBundleUncheckedCreateWithoutTemplateInput = {
 	id?: string;
 	tag?: string | null;
 	locationId?: string | null;
+	parentBundleId?: string | null;
 	netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
 	imagePath?: string | null;
 	imageFingerprint?: string | null;
@@ -966,6 +1133,7 @@ export type AssetBundleUncheckedCreateWithoutTemplateInput = {
 	updatedAt?: Date | string;
 	assets?: Prisma.AssetUncheckedCreateNestedManyWithoutBundleInput;
 	productionItems?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutSourceBundleInput;
+	childBundles?: Prisma.AssetBundleUncheckedCreateNestedManyWithoutParentBundleInput;
 };
 
 export type AssetBundleCreateOrConnectWithoutTemplateInput = {
@@ -1009,6 +1177,178 @@ export type AssetBundleUpdateManyWithWhereWithoutTemplateInput = {
 	>;
 };
 
+export type AssetBundleCreateWithoutChildBundlesInput = {
+	id?: string;
+	tag?: string | null;
+	netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	imagePath?: string | null;
+	imageFingerprint?: string | null;
+	createdAt?: Date | string;
+	updatedAt?: Date | string;
+	template: Prisma.BundleTemplateCreateNestedOneWithoutInstancesInput;
+	location?: Prisma.LocationCreateNestedOneWithoutAssetBundlesInput;
+	assets?: Prisma.AssetCreateNestedManyWithoutBundleInput;
+	productionItems?: Prisma.ProductionItemCreateNestedManyWithoutSourceBundleInput;
+	parentBundle?: Prisma.AssetBundleCreateNestedOneWithoutChildBundlesInput;
+};
+
+export type AssetBundleUncheckedCreateWithoutChildBundlesInput = {
+	id?: string;
+	templateId: string;
+	tag?: string | null;
+	locationId?: string | null;
+	parentBundleId?: string | null;
+	netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	imagePath?: string | null;
+	imageFingerprint?: string | null;
+	createdAt?: Date | string;
+	updatedAt?: Date | string;
+	assets?: Prisma.AssetUncheckedCreateNestedManyWithoutBundleInput;
+	productionItems?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutSourceBundleInput;
+};
+
+export type AssetBundleCreateOrConnectWithoutChildBundlesInput = {
+	where: Prisma.AssetBundleWhereUniqueInput;
+	create: Prisma.XOR<
+		Prisma.AssetBundleCreateWithoutChildBundlesInput,
+		Prisma.AssetBundleUncheckedCreateWithoutChildBundlesInput
+	>;
+};
+
+export type AssetBundleCreateWithoutParentBundleInput = {
+	id?: string;
+	tag?: string | null;
+	netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	imagePath?: string | null;
+	imageFingerprint?: string | null;
+	createdAt?: Date | string;
+	updatedAt?: Date | string;
+	template: Prisma.BundleTemplateCreateNestedOneWithoutInstancesInput;
+	location?: Prisma.LocationCreateNestedOneWithoutAssetBundlesInput;
+	assets?: Prisma.AssetCreateNestedManyWithoutBundleInput;
+	productionItems?: Prisma.ProductionItemCreateNestedManyWithoutSourceBundleInput;
+	childBundles?: Prisma.AssetBundleCreateNestedManyWithoutParentBundleInput;
+};
+
+export type AssetBundleUncheckedCreateWithoutParentBundleInput = {
+	id?: string;
+	templateId: string;
+	tag?: string | null;
+	locationId?: string | null;
+	netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	imagePath?: string | null;
+	imageFingerprint?: string | null;
+	createdAt?: Date | string;
+	updatedAt?: Date | string;
+	assets?: Prisma.AssetUncheckedCreateNestedManyWithoutBundleInput;
+	productionItems?: Prisma.ProductionItemUncheckedCreateNestedManyWithoutSourceBundleInput;
+	childBundles?: Prisma.AssetBundleUncheckedCreateNestedManyWithoutParentBundleInput;
+};
+
+export type AssetBundleCreateOrConnectWithoutParentBundleInput = {
+	where: Prisma.AssetBundleWhereUniqueInput;
+	create: Prisma.XOR<
+		Prisma.AssetBundleCreateWithoutParentBundleInput,
+		Prisma.AssetBundleUncheckedCreateWithoutParentBundleInput
+	>;
+};
+
+export type AssetBundleCreateManyParentBundleInputEnvelope = {
+	data:
+		Prisma.AssetBundleCreateManyParentBundleInput | Prisma.AssetBundleCreateManyParentBundleInput[];
+	skipDuplicates?: boolean;
+};
+
+export type AssetBundleUpsertWithoutChildBundlesInput = {
+	update: Prisma.XOR<
+		Prisma.AssetBundleUpdateWithoutChildBundlesInput,
+		Prisma.AssetBundleUncheckedUpdateWithoutChildBundlesInput
+	>;
+	create: Prisma.XOR<
+		Prisma.AssetBundleCreateWithoutChildBundlesInput,
+		Prisma.AssetBundleUncheckedCreateWithoutChildBundlesInput
+	>;
+	where?: Prisma.AssetBundleWhereInput;
+};
+
+export type AssetBundleUpdateToOneWithWhereWithoutChildBundlesInput = {
+	where?: Prisma.AssetBundleWhereInput;
+	data: Prisma.XOR<
+		Prisma.AssetBundleUpdateWithoutChildBundlesInput,
+		Prisma.AssetBundleUncheckedUpdateWithoutChildBundlesInput
+	>;
+};
+
+export type AssetBundleUpdateWithoutChildBundlesInput = {
+	id?: Prisma.StringFieldUpdateOperationsInput | string;
+	tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	netPurchasePrice?:
+		| Prisma.NullableDecimalFieldUpdateOperationsInput
+		| runtime.Decimal
+		| runtime.DecimalJsLike
+		| number
+		| string
+		| null;
+	imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	imageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+	template?: Prisma.BundleTemplateUpdateOneRequiredWithoutInstancesNestedInput;
+	location?: Prisma.LocationUpdateOneWithoutAssetBundlesNestedInput;
+	assets?: Prisma.AssetUpdateManyWithoutBundleNestedInput;
+	productionItems?: Prisma.ProductionItemUpdateManyWithoutSourceBundleNestedInput;
+	parentBundle?: Prisma.AssetBundleUpdateOneWithoutChildBundlesNestedInput;
+};
+
+export type AssetBundleUncheckedUpdateWithoutChildBundlesInput = {
+	id?: Prisma.StringFieldUpdateOperationsInput | string;
+	templateId?: Prisma.StringFieldUpdateOperationsInput | string;
+	tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	parentBundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	netPurchasePrice?:
+		| Prisma.NullableDecimalFieldUpdateOperationsInput
+		| runtime.Decimal
+		| runtime.DecimalJsLike
+		| number
+		| string
+		| null;
+	imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	imageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+	assets?: Prisma.AssetUncheckedUpdateManyWithoutBundleNestedInput;
+	productionItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutSourceBundleNestedInput;
+};
+
+export type AssetBundleUpsertWithWhereUniqueWithoutParentBundleInput = {
+	where: Prisma.AssetBundleWhereUniqueInput;
+	update: Prisma.XOR<
+		Prisma.AssetBundleUpdateWithoutParentBundleInput,
+		Prisma.AssetBundleUncheckedUpdateWithoutParentBundleInput
+	>;
+	create: Prisma.XOR<
+		Prisma.AssetBundleCreateWithoutParentBundleInput,
+		Prisma.AssetBundleUncheckedCreateWithoutParentBundleInput
+	>;
+};
+
+export type AssetBundleUpdateWithWhereUniqueWithoutParentBundleInput = {
+	where: Prisma.AssetBundleWhereUniqueInput;
+	data: Prisma.XOR<
+		Prisma.AssetBundleUpdateWithoutParentBundleInput,
+		Prisma.AssetBundleUncheckedUpdateWithoutParentBundleInput
+	>;
+};
+
+export type AssetBundleUpdateManyWithWhereWithoutParentBundleInput = {
+	where: Prisma.AssetBundleScalarWhereInput;
+	data: Prisma.XOR<
+		Prisma.AssetBundleUpdateManyMutationInput,
+		Prisma.AssetBundleUncheckedUpdateManyWithoutParentBundleInput
+	>;
+};
+
 export type AssetBundleCreateWithoutProductionItemsInput = {
 	id?: string;
 	tag?: string | null;
@@ -1020,6 +1360,8 @@ export type AssetBundleCreateWithoutProductionItemsInput = {
 	template: Prisma.BundleTemplateCreateNestedOneWithoutInstancesInput;
 	location?: Prisma.LocationCreateNestedOneWithoutAssetBundlesInput;
 	assets?: Prisma.AssetCreateNestedManyWithoutBundleInput;
+	parentBundle?: Prisma.AssetBundleCreateNestedOneWithoutChildBundlesInput;
+	childBundles?: Prisma.AssetBundleCreateNestedManyWithoutParentBundleInput;
 };
 
 export type AssetBundleUncheckedCreateWithoutProductionItemsInput = {
@@ -1027,12 +1369,14 @@ export type AssetBundleUncheckedCreateWithoutProductionItemsInput = {
 	templateId: string;
 	tag?: string | null;
 	locationId?: string | null;
+	parentBundleId?: string | null;
 	netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
 	imagePath?: string | null;
 	imageFingerprint?: string | null;
 	createdAt?: Date | string;
 	updatedAt?: Date | string;
 	assets?: Prisma.AssetUncheckedCreateNestedManyWithoutBundleInput;
+	childBundles?: Prisma.AssetBundleUncheckedCreateNestedManyWithoutParentBundleInput;
 };
 
 export type AssetBundleCreateOrConnectWithoutProductionItemsInput = {
@@ -1080,6 +1424,8 @@ export type AssetBundleUpdateWithoutProductionItemsInput = {
 	template?: Prisma.BundleTemplateUpdateOneRequiredWithoutInstancesNestedInput;
 	location?: Prisma.LocationUpdateOneWithoutAssetBundlesNestedInput;
 	assets?: Prisma.AssetUpdateManyWithoutBundleNestedInput;
+	parentBundle?: Prisma.AssetBundleUpdateOneWithoutChildBundlesNestedInput;
+	childBundles?: Prisma.AssetBundleUpdateManyWithoutParentBundleNestedInput;
 };
 
 export type AssetBundleUncheckedUpdateWithoutProductionItemsInput = {
@@ -1087,6 +1433,7 @@ export type AssetBundleUncheckedUpdateWithoutProductionItemsInput = {
 	templateId?: Prisma.StringFieldUpdateOperationsInput | string;
 	tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	parentBundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	netPurchasePrice?:
 		| Prisma.NullableDecimalFieldUpdateOperationsInput
 		| runtime.Decimal
@@ -1099,12 +1446,14 @@ export type AssetBundleUncheckedUpdateWithoutProductionItemsInput = {
 	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	assets?: Prisma.AssetUncheckedUpdateManyWithoutBundleNestedInput;
+	childBundles?: Prisma.AssetBundleUncheckedUpdateManyWithoutParentBundleNestedInput;
 };
 
 export type AssetBundleCreateManyLocationInput = {
 	id?: string;
 	templateId: string;
 	tag?: string | null;
+	parentBundleId?: string | null;
 	netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
 	imagePath?: string | null;
 	imageFingerprint?: string | null;
@@ -1129,12 +1478,15 @@ export type AssetBundleUpdateWithoutLocationInput = {
 	template?: Prisma.BundleTemplateUpdateOneRequiredWithoutInstancesNestedInput;
 	assets?: Prisma.AssetUpdateManyWithoutBundleNestedInput;
 	productionItems?: Prisma.ProductionItemUpdateManyWithoutSourceBundleNestedInput;
+	parentBundle?: Prisma.AssetBundleUpdateOneWithoutChildBundlesNestedInput;
+	childBundles?: Prisma.AssetBundleUpdateManyWithoutParentBundleNestedInput;
 };
 
 export type AssetBundleUncheckedUpdateWithoutLocationInput = {
 	id?: Prisma.StringFieldUpdateOperationsInput | string;
 	templateId?: Prisma.StringFieldUpdateOperationsInput | string;
 	tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	parentBundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	netPurchasePrice?:
 		| Prisma.NullableDecimalFieldUpdateOperationsInput
 		| runtime.Decimal
@@ -1148,12 +1500,14 @@ export type AssetBundleUncheckedUpdateWithoutLocationInput = {
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	assets?: Prisma.AssetUncheckedUpdateManyWithoutBundleNestedInput;
 	productionItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutSourceBundleNestedInput;
+	childBundles?: Prisma.AssetBundleUncheckedUpdateManyWithoutParentBundleNestedInput;
 };
 
 export type AssetBundleUncheckedUpdateManyWithoutLocationInput = {
 	id?: Prisma.StringFieldUpdateOperationsInput | string;
 	templateId?: Prisma.StringFieldUpdateOperationsInput | string;
 	tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	parentBundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	netPurchasePrice?:
 		| Prisma.NullableDecimalFieldUpdateOperationsInput
 		| runtime.Decimal
@@ -1171,6 +1525,7 @@ export type AssetBundleCreateManyTemplateInput = {
 	id?: string;
 	tag?: string | null;
 	locationId?: string | null;
+	parentBundleId?: string | null;
 	netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
 	imagePath?: string | null;
 	imageFingerprint?: string | null;
@@ -1195,10 +1550,85 @@ export type AssetBundleUpdateWithoutTemplateInput = {
 	location?: Prisma.LocationUpdateOneWithoutAssetBundlesNestedInput;
 	assets?: Prisma.AssetUpdateManyWithoutBundleNestedInput;
 	productionItems?: Prisma.ProductionItemUpdateManyWithoutSourceBundleNestedInput;
+	parentBundle?: Prisma.AssetBundleUpdateOneWithoutChildBundlesNestedInput;
+	childBundles?: Prisma.AssetBundleUpdateManyWithoutParentBundleNestedInput;
 };
 
 export type AssetBundleUncheckedUpdateWithoutTemplateInput = {
 	id?: Prisma.StringFieldUpdateOperationsInput | string;
+	tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	parentBundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	netPurchasePrice?:
+		| Prisma.NullableDecimalFieldUpdateOperationsInput
+		| runtime.Decimal
+		| runtime.DecimalJsLike
+		| number
+		| string
+		| null;
+	imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	imageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+	assets?: Prisma.AssetUncheckedUpdateManyWithoutBundleNestedInput;
+	productionItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutSourceBundleNestedInput;
+	childBundles?: Prisma.AssetBundleUncheckedUpdateManyWithoutParentBundleNestedInput;
+};
+
+export type AssetBundleUncheckedUpdateManyWithoutTemplateInput = {
+	id?: Prisma.StringFieldUpdateOperationsInput | string;
+	tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	parentBundleId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	netPurchasePrice?:
+		| Prisma.NullableDecimalFieldUpdateOperationsInput
+		| runtime.Decimal
+		| runtime.DecimalJsLike
+		| number
+		| string
+		| null;
+	imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	imageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+};
+
+export type AssetBundleCreateManyParentBundleInput = {
+	id?: string;
+	templateId: string;
+	tag?: string | null;
+	locationId?: string | null;
+	netPurchasePrice?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	imagePath?: string | null;
+	imageFingerprint?: string | null;
+	createdAt?: Date | string;
+	updatedAt?: Date | string;
+};
+
+export type AssetBundleUpdateWithoutParentBundleInput = {
+	id?: Prisma.StringFieldUpdateOperationsInput | string;
+	tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	netPurchasePrice?:
+		| Prisma.NullableDecimalFieldUpdateOperationsInput
+		| runtime.Decimal
+		| runtime.DecimalJsLike
+		| number
+		| string
+		| null;
+	imagePath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	imageFingerprint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+	template?: Prisma.BundleTemplateUpdateOneRequiredWithoutInstancesNestedInput;
+	location?: Prisma.LocationUpdateOneWithoutAssetBundlesNestedInput;
+	assets?: Prisma.AssetUpdateManyWithoutBundleNestedInput;
+	productionItems?: Prisma.ProductionItemUpdateManyWithoutSourceBundleNestedInput;
+	childBundles?: Prisma.AssetBundleUpdateManyWithoutParentBundleNestedInput;
+};
+
+export type AssetBundleUncheckedUpdateWithoutParentBundleInput = {
+	id?: Prisma.StringFieldUpdateOperationsInput | string;
+	templateId?: Prisma.StringFieldUpdateOperationsInput | string;
 	tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	netPurchasePrice?:
@@ -1214,10 +1644,12 @@ export type AssetBundleUncheckedUpdateWithoutTemplateInput = {
 	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
 	assets?: Prisma.AssetUncheckedUpdateManyWithoutBundleNestedInput;
 	productionItems?: Prisma.ProductionItemUncheckedUpdateManyWithoutSourceBundleNestedInput;
+	childBundles?: Prisma.AssetBundleUncheckedUpdateManyWithoutParentBundleNestedInput;
 };
 
-export type AssetBundleUncheckedUpdateManyWithoutTemplateInput = {
+export type AssetBundleUncheckedUpdateManyWithoutParentBundleInput = {
 	id?: Prisma.StringFieldUpdateOperationsInput | string;
+	templateId?: Prisma.StringFieldUpdateOperationsInput | string;
 	tag?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	locationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	netPurchasePrice?:
@@ -1240,6 +1672,7 @@ export type AssetBundleUncheckedUpdateManyWithoutTemplateInput = {
 export type AssetBundleCountOutputType = {
 	assets: number;
 	productionItems: number;
+	childBundles: number;
 };
 
 export type AssetBundleCountOutputTypeSelect<
@@ -1247,6 +1680,7 @@ export type AssetBundleCountOutputTypeSelect<
 > = {
 	assets?: boolean | AssetBundleCountOutputTypeCountAssetsArgs;
 	productionItems?: boolean | AssetBundleCountOutputTypeCountProductionItemsArgs;
+	childBundles?: boolean | AssetBundleCountOutputTypeCountChildBundlesArgs;
 };
 
 /**
@@ -1279,6 +1713,15 @@ export type AssetBundleCountOutputTypeCountProductionItemsArgs<
 	where?: Prisma.ProductionItemWhereInput;
 };
 
+/**
+ * AssetBundleCountOutputType without action
+ */
+export type AssetBundleCountOutputTypeCountChildBundlesArgs<
+	ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs
+> = {
+	where?: Prisma.AssetBundleWhereInput;
+};
+
 export type AssetBundleSelect<
 	ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs
 > = runtime.Types.Extensions.GetSelect<
@@ -1287,6 +1730,7 @@ export type AssetBundleSelect<
 		templateId?: boolean;
 		tag?: boolean;
 		locationId?: boolean;
+		parentBundleId?: boolean;
 		netPurchasePrice?: boolean;
 		imagePath?: boolean;
 		imageFingerprint?: boolean;
@@ -1296,6 +1740,8 @@ export type AssetBundleSelect<
 		location?: boolean | Prisma.AssetBundle$locationArgs<ExtArgs>;
 		assets?: boolean | Prisma.AssetBundle$assetsArgs<ExtArgs>;
 		productionItems?: boolean | Prisma.AssetBundle$productionItemsArgs<ExtArgs>;
+		parentBundle?: boolean | Prisma.AssetBundle$parentBundleArgs<ExtArgs>;
+		childBundles?: boolean | Prisma.AssetBundle$childBundlesArgs<ExtArgs>;
 		_count?: boolean | Prisma.AssetBundleCountOutputTypeDefaultArgs<ExtArgs>;
 	},
 	ExtArgs['result']['assetBundle']
@@ -1309,6 +1755,7 @@ export type AssetBundleSelectCreateManyAndReturn<
 		templateId?: boolean;
 		tag?: boolean;
 		locationId?: boolean;
+		parentBundleId?: boolean;
 		netPurchasePrice?: boolean;
 		imagePath?: boolean;
 		imageFingerprint?: boolean;
@@ -1316,6 +1763,7 @@ export type AssetBundleSelectCreateManyAndReturn<
 		updatedAt?: boolean;
 		template?: boolean | Prisma.BundleTemplateDefaultArgs<ExtArgs>;
 		location?: boolean | Prisma.AssetBundle$locationArgs<ExtArgs>;
+		parentBundle?: boolean | Prisma.AssetBundle$parentBundleArgs<ExtArgs>;
 	},
 	ExtArgs['result']['assetBundle']
 >;
@@ -1328,6 +1776,7 @@ export type AssetBundleSelectUpdateManyAndReturn<
 		templateId?: boolean;
 		tag?: boolean;
 		locationId?: boolean;
+		parentBundleId?: boolean;
 		netPurchasePrice?: boolean;
 		imagePath?: boolean;
 		imageFingerprint?: boolean;
@@ -1335,6 +1784,7 @@ export type AssetBundleSelectUpdateManyAndReturn<
 		updatedAt?: boolean;
 		template?: boolean | Prisma.BundleTemplateDefaultArgs<ExtArgs>;
 		location?: boolean | Prisma.AssetBundle$locationArgs<ExtArgs>;
+		parentBundle?: boolean | Prisma.AssetBundle$parentBundleArgs<ExtArgs>;
 	},
 	ExtArgs['result']['assetBundle']
 >;
@@ -1344,6 +1794,7 @@ export type AssetBundleSelectScalar = {
 	templateId?: boolean;
 	tag?: boolean;
 	locationId?: boolean;
+	parentBundleId?: boolean;
 	netPurchasePrice?: boolean;
 	imagePath?: boolean;
 	imageFingerprint?: boolean;
@@ -1358,6 +1809,7 @@ export type AssetBundleOmit<
 	| 'templateId'
 	| 'tag'
 	| 'locationId'
+	| 'parentBundleId'
 	| 'netPurchasePrice'
 	| 'imagePath'
 	| 'imageFingerprint'
@@ -1372,6 +1824,8 @@ export type AssetBundleInclude<
 	location?: boolean | Prisma.AssetBundle$locationArgs<ExtArgs>;
 	assets?: boolean | Prisma.AssetBundle$assetsArgs<ExtArgs>;
 	productionItems?: boolean | Prisma.AssetBundle$productionItemsArgs<ExtArgs>;
+	parentBundle?: boolean | Prisma.AssetBundle$parentBundleArgs<ExtArgs>;
+	childBundles?: boolean | Prisma.AssetBundle$childBundlesArgs<ExtArgs>;
 	_count?: boolean | Prisma.AssetBundleCountOutputTypeDefaultArgs<ExtArgs>;
 };
 export type AssetBundleIncludeCreateManyAndReturn<
@@ -1379,12 +1833,14 @@ export type AssetBundleIncludeCreateManyAndReturn<
 > = {
 	template?: boolean | Prisma.BundleTemplateDefaultArgs<ExtArgs>;
 	location?: boolean | Prisma.AssetBundle$locationArgs<ExtArgs>;
+	parentBundle?: boolean | Prisma.AssetBundle$parentBundleArgs<ExtArgs>;
 };
 export type AssetBundleIncludeUpdateManyAndReturn<
 	ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs
 > = {
 	template?: boolean | Prisma.BundleTemplateDefaultArgs<ExtArgs>;
 	location?: boolean | Prisma.AssetBundle$locationArgs<ExtArgs>;
+	parentBundle?: boolean | Prisma.AssetBundle$parentBundleArgs<ExtArgs>;
 };
 
 export type $AssetBundlePayload<
@@ -1396,6 +1852,8 @@ export type $AssetBundlePayload<
 		location: Prisma.$LocationPayload<ExtArgs> | null;
 		assets: Prisma.$AssetPayload<ExtArgs>[];
 		productionItems: Prisma.$ProductionItemPayload<ExtArgs>[];
+		parentBundle: Prisma.$AssetBundlePayload<ExtArgs> | null;
+		childBundles: Prisma.$AssetBundlePayload<ExtArgs>[];
 	};
 	scalars: runtime.Types.Extensions.GetPayloadResult<
 		{
@@ -1403,6 +1861,7 @@ export type $AssetBundlePayload<
 			templateId: string;
 			tag: string | null;
 			locationId: string | null;
+			parentBundleId: string | null;
 			netPurchasePrice: runtime.Decimal | null;
 			imagePath: string | null;
 			imageFingerprint: string | null;
@@ -1995,6 +2454,30 @@ export interface Prisma__AssetBundleClient<
 		  >
 		| Null
 	>;
+	parentBundle<T extends Prisma.AssetBundle$parentBundleArgs<ExtArgs> = {}>(
+		args?: Prisma.Subset<T, Prisma.AssetBundle$parentBundleArgs<ExtArgs>>
+	): Prisma.Prisma__AssetBundleClient<
+		runtime.Types.Result.GetResult<
+			Prisma.$AssetBundlePayload<ExtArgs>,
+			T,
+			'findUniqueOrThrow',
+			GlobalOmitOptions
+		> | null,
+		null,
+		ExtArgs,
+		GlobalOmitOptions
+	>;
+	childBundles<T extends Prisma.AssetBundle$childBundlesArgs<ExtArgs> = {}>(
+		args?: Prisma.Subset<T, Prisma.AssetBundle$childBundlesArgs<ExtArgs>>
+	): Prisma.PrismaPromise<
+		| runtime.Types.Result.GetResult<
+				Prisma.$AssetBundlePayload<ExtArgs>,
+				T,
+				'findMany',
+				GlobalOmitOptions
+		  >
+		| Null
+	>;
 	/**
 	 * Attaches callbacks for the resolution and/or rejection of the Promise.
 	 * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2030,6 +2513,7 @@ export interface AssetBundleFieldRefs {
 	readonly templateId: Prisma.FieldRef<'AssetBundle', 'String'>;
 	readonly tag: Prisma.FieldRef<'AssetBundle', 'String'>;
 	readonly locationId: Prisma.FieldRef<'AssetBundle', 'String'>;
+	readonly parentBundleId: Prisma.FieldRef<'AssetBundle', 'String'>;
 	readonly netPurchasePrice: Prisma.FieldRef<'AssetBundle', 'Decimal'>;
 	readonly imagePath: Prisma.FieldRef<'AssetBundle', 'String'>;
 	readonly imageFingerprint: Prisma.FieldRef<'AssetBundle', 'String'>;
@@ -2543,6 +3027,54 @@ export type AssetBundle$productionItemsArgs<
 	take?: number;
 	skip?: number;
 	distinct?: Prisma.ProductionItemScalarFieldEnum | Prisma.ProductionItemScalarFieldEnum[];
+};
+
+/**
+ * AssetBundle.parentBundle
+ */
+export type AssetBundle$parentBundleArgs<
+	ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs
+> = {
+	/**
+	 * Select specific fields to fetch from the AssetBundle
+	 */
+	select?: Prisma.AssetBundleSelect<ExtArgs> | null;
+	/**
+	 * Omit specific fields from the AssetBundle
+	 */
+	omit?: Prisma.AssetBundleOmit<ExtArgs> | null;
+	/**
+	 * Choose, which related nodes to fetch as well
+	 */
+	include?: Prisma.AssetBundleInclude<ExtArgs> | null;
+	where?: Prisma.AssetBundleWhereInput;
+};
+
+/**
+ * AssetBundle.childBundles
+ */
+export type AssetBundle$childBundlesArgs<
+	ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs
+> = {
+	/**
+	 * Select specific fields to fetch from the AssetBundle
+	 */
+	select?: Prisma.AssetBundleSelect<ExtArgs> | null;
+	/**
+	 * Omit specific fields from the AssetBundle
+	 */
+	omit?: Prisma.AssetBundleOmit<ExtArgs> | null;
+	/**
+	 * Choose, which related nodes to fetch as well
+	 */
+	include?: Prisma.AssetBundleInclude<ExtArgs> | null;
+	where?: Prisma.AssetBundleWhereInput;
+	orderBy?:
+		Prisma.AssetBundleOrderByWithRelationInput | Prisma.AssetBundleOrderByWithRelationInput[];
+	cursor?: Prisma.AssetBundleWhereUniqueInput;
+	take?: number;
+	skip?: number;
+	distinct?: Prisma.AssetBundleScalarFieldEnum | Prisma.AssetBundleScalarFieldEnum[];
 };
 
 /**

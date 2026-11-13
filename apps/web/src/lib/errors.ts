@@ -146,6 +146,13 @@ export type AppErrorCode =
 	| 'bundle_member_billed'
 	| 'bundle_member_has_accessories'
 	| 'bundle_template_in_use'
+	| 'bundle_nest_self'
+	| 'bundle_nest_outer_nested'
+	| 'bundle_nest_inner_has_kits'
+	| 'bundle_nest_org_mismatch'
+	| 'bundle_in_other_bundle'
+	| 'bundle_kit_not_in_type'
+	| 'bundle_kit_quantity_exceeded'
 	// Productions
 	| 'dates_end_before_start'
 	| 'show_end_before_show_start'

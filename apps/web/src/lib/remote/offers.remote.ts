@@ -1,5 +1,6 @@
 import { query, command } from '$app/server';
 import { prisma } from '#lib/server/auth.js';
+import { inBookedKit } from '#lib/bundle-nesting.js';
 import * as v from 'valibot';
 import {
 	customerRecipient,
@@ -349,6 +350,17 @@ async function computeProductionBilling(
 								include: {
 									template: {
 										include: { category: true, organization: { select: { id: true, name: true } } }
+									},
+									// Units of a kit inside the booked one bill on the outer kit's line.
+									parentBundle: {
+										include: {
+											template: {
+												include: {
+													category: true,
+													organization: { select: { id: true, name: true } }
+												}
+											}
+										}
 									}
 								}
 							}
@@ -407,10 +419,13 @@ async function computeProductionBilling(
 	// picked individually bills as itself, because a kit price can't be charged
 	// for a kit that didn't ship. A unit that has left its bundle since it was
 	// booked bills individually for the same reason.
+	// A unit of a kit inside the booked one is part of the outer kit's line.
 	const billedAsBundle = (item: (typeof scopedItems)[number]) =>
-		item.sourceBundleId !== null && item.asset.bundleId === item.sourceBundleId
-			? item.asset.bundle
-			: null;
+		!inBookedKit(item)
+			? null
+			: item.asset.bundleId === item.sourceBundleId
+				? item.asset.bundle
+				: (item.asset.bundle?.parentBundle ?? null);
 
 	const bundleById = new Map(
 		scopedItems
@@ -430,7 +445,10 @@ async function computeProductionBilling(
 	// booked on its own gets no such hint, since a bundle price wouldn't cover it.
 	function noteMissingPrice(
 		asset: (typeof scopedItems)[number]['asset'],
-		viaBundle: (typeof scopedItems)[number]['asset']['bundle'] = null
+		viaBundle: Omit<
+			NonNullable<(typeof scopedItems)[number]['asset']['bundle']>,
+			'parentBundle'
+		> | null = null
 	) {
 		const key = `product:${asset.productId}`;
 		let group = unpricedByProduct.get(key);
@@ -2515,6 +2533,7 @@ export const getLoanCosts = query(
 					select: {
 						organizationId: true,
 						bundleId: true,
+						bundle: { select: { parentBundleId: true } },
 						organization: { select: { name: true, shortName: true } }
 					}
 				}
@@ -2583,7 +2602,7 @@ export const getLoanCosts = query(
 		>();
 		for (const unit of lent) {
 			if (unit.sourceParentAssetId && lentIds.has(unit.sourceParentAssetId)) continue;
-			const asKit = unit.sourceBundleId !== null && unit.asset.bundleId === unit.sourceBundleId;
+			const asKit = inBookedKit(unit);
 			const key = asKit ? `bundle:${unit.sourceBundleId}` : unit.assetId;
 			const entry = entries.get(key);
 			if (entry) {

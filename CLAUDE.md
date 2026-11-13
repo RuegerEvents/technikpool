@@ -281,6 +281,25 @@ withdrawing it bumps the version and kills every older link. It stops opening 30
 production's end. The page gets `ShareView` (`src/lib/production-share.ts`) and nothing else — no
 prices, no customer record. Created from the "Customer link" menu on the production page (MEMBER+).
 
+## Kits inside kits
+
+A bundle can sit in exactly one other bundle, **one level deep** (`AssetBundle.parentBundleId`):
+the PowerCon set in the FOH case. A kit holding kits goes into none, and nesting across orgs is
+refused; the pure rules are in `src/lib/bundle-nesting.ts` (`nestingRefusal`, `inBookedKit`,
+`bookedKitFor`, `kitAssetsWhere`). An inner kit follows the outer one's location.
+
+- **Booking keeps one column.** Booking the outer kit stamps its id as `sourceBundleId` on the
+  inner kit's units too; the inner kit is read off `Asset.bundleId`, the outer one off that kit's
+  `parentBundleId`, so a list heads an inner unit by its own kit (`ListKit.parent`) and still
+  counts it in the outer one. The inner kit can also be booked alone, and the outer then counts as
+  incomplete. "Still in its booked kit" is `inBookedKit`, never `bundleId === sourceBundleId`.
+- **Bundle types count kit types.** `bundleTypeSpec` lines carry `kind` and `key` (a product id
+  or `bundle:<templateId>`), and every spec helper counts by `key`.
+- **Shown:** one line on the case label ("1× PowerCon-Set") and one tile on the inventory list;
+  expanded on the delivery note, packing list, Kiste checken and the stocktake.
+- Plan and what comes next (swapping interchangeable units, pack cases):
+  `docs/plans/bundles-nested-swap-packcases.md`.
+
 ## Case labels (Kistenetikett)
 
 A kit, or a unit with its accessories (the same "case" as Kiste checken), gets a label for its
@@ -320,6 +339,13 @@ drawn by `SheetProgress`) and hands over the bytes. The tab is opened on the cli
 afterwards, since a tab opened after an `await` is a blocked popup. Each click passes a fresh
 `request`, or the live query's cache would answer with the previous PDF. The plain GET routes
 stay for links and bookmarks.
+
+A kit's **inventory list** (Inventarliste, for the lid of its case) is a PDF of its own:
+`/assets/bundles/[id]/inventory-list?size=a4|a5&layout=grid|list`, always landscape, offered by
+a menu on the bundle page. Pictures and counts only, no tags or serials: one tile per product
+and accessory set (`inventoryTiles` in `src/lib/server/bundle-inventory-pdf.ts`), accessories
+as "je 1× …" underneath. Data and access (as `getBundle`) in `services/bundle-inventory.ts`.
+Both renderers shrink pictures through `pdf-thumbnail.ts`, cached per size.
 
 ## Service lines on offers and invoices
 
@@ -707,7 +733,7 @@ src/routes/
 └── calendar/+page.svelte
 ```
 
-Print routes (`/crew-passes`, `/inventory-list`, `…/print`) bypass the app header — detected via regex in `+layout.svelte`.
+Print routes (`/crew-passes`, `…/print`) bypass the app header — detected via regex in `+layout.svelte`.
 
 ## UI Components
 
@@ -827,7 +853,7 @@ ordinary style. Two things to know about that boundary:
   children are not rendered at all. That is the trade: the shell arrives immediately, and the
   data comes from the client.
 
-**Print routes keep `await`** (`crew-passes`, `inventory-list`). A page that is about to be printed should arrive complete, and nobody is
+**Print routes keep `await`** (`crew-passes`, `…/print`). A page that is about to be printed should arrive complete, and nobody is
 watching it load.
 
 **Shared components answer to the same rule**, because a component that suspends takes the page

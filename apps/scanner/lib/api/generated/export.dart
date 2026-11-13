@@ -139,6 +139,8 @@ export 'models/handout_addition.dart';
 export 'models/handout_addition_request.dart';
 export 'models/count_result.dart';
 export 'models/bundle_summary.dart';
+export 'models/kit_ref.dart';
+export 'models/inner_bundle.dart';
 export 'models/location_ref.dart';
 export 'models/bundle_unit.dart';
 export 'models/bundle_detail.dart';
