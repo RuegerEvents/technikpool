@@ -130,21 +130,36 @@ void main() {
     expect(find.text('History'), findsOneWidget);
   });
 
-  testWidgets('the filters scroll away and come back', (tester) async {
+  testWidgets('the filters scroll away with the list, as far as it moved', (tester) async {
     await pump(tester, height: 900);
     await tester.tap(find.text('All Devices'));
     await settle(tester);
-    double factor() =>
-        tester.widget<AnimatedAlign>(find.byType(AnimatedAlign)).heightFactor!;
-    expect(factor(), 1);
+    // The header floats over the list; how far it is pushed up is its top.
+    final header = find.ancestor(
+      of: find.byType(SegmentedButton<InventoryGrouping>),
+      matching: find.byType(Positioned),
+    );
+    double hidden() => -tester.widget<Positioned>(header).top!;
+    double height() => tester.getSize(header).height;
+    double scrolled() =>
+        tester.state<ScrollableState>(find.byType(Scrollable).first).position.pixels;
+    expect(hidden(), 0);
 
-    await tester.drag(find.byType(ListView), const Offset(0, -300));
+    // A short move takes the header along by exactly as much, not all of it.
+    await tester.drag(find.byType(ListView), const Offset(0, -80));
     await tester.pumpAndSettle();
-    expect(factor(), 0);
+    expect(hidden(), closeTo(scrolled(), 0.5));
+    expect(hidden(), lessThan(height()));
 
+    await tester.drag(find.byType(ListView), const Offset(0, -400));
+    await tester.pumpAndSettle();
+    expect(hidden(), height());
+
+    // Moving back up brings it back by as much, wherever the list is.
+    final before = scrolled();
     await tester.drag(find.byType(ListView), const Offset(0, 60));
     await tester.pumpAndSettle();
-    expect(factor(), 1);
+    expect(hidden(), closeTo(height() - (before - scrolled()), 0.5));
   });
 
   test('the bundle view sorts kits in among the products', () {

@@ -1,7 +1,8 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
-import 'package:flutter/rendering.dart' show ScrollDirection;
+import 'package:flutter/rendering.dart' show RenderProxyBox;
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../api/client.dart';
@@ -75,9 +76,14 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   bool _cameraOpen = false;
 
   /// The grouping, search and filters: three rows a PDA can ill spare, so
-  /// they slide away while the list scrolls down and come back on the first
-  /// move up.
-  bool _headerShown = true;
+  /// they scroll away with the list, pixel for pixel, and come back the same
+  /// way on a move up. They float over the list, whose top padding is their
+  /// height — resizing the list instead would move its rows twice as fast as
+  /// the finger and clip the top one.
+  double _headerHeight = 0;
+
+  /// How much of the header is pushed up out of sight.
+  double _headerHidden = 0;
 
   InventoryGrouping get _grouping =>
       ref.read(inventoryGroupingProvider).value ?? InventoryGrouping.bundles;
@@ -185,20 +191,34 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     if (mounted) setState(() => _cameraOpen = false);
   }
 
-  /// Hides the filters while the list scrolls down, shows them on the first
-  /// move up and whenever the list is back at its top.
-  bool _onListScroll(ScrollNotification n) {
-    if (n.depth != 0) return false;
-    final atTop = n.metrics.pixels <= n.metrics.minScrollExtent;
-    var show = _headerShown;
-    if (n is UserScrollNotification) {
-      if (n.direction == ScrollDirection.reverse) show = false;
-      if (n.direction == ScrollDirection.forward) show = true;
-    } else if (n is ScrollUpdateNotification && atTop) {
-      show = true;
+  /// Moves the filters by exactly as far as the list scrolled. Never more
+  /// than the list has scrolled from its top, since the space they leave is
+  /// the list's own padding: back at the top they are always fully there.
+  bool _onListScroll(Notification n) {
+    final ScrollMetrics metrics;
+    var hidden = _headerHidden;
+    if (n is ScrollUpdateNotification && n.depth == 0) {
+      metrics = n.metrics;
+      hidden += n.scrollDelta ?? 0;
+    } else if (n is ScrollMetricsNotification && n.depth == 0) {
+      // The list was replaced or its rows changed under a still finger.
+      metrics = n.metrics;
+    } else {
+      return false;
     }
-    if (show != _headerShown) setState(() => _headerShown = show);
+    if (metrics.axis != Axis.vertical) return false;
+    final scrolled = math.max(0.0, metrics.pixels - metrics.minScrollExtent);
+    hidden = hidden.clamp(0.0, math.min(_headerHeight, scrolled));
+    if (hidden != _headerHidden) setState(() => _headerHidden = hidden);
     return false;
+  }
+
+  void _headerMeasured(double height) {
+    if (!mounted || height == _headerHeight) return;
+    setState(() {
+      _headerHeight = height;
+      _headerHidden = math.min(_headerHidden, height);
+    });
   }
 
   Future<void> _load({bool reset = false}) async {
@@ -309,17 +329,6 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       ),
       body: Column(
         children: [
-          // Kept mounted while hidden, so the search keeps its text and the
-          // filters their choice.
-          ClipRect(
-            child: AnimatedAlign(
-              alignment: Alignment.topCenter,
-              heightFactor: _headerShown ? 1 : 0,
-              duration: const Duration(milliseconds: 200),
-              curve: Curves.easeOut,
-              child: _header(l10n, grouping, locations, categories),
-            ),
-          ),
           if (_loading || _resolving)
             const LinearProgressIndicator()
           else
@@ -333,19 +342,46 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
               ),
             ),
           Expanded(
-            child: NotificationListener<ScrollNotification>(
-              onNotification: _onListScroll,
-              child: RefreshIndicator(
-                onRefresh: () async {
-                  ref.invalidate(bundlesProvider);
-                  await _load(reset: true);
-                },
-                child: switch (grouping) {
-                  InventoryGrouping.devices => _devices(l10n),
-                  InventoryGrouping.products => _products(l10n),
-                  InventoryGrouping.bundles => _bundleView(l10n, categories),
-                },
-              ),
+            child: Stack(
+              children: [
+                NotificationListener<Notification>(
+                  onNotification: _onListScroll,
+                  child: RefreshIndicator(
+                    // Pulled down only at the top, where the header is all
+                    // there: the spinner comes out from under it.
+                    edgeOffset: _headerHeight,
+                    onRefresh: () async {
+                      ref.invalidate(bundlesProvider);
+                      await _load(reset: true);
+                    },
+                    child: switch (grouping) {
+                      InventoryGrouping.devices => _devices(l10n),
+                      InventoryGrouping.products => _products(l10n),
+                      InventoryGrouping.bundles => _bundleView(
+                        l10n,
+                        categories,
+                      ),
+                    },
+                  ),
+                ),
+                // Kept mounted while out of sight, so the search keeps its
+                // text and the filters their choice.
+                Positioned(
+                  top: -_headerHidden,
+                  left: 0,
+                  right: 0,
+                  child: _HeightReporter(
+                    onHeight: _headerMeasured,
+                    child: ColoredBox(
+                      color: Theme.of(context).scaffoldBackgroundColor,
+                      child: Padding(
+                        padding: const EdgeInsets.only(bottom: 4),
+                        child: _header(l10n, grouping, locations, categories),
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ),
           ),
         ],
@@ -487,6 +523,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
   Widget _list(S l10n, int count, Widget Function(int) row, {Widget? tail}) {
     if (count == 0 && !_loading && _error == null) {
       return ListView(
+        padding: EdgeInsets.only(top: _headerHeight),
         children: [
           Padding(
             padding: const EdgeInsets.all(24),
@@ -504,7 +541,7 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
     return ListView.separated(
       keyboardDismissBehavior: ScrollViewKeyboardDismissBehavior.onDrag,
       // Clear of the "+" floating over the list's end.
-      padding: const EdgeInsets.only(bottom: 88),
+      padding: EdgeInsets.only(top: _headerHeight, bottom: 88),
       itemCount: count + (tail == null ? 0 : 1),
       separatorBuilder: (_, _) => const Divider(height: 1),
       itemBuilder: (_, i) => i == count ? tail! : row(i),
@@ -700,4 +737,40 @@ class _InventoryScreenState extends ConsumerState<InventoryScreen> {
       ),
     ),
   );
+}
+
+/// Hands its child's height to [onHeight] after each layout that changed it —
+/// the header's, which the list below needs as its top padding and which
+/// grows by a line when the demo's tag hint shows.
+class _HeightReporter extends SingleChildRenderObjectWidget {
+  const _HeightReporter({required this.onHeight, required super.child});
+
+  final ValueChanged<double> onHeight;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) =>
+      _RenderHeightReporter(onHeight);
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    _RenderHeightReporter renderObject,
+  ) => renderObject.onHeight = onHeight;
+}
+
+class _RenderHeightReporter extends RenderProxyBox {
+  _RenderHeightReporter(this.onHeight);
+
+  ValueChanged<double> onHeight;
+  double? _reported;
+
+  @override
+  void performLayout() {
+    super.performLayout();
+    final height = size.height;
+    if (height == _reported) return;
+    _reported = height;
+    // Layout is no place for a setState.
+    WidgetsBinding.instance.addPostFrameCallback((_) => onHeight(height));
+  }
 }
