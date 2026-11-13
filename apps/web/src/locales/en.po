@@ -207,6 +207,7 @@ msgstr "Crew"
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
+#: src/routes/assets/bundles/[id]/inventory-list-menu.svelte
 #: src/routes/assets/bundles/new/+page.svelte
 #: src/routes/assets/by-location/+page.svelte
 #: src/routes/assets/equipment-list-modal.svelte
@@ -12676,6 +12677,7 @@ msgstr[1] "# organizations"
 
 #: src/lib/equipment-sheet-download.svelte.ts
 #: src/routes/assets/bundles/[id]/inventory-list-menu.svelte
+#: src/routes/assets/bundles/[id]/inventory-list-menu.svelte
 msgid "Inventory list"
 msgstr "Inventory list"
 
@@ -12691,6 +12693,7 @@ msgstr "One line per product and kit with how many there are, by category — wh
 msgid "Everything by location, with every unit's tag or serial number."
 msgstr "Everything by location, with every unit's tag or serial number."
 
+#: src/routes/assets/bundles/[id]/inventory-list-menu.svelte
 #: src/routes/assets/equipment-list-modal.svelte
 msgid "Layout"
 msgstr "Layout"
@@ -14116,21 +14119,17 @@ msgstr "This bundle type does not hold a bundle of that type. Every case of a ty
 msgid "This bundle type holds no more \"{0}\" than it already has."
 msgstr "This bundle type holds no more \"{0}\" than it already has."
 
-#: src/routes/assets/bundles/[id]/inventory-list-menu.svelte
-msgid "A4, tiles"
-msgstr "A4, tiles"
+#~ msgid "A4, tiles"
+#~ msgstr "A4, tiles"
 
-#: src/routes/assets/bundles/[id]/inventory-list-menu.svelte
-msgid "A4, list"
-msgstr "A4, list"
+#~ msgid "A4, list"
+#~ msgstr "A4, list"
 
-#: src/routes/assets/bundles/[id]/inventory-list-menu.svelte
-msgid "A5, tiles"
-msgstr "A5, tiles"
+#~ msgid "A5, tiles"
+#~ msgstr "A5, tiles"
 
-#: src/routes/assets/bundles/[id]/inventory-list-menu.svelte
-msgid "A5, list"
-msgstr "A5, list"
+#~ msgid "A5, list"
+#~ msgstr "A5, list"
 
 #. 0: row.kit.parent.name
 #. 0: withCaption( kit.inside.template.name, kit.inside.template.caption )
@@ -14453,3 +14452,31 @@ msgstr "Released — <0/> went out instead"
 #: src/routes/assets/[id]/asset-detail.svelte
 msgid "· for <0/>"
 msgstr "· for <0/>"
+
+#: src/routes/assets/bundles/[id]/inventory-list-menu.svelte
+msgid "A4"
+msgstr "A4"
+
+#: src/routes/assets/bundles/[id]/inventory-list-menu.svelte
+msgid "A5"
+msgstr "A5"
+
+#: src/routes/assets/bundles/[id]/inventory-list-menu.svelte
+msgid "Page size"
+msgstr "Page size"
+
+#: src/routes/assets/bundles/[id]/inventory-list-menu.svelte
+msgid "Tiles"
+msgstr "Tiles"
+
+#: src/routes/assets/bundles/[id]/inventory-list-menu.svelte
+msgid "List"
+msgstr "List"
+
+#: src/routes/assets/bundles/[id]/inventory-list-menu.svelte
+msgid "For the lid of the case, always landscape: what belongs in it, with pictures."
+msgstr "For the lid of the case, always landscape: what belongs in it, with pictures."
+
+#: src/routes/assets/bundles/[id]/inventory-list-menu.svelte
+msgid "Open PDF"
+msgstr "Open PDF"

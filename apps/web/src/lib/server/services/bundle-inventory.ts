@@ -2,6 +2,7 @@ import { error } from '@sveltejs/kit';
 import { prisma } from '#lib/server/auth.js';
 import { ACTIVE_ASSET_WHERE } from '#lib/asset-status.js';
 import { naturalCompare } from '#lib/sort.js';
+import { bundleCaseUnit } from '#lib/bundle-case.js';
 import { isSystemAdmin, userOrgIds } from './access';
 import {
 	generateBundleInventoryPdf,
@@ -87,8 +88,14 @@ export async function renderBundleInventory(
 					id: true,
 					parentAssetId: true,
 					productId: true,
+					orgIndex: true,
 					product: {
-						select: { name: true, imagePath: true, manufacturer: { select: { name: true } } }
+						select: {
+							name: true,
+							imagePath: true,
+							isContainer: true,
+							manufacturer: { select: { name: true } }
+						}
 					}
 				}
 			},
@@ -114,6 +121,17 @@ export async function renderBundleInventory(
 		error(403, 'Forbidden');
 	}
 
+	// The kit's own case is where this sheet is stuck, not something packed in
+	// it: it and whatever hangs off it are left off the list.
+	const caseUnit = bundleCaseUnit(
+		bundle.assets
+			.filter((asset) => !asset.parentAssetId)
+			.map((asset) => ({ ...asset, isContainer: asset.product.isContainer }))
+	);
+	const contents = bundle.assets.filter(
+		(asset) => asset.id !== caseUnit?.id && asset.parentAssetId !== caseUnit?.id
+	);
+
 	const org = bundle.template.organization;
 	const sheet: InventorySheet = {
 		name: bundle.template.name,
@@ -121,10 +139,10 @@ export async function renderBundleInventory(
 		tag: bundle.tag,
 		organization: { name: org.shortName ?? org.name, logoPath: org.logoPath },
 		unitCount:
-			bundle.assets.length + bundle.childBundles.reduce((sum, kit) => sum + kit.assets.length, 0),
+			contents.length + bundle.childBundles.reduce((sum, kit) => sum + kit.assets.length, 0),
 		tiles: [
 			...inventoryTiles(
-				bundle.assets.map((asset) => ({
+				contents.map((asset) => ({
 					id: asset.id,
 					parentId: asset.parentAssetId,
 					productId: asset.productId,
