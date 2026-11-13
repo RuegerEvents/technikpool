@@ -23,6 +23,9 @@ import {
 	requireProductionRead
 } from '#lib/server/services/access.js';
 import { fmtDate } from '../pdf-text';
+import { cableColorSchemes } from './cable-colors';
+import { bandColor, cableBandFor, sortBands } from '#lib/cable-colors.js';
+import { formatLength } from '#lib/cable.js';
 import { productionRentalTerms } from './rental-terms';
 import { rentalTermsNote } from '#lib/rental-terms-text.js';
 import type { OrgListLayout, SheetKind } from '#lib/equipment-sheet.js';
@@ -248,6 +251,8 @@ async function pricingFor(organizationId: string): Promise<Pricing> {
 }
 
 type PendingLine = EquipmentSheetLine & {
+	/** The product a unit line is for; null on a kit's line, which shows no colour. */
+	productId: string | null;
 	group: ListGroup;
 	/** The pack case the line's units travel in; such lines are listed under it. */
 	packCase: ListCase | null;
@@ -276,10 +281,13 @@ async function sheetGroups(
 	{
 		pricing = null,
 		identifiers = true,
-		caseOf = () => null
+		caseOf = () => null,
+		colorOf = () => null
 	}: {
 		pricing?: Pricing | null;
 		identifiers?: boolean;
+		/** A unit's cable colour, by its owner's scheme — see `sheetCableColors`. */
+		colorOf?: (asset: Unit['asset']) => { hex: string; name: string } | null;
 		/** On a production: the pack case a unit is listed under — see #lib/pack-cases.ts. */
 		caseOf?: (item: Unit) => ListCase | null;
 	} = {}
@@ -343,6 +351,7 @@ async function sheetGroups(
 		add(
 			`${sectionKey(packCase, group)}|product:${asset.productId}|${inkl ?? ''}`,
 			() => ({
+				productId: asset.productId,
 				group,
 				packCase,
 				units: [],
@@ -366,6 +375,7 @@ async function sheetGroups(
 		add(
 			`${sectionKey(packCase, group)}|bundle:${bundle.templateId}|${contents}`,
 			() => ({
+				productId: null,
 				group,
 				packCase,
 				units: [],
@@ -413,8 +423,17 @@ async function sheetGroups(
 		quantity,
 		unitPrice,
 		imagePath,
-		units
+		units,
+		productId
 	} of lines.values()) {
+		// One per owner whose scheme colours the line's units: lent and own
+		// cables of one length can be taped differently.
+		const colours = new Map<string, { hex: string; name: string }>();
+		for (const unit of units) {
+			if (unit.productId !== productId) continue;
+			const colour = colorOf(unit);
+			if (colour) colours.set(`${colour.hex}|${colour.name}`, colour);
+		}
 		const key = sectionKey(packCase, group);
 		if (!groups.has(key)) groups.set(key, { group, packCase, lines: [] });
 		groups.get(key)!.lines.push({
@@ -424,7 +443,8 @@ async function sheetGroups(
 			quantity,
 			unitPrice,
 			imagePath,
-			inspection: inspectionProof(units)
+			inspection: inspectionProof(units),
+			cableColors: [...colours.values()]
 		});
 	}
 	// Cases first, a case inside another right after it; then what is loose,
@@ -533,6 +553,7 @@ async function deliveryNoteSheet(
 	const { customer } = production;
 	const venue = venueOf(production);
 	const rentalTerms = await productionRentalTerms(production);
+	const colors = await sheetCableColors(production.items);
 	return {
 		title: 'Lieferschein',
 		organization: letterhead(production.organization),
@@ -563,8 +584,10 @@ async function deliveryNoteSheet(
 		prices: false,
 		empty: 'Dieser Produktion ist noch keine Ausrüstung zugeordnet.',
 		groups: await sheetGroups(production.items, byCategory, report, {
-			caseOf: await productionCaseOf(productionId)
+			caseOf: await productionCaseOf(productionId),
+			colorOf: colors.colorOf
 		}),
+		cableLegend: colors.legend,
 		// Hand-over: the note travels with the goods and is signed on both sides.
 		// With rental terms, the signature confirms receipt under them (their
 		// § 4); without, the note says in a sentence what they would have.
@@ -603,6 +626,7 @@ async function packingListSheet(
 		? production.items.filter((item) => item.asset.organizationId === ownerOrgId)
 		: production.items;
 	const lender = owner.id !== production.organizationId;
+	const colors = await sheetCableColors(items);
 	return {
 		title: 'Packliste',
 		organization: letterhead(owner),
@@ -618,11 +642,50 @@ async function packingListSheet(
 		prices: false,
 		empty: 'Für diese Produktion ist nichts zu packen.',
 		groups: await sheetGroups(items, byShelf(owner.id), report, {
-			caseOf: await productionCaseOf(productionId)
+			caseOf: await productionCaseOf(productionId),
+			colorOf: colors.colorOf
 		}),
+		cableLegend: colors.legend,
 		closing: [],
 		signatures: ['Gepackt', 'Geprüft']
 	};
+}
+
+/**
+ * The cable colours of a sheet's units, each by its owner's scheme, and the
+ * legend for every owner whose colours appear — German, like the sheet.
+ */
+async function sheetCableColors(items: Unit[]) {
+	const schemes = await cableColorSchemes(items.map((item) => item.asset.organizationId));
+	const colorOf = (asset: Unit['asset']) => {
+		const band = cableBandFor(asset.product.lengthCm, schemes.get(asset.organizationId) ?? []);
+		const colour = band ? bandColor(band) : null;
+		return colour ? { hex: colour.hex, name: colour.nameDe } : null;
+	};
+	const owners = new Map<string, string>();
+	for (const item of items) {
+		if (colorOf(item.asset))
+			owners.set(item.asset.organizationId, orgLabel(item.asset.organization));
+	}
+	const legend = [...owners].map(([organizationId, name]) => ({
+		name,
+		rows: sortBands(schemes.get(organizationId) ?? []).flatMap((band, index, sorted) => {
+			const colour = bandColor(band);
+			if (!colour) return [];
+			const upTo = formatLength(band.maxLengthCm);
+			return [
+				{
+					hex: colour.hex,
+					name: colour.nameDe,
+					range:
+						index === 0
+							? `bis ${upTo}`
+							: `über ${formatLength(sorted[index - 1].maxLengthCm)} bis ${upTo}`
+				}
+			];
+		})
+	}));
+	return { colorOf, legend };
 }
 
 /** Which pack case a production's item is listed under. */
@@ -698,17 +761,18 @@ async function orgListSheet(
 		prices ? pricingFor(organizationId) : null
 	]);
 	// A kit's line holds the units that are in it now.
-	const units = assets.map((asset) => ({
+	const units: Unit[] = assets.map((asset) => ({
 		assetId: asset.id,
 		// A kit inside another one is listed on the outer kit's line.
 		sourceBundleId: asset.bundle?.parentBundleId ?? asset.bundleId,
 		asset
 	}));
+	const colors = await sheetCableColors(units);
 	const groups = await sheetGroups(
 		units,
 		catalogue ? byCategory : byShelf(organizationId),
 		report,
-		{ pricing, identifiers: !catalogue }
+		{ pricing, identifiers: !catalogue, colorOf: colors.colorOf }
 	);
 	const unpriced = groups.some((g) => g.lines.some((line) => line.unitPrice === null));
 	return {
@@ -722,6 +786,7 @@ async function orgListSheet(
 		prices: pricing !== null,
 		empty: 'Hier sind noch keine Geräte erfasst.',
 		groups,
+		cableLegend: colors.legend,
 		closing: pricing
 			? [
 					'Mietpreise pro Tag und Stück, netto zzgl. gesetzlicher MwSt.',

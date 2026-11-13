@@ -84,6 +84,8 @@ export const LIST_ITEM_INCLUDE = {
 					caption: true,
 					imagePath: true,
 					isContainer: true,
+					// For the cable colour, with the owner's scheme (#lib/cable-colors).
+					lengthCm: true,
 					manufacturer: { select: { name: true } }
 				}
 			},
@@ -273,6 +275,8 @@ export function buildLines(
 			productImagePath: item.asset.product.imagePath,
 			manufacturerName: item.asset.product.manufacturer?.name ?? null,
 			lentBy: lent ? lenderLabel(item) : null,
+			ownerOrgId: item.asset.organizationId,
+			lengthCm: item.asset.product.lengthCm,
 			group: groupOf(item, productionOrgId, byLender),
 			assetIds: [],
 			order: [],

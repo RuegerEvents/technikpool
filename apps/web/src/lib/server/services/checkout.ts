@@ -43,6 +43,9 @@ export interface ScannedAsset {
 	productName: string;
 	productCaption: string | null;
 	manufacturerName: string | null;
+	/** The unit's org and its product's length: what the cable colour is read off. */
+	ownerOrgId?: string;
+	lengthCm?: number | null;
 }
 
 export interface ScanResult {
@@ -677,7 +680,9 @@ export async function performScan(
 		assetTag: asset.assetTag ?? input.assetTag,
 		productName: asset.product.name,
 		productCaption: asset.product.caption,
-		manufacturerName: asset.product.manufacturer?.name ?? null
+		manufacturerName: asset.product.manufacturer?.name ?? null,
+		ownerOrgId: asset.organizationId,
+		lengthCm: asset.product.lengthCm
 	};
 
 	// Scanning a unit does the same thing to whatever is attached to it: the

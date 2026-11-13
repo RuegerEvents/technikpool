@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { CableColorDot } from '#lib/components/ui/cable-color/index.js';
 	import { BackButton } from '#lib/components/ui/back-button/index.js';
 	import { CameraScanButton } from '#lib/components/ui/camera-scan/index.js';
 	import { userLabel } from '#lib/user-label.svelte.js';
@@ -710,6 +711,11 @@
 							]
 								.filter(Boolean)
 								.join(' · ')}
+							<CableColorDot
+								organizationId={asset.organizationId}
+								lengthCm={asset.product.lengthCm}
+								withName
+							/>
 						</p>
 					{/if}
 				</div>

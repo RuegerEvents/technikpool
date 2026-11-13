@@ -105,6 +105,8 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 		manufacturerName: string | null;
 		/** Both ends of a cable, and a loom's ways: searched, not shown. */
 		cableEnds: string;
+		/** For the cable colour, with the owner's scheme (#lib/cable-colors). */
+		lengthCm: number | null;
 		categoryId: string;
 		categoryName: string;
 		categoryNameDe: string | null;
@@ -157,6 +159,7 @@ export const getEquipmentEditorData = query(v.string(), async (productionId: str
 				]
 					.filter(Boolean)
 					.join(' '),
+				lengthCm: a.product.lengthCm,
 				categoryId: a.product.categoryId,
 				categoryName: a.product.category.name,
 				categoryNameDe: a.product.category.nameDe,

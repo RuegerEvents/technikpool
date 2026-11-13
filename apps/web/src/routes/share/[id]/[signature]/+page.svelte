@@ -1,4 +1,6 @@
 <script lang="ts">
+	import { CableColorLegend, CableColorSwatch } from '#lib/components/ui/cable-color/index.js';
+	import { bandDisplay } from '#lib/cable-colors.svelte.js';
 	// What a customer sees behind their info link, in three tabs: the booked
 	// equipment at a glance, the manuals and datasheets for it, and a checklist
 	// to pack and check against. Ticks live in this browser only (localStorage) —
@@ -533,6 +535,22 @@
 				{/if}
 			</div>
 
+			{#if view.cableColors?.length}
+				<!-- Which colour of tape marks which length: the customer does not
+				     know the code of whoever owns the cables. -->
+				<section class="mt-8 space-y-3 rounded-lg border bg-background p-3">
+					<h2 class="font-semibold">Cable colours</h2>
+					{#each view.cableColors as scheme (scheme.organization)}
+						<div class="space-y-1">
+							{#if view.cableColors.length > 1}
+								<p class="text-xs font-medium text-muted-foreground">{scheme.organization}</p>
+							{/if}
+							<CableColorLegend bands={scheme.bands} />
+						</div>
+					{/each}
+				</section>
+			{/if}
+
 			<footer class="mt-8 space-y-2 text-xs text-muted-foreground">
 				{#if tab === 'pack' || view.expiresAt}
 					<p class="flex items-start gap-1.5">
@@ -637,6 +655,15 @@
 					class="block text-sm font-medium {packed.has(unit.id) ? 'line-through opacity-60' : ''}"
 				>
 					{withCaption(unit.name, unit.caption)}
+					{#if unit.cableColor}
+						{@const colour = bandDisplay(unit.cableColor)}
+						{#if colour}
+							<span
+								class="ml-1 inline-flex items-center gap-1 text-xs font-normal text-muted-foreground"
+								><CableColorSwatch hex={colour.hex} name={colour.name} />{colour.name}</span
+							>
+						{/if}
+					{/if}
 				</span>
 				<span class="block text-xs text-muted-foreground">
 					{[unit.manufacturer, unit.tag].filter(Boolean).join(' · ')}

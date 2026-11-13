@@ -54,6 +54,7 @@ export const ModelName = {
 	Verification: 'Verification',
 	DeviceCode: 'DeviceCode',
 	Organization: 'Organization',
+	CableColorBand: 'CableColorBand',
 	OrgMembership: 'OrgMembership',
 	SystemSettings: 'SystemSettings',
 	LegalDocument: 'LegalDocument',
@@ -237,6 +238,18 @@ export const OrganizationScalarFieldEnum = {
 
 export type OrganizationScalarFieldEnum =
 	(typeof OrganizationScalarFieldEnum)[keyof typeof OrganizationScalarFieldEnum];
+
+export const CableColorBandScalarFieldEnum = {
+	id: 'id',
+	organizationId: 'organizationId',
+	maxLengthCm: 'maxLengthCm',
+	paletteKey: 'paletteKey',
+	customName: 'customName',
+	customHex: 'customHex'
+} as const;
+
+export type CableColorBandScalarFieldEnum =
+	(typeof CableColorBandScalarFieldEnum)[keyof typeof CableColorBandScalarFieldEnum];
 
 export const OrgMembershipScalarFieldEnum = {
 	id: 'id',

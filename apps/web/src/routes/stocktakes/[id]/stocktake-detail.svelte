@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { CableColorDot } from '#lib/components/ui/cable-color/index.js';
 	import { matchesSearch } from '#lib/search.js';
 	import { naturalCompare } from '#lib/sort.js';
 	import { userLabel } from '#lib/user-label.svelte.js';
@@ -836,6 +837,10 @@
 														>{p.product.manufacturer.name}</span
 													>{/if}
 												{p.product.name}
+												<CableColorDot
+													organizationId={stocktake.organizationId}
+													lengthCm={p.product.lengthCm}
+												/>
 											</p>
 											<CategoryPill
 												name={categoryLabel(p.product.category)}
@@ -964,6 +969,10 @@
 														>{item.asset.product.manufacturer.name}</span
 													>{/if}
 												{item.asset.product.name}
+												<CableColorDot
+													organizationId={item.asset.organizationId}
+													lengthCm={item.asset.product.lengthCm}
+												/>
 											</p>
 											<p class="text-xs text-muted-foreground">
 												{item.asset.assetTag ?? item.asset.serialNumber ?? 'No tag'}

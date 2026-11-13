@@ -396,6 +396,7 @@ export const ModelName = {
 	Verification: 'Verification',
 	DeviceCode: 'DeviceCode',
 	Organization: 'Organization',
+	CableColorBand: 'CableColorBand',
 	OrgMembership: 'OrgMembership',
 	SystemSettings: 'SystemSettings',
 	LegalDocument: 'LegalDocument',
@@ -475,6 +476,7 @@ export type TypeMap<
 			| 'verification'
 			| 'deviceCode'
 			| 'organization'
+			| 'cableColorBand'
 			| 'orgMembership'
 			| 'systemSettings'
 			| 'legalDocument'
@@ -974,6 +976,81 @@ export type TypeMap<
 					args: Prisma.OrganizationCountArgs<ExtArgs>;
 					result:
 						runtime.Types.Utils.Optional<Prisma.OrganizationCountAggregateOutputType> | number;
+				};
+			};
+		};
+		CableColorBand: {
+			payload: Prisma.$CableColorBandPayload<ExtArgs>;
+			fields: Prisma.CableColorBandFieldRefs;
+			operations: {
+				findUnique: {
+					args: Prisma.CableColorBandFindUniqueArgs<ExtArgs>;
+					result: runtime.Types.Utils.PayloadToResult<Prisma.$CableColorBandPayload> | null;
+				};
+				findUniqueOrThrow: {
+					args: Prisma.CableColorBandFindUniqueOrThrowArgs<ExtArgs>;
+					result: runtime.Types.Utils.PayloadToResult<Prisma.$CableColorBandPayload>;
+				};
+				findFirst: {
+					args: Prisma.CableColorBandFindFirstArgs<ExtArgs>;
+					result: runtime.Types.Utils.PayloadToResult<Prisma.$CableColorBandPayload> | null;
+				};
+				findFirstOrThrow: {
+					args: Prisma.CableColorBandFindFirstOrThrowArgs<ExtArgs>;
+					result: runtime.Types.Utils.PayloadToResult<Prisma.$CableColorBandPayload>;
+				};
+				findMany: {
+					args: Prisma.CableColorBandFindManyArgs<ExtArgs>;
+					result: runtime.Types.Utils.PayloadToResult<Prisma.$CableColorBandPayload>[];
+				};
+				create: {
+					args: Prisma.CableColorBandCreateArgs<ExtArgs>;
+					result: runtime.Types.Utils.PayloadToResult<Prisma.$CableColorBandPayload>;
+				};
+				createMany: {
+					args: Prisma.CableColorBandCreateManyArgs<ExtArgs>;
+					result: BatchPayload;
+				};
+				createManyAndReturn: {
+					args: Prisma.CableColorBandCreateManyAndReturnArgs<ExtArgs>;
+					result: runtime.Types.Utils.PayloadToResult<Prisma.$CableColorBandPayload>[];
+				};
+				delete: {
+					args: Prisma.CableColorBandDeleteArgs<ExtArgs>;
+					result: runtime.Types.Utils.PayloadToResult<Prisma.$CableColorBandPayload>;
+				};
+				update: {
+					args: Prisma.CableColorBandUpdateArgs<ExtArgs>;
+					result: runtime.Types.Utils.PayloadToResult<Prisma.$CableColorBandPayload>;
+				};
+				deleteMany: {
+					args: Prisma.CableColorBandDeleteManyArgs<ExtArgs>;
+					result: BatchPayload;
+				};
+				updateMany: {
+					args: Prisma.CableColorBandUpdateManyArgs<ExtArgs>;
+					result: BatchPayload;
+				};
+				updateManyAndReturn: {
+					args: Prisma.CableColorBandUpdateManyAndReturnArgs<ExtArgs>;
+					result: runtime.Types.Utils.PayloadToResult<Prisma.$CableColorBandPayload>[];
+				};
+				upsert: {
+					args: Prisma.CableColorBandUpsertArgs<ExtArgs>;
+					result: runtime.Types.Utils.PayloadToResult<Prisma.$CableColorBandPayload>;
+				};
+				aggregate: {
+					args: Prisma.CableColorBandAggregateArgs<ExtArgs>;
+					result: runtime.Types.Utils.Optional<Prisma.AggregateCableColorBand>;
+				};
+				groupBy: {
+					args: Prisma.CableColorBandGroupByArgs<ExtArgs>;
+					result: runtime.Types.Utils.Optional<Prisma.CableColorBandGroupByOutputType>[];
+				};
+				count: {
+					args: Prisma.CableColorBandCountArgs<ExtArgs>;
+					result:
+						runtime.Types.Utils.Optional<Prisma.CableColorBandCountAggregateOutputType> | number;
 				};
 			};
 		};
@@ -5095,6 +5172,18 @@ export const OrganizationScalarFieldEnum = {
 export type OrganizationScalarFieldEnum =
 	(typeof OrganizationScalarFieldEnum)[keyof typeof OrganizationScalarFieldEnum];
 
+export const CableColorBandScalarFieldEnum = {
+	id: 'id',
+	organizationId: 'organizationId',
+	maxLengthCm: 'maxLengthCm',
+	paletteKey: 'paletteKey',
+	customName: 'customName',
+	customHex: 'customHex'
+} as const;
+
+export type CableColorBandScalarFieldEnum =
+	(typeof CableColorBandScalarFieldEnum)[keyof typeof CableColorBandScalarFieldEnum];
+
 export const OrgMembershipScalarFieldEnum = {
 	id: 'id',
 	userId: 'userId',
@@ -6266,6 +6355,7 @@ export type GlobalOmitConfig = {
 	verification?: Prisma.VerificationOmit;
 	deviceCode?: Prisma.DeviceCodeOmit;
 	organization?: Prisma.OrganizationOmit;
+	cableColorBand?: Prisma.CableColorBandOmit;
 	orgMembership?: Prisma.OrgMembershipOmit;
 	systemSettings?: Prisma.SystemSettingsOmit;
 	legalDocument?: Prisma.LegalDocumentOmit;

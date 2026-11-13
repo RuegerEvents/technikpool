@@ -13,6 +13,7 @@ export type * from './models/Account.ts';
 export type * from './models/Verification.ts';
 export type * from './models/DeviceCode.ts';
 export type * from './models/Organization.ts';
+export type * from './models/CableColorBand.ts';
 export type * from './models/OrgMembership.ts';
 export type * from './models/SystemSettings.ts';
 export type * from './models/LegalDocument.ts';

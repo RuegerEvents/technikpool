@@ -258,6 +258,12 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return `This bundle sits inside "${p0}" itself, and bundles nest only one level deep.`;
 		case 'bundle_nest_inner_has_kits':
 			return `The bundle "${p0}" holds bundles of its own, and bundles nest only one level deep.`;
+		case 'cable_color_length_invalid':
+			return 'Each colour needs a length greater than zero.';
+		case 'cable_color_length_duplicate':
+			return `Two colours end at ${p0} m. Each length can have only one colour.`;
+		case 'cable_color_invalid':
+			return 'Pick a colour, or give your own colour a name and a value.';
 		case 'bundle_convert_has_kits':
 			return `This bundle holds other bundles (${p0}). Take them out first — a device cannot hold a bundle.`;
 		case 'bundle_nest_org_mismatch':

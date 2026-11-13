@@ -306,6 +306,30 @@ refused; the pure rules are in `src/lib/bundle-nesting.ts` (`nestingRefusal`, `i
 - Plan and what comes next (swapping interchangeable units, pack cases):
   `docs/plans/bundles-nested-swap-packcases.md`.
 
+## Cable colours (Kabelfarben)
+
+An org marks its cables with a colour of tape per length: one scheme per org, by length only,
+in bands (`CableColorBand`: "up to `maxLengthCm`", a palette key or a colour of its own with
+name and `#rrggbb`). Kept by ADMIN+ on the org page, no versions. Plan:
+`docs/plans/kabelfarben.md`.
+
+- **Nothing is stored on a unit.** Its colour is always the band of its **owner's** scheme
+  that the product's `lengthCm` falls in (`cableBandFor` in `#lib/cable-colors.ts`), so a lent
+  cable shows the lender's colour and a changed scheme reaches every list at once.
+- **Who sees a scheme** (`mayReadCableColors`, `visibleCableColorSchemes` in
+  `services/cable-colors.ts`): members of the org, and members of an org that a unit of it is
+  lent to. `getCableColorSchemes()` hands a page all of them in one request; `CableColorDot`
+  (`#lib/components/ui/cable-color`) draws a unit's dot from it.
+- **Shown** next to cables on the Devices list, a unit's page, a kit's contents, the
+  board by location, the planner, the hand-out/take-back/check lists and the stocktake; found
+  by the search (`cableColorTerms`: the name as shown plus the palette key and its German
+  name); on delivery note, packing list and the org's lists as "Kabelfarbe …" with a legend
+  per owner at the end (`sheetCableColors`); on the customer link with the legend; as a
+  legend card on the production page. The scanner reads `GET /api/v1/cable-colors` and works
+  the colour out itself. Not on the case label — the printer is black only.
+- Palette names are translated in `#lib/cable-colors.svelte.ts`; the PDFs use the German ones
+  from `#lib/cable-colors.ts`.
+
 ## Swapping linked units (Austausch)
 
 Units stay fixed-linked — a unit in its kit, an accessory on its unit — but whoever packs takes the
@@ -812,7 +836,12 @@ src/routes/
 ├── api/auth/[...all]/+server.ts   # Better-Auth handler
 ├── orgs/
 │   ├── +page.svelte        # List orgs; Manage button for OWNER/admin
-│   └── [id]/+page.svelte   # Manage org members: add/remove/role
+│   └── [id]/               # Tabs, one route each, under +layout.svelte (org-access.ts says
+│       ├── +page.svelte    #   who sees which): Members (default) · general · equipment
+│       ├── general/        #   (+ locations, value) · billing (+ rates) · data (DPA, export,
+│       ├── equipment/      #   danger zone). Old /locations, /value, /rates redirect.
+│       ├── billing/        #   Settings forms are always open; FormDraft
+│       └── data/           #   (form-draft.svelte.ts) enables Save once a field differs.
 ├── admin/
 │   └── users/+page.svelte  # System admin: sign-up switch, invitations, grant/revoke isAdmin
 ├── inventory/

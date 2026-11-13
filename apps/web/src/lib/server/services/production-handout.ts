@@ -93,6 +93,9 @@ export interface HandoutItem {
 	productImagePath: string | null;
 	manufacturerName: string | null;
 	lentBy: string | null;
+	/** The org the unit belongs to, and its length: what the cable colour is read off. */
+	ownerOrgId: string;
+	lengthCm: number | null;
 	accessoryOf: string | null;
 	group: ListGroup;
 	/** The kit the unit is in, for a heading over its units. */
@@ -297,6 +300,7 @@ async function kitAdditions(scope: Scope) {
 					name: true,
 					caption: true,
 					imagePath: true,
+					lengthCm: true,
 					manufacturer: { select: { name: true } }
 				}
 			}
@@ -342,6 +346,8 @@ export async function getHandout(
 			productImagePath: asset.product.imagePath,
 			manufacturerName: asset.product.manufacturer?.name ?? null,
 			lentBy: null,
+			ownerOrgId: asset.organizationId,
+			lengthCm: asset.product.lengthCm,
 			accessoryOf: null,
 			group: asset.location
 				? { kind: 'location' as const, name: asset.location.name }
@@ -366,6 +372,8 @@ export async function getHandout(
 				productImagePath: item.asset.product.imagePath,
 				manufacturerName: item.asset.product.manufacturer?.name ?? null,
 				lentBy: lent ? lenderLabel(item) : null,
+				ownerOrgId: item.asset.organizationId,
+				lengthCm: item.asset.product.lengthCm,
 				accessoryOf: item.asset.parentAssetId,
 				group: groupOf(item, productionOrgId, byLender),
 				kit: kitOf(item.asset.bundle),

@@ -109,6 +109,9 @@ export interface ProductionCheckItem {
 	manufacturerName: string | null;
 	/** The org that owns the unit, shown when it is not the production's. */
 	lentBy: string | null;
+	/** The org the unit belongs to, and its length: what the cable colour is read off. */
+	ownerOrgId: string;
+	lengthCm: number | null;
 	/** An accessory's parent, so the list can nest it. */
 	accessoryOf: string | null;
 	/**
@@ -328,6 +331,8 @@ export async function getProductionCheck(
 				productImagePath: item.asset.product.imagePath,
 				manufacturerName: item.asset.product.manufacturer?.name ?? null,
 				lentBy: lent ? item.asset.organization.shortName || item.asset.organization.name : null,
+				ownerOrgId: item.asset.organizationId,
+				lengthCm: item.asset.product.lengthCm,
 				accessoryOf: item.asset.parentAssetId,
 				group: checkGroupOf(item, productionOrgId, side),
 				kit: kitOf(item.asset.bundle),

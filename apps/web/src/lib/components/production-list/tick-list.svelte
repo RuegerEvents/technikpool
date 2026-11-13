@@ -1,7 +1,8 @@
 <script
 	lang="ts"
-	generics="U extends { assetId: string; assetTag: string | null; productName: string; productCaption: string | null; productImagePath: string | null; accessoryOf: string | null; kit: ListKit | null }"
+	generics="U extends { assetId: string; assetTag: string | null; productName: string; productCaption: string | null; productImagePath: string | null; accessoryOf: string | null; kit: ListKit | null; ownerOrgId?: string; lengthCm?: number | null }"
 >
+	import { CableColorDot } from '#lib/components/ui/cable-color/index.js';
 	import type { Snippet } from 'svelte';
 	import { Box, Handshake, MapPin, Package } from '@lucide/svelte';
 	import { SvelteMap } from 'svelte/reactivity';
@@ -288,7 +289,12 @@
 							>
 							<ProductThumb path={line.productImagePath} alt={line.productName} size={36} />
 							<span class="min-w-0 flex-1">
-								<span class="block truncate font-medium">{line.productName}</span>
+								<span class="flex items-center gap-1.5 truncate font-medium"
+									>{#if line.ownerOrgId}<CableColorDot
+											organizationId={line.ownerOrgId}
+											lengthCm={line.lengthCm}
+										/>{/if}<span class="truncate">{line.productName}</span></span
+								>
 								<span class="block truncate text-xs text-muted-foreground">
 									No tag · counted{line.productCaption ? ` · ${line.productCaption}` : ''}
 								</span>
@@ -324,7 +330,12 @@
 								/>
 								<ProductThumb path={unit.productImagePath} alt={unit.productName} size={36} />
 								<span class="min-w-0 flex-1">
-									<span class="block truncate font-medium">{unit.productName}</span>
+									<span class="flex items-center gap-1.5 truncate font-medium"
+										>{#if unit.ownerOrgId}<CableColorDot
+												organizationId={unit.ownerOrgId}
+												lengthCm={unit.lengthCm}
+											/>{/if}<span class="truncate">{unit.productName}</span></span
+									>
 									<span class="block truncate text-xs text-muted-foreground">
 										{unit.assetTag ?? 'No tag'}{unit.productCaption
 											? ` · ${unit.productCaption}`

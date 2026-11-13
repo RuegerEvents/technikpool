@@ -24,6 +24,12 @@ export type EquipmentSheetLine = {
 	 * prints it as a warning. Absent where nothing on the line is inspected.
 	 */
 	inspection?: { text: string; overdue: boolean } | null;
+	/**
+	 * The cable colour of the line's units, one per owner scheme that colours
+	 * them (usually one). Printed as a dot with its name, since sheets are also
+	 * printed in black and white.
+	 */
+	cableColors?: { hex: string; name: string }[];
 };
 
 export type EquipmentSheetGroup = {
@@ -62,6 +68,8 @@ export type EquipmentSheet = {
 	prices: boolean;
 	empty: string;
 	groups: EquipmentSheetGroup[];
+	/** Per owner whose cable colours appear on the sheet: which colour marks which lengths. */
+	cableLegend?: { name: string; rows: { hex: string; name: string; range: string }[] }[];
 	/** Paragraphs after the table. */
 	closing: string[];
 	signatures: [string, string] | null;
@@ -175,6 +183,18 @@ export async function generateEquipmentSheetPdf(
 	// As in the billing documents: inside the table `y` is the top edge of the
 	// next block, and text sits by its cap height.
 	const capHeight = (font: PDFFont, size: number) => font.heightAtSize(size, { descender: false });
+	// A cable's tape colour, ringed so white and black still read on paper.
+	const colourDot = (x: number, centreY: number, hex: string) => {
+		const n = Number.parseInt(hex.slice(1), 16);
+		page.drawCircle({
+			x,
+			y: centreY,
+			size: 2.6,
+			color: rgb(((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255),
+			borderColor: rgb(0.45, 0.45, 0.45),
+			borderWidth: 0.4
+		});
+	};
 	const bandBaseline = (top: number, height: number, font: PDFFont, size: number) =>
 		top - (height + capHeight(font, size)) / 2;
 	const HEADER_H = 18;
@@ -309,6 +329,18 @@ export async function generateEquipmentSheetPdf(
 					color: muted,
 					gap: i === 0 ? 10 : 8.5
 				})),
+				...(line.cableColors?.length
+					? [
+							{
+								value: `Kabelfarbe ${line.cableColors.map((c) => c.name).join(' / ')}`,
+								size: 7,
+								font: regular,
+								color: muted,
+								gap: 10,
+								dots: line.cableColors.map((c) => c.hex)
+							}
+						]
+					: []),
 				...(line.inspection ? wrap(line.inspection.text, regular, 7, textWidth) : []).map(
 					(value, i) => ({
 						value,
@@ -329,7 +361,9 @@ export async function generateEquipmentSheetPdf(
 			right(`${line.quantity}x`, QTY_RIGHT, baseline, 9, bold);
 			for (const t of text) {
 				baseline -= t.gap;
-				draw(t.value, TEXT_X, baseline, t.size, t.font, t.color);
+				const dots = 'dots' in t ? (t.dots as string[]) : [];
+				dots.forEach((hex, i) => colourDot(TEXT_X + 3 + i * 8, baseline + 2.3, hex));
+				draw(t.value, TEXT_X + dots.length * 8, baseline, t.size, t.font, t.color);
 			}
 			const image = line.imagePath ? images.get(line.imagePath) : undefined;
 			if (image) {
@@ -394,6 +428,24 @@ export async function generateEquipmentSheetPdf(
 	}
 
 	y -= 24;
+	if (data.cableLegend?.length) {
+		// Which colour of tape marks which length, per owner whose cables are on
+		// the sheet — the reader of a lent cable does not know the lender's code.
+		y -= 18;
+		for (const legend of data.cableLegend) {
+			ensure(14 + legend.rows.length * 11);
+			draw(`Kabelfarben ${legend.name}`, LEFT, y, 8, bold);
+			y -= 12;
+			for (const row of legend.rows) {
+				colourDot(LEFT + 3, y + 2.6, row.hex);
+				draw(row.name, LEFT + 10, y, 8);
+				draw(row.range, LEFT + 70, y, 8, regular, muted);
+				y -= 11;
+			}
+			y -= 6;
+		}
+		y -= 6;
+	}
 	data.closing.forEach((text, index) =>
 		paragraph(text, 9, index === data.closing.length - 1 ? 0 : 9)
 	);

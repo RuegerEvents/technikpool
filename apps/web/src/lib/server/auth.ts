@@ -77,6 +77,7 @@ const prefixes: Partial<Record<ModelName, string>> = {
 	RentalTermsVersion: 'rtrm',
 	RentalTermsAcceptance: 'rtac',
 	BillingDismissal: 'bdis',
+	CableColorBand: 'ccol',
 	UserDefaultLocation: 'udl'
 };
 

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { CableColorDot } from '#lib/components/ui/cable-color/index.js';
 	// The warehouse as a board: one column per location of an org, its kits and
 	// its loose units on cards, and a card dragged into another column is moved
 	// there — the same booking as scanning it onto that shelf (`checkoutAssets`),
@@ -433,6 +434,10 @@
 														href={resolve(`assets/${unit.id}`)}
 														class="min-w-0 truncate underline-offset-2 hover:underline"
 													>
+														<CableColorDot
+															organizationId={unit.organizationId}
+															lengthCm={unit.product.lengthCm}
+														/>
 														{#if card.kind === 'bundle'}{unit.product.name}
 														{/if}<span class="font-mono">{unitLabel(unit)}</span>
 														{#if unit.accessories.length > 0}

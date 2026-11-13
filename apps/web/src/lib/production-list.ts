@@ -31,6 +31,9 @@ export interface ListLine {
 	productImagePath: string | null;
 	manufacturerName: string | null;
 	lentBy: string | null;
+	/** The org the units belong to, and their length: what the cable colour is read off. */
+	ownerOrgId?: string;
+	lengthCm?: number | null;
 	group: ListGroup;
 	/** Every unit on the line. They are also in the list's items, one by one. */
 	assetIds: string[];

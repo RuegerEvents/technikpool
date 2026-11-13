@@ -45,7 +45,8 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 		categoryRates,
 		productPrices,
 		products,
-		assetTransactions
+		assetTransactions,
+		cableColorBands
 	] = await Promise.all([
 		prisma.orgMembership.findMany({
 			where: { organizationId },
@@ -93,7 +94,8 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 			where: { asset: { organizationId } },
 			include: { user: userFields },
 			orderBy: { createdAt: 'asc' }
-		})
+		}),
+		prisma.cableColorBand.findMany({ where: { organizationId }, orderBy: { maxLengthCm: 'asc' } })
 	]);
 
 	const fileKeys = new Set<string>();
@@ -138,6 +140,7 @@ export const GET: RequestHandler = async ({ params, locals }) => {
 		invoices,
 		offerSequences,
 		assetTransactions,
+		cableColorBands,
 		files
 	});
 

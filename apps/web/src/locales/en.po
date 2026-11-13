@@ -42,7 +42,6 @@ msgid "Toggle theme"
 msgstr "Toggle theme"
 
 #: src/routes/+layout.svelte
-#: src/routes/orgs/[id]/+page.svelte
 msgid "<0/> Organizations"
 msgstr "<0/> Organizations"
 
@@ -98,6 +97,7 @@ msgstr "Crew Passes"
 #: src/lib/components/production-list/unit-question.svelte
 #: src/lib/components/ui/camera-scan/camera-scan-button.svelte
 #: src/routes/assets/new/cables/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
 msgid "Done"
 msgstr "Done"
 
@@ -119,7 +119,7 @@ msgstr "No assets found."
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/checkout/+page.svelte
-#: src/routes/orgs/[id]/value/+page.svelte
+#: src/routes/orgs/[id]/equipment/value/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/products/[id]/product-detail.svelte
 #: src/routes/products/dguv-quick.svelte
@@ -220,13 +220,15 @@ msgstr "Crew"
 #: src/routes/offers/[id]/offer-detail.svelte
 #: src/routes/orgs/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/locations/+page.svelte
-#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/cable-colors-card.svelte
+#: src/routes/orgs/[id]/data/+page.svelte
+#: src/routes/orgs/[id]/equipment/locations/+page.svelte
+#: src/routes/orgs/[id]/equipment/locations/+page.svelte
 #: src/routes/orgs/[id]/qualification-dialog.svelte
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
 #: src/routes/orgs/[id]/rental-terms-card.svelte
 #: src/routes/productions/[id]/copy-equipment-modal.svelte
 #: src/routes/productions/[id]/handout-detail.svelte
@@ -261,6 +263,7 @@ msgstr "Select a user…"
 #: src/routes/admin/users/+page.svelte
 #: src/routes/orgs/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "Role"
 msgstr "Role"
@@ -269,6 +272,7 @@ msgstr "Role"
 msgid "Camera Operator"
 msgstr "Camera Operator"
 
+#: src/routes/orgs/[id]/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 msgid "Adding…"
 msgstr "Adding…"
@@ -293,11 +297,10 @@ msgstr "No crew members added yet."
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/auth/register/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/locations/+page.svelte
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/equipment/locations/+page.svelte
+#: src/routes/orgs/[id]/general/+page.svelte
 #: src/routes/productions/+page.svelte
 #: src/routes/profile/+page.svelte
 #: src/routes/profile/+page.svelte
@@ -471,6 +474,7 @@ msgstr "Bundle"
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/offers/new/+page.svelte
 #: src/routes/orgs/+page.svelte
+#: src/routes/orgs/[id]/+layout.svelte
 #: src/routes/productions/+page.svelte
 #: src/routes/products/[id]/product-detail.svelte
 #: src/routes/stickers/+page.svelte
@@ -610,6 +614,8 @@ msgstr "Organization \"{0}\" created!"
 
 #: src/routes/admin/users/+page.svelte
 #: src/routes/orgs/+page.svelte
+#: src/routes/orgs/[id]/+layout.svelte
+#: src/routes/orgs/[id]/+layout.svelte
 msgid "Organizations"
 msgstr "Organizations"
 
@@ -759,9 +765,13 @@ msgstr "<0/> Create another after saving"
 #: src/routes/manufacturers/+page.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
-#: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
+#: src/routes/orgs/[id]/cable-colors-card.svelte
+#: src/routes/orgs/[id]/equipment/+page.svelte
+#: src/routes/orgs/[id]/equipment/+page.svelte
+#: src/routes/orgs/[id]/equipment/locations/+page.svelte
+#: src/routes/orgs/[id]/general/+page.svelte
 #: src/routes/orgs/[id]/qualification-dialog.svelte
 #: src/routes/orgs/[id]/rental-terms-card.svelte
 #: src/routes/productions/[id]/handout-detail.svelte
@@ -1016,14 +1026,11 @@ msgstr "Member"
 msgid "Viewer"
 msgstr "Viewer"
 
-#: src/routes/orgs/[id]/+page.svelte
-msgid "Manage members and roles."
-msgstr "Manage members and roles."
+#~ msgid "Manage members and roles."
+#~ msgstr "Manage members and roles."
 
-#: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
-msgid "Add Member"
-msgstr "Add Member"
+#~ msgid "Add Member"
+#~ msgstr "Add Member"
 
 #~ msgid "Add a registered user to this organization by email."
 #~ msgstr "Add a registered user to this organization by email."
@@ -1034,9 +1041,8 @@ msgstr "Add Member"
 msgid "Email address"
 msgstr "Email address"
 
-#: src/routes/orgs/[id]/+page.svelte
-msgid "Adding..."
-msgstr "Adding..."
+#~ msgid "Adding..."
+#~ msgstr "Adding..."
 
 #. 0: org.members.length
 #: src/routes/orgs/[id]/+page.svelte
@@ -1320,9 +1326,9 @@ msgstr "Asset"
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
-#: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
+#: src/routes/orgs/[id]/equipment/locations/+page.svelte
 #: src/routes/orgs/[id]/rental-terms-card.svelte
 msgid "Edit"
 msgstr "Edit"
@@ -1375,13 +1381,17 @@ msgstr "Location"
 #: src/routes/invoices/[id]/invoice-detail.svelte
 #: src/routes/manufacturers/+page.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
-#: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
+#: src/routes/orgs/[id]/billing/rates/+page.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/cable-colors-card.svelte
+#: src/routes/orgs/[id]/equipment/+page.svelte
+#: src/routes/orgs/[id]/equipment/+page.svelte
+#: src/routes/orgs/[id]/equipment/locations/+page.svelte
+#: src/routes/orgs/[id]/general/+page.svelte
 #: src/routes/orgs/[id]/qualification-dialog.svelte
-#: src/routes/orgs/[id]/rates/+page.svelte
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
 #: src/routes/orgs/[id]/rental-terms-card.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/[id]/production-detail.svelte
@@ -1405,7 +1415,7 @@ msgstr "No locations yet. Create one in <0>Locations</0>."
 #: src/lib/components/ui/address-input/address-input.svelte
 #: src/lib/components/ui/address-input/address-input.svelte
 #: src/lib/components/ui/org-snapshot-banner/org-snapshot-banner.svelte
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/productions/new/+page.svelte
 msgid "Address"
@@ -1455,50 +1465,46 @@ msgstr "Country"
 msgid "Address updated"
 msgstr "Address updated"
 
-#: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/equipment/+layout.svelte
 #: src/routes/productions/[id]/equipment/equipment-planner.svelte
 #: src/routes/productions/[id]/equipment/equipment-planner.svelte
 #: src/routes/stocktakes/new/+page.svelte
 msgid "Locations"
 msgstr "Locations"
 
-#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/equipment/locations/+page.svelte
 msgid "Location created"
 msgstr "Location created"
 
-#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/equipment/locations/+page.svelte
 msgid "Location updated"
 msgstr "Location updated"
 
-#: src/routes/orgs/[id]/locations/+page.svelte
-msgid "← Organization"
-msgstr "← Organization"
+#~ msgid "← Organization"
+#~ msgstr "← Organization"
 
-#. 0: org?.name ?? '…'
-#: src/routes/orgs/[id]/locations/+page.svelte
-msgid "Manage locations for {0}."
-msgstr "Manage locations for {0}."
+#~ msgid "Manage locations for {0}."
+#~ msgstr "Manage locations for {0}."
 
-#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/equipment/locations/+page.svelte
 msgid "You don’t have permission to manage locations."
 msgstr "You don’t have permission to manage locations."
 
-#: src/routes/orgs/[id]/locations/+page.svelte
-#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/equipment/locations/+page.svelte
+#: src/routes/orgs/[id]/equipment/locations/+page.svelte
 msgid "Create Location"
 msgstr "Create Location"
 
-#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/equipment/locations/+page.svelte
 msgid "Add a new storage or pickup location."
 msgstr "Add a new storage or pickup location."
 
 #. 0: locations.length
-#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/equipment/locations/+page.svelte
 msgid "Existing Locations ({0})"
 msgstr "Existing Locations ({0})"
 
-#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/equipment/locations/+page.svelte
 msgid "No locations yet."
 msgstr "No locations yet."
 
@@ -1548,6 +1554,10 @@ msgstr "Asset Bundles | Technikpool"
 #. 0: title
 #. 0: kind === 'invoice' ? 'New invoice' \\: 'New Offer'
 #. 0: org?.name ?? ''
+#. 0: org?.name ?? ''
+#. 0: org?.name ?? ''
+#. 0: org?.name ?? ''
+#. 0: org?.name ?? ''
 #. 0: production.name
 #. 0: product?.name ?? 'Product'
 #. 0: stocktake.name
@@ -1557,6 +1567,10 @@ msgstr "Asset Bundles | Technikpool"
 #: src/routes/legal/[slug]/+page.svelte
 #: src/routes/offers/new/+page.svelte
 #: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
+#: src/routes/orgs/[id]/data/+page.svelte
+#: src/routes/orgs/[id]/equipment/+page.svelte
+#: src/routes/orgs/[id]/general/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/products/[id]/product-detail.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
@@ -1576,7 +1590,7 @@ msgid "Productions | Technikpool"
 msgstr "Productions | Technikpool"
 
 #. 0: org?.name ?? ''
-#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/equipment/locations/+page.svelte
 msgid "Locations – {0} | Technikpool"
 msgstr "Locations – {0} | Technikpool"
 
@@ -1918,8 +1932,8 @@ msgstr "All Categories"
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/assets/new/cables/+page.svelte
 #: src/routes/inspections/+page.svelte
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
 #: src/routes/products/dguv-quick.svelte
 #: src/routes/products/dguv-quick.svelte
 #: src/routes/stocktakes/[id]/stocktake-detail.svelte
@@ -2908,12 +2922,12 @@ msgid "Number"
 msgstr "Number"
 
 #: src/routes/orgs/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/general/+page.svelte
 msgid "Color"
 msgstr "Color"
 
 #: src/routes/orgs/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/general/+page.svelte
 msgid "Avatar label"
 msgstr "Avatar label"
 
@@ -3043,7 +3057,7 @@ msgid "Discount updated"
 msgstr "Discount updated"
 
 #: src/lib/components/ui/billing-document/billing-document.svelte
-#: src/routes/orgs/[id]/rates/+page.svelte
+#: src/routes/orgs/[id]/billing/rates/+page.svelte
 msgid "Rate updated"
 msgstr "Rate updated"
 
@@ -3135,23 +3149,21 @@ msgstr "Amount (€)"
 #~ msgid "Gross — no VAT (§19 UStG Kleinunternehmer)"
 #~ msgstr "Gross — no VAT (§19 UStG Kleinunternehmer)"
 
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/general/+page.svelte
 msgid "Organization settings updated"
 msgstr "Organization settings updated"
 
-#: src/routes/orgs/[id]/rates/+page.svelte
+#: src/routes/orgs/[id]/billing/rates/+page.svelte
 msgid "Rental Rates"
 msgstr "Rental Rates"
 
-#: src/routes/orgs/[id]/+page.svelte
-msgid "Organization Settings"
-msgstr "Organization Settings"
+#~ msgid "Organization Settings"
+#~ msgstr "Organization Settings"
 
 #~ msgid "Asset ID prefix, visual identity, DGUV default interval, and Kleinunternehmer status."
 #~ msgstr "Asset ID prefix, visual identity, DGUV default interval, and Kleinunternehmer status."
 
-#: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/equipment/+page.svelte
 msgid "Asset ID prefix"
 msgstr "Asset ID prefix"
 
@@ -3161,30 +3173,27 @@ msgstr "Asset ID prefix"
 #~ msgid "Copied onto new assets at creation; leave blank to not track inspections by default."
 #~ msgstr "Copied onto new assets at creation; leave blank to not track inspections by default."
 
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
 msgid "<0/> Kleinunternehmer (§19 UStG) — no VAT charged"
 msgstr "<0/> Kleinunternehmer (§19 UStG) — no VAT charged"
 
-#: src/routes/orgs/[id]/+page.svelte
-msgid "Visual identity"
-msgstr "Visual identity"
+#~ msgid "Visual identity"
+#~ msgstr "Visual identity"
 
 #~ msgid "DGUV default interval"
 #~ msgstr "DGUV default interval"
 
-#: src/routes/orgs/[id]/+page.svelte
-msgid "Not tracked"
-msgstr "Not tracked"
+#~ msgid "Not tracked"
+#~ msgstr "Not tracked"
 
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
 msgid "Kleinunternehmer"
 msgstr "Kleinunternehmer"
 
-#: src/routes/orgs/[id]/+page.svelte
-msgid "Yes"
-msgstr "Yes"
+#~ msgid "Yes"
+#~ msgstr "Yes"
 
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
 msgid "No"
 msgstr "No"
 
@@ -3269,6 +3278,7 @@ msgid "Equipment | {0} | Technikpool"
 msgstr "Equipment | {0} | Technikpool"
 
 #: src/lib/components/ui/production-hover-card/production-hover-card.svelte
+#: src/routes/orgs/[id]/+layout.svelte
 #: src/routes/productions/[id]/equipment/equipment-planner.svelte
 msgid "Equipment"
 msgstr "Equipment"
@@ -3339,19 +3349,21 @@ msgstr "Nothing booked yet."
 #~ msgstr "Default daily rental rate per category, as a percentage of an asset's net purchase price. Feeds offer/invoice pricing."
 
 #: src/lib/components/missing-pricing/missing-pricing.svelte
-#: src/routes/orgs/[id]/rates/+page.svelte
+#: src/routes/orgs/[id]/billing/rates/+page.svelte
 msgid "% / day"
 msgstr "% / day"
 
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
-#: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/rates/+page.svelte
-#: src/routes/orgs/[id]/value/+page.svelte
-#: src/routes/orgs/[id]/value/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
+#: src/routes/orgs/[id]/billing/rates/+page.svelte
+#: src/routes/orgs/[id]/equipment/value/+page.svelte
+#: src/routes/orgs/[id]/equipment/value/+page.svelte
 msgid "Not set"
 msgstr "Not set"
 
@@ -3373,13 +3385,12 @@ msgstr "No VAT charged (§19 UStG Kleinunternehmer) — net = gross"
 msgid "Includes {0}% German VAT"
 msgstr "Includes {0}% German VAT"
 
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
 msgid "Billing details updated"
 msgstr "Billing details updated"
 
-#: src/routes/orgs/[id]/+page.svelte
-msgid "Billing Details"
-msgstr "Billing Details"
+#~ msgid "Billing Details"
+#~ msgstr "Billing Details"
 
 #~ msgid "Address, tax ID, and bank account — used on generated offers/invoices."
 #~ msgstr "Address, tax ID, and bank account — used on generated offers/invoices."
@@ -3388,20 +3399,20 @@ msgstr "Billing Details"
 #~ msgstr "Tax ID (Steuernummer / USt-IdNr.)"
 
 #: src/lib/billing-document-check.svelte.ts
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
 msgid "Bank account holder"
 msgstr "Bank account holder"
 
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
 msgid "IBAN"
 msgstr "IBAN"
 
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
 msgid "BIC"
 msgstr "BIC"
 
 #: src/lib/billing-document-check.svelte.ts
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
 msgid "Bank name"
 msgstr "Bank name"
 
@@ -3409,7 +3420,7 @@ msgstr "Bank name"
 #~ msgstr "Tax ID"
 
 #: src/lib/billing-setup.svelte.ts
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
 msgid "Bank account"
 msgstr "Bank account"
 
@@ -3917,10 +3928,8 @@ msgstr "{0} added to organization"
 msgid "{0} removed from organization"
 msgstr "{0} removed from organization"
 
-#. 0: months
-#: src/routes/orgs/[id]/+page.svelte
-msgid "{0} months"
-msgstr "{0} months"
+#~ msgid "{0} months"
+#~ msgstr "{0} months"
 
 #. 0: fullDuration.days
 #. 0: showDuration.days
@@ -3935,7 +3944,7 @@ msgid "{0} organizations"
 msgstr "{0} organizations"
 
 #. 0: row.percentage
-#: src/routes/orgs/[id]/rates/+page.svelte
+#: src/routes/orgs/[id]/billing/rates/+page.svelte
 msgid "{0}% / day"
 msgstr "{0}% / day"
 
@@ -4012,17 +4021,16 @@ msgstr[1] "# components"
 #~ msgid "Probe string for HMR check"
 #~ msgstr "Probe string for HMR check"
 
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/general/+page.svelte
 msgid "Short name <0>(optional)</0>"
 msgstr "Short name <0>(optional)</0>"
 
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/general/+page.svelte
 msgid "Shown instead of the full name in tables and pickers. Invoices and offers always use the full name."
 msgstr "Shown instead of the full name in tables and pickers. Invoices and offers always use the full name."
 
-#: src/routes/orgs/[id]/+page.svelte
-msgid "Short name"
-msgstr "Short name"
+#~ msgid "Short name"
+#~ msgstr "Short name"
 
 #: src/routes/orgs/+page.svelte
 msgid "Short Name <0>(optional)</0>"
@@ -4265,7 +4273,6 @@ msgstr "Only possible while it has never been booked, scanned, inspected or bill
 #: src/routes/admin/connectors/+page.svelte
 #: src/routes/admin/users/+page.svelte
 #: src/routes/assets/[id]/asset-detail.svelte
-#: src/routes/orgs/[id]/+page.svelte
 msgid "Delete"
 msgstr "Delete"
 
@@ -4278,7 +4285,7 @@ msgstr "Delete"
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
 #: src/routes/invoices/[id]/invoice-detail.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/data/+page.svelte
 #: src/routes/productions/[id]/production-detail.svelte
 #: src/routes/profile/+page.svelte
 msgid "Deleting…"
@@ -4428,7 +4435,7 @@ msgstr "Unsaved changes"
 #. 0: unpricedUnits
 #. 0: currentBundle.assets.length
 #: src/lib/components/ui/product-editor/product-editor.svelte
-#: src/routes/orgs/[id]/value/+page.svelte
+#: src/routes/orgs/[id]/equipment/value/+page.svelte
 #: src/routes/products/+page.svelte
 msgid "{0} units"
 msgstr "{0} units"
@@ -4491,7 +4498,7 @@ msgid "Enter a net purchase price first"
 msgstr "Enter a net purchase price first"
 
 #: src/lib/components/missing-pricing/missing-pricing.svelte
-#: src/routes/orgs/[id]/value/+page.svelte
+#: src/routes/orgs/[id]/equipment/value/+page.svelte
 msgid "Enter a valid net purchase price"
 msgstr "Enter a valid net purchase price"
 
@@ -4627,7 +4634,8 @@ msgstr "Categories | Technikpool"
 #~ msgstr "Categories are shared by every organization. The English name is the source — it is what the API returns and what a billing line records; the German name is what the German UI and a German offer or invoice show."
 
 #: src/routes/admin/categories/+page.svelte
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/cable-colors-card.svelte
 msgid "Colour"
 msgstr "Colour"
 
@@ -4915,15 +4923,15 @@ msgstr "New Organization"
 msgid "Edit Bundle"
 msgstr "Edit Bundle"
 
-#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/equipment/locations/+page.svelte
 msgid "New Location"
 msgstr "New Location"
 
-#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/equipment/locations/+page.svelte
 msgid "Edit Location"
 msgstr "Edit Location"
 
-#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/equipment/locations/+page.svelte
 msgid "Rename it or correct its address."
 msgstr "Rename it or correct its address."
 
@@ -4954,8 +4962,8 @@ msgstr[0] "1 accessory"
 msgstr[1] "# accessories"
 
 #: src/routes/assets/[id]/asset-detail.svelte
-#: src/routes/orgs/[id]/locations/+page.svelte
-#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/equipment/locations/+page.svelte
+#: src/routes/orgs/[id]/equipment/locations/+page.svelte
 msgid "1 unit"
 msgid_plural "# units"
 msgstr[0] "1 unit"
@@ -5084,7 +5092,7 @@ msgstr "Offers and invoices already written are not touched — they say what th
 
 #: src/lib/components/ui/product-editor/product-editor.svelte
 #: src/routes/manufacturers/+page.svelte
-#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/equipment/locations/+page.svelte
 msgid "Merging…"
 msgstr "Merging…"
 
@@ -5220,18 +5228,18 @@ msgstr "Delete <0/>?"
 msgid "Delete product"
 msgstr "Delete product"
 
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/data/+page.svelte
 msgid "Organization deleted"
 msgstr "Organization deleted"
 
-#: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/data/+page.svelte
+#: src/routes/orgs/[id]/data/+page.svelte
+#: src/routes/orgs/[id]/data/+page.svelte
 msgid "Delete organization"
 msgstr "Delete organization"
 
-#: src/routes/orgs/[id]/+page.svelte
-msgid "This permanently deletes the organization and all of its locations, assets, productions, offers, and invoices."
-msgstr "This permanently deletes the organization and all of its locations, assets, productions, offers, and invoices."
+#~ msgid "This permanently deletes the organization and all of its locations, assets, productions, offers, and invoices."
+#~ msgstr "This permanently deletes the organization and all of its locations, assets, productions, offers, and invoices."
 
 #: src/routes/+layout.svelte
 msgid "<0/> Tools <1/>"
@@ -5358,7 +5366,7 @@ msgstr[1] "# products"
 
 #: src/lib/components/ui/product-fields/product-fields.svelte
 #: src/routes/manufacturers/+page.svelte
-#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/equipment/locations/+page.svelte
 msgid "Merge…"
 msgstr "Merge…"
 
@@ -5402,7 +5410,7 @@ msgid "Phone"
 msgstr "Phone"
 
 #: src/lib/components/ui/customer-fields/customer-fields.svelte
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
 msgid "VAT ID"
 msgstr "VAT ID"
 
@@ -5443,7 +5451,7 @@ msgstr "Copied from the organization preset and editable for this offer."
 
 #: src/routes/invoices/[id]/invoice-detail.svelte
 #: src/routes/offers/[id]/offer-detail.svelte
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
 msgid "Payment term (days)"
 msgstr "Payment term (days)"
 
@@ -5533,36 +5541,40 @@ msgstr "Copied from the organization preset and frozen when the invoice is marke
 
 #: src/lib/billing-document-check.svelte.ts
 #: src/lib/billing-setup.svelte.ts
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
 msgid "Billing email"
 msgstr "Billing email"
 
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
 msgid "Website"
 msgstr "Website"
 
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
 msgid "Document text presets"
 msgstr "Document text presets"
 
-#. 0: '{production}'; 1: '{startDate}'; 2: '{endDate}'; 3: '{servicePeriod}'; 4: '{customer}'; 5: '{documentNumber}'; 6: '{paymentTermsDays}'
-#: src/routes/orgs/[id]/+page.svelte
-msgid "Placeholders: {0}, {1}, {2}, {3}, {4}, {5}, {6}"
-msgstr "Placeholders: {0}, {1}, {2}, {3}, {4}, {5}, {6}"
+#~ msgid "Placeholders: {0}, {1}, {2}, {3}, {4}, {5}, {6}"
+#~ msgstr "Placeholders: {0}, {1}, {2}, {3}, {4}, {5}, {6}"
 
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
 msgid "Offer introduction"
 msgstr "Offer introduction"
 
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
 msgid "Offer closing"
 msgstr "Offer closing"
 
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
 msgid "Invoice introduction"
 msgstr "Invoice introduction"
 
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
 msgid "Invoice closing"
 msgstr "Invoice closing"
 
@@ -5820,7 +5832,7 @@ msgid "Manufacturers merged"
 msgstr "Manufacturers merged"
 
 #: src/routes/admin/catalog-log/+page.svelte
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
 msgid "Category updated"
 msgstr "Category updated"
 
@@ -5885,15 +5897,14 @@ msgstr "Duplicates all line items into a new offer for the selected customer."
 msgid "The selected customer's details are copied onto this invoice."
 msgstr "The selected customer's details are copied onto this invoice."
 
-#: src/routes/orgs/[id]/+page.svelte
-msgid "Data Export"
-msgstr "Data Export"
+#~ msgid "Data Export"
+#~ msgstr "Data Export"
 
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/data/+page.svelte
 msgid "Download everything this organization owns — members, inventory, productions, offers and invoices including the archived PDFs — as one JSON file."
 msgstr "Download everything this organization owns — members, inventory, productions, offers and invoices including the archived PDFs — as one JSON file."
 
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/data/+page.svelte
 msgid "Export all data (JSON)"
 msgstr "Export all data (JSON)"
 
@@ -6559,9 +6570,8 @@ msgstr "The avatar label {0} is already taken. Pick another one."
 msgid "The asset ID prefix {0} is already taken. Pick another one."
 msgstr "The asset ID prefix {0} is already taken. Pick another one."
 
-#: src/routes/orgs/[id]/+page.svelte
-msgid "Delete <0/> and all of its data?"
-msgstr "Delete <0/> and all of its data?"
+#~ msgid "Delete <0/> and all of its data?"
+#~ msgstr "Delete <0/> and all of its data?"
 
 #: src/lib/billing-document-check.svelte.ts
 #: src/routes/offers/[id]/offer-detail.svelte
@@ -7069,9 +7079,8 @@ msgstr "Everything a member can, plus the inventory itself: register and retire 
 msgid "Everything an admin can, plus the organization: members, their roles, settings and category rates."
 msgstr "Everything an admin can, plus the organization: members, their roles, settings and category rates."
 
-#: src/routes/orgs/[id]/+page.svelte
-msgid "What the roles mean"
-msgstr "What the roles mean"
+#~ msgid "What the roles mean"
+#~ msgstr "What the roles mean"
 
 #: src/routes/+layout.svelte
 msgid "<0/> Profile"
@@ -8195,7 +8204,7 @@ msgstr "It may have been merged into another product or deleted."
 #~ msgid "Back to Products"
 #~ msgstr "Back to Products"
 
-#: src/routes/orgs/[id]/value/+page.svelte
+#: src/routes/orgs/[id]/equipment/value/+page.svelte
 #: src/routes/products/[id]/product-detail.svelte
 msgid "Units"
 msgstr "Units"
@@ -8404,7 +8413,7 @@ msgstr "No interval set"
 
 #: src/routes/assets/[id]/asset-detail.svelte
 #: src/routes/assets/bundles/[id]/bundle-detail.svelte
-#: src/routes/orgs/[id]/value/+page.svelte
+#: src/routes/orgs/[id]/equipment/value/+page.svelte
 msgid "Net purchase price"
 msgstr "Net purchase price"
 
@@ -9151,19 +9160,19 @@ msgstr "Billing details of {0} are incomplete"
 msgid "Missing: {0}. Offers and invoices can only be generated once these are filled in."
 msgstr "Missing: {0}. Offers and invoices can only be generated once these are filled in."
 
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
 msgid "Tax number (Steuernummer)"
 msgstr "Tax number (Steuernummer)"
 
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
 msgid "VAT ID (USt-IdNr.)"
 msgstr "VAT ID (USt-IdNr.)"
 
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
 msgid "Invoices need at least one of the two and show both if both are set. Not your personal tax ID (Steuer-ID) — that one does not belong on an invoice."
 msgstr "Invoices need at least one of the two and show both if both are set. Not your personal tax ID (Steuer-ID) — that one does not belong on an invoice."
 
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
 msgid "Tax number"
 msgstr "Tax number"
 
@@ -9171,9 +9180,8 @@ msgstr "Tax number"
 msgid "Tax number / VAT ID"
 msgstr "Tax number / VAT ID"
 
-#: src/routes/orgs/[id]/+page.svelte
-msgid "Address, tax numbers, and bank account — used on generated offers/invoices."
-msgstr "Address, tax numbers, and bank account — used on generated offers/invoices."
+#~ msgid "Address, tax numbers, and bank account — used on generated offers/invoices."
+#~ msgstr "Address, tax numbers, and bank account — used on generated offers/invoices."
 
 #: src/lib/billing-document-check.svelte.ts
 msgid "Organization address"
@@ -9258,19 +9266,19 @@ msgid "Service removed"
 msgstr "Service removed"
 
 #: src/lib/components/ui/billing-document/billing-document.svelte
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
 msgid "Move up"
 msgstr "Move up"
 
 #: src/lib/components/ui/billing-document/billing-document.svelte
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
 msgid "Move down"
 msgstr "Move down"
 
 #: src/lib/components/ui/billing-document/billing-document.svelte
 #: src/lib/components/ui/billing-document/service-line-modal.svelte
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
 msgid "Edit service"
 msgstr "Edit service"
 
@@ -9285,17 +9293,17 @@ msgstr "× {0} d"
 
 #: src/lib/components/ui/billing-document/billing-document.svelte
 #: src/lib/components/ui/billing-document/service-line-modal.svelte
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
 msgid "Add service"
 msgstr "Add service"
 
 #: src/lib/components/ui/billing-document/service-line-modal.svelte
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
 msgid "Service updated"
 msgstr "Service updated"
 
 #: src/lib/components/ui/billing-document/service-line-modal.svelte
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
 msgid "Service added"
 msgstr "Service added"
 
@@ -9316,6 +9324,7 @@ msgid "(deleted section)"
 msgstr "(deleted section)"
 
 #: src/lib/components/ui/billing-document/service-line-modal.svelte
+#: src/routes/orgs/[id]/sub-tabs.svelte
 msgid "Section"
 msgstr "Section"
 
@@ -9324,12 +9333,12 @@ msgid "Optional, printed under the name"
 msgstr "Optional, printed under the name"
 
 #: src/lib/components/ui/billing-document/service-line-modal.svelte
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
 msgid "Unit"
 msgstr "Unit"
 
 #: src/lib/components/ui/billing-document/service-line-modal.svelte
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
 msgid "Unit price (€, net)"
 msgstr "Unit price (€, net)"
 
@@ -9382,98 +9391,96 @@ msgstr "That service category no longer exists."
 msgid "That service no longer exists."
 msgstr "That service no longer exists."
 
-#: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/rates/+page.svelte
+#: src/routes/orgs/[id]/billing/+layout.svelte
 msgid "Rates & services"
 msgstr "Rates & services"
 
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
 msgid "Category added"
 msgstr "Category added"
 
 #. 0: category.name; 1: category.services.length
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
 msgid "Delete \"{0}\" and its {1} service(s)? Offers and invoices keep their lines."
 msgstr "Delete \"{0}\" and its {1} service(s)? Offers and invoices keep their lines."
 
 #. 0: category.name
 #. 0: service.name
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
 msgid "Delete \"{0}\"? Offers and invoices keep their lines."
 msgstr "Delete \"{0}\"? Offers and invoices keep their lines."
 
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
 msgid "Category deleted"
 msgstr "Category deleted"
 
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
 msgid "Service deleted"
 msgstr "Service deleted"
 
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
 msgid "Services"
 msgstr "Services"
 
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
 msgid "What you bill besides equipment, such as crew, transport or programming. Each category is a section on offers and invoices, in this order. A line picked from here copies the price, so changing it later does not touch documents that already exist."
 msgstr "What you bill besides equipment, such as crew, transport or programming. Each category is a section on offers and invoices, in this order. A line picked from here copies the price, so changing it later does not touch documents that already exist."
 
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
 msgid "No service categories yet. Add one, for example Personal or Transport."
 msgstr "No service categories yet. Add one, for example Personal or Transport."
 
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
 msgid "Edit category"
 msgstr "Edit category"
 
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
 msgid "Delete category"
 msgstr "Delete category"
 
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
 msgid "· per day"
 msgstr "· per day"
 
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
 msgid "Delete service"
 msgstr "Delete service"
 
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
 msgid "Service"
 msgstr "Service"
 
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
 msgid "Add category"
 msgstr "Add category"
 
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
 msgid "Personal"
 msgstr "Personal"
 
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
 msgid "Printed as the section heading on documents."
 msgstr "Printed as the section heading on documents."
 
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
 msgid "Techniker"
 msgstr "Techniker"
 
-#: src/routes/orgs/[id]/rates/service-catalog.svelte
+#: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
 msgid "Per day <0>Also multiplied by the document's day count, e.g. a technician's day rate.</0>"
 msgstr "Per day <0>Also multiplied by the document's day count, e.g. a technician's day rate.</0>"
 
 #. 0: org?.name ?? ''
-#: src/routes/orgs/[id]/rates/+page.svelte
+#: src/routes/orgs/[id]/billing/rates/+page.svelte
 msgid "Rates & services | {0} | Technikpool"
 msgstr "Rates & services | {0} | Technikpool"
 
-#: src/routes/orgs/[id]/rates/+page.svelte
-msgid "What offers and invoices are priced from."
-msgstr "What offers and invoices are priced from."
+#~ msgid "What offers and invoices are priced from."
+#~ msgstr "What offers and invoices are priced from."
 
-#: src/routes/orgs/[id]/rates/+page.svelte
+#: src/routes/orgs/[id]/billing/rates/+page.svelte
 msgid "Default daily rental rate per category, as a percentage of an asset's net purchase price."
 msgstr "Default daily rental rate per category, as a percentage of an asset's net purchase price."
 
@@ -10277,7 +10284,7 @@ msgid "Enter the asset tag, or tick \"No asset tag\"."
 msgstr "Enter the asset tag, or tick \"No asset tag\"."
 
 #: src/lib/components/asset-form/asset-form.svelte
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/equipment/+page.svelte
 msgid "Asset tags"
 msgstr "Asset tags"
 
@@ -10468,7 +10475,7 @@ msgstr "Last updated {0}"
 
 #: src/lib/components/ui/dpa-gate/dpa-gate.svelte
 #: src/lib/legal.svelte.ts
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/data/+page.svelte
 msgid "Data processing agreement"
 msgstr "Data processing agreement"
 
@@ -10578,12 +10585,12 @@ msgstr "Address of {0}"
 msgid "The organization is a party to the agreement and needs an address. It is also saved as its billing address."
 msgstr "The organization is a party to the agreement and needs an address. It is also saved as its billing address."
 
-#. 0: new Date( org.dpaAcceptances[0].acceptedAt ).toLocaleDateString()
-#: src/routes/orgs/[id]/+page.svelte
+#. 0: new Date( dpa.acceptedAt ).toLocaleDateString()
+#: src/routes/orgs/[id]/data/+page.svelte
 msgid "Accepted with the operator of this server on {0}. The PDF shows who accepted which version, and when."
 msgstr "Accepted with the operator of this server on {0}. The PDF shows who accepted which version, and when."
 
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/data/+page.svelte
 msgid "Download PDF"
 msgstr "Download PDF"
 
@@ -10680,20 +10687,18 @@ msgstr "No loose units to add."
 #~ msgid "No loose units to add.=======next free number\" — a tag is typed or scanned)"
 #~ msgstr "No loose units to add.=======next free number\" — a tag is typed or scanned)"
 
-#. 0: prefix
-#: src/routes/orgs/[id]/+page.svelte
-msgid "Give devices created without a tag the next number: the prefix {0} and five digits."
-msgstr "Give devices created without a tag the next number: the prefix {0} and five digits."
+#~ msgid "Give devices created without a tag the next number: the prefix {0} and five digits."
+#~ msgstr "Give devices created without a tag the next number: the prefix {0} and five digits."
 
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/equipment/+page.svelte
 msgid "Next number: <0/>. A number is never handed out twice, even after its device is deleted."
 msgstr "Next number: <0/>. A number is never handed out twice, even after its device is deleted."
 
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/equipment/+page.svelte
 msgid "Off: a device gets its tag by typing or scanning the sticker."
 msgstr "Off: a device gets its tag by typing or scanning the sticker."
 
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/equipment/+page.svelte
 msgid "<0/> Number new devices automatically"
 msgstr "<0/> Number new devices automatically"
 
@@ -10937,7 +10942,7 @@ msgid_plural "# devices"
 msgstr[0] "1 device"
 msgstr[1] "# devices"
 
-#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/equipment/locations/+page.svelte
 #: src/routes/share/[id]/[signature]/+page.svelte
 msgid "1 case"
 msgid_plural "# cases"
@@ -11834,67 +11839,66 @@ msgid "Gathering the equipment"
 msgstr "Gathering the equipment"
 
 #. 0: org?.name ?? ''
-#: src/routes/orgs/[id]/value/+page.svelte
+#: src/routes/orgs/[id]/equipment/value/+page.svelte
 msgid "Equipment value | {0} | Technikpool"
 msgstr "Equipment value | {0} | Technikpool"
 
-#: src/routes/orgs/[id]/+page.svelte
-#: src/routes/orgs/[id]/value/+page.svelte
+#: src/routes/orgs/[id]/equipment/+layout.svelte
 msgid "Equipment value"
 msgstr "Equipment value"
 
-#: src/routes/orgs/[id]/value/+page.svelte
+#: src/routes/orgs/[id]/equipment/value/+page.svelte
 msgid "Every unit still in the pool, at this organization's net purchase price."
 msgstr "Every unit still in the pool, at this organization's net purchase price."
 
-#: src/routes/orgs/[id]/value/+page.svelte
+#: src/routes/orgs/[id]/equipment/value/+page.svelte
 msgid "This organization has no equipment yet."
 msgstr "This organization has no equipment yet."
 
-#: src/routes/orgs/[id]/value/+page.svelte
+#: src/routes/orgs/[id]/equipment/value/+page.svelte
 msgid "Total value"
 msgstr "Total value"
 
 #. 0: units; 1: rows.length
-#: src/routes/orgs/[id]/value/+page.svelte
+#: src/routes/orgs/[id]/equipment/value/+page.svelte
 msgid "{0} units, {1} products"
 msgstr "{0} units, {1} products"
 
-#: src/routes/orgs/[id]/value/+page.svelte
+#: src/routes/orgs/[id]/equipment/value/+page.svelte
 msgid "Broken or in maintenance"
 msgstr "Broken or in maintenance"
 
-#: src/routes/orgs/[id]/value/+page.svelte
+#: src/routes/orgs/[id]/equipment/value/+page.svelte
 msgid "Included in the total"
 msgstr "Included in the total"
 
-#: src/routes/orgs/[id]/value/+page.svelte
+#: src/routes/orgs/[id]/equipment/value/+page.svelte
 msgid "Without a price"
 msgstr "Without a price"
 
 #. 0: unpriced.length
-#: src/routes/orgs/[id]/value/+page.svelte
+#: src/routes/orgs/[id]/equipment/value/+page.svelte
 msgid "{0} products, not in the total"
 msgstr "{0} products, not in the total"
 
-#: src/routes/orgs/[id]/value/+page.svelte
+#: src/routes/orgs/[id]/equipment/value/+page.svelte
 msgid "Every product has a price"
 msgstr "Every product has a price"
 
-#: src/routes/orgs/[id]/value/+page.svelte
+#: src/routes/orgs/[id]/equipment/value/+page.svelte
 msgid "<0/> Only products without a price"
 msgstr "<0/> Only products without a price"
 
-#: src/routes/orgs/[id]/value/+page.svelte
+#: src/routes/orgs/[id]/equipment/value/+page.svelte
 msgid "Net price"
 msgstr "Net price"
 
-#: src/routes/orgs/[id]/value/+page.svelte
+#: src/routes/orgs/[id]/equipment/value/+page.svelte
 msgid "Value"
 msgstr "Value"
 
 #. 0: row.damaged
-#: src/routes/orgs/[id]/value/+page.svelte
+#: src/routes/orgs/[id]/equipment/value/+page.svelte
 msgid "({0} damaged)"
 msgstr "({0} damaged)"
 
@@ -12446,29 +12450,29 @@ msgstr "Search locations"
 msgid "No locations found."
 msgstr "No locations found."
 
-#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/equipment/locations/+page.svelte
 msgid "Locations merged"
 msgstr "Locations merged"
 
-#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/equipment/locations/+page.svelte
 msgid "Merge location"
 msgstr "Merge location"
 
-#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/equipment/locations/+page.svelte
 msgid "Merge into"
 msgstr "Merge into"
 
 #. 0: plural(mergeSource._count.assets, ['1 unit', '# units'])
-#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/equipment/locations/+page.svelte
 msgid "{0} will be at <0/><1/>."
 msgstr "{0} will be at <0/><1/>."
 
 #. 0: mergeSource.name
-#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/equipment/locations/+page.svelte
 msgid "Everything kept at <0/> moves to the location you pick, and {0} is deleted. Stocktake reports keep their counts under the new name."
 msgstr "Everything kept at <0/> moves to the location you pick, and {0} is deleted. Stocktake reports keep their counts under the new name."
 
-#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/equipment/locations/+page.svelte
 msgid "Merge and delete"
 msgstr "Merge and delete"
 
@@ -12477,12 +12481,12 @@ msgid "Your default"
 msgstr "Your default"
 
 #: src/lib/components/ui/location-select/location-select.svelte
-#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/equipment/locations/+page.svelte
 msgid "Your default — click to clear"
 msgstr "Your default — click to clear"
 
 #: src/lib/components/ui/location-select/location-select.svelte
-#: src/routes/orgs/[id]/locations/+page.svelte
+#: src/routes/orgs/[id]/equipment/locations/+page.svelte
 msgid "Make this your default"
 msgstr "Make this your default"
 
@@ -12588,6 +12592,7 @@ msgid "Home"
 msgstr "Home"
 
 #: src/routes/orgs/+page.svelte
+#: src/routes/orgs/[id]/+layout.svelte
 msgid "Members"
 msgstr "Members"
 
@@ -12765,37 +12770,37 @@ msgid "Registered and attached to {0}{1} in one step. It inherits that unit's lo
 msgstr "Registered and attached to {0}{1} in one step. It inherits that unit's location."
 
 #. 0: tagSuggestion.resetTo
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/equipment/+page.svelte
 msgid "Reset the counter to {0}?"
 msgstr "Reset the counter to {0}?"
 
 #. 0: tagSuggestion.highest
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/equipment/+page.svelte
 msgid "The highest number a device carries is {0}. Numbers above it become free again, including those of deleted devices."
 msgstr "The highest number a device carries is {0}. Numbers above it become free again, including those of deleted devices."
 
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/equipment/+page.svelte
 msgid "No device carries a number yet. Numbering starts over, including the numbers of deleted devices."
 msgstr "No device carries a number yet. Numbering starts over, including the numbers of deleted devices."
 
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/equipment/+page.svelte
 msgid "Reset"
 msgstr "Reset"
 
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/equipment/+page.svelte
 msgid "Counter reset"
 msgstr "Counter reset"
 
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/equipment/+page.svelte
 msgid "The highest number in use is <0/> — the counter is further ahead."
 msgstr "The highest number in use is <0/> — the counter is further ahead."
 
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/equipment/+page.svelte
 msgid "No device carries a number yet, but the counter is further ahead."
 msgstr "No device carries a number yet, but the counter is further ahead."
 
 #. 0: tagSuggestion.resetTo
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/equipment/+page.svelte
 msgid "Reset counter to {0}"
 msgstr "Reset counter to {0}"
 
@@ -13392,10 +13397,8 @@ msgstr "Version {0} of {1}"
 msgid "{0} and {1} are filled in from the rental terms when the document is finalized. Without rental terms, their line is left out."
 msgstr "{0} and {1} are filled in from the rental terms when the document is finalized. Without rental terms, their line is left out."
 
-#. 0: '{rentalTermsDate}'; 1: '{rentalTermsUrl}'
-#: src/routes/orgs/[id]/+page.svelte
-msgid "{0} and {1} cite your rental terms. Without rental terms, a line holding one of them is left out."
-msgstr "{0} and {1} cite your rental terms. Without rental terms, a line holding one of them is left out."
+#~ msgid "{0} and {1} cite your rental terms. Without rental terms, a line holding one of them is left out."
+#~ msgstr "{0} and {1} cite your rental terms. Without rental terms, a line holding one of them is left out."
 
 #: src/routes/orgs/[id]/rental-terms-card.svelte
 msgid "Your closing texts for offers and invoices don't mention the rental terms."
@@ -13418,11 +13421,10 @@ msgstr "<0/> Add a sentence with {0} and {1} under <1>Billing Details</1>. The o
 msgid "The organization needs a name."
 msgstr "The organization needs a name."
 
-#: src/routes/orgs/[id]/+page.svelte
-msgid "Name, asset ID prefix, visual identity, DGUV default interval, and Kleinunternehmer status."
-msgstr "Name, asset ID prefix, visual identity, DGUV default interval, and Kleinunternehmer status."
+#~ msgid "Name, asset ID prefix, visual identity, DGUV default interval, and Kleinunternehmer status."
+#~ msgstr "Name, asset ID prefix, visual identity, DGUV default interval, and Kleinunternehmer status."
 
-#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/general/+page.svelte
 msgid "The full name, printed on offers, invoices and delivery notes. Documents already issued keep the old one; drafts offer to take the new one."
 msgstr "The full name, printed on offers, invoices and delivery notes. Documents already issued keep the old one; drafts offer to take the new one."
 
@@ -13559,6 +13561,7 @@ msgid "Serial number, tag, status, location and purchase date."
 msgstr "Serial number, tag, status, location and purchase date."
 
 #: src/routes/assets/[id]/asset-detail.svelte
+#: src/routes/orgs/[id]/equipment/+page.svelte
 msgid "Inspection intervals"
 msgstr "Inspection intervals"
 
@@ -13615,17 +13618,14 @@ msgstr "— set to {0}"
 msgid "{0}: inspection of {1} deleted"
 msgstr "{0}: inspection of {1} deleted"
 
-#: src/routes/orgs/[id]/+page.svelte
-msgid "Inspection intervals (months)"
-msgstr "Inspection intervals (months)"
+#~ msgid "Inspection intervals (months)"
+#~ msgstr "Inspection intervals (months)"
 
 #~ msgid "Given to new devices whose product needs that inspection (set per category, or on the product's page). They are due for their first inspection at once. Existing devices keep theirs — change those from the Devices list. Leave a type blank to not track it by default."
 #~ msgstr "Given to new devices whose product needs that inspection (set per category, or on the product's page). They are due for their first inspection at once. Existing devices keep theirs — change those from the Devices list. Leave a type blank to not track it by default."
 
-#. 0: inspectionTypeLabel(type)
-#: src/routes/orgs/[id]/+page.svelte
-msgid "Interval: {0}"
-msgstr "Interval: {0}"
+#~ msgid "Interval: {0}"
+#~ msgstr "Interval: {0}"
 
 #~ msgid "Which inspections its devices need. Those that do get their organization's interval for each; the others are not tracked for it."
 #~ msgstr "Which inspections its devices need. Those that do get their organization's interval for each; the others are not tracked for it."
@@ -13716,9 +13716,8 @@ msgstr "Own interval (months)"
 msgid "Only for an exception: normally a device follows its organization's interval for the product or the type. Leave empty to follow it again. The next due date follows from the latest inspection of this type, or is due at once if there was none."
 msgstr "Only for an exception: normally a device follows its organization's interval for the product or the type. Leave empty to follow it again. The next due date follows from the latest inspection of this type, or is due at once if there was none."
 
-#: src/routes/orgs/[id]/+page.svelte
-msgid "For devices whose product needs that inspection (set per category, or on the product's page). A change applies to every device at once, except those with an interval set for their product or of their own. A device never inspected is due at once. Leave a type blank to not track it."
-msgstr "For devices whose product needs that inspection (set per category, or on the product's page). A change applies to every device at once, except those with an interval set for their product or of their own. A device never inspected is due at once. Leave a type blank to not track it."
+#~ msgid "For devices whose product needs that inspection (set per category, or on the product's page). A change applies to every device at once, except those with an interval set for their product or of their own. A device never inspected is due at once. Leave a type blank to not track it."
+#~ msgstr "For devices whose product needs that inspection (set per category, or on the product's page). A change applies to every device at once, except those with an interval set for their product or of their own. A device never inspected is due at once. Leave a type blank to not track it."
 
 #: src/routes/products/[id]/product-detail.svelte
 msgid "Organization's default"
@@ -14546,3 +14545,286 @@ msgstr "Archived PDF"
 #: src/routes/offers/[id]/offer-detail.svelte
 msgid "With a line for the customer to sign the order on"
 msgstr "With a line for the customer to sign the order on"
+
+#: src/lib/cable-colors.svelte.ts
+msgid "Red"
+msgstr "Red"
+
+#: src/lib/cable-colors.svelte.ts
+msgid "Blue"
+msgstr "Blue"
+
+#: src/lib/cable-colors.svelte.ts
+msgid "Green"
+msgstr "Green"
+
+#: src/lib/cable-colors.svelte.ts
+msgid "Yellow"
+msgstr "Yellow"
+
+#: src/lib/cable-colors.svelte.ts
+msgid "White"
+msgstr "White"
+
+#: src/lib/cable-colors.svelte.ts
+msgid "Black"
+msgstr "Black"
+
+#: src/lib/cable-colors.svelte.ts
+msgid "Orange"
+msgstr "Orange"
+
+#: src/lib/cable-colors.svelte.ts
+msgid "Brown"
+msgstr "Brown"
+
+#: src/lib/cable-colors.svelte.ts
+msgid "Grey"
+msgstr "Grey"
+
+#: src/lib/cable-colors.svelte.ts
+msgid "Violet"
+msgstr "Violet"
+
+#: src/lib/cable-colors.svelte.ts
+msgid "Pink"
+msgstr "Pink"
+
+#: src/lib/cable-colors.svelte.ts
+msgid "Turquoise"
+msgstr "Turquoise"
+
+#: src/lib/error-messages.svelte.ts
+msgid "Each colour needs a length greater than zero."
+msgstr "Each colour needs a length greater than zero."
+
+#. 0: p0
+#: src/lib/error-messages.svelte.ts
+msgid "Two colours end at {0} m. Each length can have only one colour."
+msgstr "Two colours end at {0} m. Each length can have only one colour."
+
+#: src/lib/error-messages.svelte.ts
+msgid "Pick a colour, or give your own colour a name and a value."
+msgstr "Pick a colour, or give your own colour a name and a value."
+
+#: src/routes/orgs/[id]/cable-colors-card.svelte
+msgid "Enter a length in metres."
+msgstr "Enter a length in metres."
+
+#: src/routes/orgs/[id]/cable-colors-card.svelte
+msgid "Give your colour a name."
+msgstr "Give your colour a name."
+
+#: src/routes/orgs/[id]/cable-colors-card.svelte
+msgid "Pick a colour value."
+msgstr "Pick a colour value."
+
+#: src/routes/orgs/[id]/cable-colors-card.svelte
+msgid "Cable colours saved"
+msgstr "Cable colours saved"
+
+#: src/lib/components/ui/cable-color/production-cable-colors.svelte
+#: src/routes/orgs/[id]/cable-colors-card.svelte
+#: src/routes/orgs/[id]/cable-colors-card.svelte
+#: src/routes/share/[id]/[signature]/+page.svelte
+msgid "Cable colours"
+msgstr "Cable colours"
+
+#: src/routes/orgs/[id]/cable-colors-card.svelte
+msgid "The colour of tape that marks each cable length. Shown next to every cable of yours, in the search, on packing lists and delivery notes, and to organizations that borrow from you."
+msgstr "The colour of tape that marks each cable length. Shown next to every cable of yours, in the search, on packing lists and delivery notes, and to organizations that borrow from you."
+
+#: src/routes/orgs/[id]/cable-colors-card.svelte
+msgid "No colours set."
+msgstr "No colours set."
+
+#: src/routes/orgs/[id]/cable-colors-card.svelte
+msgid "Set up colours"
+msgstr "Set up colours"
+
+#: src/routes/orgs/[id]/cable-colors-card.svelte
+msgid "Edit colours"
+msgstr "Edit colours"
+
+#: src/routes/orgs/[id]/cable-colors-card.svelte
+msgid "Length in metres"
+msgstr "Length in metres"
+
+#: src/routes/orgs/[id]/cable-colors-card.svelte
+msgid "up to"
+msgstr "up to"
+
+#: src/routes/orgs/[id]/cable-colors-card.svelte
+msgid "m"
+msgstr "m"
+
+#: src/routes/orgs/[id]/cable-colors-card.svelte
+msgid "Own colour…"
+msgstr "Own colour…"
+
+#: src/routes/orgs/[id]/cable-colors-card.svelte
+msgid "Name, e.g. neon yellow"
+msgstr "Name, e.g. neon yellow"
+
+#: src/routes/orgs/[id]/cable-colors-card.svelte
+msgid "Colour name"
+msgstr "Colour name"
+
+#: src/routes/orgs/[id]/cable-colors-card.svelte
+msgid "Colour value"
+msgstr "Colour value"
+
+#: src/routes/orgs/[id]/cable-colors-card.svelte
+msgid "Remove colour"
+msgstr "Remove colour"
+
+#. 0: formatLength(duplicate)
+#: src/routes/orgs/[id]/cable-colors-card.svelte
+msgid "Two colours end at {0}. Each length can have only one colour."
+msgstr "Two colours end at {0}. Each length can have only one colour."
+
+#: src/routes/orgs/[id]/cable-colors-card.svelte
+msgid "Each colour covers every length up to its own, from just past the colour before it. A cable longer than the last one has no colour."
+msgstr "Each colour covers every length up to its own, from just past the colour before it. A cable longer than the last one has no colour."
+
+#: src/routes/orgs/[id]/cable-colors-card.svelte
+msgid "Add colour"
+msgstr "Add colour"
+
+#. 0: formatLength(row.band.maxLengthCm)
+#: src/lib/components/ui/cable-color/cable-color-legend.svelte
+msgid "up to {0}"
+msgstr "up to {0}"
+
+#. 0: formatLength(row.from); 1: formatLength(row.band.maxLengthCm)
+#: src/lib/components/ui/cable-color/cable-color-legend.svelte
+msgid "over {0} up to {1}"
+msgstr "over {0} up to {1}"
+
+#: src/routes/orgs/[id]/+layout.svelte
+msgid "General"
+msgstr "General"
+
+#: src/routes/orgs/[id]/+layout.svelte
+msgid "Billing"
+msgstr "Billing"
+
+#: src/routes/orgs/[id]/+layout.svelte
+msgid "Data & legal"
+msgstr "Data & legal"
+
+#. 0: name
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Remove {0}?"
+msgstr "Remove {0}?"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "They lose access to this organization at once. You can add them again later."
+msgstr "They lose access to this organization at once. You can add them again later."
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "What do the roles mean?"
+msgstr "What do the roles mean?"
+
+#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Add member"
+msgstr "Add member"
+
+#. 0: name
+#: src/routes/orgs/[id]/+page.svelte
+msgid "Remove {0}"
+msgstr "Remove {0}"
+
+#: src/routes/orgs/[id]/+page.svelte
+msgid "People invited by email who have not created their account yet."
+msgstr "People invited by email who have not created their account yet."
+
+#: src/routes/orgs/[id]/billing/+layout.svelte
+#: src/routes/orgs/[id]/billing/+page.svelte
+msgid "Billing details"
+msgstr "Billing details"
+
+#: src/routes/orgs/[id]/billing/+page.svelte
+msgid "Text presets saved"
+msgstr "Text presets saved"
+
+#: src/routes/orgs/[id]/billing/+page.svelte
+msgid "Address, tax numbers and bank account, printed on offers and invoices."
+msgstr "Address, tax numbers and bank account, printed on offers and invoices."
+
+#: src/routes/orgs/[id]/equipment/+page.svelte
+#: src/routes/orgs/[id]/general/+page.svelte
+msgid "Discard changes"
+msgstr "Discard changes"
+
+#. 0: '{production}'; 1: '{startDate}'; 2: '{endDate}'; 3: '{servicePeriod}'; 4: '{customer}'; 5: '{documentNumber}'; 6: '{paymentTermsDays}'; 7: '{rentalTermsDate}'; 8: '{rentalTermsUrl}'
+#: src/routes/orgs/[id]/billing/+page.svelte
+msgid "What a new offer or invoice starts with. Placeholders: {0}, {1}, {2}, {3}, {4}, {5}, {6}. {7} and {8} cite your rental terms; without rental terms, a line holding one of them is left out."
+msgstr "What a new offer or invoice starts with. Placeholders: {0}, {1}, {2}, {3}, {4}, {5}, {6}. {7} and {8} cite your rental terms; without rental terms, a line holding one of them is left out."
+
+#: src/routes/orgs/[id]/general/+page.svelte
+msgid "Name and look"
+msgstr "Name and look"
+
+#: src/routes/orgs/[id]/general/+page.svelte
+msgid "How the organization is named and shown across the app."
+msgstr "How the organization is named and shown across the app."
+
+#: src/routes/orgs/[id]/equipment/+layout.svelte
+msgid "Settings"
+msgstr "Settings"
+
+#: src/routes/orgs/[id]/data/+page.svelte
+msgid "Data export"
+msgstr "Data export"
+
+#: src/routes/orgs/[id]/data/+page.svelte
+msgid "Danger zone"
+msgstr "Danger zone"
+
+#: src/routes/orgs/[id]/data/+page.svelte
+msgid "Deleting the organization removes it with all of its locations, devices, productions, offers and invoices. It cannot be undone — export the data first if you may need it."
+msgstr "Deleting the organization removes it with all of its locations, devices, productions, offers and invoices. It cannot be undone — export the data first if you may need it."
+
+#: src/routes/orgs/[id]/data/+page.svelte
+msgid "Delete <0/> and all of its data? This cannot be undone."
+msgstr "Delete <0/> and all of its data? This cannot be undone."
+
+#: src/routes/orgs/[id]/equipment/+page.svelte
+msgid "Asset ID prefix saved"
+msgstr "Asset ID prefix saved"
+
+#: src/routes/orgs/[id]/equipment/+page.svelte
+msgid "Inspection intervals saved"
+msgstr "Inspection intervals saved"
+
+#: src/routes/orgs/[id]/equipment/+page.svelte
+msgid "The numbers on your stickers: a prefix of three characters and five digits."
+msgstr "The numbers on your stickers: a prefix of three characters and five digits."
+
+#: src/routes/orgs/[id]/equipment/+page.svelte
+msgid "Prefix <0/>"
+msgstr "Prefix <0/>"
+
+#: src/routes/orgs/[id]/equipment/+page.svelte
+msgid "In months, for devices whose product needs that inspection (set per category, or on the product's page). A change applies to every device at once, except those with an interval set for their product or of their own. A device never inspected is due at once. Leave a type blank to not track it."
+msgstr "In months, for devices whose product needs that inspection (set per category, or on the product's page). A change applies to every device at once, except those with an interval set for their product or of their own. A device never inspected is due at once. Leave a type blank to not track it."
+
+#: src/routes/orgs/[id]/billing/+page.svelte
+msgid "Yes — no VAT charged"
+msgstr "Yes — no VAT charged"
+
+#: src/routes/orgs/[id]/billing/+page.svelte
+msgid "Payment term"
+msgstr "Payment term"
+
+#. 0: o.paymentTermsDays
+#: src/routes/orgs/[id]/billing/+page.svelte
+msgid "{0} days"
+msgstr "{0} days"
+
+#: src/routes/orgs/[id]/billing/+page.svelte
+msgid "Default"
+msgstr "Default"

@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { CableColorDot } from '#lib/components/ui/cable-color/index.js';
 	import { naturalCompare } from '#lib/sort.js';
 	import { rowLinkClick } from '#lib/row-link.js';
 	import { BackButton } from '#lib/components/ui/back-button/index.js';
@@ -956,6 +957,10 @@
 												size={nested ? 32 : 40}
 											/>
 											<div class="min-w-0">
+												<CableColorDot
+													organizationId={asset.organizationId}
+													lengthCm={asset.product.lengthCm}
+												/>
 												<a
 													href={resolve(`assets/${asset.id}`)}
 													class="font-medium hover:underline"

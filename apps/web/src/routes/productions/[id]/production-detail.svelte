@@ -1,4 +1,5 @@
 <script lang="ts">
+	import { ProductionCableColors } from '#lib/components/ui/cable-color/index.js';
 	import { BackButton } from '#lib/components/ui/back-button/index.js';
 	import { withCaption } from '#lib/product-label.js';
 	import ShareLinkMenu from './share-link-menu.svelte';
@@ -1194,6 +1195,8 @@
 					</div>
 				</Card.Content>
 			</Card.Root>
+
+			<ProductionCableColors units={production.items.map((item) => item.asset)} />
 
 			<!-- Crew -->
 			<Card.Root>

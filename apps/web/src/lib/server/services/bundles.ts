@@ -639,6 +639,8 @@ const BUNDLE_UNIT_SELECT = {
 			caption: true,
 			imagePath: true,
 			isContainer: true,
+			// For the cable colour, with the kit's org's scheme.
+			lengthCm: true,
 			manufacturer: { select: { name: true } }
 		}
 	},

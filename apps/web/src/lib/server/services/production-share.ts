@@ -6,6 +6,9 @@ import { nestAccessories } from '#lib/production-items.js';
 import { naturalCompare } from '#lib/sort.js';
 import type { ShareInspection, ShareUnit, ShareView } from '#lib/production-share.js';
 import { productionRentalTerms } from './rental-terms';
+import { cableColorSchemes } from './cable-colors';
+import { cableBandFor } from '#lib/cable-colors.js';
+import { orgLabel } from '#lib/utils.js';
 
 // A production's info link for its customer: what is booked for the job, to
 // tick off while packing (in the customer's own browser, nothing is stored
@@ -72,6 +75,8 @@ export async function resolveShare(productionId: string, signature: string) {
 							assetTag: true,
 							parentAssetId: true,
 							productId: true,
+							organizationId: true,
+							organization: { select: { name: true, shortName: true } },
 							inspectionSchedules: {
 								select: {
 									nextDue: true,
@@ -84,6 +89,7 @@ export async function resolveShare(productionId: string, signature: string) {
 									name: true,
 									caption: true,
 									imagePath: true,
+									lengthCm: true,
 									manufacturer: { select: { name: true } }
 								}
 							}
@@ -116,6 +122,16 @@ export async function resolveShare(productionId: string, signature: string) {
 			validUntil: s.nextDue.toISOString().slice(0, 10),
 			overdue: s.nextDue.getTime() < now
 		}));
+	const schemes = await cableColorSchemes(
+		production.items.map((item) => item.asset.organizationId)
+	);
+	const colourOf = (asset: (typeof production.items)[number]['asset']) =>
+		cableBandFor(asset.product.lengthCm, schemes.get(asset.organizationId) ?? []);
+	const coloured = new Map<string, string>();
+	for (const item of production.items) {
+		if (colourOf(item.asset))
+			coloured.set(item.asset.organizationId, orgLabel(item.asset.organization));
+	}
 	const unitOf = (item: (typeof production.items)[number]) => ({
 		id: item.asset.id,
 		name: item.asset.product.name,
@@ -124,7 +140,8 @@ export async function resolveShare(productionId: string, signature: string) {
 		tag: item.asset.assetTag,
 		productId: item.asset.productId,
 		imageUrl: imageSrc(item.asset.product.imagePath),
-		inspections: proofOf(item.asset)
+		inspections: proofOf(item.asset),
+		cableColor: colourOf(item.asset)
 	});
 	const byUnit = (a: ShareUnit, b: ShareUnit) =>
 		naturalCompare(a.name, b.name) || naturalCompare(a.tag ?? '', b.tag ?? '');
@@ -205,6 +222,10 @@ export async function resolveShare(productionId: string, signature: string) {
 			.sort((a, b) => naturalCompare(a.name, b.name) || naturalCompare(a.tag ?? '', b.tag ?? '')),
 		units: units.sort(byUnit),
 		documents,
+		cableColors: [...coloured].map(([organizationId, organization]) => ({
+			organization,
+			bands: schemes.get(organizationId) ?? []
+		})),
 		expiresAt: expiresAt?.toISOString() ?? null,
 		rentalTerms: await shareRentalTerms(production)
 	};

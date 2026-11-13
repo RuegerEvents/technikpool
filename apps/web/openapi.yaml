@@ -276,6 +276,30 @@ paths:
                 items:
                   $ref: '#/components/schemas/LegalLink'
 
+  /api/v1/cable-colors:
+    get:
+      operationId: listCableColors
+      tags: [inventory]
+      summary: The cable colour codes the user's equipment is marked with
+      description: |
+        One scheme per organization: the colour of tape that marks each cable
+        length. Every organization the user belongs to, plus every organization
+        that has a unit on one of their productions — a lent cable carries its
+        owner's colour. An organization without bands is left out.
+
+        A unit's colour is the band of its owner's scheme with the smallest
+        `maxLengthCm` that is at least the product's `cable.lengthCm`; a longer
+        cable, or a product without a length, has none.
+      responses:
+        '200':
+          description: The schemes
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/CableColorScheme'
+
   /api/v1/locations:
     get:
       operationId: listLocations
@@ -2904,6 +2928,43 @@ components:
         avatarLabel:
           type: string
 
+    CableColorScheme:
+      type: object
+      required: [organizationId, bands]
+      properties:
+        organizationId:
+          type: string
+        bands:
+          type: array
+          description: Shortest first.
+          items:
+            $ref: '#/components/schemas/CableColorBand'
+
+    CableColorBand:
+      type: object
+      required: [maxLengthCm, paletteKey, customName, customHex]
+      properties:
+        maxLengthCm:
+          type: integer
+          description: |
+            Upper bound, inclusive. The band covers every length above the
+            next shorter band's bound up to this one.
+        paletteKey:
+          type: [string, 'null']
+          description: |
+            One of the fixed tape colours — `red`, `blue`, `green`, `yellow`,
+            `white`, `black`, `orange`, `brown`, `grey`, `violet`, `pink`,
+            `turquoise` — which the client names in its own language. Null for
+            a colour of the organization's own. Not an enum, so a colour added
+            later does not break an older client; one it does not know it may
+            show as grey.
+        customName:
+          type: [string, 'null']
+          description: The organization's own colour's name, when `paletteKey` is null.
+        customHex:
+          type: [string, 'null']
+          description: The organization's own colour as `#rrggbb`, when `paletteKey` is null.
+
     LegalLink:
       type: object
       required: [kind, url]
@@ -4391,6 +4452,15 @@ components:
       type: object
       required: [id, assetTag, productName, manufacturerName]
       properties:
+        ownerOrgId:
+          type: string
+          description: |
+            The organization the unit belongs to. With `lengthCm`, what the
+            cable colour is read off (see `GET /api/v1/cable-colors`). Not
+            required, so an older client keeps compiling.
+        lengthCm:
+          type: [integer, 'null']
+          description: The product's length in whole centimetres; null when it has none.
         id:
           type: string
         assetTag:
@@ -5103,6 +5173,15 @@ components:
         - returnReported
         - tick
       properties:
+        ownerOrgId:
+          type: string
+          description: |
+            The organization the unit belongs to. With `lengthCm`, what the
+            cable colour is read off (see `GET /api/v1/cable-colors`). Not
+            required, so an older client keeps compiling.
+        lengthCm:
+          type: [integer, 'null']
+          description: The product's length in whole centimetres; null when it has none.
         assetId:
           type: string
         assetTag:
@@ -5345,6 +5424,15 @@ components:
         - done
         - floor
       properties:
+        ownerOrgId:
+          type: string
+          description: |
+            The organization the unit belongs to. With `lengthCm`, what the
+            cable colour is read off (see `GET /api/v1/cable-colors`). Not
+            required, so an older client keeps compiling.
+        lengthCm:
+          type: [integer, 'null']
+          description: The product's length in whole centimetres; null when it has none.
         key:
           type: string
           description: Identifies the line for a count; opaque to clients.
@@ -5422,6 +5510,15 @@ components:
         - received
         - returnReported
       properties:
+        ownerOrgId:
+          type: string
+          description: |
+            The organization the unit belongs to. With `lengthCm`, what the
+            cable colour is read off (see `GET /api/v1/cable-colors`). Not
+            required, so an older client keeps compiling.
+        lengthCm:
+          type: [integer, 'null']
+          description: The product's length in whole centimetres; null when it has none.
         assetId:
           type: string
         assetTag:
@@ -5722,6 +5819,12 @@ components:
           checkedOutTo
         ]
       properties:
+        lengthCm:
+          type: [integer, 'null']
+          description: |
+            The product's length in whole centimetres, null when it has none —
+            with the kit's organization, what the cable colour is read off (see
+            `GET /api/v1/cable-colors`). Not required, so an older client keeps compiling.
         id:
           type: string
         assetTag:

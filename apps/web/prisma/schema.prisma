@@ -231,6 +231,25 @@ model Organization {
 
   rentalTermsVersions    RentalTermsVersion[]    @relation("RentalTermsVersions")
   rentalTermsAcceptances RentalTermsAcceptance[]
+  cableColorBands        CableColorBand[]
+}
+
+/// One band of an org's cable colour code: every cable of the org up to
+/// `maxLengthCm` (and longer than the next shorter band) carries this colour.
+/// See docs/plans/kabelfarben.md and #lib/cable-colors.svelte.ts.
+model CableColorBand {
+  id             String       @id @default(cuid())
+  organizationId String
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Cascade)
+  /// Upper bound of the band, inclusive.
+  maxLengthCm    Int
+  /// A key of the fixed palette ("red", "blue" …), or null for a colour of the org's own.
+  paletteKey     String?
+  /// Only for a colour of the org's own.
+  customName     String?
+  customHex      String?
+
+  @@unique([organizationId, maxLengthCm])
 }
 
 // Declared highest first, so `orderBy: { role: 'asc' }` lists owners at the

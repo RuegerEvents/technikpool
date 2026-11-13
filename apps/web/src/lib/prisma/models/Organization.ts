@@ -455,6 +455,7 @@ export type OrganizationWhereInput = {
 	loanRequests?: Prisma.LoanRequestListRelationFilter;
 	rentalTermsVersions?: Prisma.RentalTermsVersionListRelationFilter;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceListRelationFilter;
+	cableColorBands?: Prisma.CableColorBandListRelationFilter;
 };
 
 export type OrganizationOrderByWithRelationInput = {
@@ -517,6 +518,7 @@ export type OrganizationOrderByWithRelationInput = {
 	loanRequests?: Prisma.LoanRequestOrderByRelationAggregateInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionOrderByRelationAggregateInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceOrderByRelationAggregateInput;
+	cableColorBands?: Prisma.CableColorBandOrderByRelationAggregateInput;
 };
 
 export type OrganizationWhereUniqueInput = Prisma.AtLeast<
@@ -589,6 +591,7 @@ export type OrganizationWhereUniqueInput = Prisma.AtLeast<
 		loanRequests?: Prisma.LoanRequestListRelationFilter;
 		rentalTermsVersions?: Prisma.RentalTermsVersionListRelationFilter;
 		rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceListRelationFilter;
+		cableColorBands?: Prisma.CableColorBandListRelationFilter;
 	},
 	'id' | 'assetIdPrefix' | 'slug' | 'color' | 'avatarLabel' | 'rentalTermsVersionId'
 >;
@@ -730,6 +733,7 @@ export type OrganizationCreateInput = {
 	loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationUncheckedCreateInput = {
@@ -790,6 +794,7 @@ export type OrganizationUncheckedCreateInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationUpdateInput = {
@@ -850,6 +855,7 @@ export type OrganizationUpdateInput = {
 	loanRequests?: Prisma.LoanRequestUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationUncheckedUpdateInput = {
@@ -910,6 +916,7 @@ export type OrganizationUncheckedUpdateInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationCreateManyInput = {
@@ -1165,6 +1172,32 @@ export type OrganizationUpdateOneWithoutHomeUsersNestedInput = {
 			Prisma.OrganizationUpdateWithoutHomeUsersInput
 		>,
 		Prisma.OrganizationUncheckedUpdateWithoutHomeUsersInput
+	>;
+};
+
+export type OrganizationCreateNestedOneWithoutCableColorBandsInput = {
+	create?: Prisma.XOR<
+		Prisma.OrganizationCreateWithoutCableColorBandsInput,
+		Prisma.OrganizationUncheckedCreateWithoutCableColorBandsInput
+	>;
+	connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutCableColorBandsInput;
+	connect?: Prisma.OrganizationWhereUniqueInput;
+};
+
+export type OrganizationUpdateOneRequiredWithoutCableColorBandsNestedInput = {
+	create?: Prisma.XOR<
+		Prisma.OrganizationCreateWithoutCableColorBandsInput,
+		Prisma.OrganizationUncheckedCreateWithoutCableColorBandsInput
+	>;
+	connectOrCreate?: Prisma.OrganizationCreateOrConnectWithoutCableColorBandsInput;
+	upsert?: Prisma.OrganizationUpsertWithoutCableColorBandsInput;
+	connect?: Prisma.OrganizationWhereUniqueInput;
+	update?: Prisma.XOR<
+		Prisma.XOR<
+			Prisma.OrganizationUpdateToOneWithWhereWithoutCableColorBandsInput,
+			Prisma.OrganizationUpdateWithoutCableColorBandsInput
+		>,
+		Prisma.OrganizationUncheckedUpdateWithoutCableColorBandsInput
 	>;
 };
 
@@ -2053,6 +2086,7 @@ export type OrganizationCreateWithoutHomeUsersInput = {
 	loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationUncheckedCreateWithoutHomeUsersInput = {
@@ -2112,6 +2146,7 @@ export type OrganizationUncheckedCreateWithoutHomeUsersInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationCreateOrConnectWithoutHomeUsersInput = {
@@ -2199,6 +2234,7 @@ export type OrganizationUpdateWithoutHomeUsersInput = {
 	loanRequests?: Prisma.LoanRequestUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationUncheckedUpdateWithoutHomeUsersInput = {
@@ -2232,6 +2268,275 @@ export type OrganizationUncheckedUpdateWithoutHomeUsersInput = {
 	invoiceIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	invoiceClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	rentalTermsVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	members?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrganizationNestedInput;
+	dpaAcceptances?: Prisma.DpaAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput;
+	invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput;
+	locations?: Prisma.LocationUncheckedUpdateManyWithoutOrganizationNestedInput;
+	defaultLocations?: Prisma.UserDefaultLocationUncheckedUpdateManyWithoutOrganizationNestedInput;
+	assets?: Prisma.AssetUncheckedUpdateManyWithoutOrganizationNestedInput;
+	bundleTemplates?: Prisma.BundleTemplateUncheckedUpdateManyWithoutOrganizationNestedInput;
+	productions?: Prisma.ProductionUncheckedUpdateManyWithoutOrganizationNestedInput;
+	categoryRates?: Prisma.OrgCategoryRateUncheckedUpdateManyWithoutOrganizationNestedInput;
+	inspectionIntervals?: Prisma.OrgInspectionIntervalUncheckedUpdateManyWithoutOrganizationNestedInput;
+	productInspectionIntervals?: Prisma.OrgProductInspectionIntervalUncheckedUpdateManyWithoutOrganizationNestedInput;
+	serviceCategories?: Prisma.ServiceCategoryUncheckedUpdateManyWithoutOrganizationNestedInput;
+	services?: Prisma.OrgServiceUncheckedUpdateManyWithoutOrganizationNestedInput;
+	productPrices?: Prisma.OrgProductPriceUncheckedUpdateManyWithoutOrganizationNestedInput;
+	offerSequences?: Prisma.OfferSequenceUncheckedUpdateManyWithoutOrganizationNestedInput;
+	offers?: Prisma.OfferUncheckedUpdateManyWithoutOrganizationNestedInput;
+	invoices?: Prisma.InvoiceUncheckedUpdateManyWithoutOrganizationNestedInput;
+	offersReceived?: Prisma.OfferUncheckedUpdateManyWithoutRecipientOrganizationNestedInput;
+	invoicesReceived?: Prisma.InvoiceUncheckedUpdateManyWithoutRecipientOrganizationNestedInput;
+	billingDismissals?: Prisma.BillingDismissalUncheckedUpdateManyWithoutOrganizationNestedInput;
+	customers?: Prisma.CustomerUncheckedUpdateManyWithoutOrganizationNestedInput;
+	stocktakes?: Prisma.StocktakeUncheckedUpdateManyWithoutOrganizationNestedInput;
+	productionChecks?: Prisma.ProductionCheckUncheckedUpdateManyWithoutOrganizationNestedInput;
+	loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutOrganizationNestedInput;
+	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedUpdateManyWithoutOrganizationNestedInput;
+	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedUpdateManyWithoutOrganizationNestedInput;
+};
+
+export type OrganizationCreateWithoutCableColorBandsInput = {
+	id?: string;
+	name: string;
+	shortName?: string | null;
+	assetIdPrefix: string;
+	slug: string;
+	autoAssetTags?: boolean;
+	nextAssetTagNumber?: number;
+	nextAssetIndex?: number;
+	createdAt?: Date | string;
+	updatedAt?: Date | string;
+	defaultAssetVisibility?: string;
+	color: string;
+	avatarLabel: string;
+	isKleinunternehmer?: boolean;
+	taxNumber?: string | null;
+	vatId?: string | null;
+	bankAccountHolder?: string | null;
+	iban?: string | null;
+	bic?: string | null;
+	bankName?: string | null;
+	billingEmail?: string | null;
+	billingWebsite?: string | null;
+	logoPath?: string | null;
+	paymentTermsDays?: number;
+	offerIntroTemplate?: string | null;
+	offerClosingTemplate?: string | null;
+	invoiceIntroTemplate?: string | null;
+	invoiceClosingTemplate?: string | null;
+	address?: Prisma.AddressCreateNestedOneWithoutOrganizationsInput;
+	rentalTermsVersion?: Prisma.RentalTermsVersionCreateNestedOneWithoutActiveForInput;
+	homeUsers?: Prisma.UserCreateNestedManyWithoutHomeOrgInput;
+	members?: Prisma.OrgMembershipCreateNestedManyWithoutOrganizationInput;
+	dpaAcceptances?: Prisma.DpaAcceptanceCreateNestedManyWithoutOrganizationInput;
+	invitations?: Prisma.InvitationCreateNestedManyWithoutOrganizationInput;
+	locations?: Prisma.LocationCreateNestedManyWithoutOrganizationInput;
+	defaultLocations?: Prisma.UserDefaultLocationCreateNestedManyWithoutOrganizationInput;
+	assets?: Prisma.AssetCreateNestedManyWithoutOrganizationInput;
+	bundleTemplates?: Prisma.BundleTemplateCreateNestedManyWithoutOrganizationInput;
+	productions?: Prisma.ProductionCreateNestedManyWithoutOrganizationInput;
+	categoryRates?: Prisma.OrgCategoryRateCreateNestedManyWithoutOrganizationInput;
+	inspectionIntervals?: Prisma.OrgInspectionIntervalCreateNestedManyWithoutOrganizationInput;
+	productInspectionIntervals?: Prisma.OrgProductInspectionIntervalCreateNestedManyWithoutOrganizationInput;
+	serviceCategories?: Prisma.ServiceCategoryCreateNestedManyWithoutOrganizationInput;
+	services?: Prisma.OrgServiceCreateNestedManyWithoutOrganizationInput;
+	productPrices?: Prisma.OrgProductPriceCreateNestedManyWithoutOrganizationInput;
+	offerSequences?: Prisma.OfferSequenceCreateNestedManyWithoutOrganizationInput;
+	offers?: Prisma.OfferCreateNestedManyWithoutOrganizationInput;
+	invoices?: Prisma.InvoiceCreateNestedManyWithoutOrganizationInput;
+	offersReceived?: Prisma.OfferCreateNestedManyWithoutRecipientOrganizationInput;
+	invoicesReceived?: Prisma.InvoiceCreateNestedManyWithoutRecipientOrganizationInput;
+	billingDismissals?: Prisma.BillingDismissalCreateNestedManyWithoutOrganizationInput;
+	customers?: Prisma.CustomerCreateNestedManyWithoutOrganizationInput;
+	stocktakes?: Prisma.StocktakeCreateNestedManyWithoutOrganizationInput;
+	productionChecks?: Prisma.ProductionCheckCreateNestedManyWithoutOrganizationInput;
+	loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutOrganizationInput;
+	rentalTermsVersions?: Prisma.RentalTermsVersionCreateNestedManyWithoutOrganizationInput;
+	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceCreateNestedManyWithoutOrganizationInput;
+};
+
+export type OrganizationUncheckedCreateWithoutCableColorBandsInput = {
+	id?: string;
+	name: string;
+	shortName?: string | null;
+	assetIdPrefix: string;
+	slug: string;
+	autoAssetTags?: boolean;
+	nextAssetTagNumber?: number;
+	nextAssetIndex?: number;
+	createdAt?: Date | string;
+	updatedAt?: Date | string;
+	defaultAssetVisibility?: string;
+	color: string;
+	avatarLabel: string;
+	isKleinunternehmer?: boolean;
+	addressId?: string | null;
+	taxNumber?: string | null;
+	vatId?: string | null;
+	bankAccountHolder?: string | null;
+	iban?: string | null;
+	bic?: string | null;
+	bankName?: string | null;
+	billingEmail?: string | null;
+	billingWebsite?: string | null;
+	logoPath?: string | null;
+	paymentTermsDays?: number;
+	offerIntroTemplate?: string | null;
+	offerClosingTemplate?: string | null;
+	invoiceIntroTemplate?: string | null;
+	invoiceClosingTemplate?: string | null;
+	rentalTermsVersionId?: string | null;
+	homeUsers?: Prisma.UserUncheckedCreateNestedManyWithoutHomeOrgInput;
+	members?: Prisma.OrgMembershipUncheckedCreateNestedManyWithoutOrganizationInput;
+	dpaAcceptances?: Prisma.DpaAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput;
+	invitations?: Prisma.InvitationUncheckedCreateNestedManyWithoutOrganizationInput;
+	locations?: Prisma.LocationUncheckedCreateNestedManyWithoutOrganizationInput;
+	defaultLocations?: Prisma.UserDefaultLocationUncheckedCreateNestedManyWithoutOrganizationInput;
+	assets?: Prisma.AssetUncheckedCreateNestedManyWithoutOrganizationInput;
+	bundleTemplates?: Prisma.BundleTemplateUncheckedCreateNestedManyWithoutOrganizationInput;
+	productions?: Prisma.ProductionUncheckedCreateNestedManyWithoutOrganizationInput;
+	categoryRates?: Prisma.OrgCategoryRateUncheckedCreateNestedManyWithoutOrganizationInput;
+	inspectionIntervals?: Prisma.OrgInspectionIntervalUncheckedCreateNestedManyWithoutOrganizationInput;
+	productInspectionIntervals?: Prisma.OrgProductInspectionIntervalUncheckedCreateNestedManyWithoutOrganizationInput;
+	serviceCategories?: Prisma.ServiceCategoryUncheckedCreateNestedManyWithoutOrganizationInput;
+	services?: Prisma.OrgServiceUncheckedCreateNestedManyWithoutOrganizationInput;
+	productPrices?: Prisma.OrgProductPriceUncheckedCreateNestedManyWithoutOrganizationInput;
+	offerSequences?: Prisma.OfferSequenceUncheckedCreateNestedManyWithoutOrganizationInput;
+	offers?: Prisma.OfferUncheckedCreateNestedManyWithoutOrganizationInput;
+	invoices?: Prisma.InvoiceUncheckedCreateNestedManyWithoutOrganizationInput;
+	offersReceived?: Prisma.OfferUncheckedCreateNestedManyWithoutRecipientOrganizationInput;
+	invoicesReceived?: Prisma.InvoiceUncheckedCreateNestedManyWithoutRecipientOrganizationInput;
+	billingDismissals?: Prisma.BillingDismissalUncheckedCreateNestedManyWithoutOrganizationInput;
+	customers?: Prisma.CustomerUncheckedCreateNestedManyWithoutOrganizationInput;
+	stocktakes?: Prisma.StocktakeUncheckedCreateNestedManyWithoutOrganizationInput;
+	productionChecks?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutOrganizationInput;
+	loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutOrganizationInput;
+	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedCreateNestedManyWithoutOrganizationInput;
+	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput;
+};
+
+export type OrganizationCreateOrConnectWithoutCableColorBandsInput = {
+	where: Prisma.OrganizationWhereUniqueInput;
+	create: Prisma.XOR<
+		Prisma.OrganizationCreateWithoutCableColorBandsInput,
+		Prisma.OrganizationUncheckedCreateWithoutCableColorBandsInput
+	>;
+};
+
+export type OrganizationUpsertWithoutCableColorBandsInput = {
+	update: Prisma.XOR<
+		Prisma.OrganizationUpdateWithoutCableColorBandsInput,
+		Prisma.OrganizationUncheckedUpdateWithoutCableColorBandsInput
+	>;
+	create: Prisma.XOR<
+		Prisma.OrganizationCreateWithoutCableColorBandsInput,
+		Prisma.OrganizationUncheckedCreateWithoutCableColorBandsInput
+	>;
+	where?: Prisma.OrganizationWhereInput;
+};
+
+export type OrganizationUpdateToOneWithWhereWithoutCableColorBandsInput = {
+	where?: Prisma.OrganizationWhereInput;
+	data: Prisma.XOR<
+		Prisma.OrganizationUpdateWithoutCableColorBandsInput,
+		Prisma.OrganizationUncheckedUpdateWithoutCableColorBandsInput
+	>;
+};
+
+export type OrganizationUpdateWithoutCableColorBandsInput = {
+	id?: Prisma.StringFieldUpdateOperationsInput | string;
+	name?: Prisma.StringFieldUpdateOperationsInput | string;
+	shortName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	assetIdPrefix?: Prisma.StringFieldUpdateOperationsInput | string;
+	slug?: Prisma.StringFieldUpdateOperationsInput | string;
+	autoAssetTags?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	nextAssetTagNumber?: Prisma.IntFieldUpdateOperationsInput | number;
+	nextAssetIndex?: Prisma.IntFieldUpdateOperationsInput | number;
+	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+	defaultAssetVisibility?: Prisma.StringFieldUpdateOperationsInput | string;
+	color?: Prisma.StringFieldUpdateOperationsInput | string;
+	avatarLabel?: Prisma.StringFieldUpdateOperationsInput | string;
+	isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number;
+	offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	invoiceIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	invoiceClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	address?: Prisma.AddressUpdateOneWithoutOrganizationsNestedInput;
+	rentalTermsVersion?: Prisma.RentalTermsVersionUpdateOneWithoutActiveForNestedInput;
+	homeUsers?: Prisma.UserUpdateManyWithoutHomeOrgNestedInput;
+	members?: Prisma.OrgMembershipUpdateManyWithoutOrganizationNestedInput;
+	dpaAcceptances?: Prisma.DpaAcceptanceUpdateManyWithoutOrganizationNestedInput;
+	invitations?: Prisma.InvitationUpdateManyWithoutOrganizationNestedInput;
+	locations?: Prisma.LocationUpdateManyWithoutOrganizationNestedInput;
+	defaultLocations?: Prisma.UserDefaultLocationUpdateManyWithoutOrganizationNestedInput;
+	assets?: Prisma.AssetUpdateManyWithoutOrganizationNestedInput;
+	bundleTemplates?: Prisma.BundleTemplateUpdateManyWithoutOrganizationNestedInput;
+	productions?: Prisma.ProductionUpdateManyWithoutOrganizationNestedInput;
+	categoryRates?: Prisma.OrgCategoryRateUpdateManyWithoutOrganizationNestedInput;
+	inspectionIntervals?: Prisma.OrgInspectionIntervalUpdateManyWithoutOrganizationNestedInput;
+	productInspectionIntervals?: Prisma.OrgProductInspectionIntervalUpdateManyWithoutOrganizationNestedInput;
+	serviceCategories?: Prisma.ServiceCategoryUpdateManyWithoutOrganizationNestedInput;
+	services?: Prisma.OrgServiceUpdateManyWithoutOrganizationNestedInput;
+	productPrices?: Prisma.OrgProductPriceUpdateManyWithoutOrganizationNestedInput;
+	offerSequences?: Prisma.OfferSequenceUpdateManyWithoutOrganizationNestedInput;
+	offers?: Prisma.OfferUpdateManyWithoutOrganizationNestedInput;
+	invoices?: Prisma.InvoiceUpdateManyWithoutOrganizationNestedInput;
+	offersReceived?: Prisma.OfferUpdateManyWithoutRecipientOrganizationNestedInput;
+	invoicesReceived?: Prisma.InvoiceUpdateManyWithoutRecipientOrganizationNestedInput;
+	billingDismissals?: Prisma.BillingDismissalUpdateManyWithoutOrganizationNestedInput;
+	customers?: Prisma.CustomerUpdateManyWithoutOrganizationNestedInput;
+	stocktakes?: Prisma.StocktakeUpdateManyWithoutOrganizationNestedInput;
+	productionChecks?: Prisma.ProductionCheckUpdateManyWithoutOrganizationNestedInput;
+	loanRequests?: Prisma.LoanRequestUpdateManyWithoutOrganizationNestedInput;
+	rentalTermsVersions?: Prisma.RentalTermsVersionUpdateManyWithoutOrganizationNestedInput;
+	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUpdateManyWithoutOrganizationNestedInput;
+};
+
+export type OrganizationUncheckedUpdateWithoutCableColorBandsInput = {
+	id?: Prisma.StringFieldUpdateOperationsInput | string;
+	name?: Prisma.StringFieldUpdateOperationsInput | string;
+	shortName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	assetIdPrefix?: Prisma.StringFieldUpdateOperationsInput | string;
+	slug?: Prisma.StringFieldUpdateOperationsInput | string;
+	autoAssetTags?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	nextAssetTagNumber?: Prisma.IntFieldUpdateOperationsInput | number;
+	nextAssetIndex?: Prisma.IntFieldUpdateOperationsInput | number;
+	createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+	updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string;
+	defaultAssetVisibility?: Prisma.StringFieldUpdateOperationsInput | string;
+	color?: Prisma.StringFieldUpdateOperationsInput | string;
+	avatarLabel?: Prisma.StringFieldUpdateOperationsInput | string;
+	isKleinunternehmer?: Prisma.BoolFieldUpdateOperationsInput | boolean;
+	addressId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	taxNumber?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	vatId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	bankAccountHolder?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	iban?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	bic?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	bankName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	billingEmail?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	billingWebsite?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	logoPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	paymentTermsDays?: Prisma.IntFieldUpdateOperationsInput | number;
+	offerIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	offerClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	invoiceIntroTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	invoiceClosingTemplate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	rentalTermsVersionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
+	homeUsers?: Prisma.UserUncheckedUpdateManyWithoutHomeOrgNestedInput;
 	members?: Prisma.OrgMembershipUncheckedUpdateManyWithoutOrganizationNestedInput;
 	dpaAcceptances?: Prisma.DpaAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput;
 	invitations?: Prisma.InvitationUncheckedUpdateManyWithoutOrganizationNestedInput;
@@ -2317,6 +2622,7 @@ export type OrganizationCreateWithoutMembersInput = {
 	loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationUncheckedCreateWithoutMembersInput = {
@@ -2376,6 +2682,7 @@ export type OrganizationUncheckedCreateWithoutMembersInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationCreateOrConnectWithoutMembersInput = {
@@ -2463,6 +2770,7 @@ export type OrganizationUpdateWithoutMembersInput = {
 	loanRequests?: Prisma.LoanRequestUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationUncheckedUpdateWithoutMembersInput = {
@@ -2522,6 +2830,7 @@ export type OrganizationUncheckedUpdateWithoutMembersInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationCreateWithoutDpaAcceptancesInput = {
@@ -2581,6 +2890,7 @@ export type OrganizationCreateWithoutDpaAcceptancesInput = {
 	loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationUncheckedCreateWithoutDpaAcceptancesInput = {
@@ -2640,6 +2950,7 @@ export type OrganizationUncheckedCreateWithoutDpaAcceptancesInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationCreateOrConnectWithoutDpaAcceptancesInput = {
@@ -2727,6 +3038,7 @@ export type OrganizationUpdateWithoutDpaAcceptancesInput = {
 	loanRequests?: Prisma.LoanRequestUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationUncheckedUpdateWithoutDpaAcceptancesInput = {
@@ -2786,6 +3098,7 @@ export type OrganizationUncheckedUpdateWithoutDpaAcceptancesInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationCreateWithoutInvitationsInput = {
@@ -2845,6 +3158,7 @@ export type OrganizationCreateWithoutInvitationsInput = {
 	loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationUncheckedCreateWithoutInvitationsInput = {
@@ -2904,6 +3218,7 @@ export type OrganizationUncheckedCreateWithoutInvitationsInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationCreateOrConnectWithoutInvitationsInput = {
@@ -2991,6 +3306,7 @@ export type OrganizationUpdateWithoutInvitationsInput = {
 	loanRequests?: Prisma.LoanRequestUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationUncheckedUpdateWithoutInvitationsInput = {
@@ -3050,6 +3366,7 @@ export type OrganizationUncheckedUpdateWithoutInvitationsInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationCreateWithoutProductPricesInput = {
@@ -3109,6 +3426,7 @@ export type OrganizationCreateWithoutProductPricesInput = {
 	loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationUncheckedCreateWithoutProductPricesInput = {
@@ -3168,6 +3486,7 @@ export type OrganizationUncheckedCreateWithoutProductPricesInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationCreateOrConnectWithoutProductPricesInput = {
@@ -3255,6 +3574,7 @@ export type OrganizationUpdateWithoutProductPricesInput = {
 	loanRequests?: Prisma.LoanRequestUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationUncheckedUpdateWithoutProductPricesInput = {
@@ -3314,6 +3634,7 @@ export type OrganizationUncheckedUpdateWithoutProductPricesInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationCreateWithoutAddressInput = {
@@ -3373,6 +3694,7 @@ export type OrganizationCreateWithoutAddressInput = {
 	loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationUncheckedCreateWithoutAddressInput = {
@@ -3432,6 +3754,7 @@ export type OrganizationUncheckedCreateWithoutAddressInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationCreateOrConnectWithoutAddressInput = {
@@ -3568,6 +3891,7 @@ export type OrganizationCreateWithoutLocationsInput = {
 	loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationUncheckedCreateWithoutLocationsInput = {
@@ -3627,6 +3951,7 @@ export type OrganizationUncheckedCreateWithoutLocationsInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationCreateOrConnectWithoutLocationsInput = {
@@ -3714,6 +4039,7 @@ export type OrganizationUpdateWithoutLocationsInput = {
 	loanRequests?: Prisma.LoanRequestUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationUncheckedUpdateWithoutLocationsInput = {
@@ -3773,6 +4099,7 @@ export type OrganizationUncheckedUpdateWithoutLocationsInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationCreateWithoutDefaultLocationsInput = {
@@ -3832,6 +4159,7 @@ export type OrganizationCreateWithoutDefaultLocationsInput = {
 	loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationUncheckedCreateWithoutDefaultLocationsInput = {
@@ -3891,6 +4219,7 @@ export type OrganizationUncheckedCreateWithoutDefaultLocationsInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationCreateOrConnectWithoutDefaultLocationsInput = {
@@ -3978,6 +4307,7 @@ export type OrganizationUpdateWithoutDefaultLocationsInput = {
 	loanRequests?: Prisma.LoanRequestUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationUncheckedUpdateWithoutDefaultLocationsInput = {
@@ -4037,6 +4367,7 @@ export type OrganizationUncheckedUpdateWithoutDefaultLocationsInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationCreateWithoutAssetsInput = {
@@ -4096,6 +4427,7 @@ export type OrganizationCreateWithoutAssetsInput = {
 	loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationUncheckedCreateWithoutAssetsInput = {
@@ -4155,6 +4487,7 @@ export type OrganizationUncheckedCreateWithoutAssetsInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationCreateOrConnectWithoutAssetsInput = {
@@ -4242,6 +4575,7 @@ export type OrganizationUpdateWithoutAssetsInput = {
 	loanRequests?: Prisma.LoanRequestUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationUncheckedUpdateWithoutAssetsInput = {
@@ -4301,6 +4635,7 @@ export type OrganizationUncheckedUpdateWithoutAssetsInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationCreateWithoutBundleTemplatesInput = {
@@ -4360,6 +4695,7 @@ export type OrganizationCreateWithoutBundleTemplatesInput = {
 	loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationUncheckedCreateWithoutBundleTemplatesInput = {
@@ -4419,6 +4755,7 @@ export type OrganizationUncheckedCreateWithoutBundleTemplatesInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationCreateOrConnectWithoutBundleTemplatesInput = {
@@ -4506,6 +4843,7 @@ export type OrganizationUpdateWithoutBundleTemplatesInput = {
 	loanRequests?: Prisma.LoanRequestUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationUncheckedUpdateWithoutBundleTemplatesInput = {
@@ -4565,6 +4903,7 @@ export type OrganizationUncheckedUpdateWithoutBundleTemplatesInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationCreateWithoutProductionsInput = {
@@ -4624,6 +4963,7 @@ export type OrganizationCreateWithoutProductionsInput = {
 	loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationUncheckedCreateWithoutProductionsInput = {
@@ -4683,6 +5023,7 @@ export type OrganizationUncheckedCreateWithoutProductionsInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationCreateOrConnectWithoutProductionsInput = {
@@ -4770,6 +5111,7 @@ export type OrganizationUpdateWithoutProductionsInput = {
 	loanRequests?: Prisma.LoanRequestUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationUncheckedUpdateWithoutProductionsInput = {
@@ -4829,6 +5171,7 @@ export type OrganizationUncheckedUpdateWithoutProductionsInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationCreateWithoutCustomersInput = {
@@ -4888,6 +5231,7 @@ export type OrganizationCreateWithoutCustomersInput = {
 	loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationUncheckedCreateWithoutCustomersInput = {
@@ -4947,6 +5291,7 @@ export type OrganizationUncheckedCreateWithoutCustomersInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationCreateOrConnectWithoutCustomersInput = {
@@ -5034,6 +5379,7 @@ export type OrganizationUpdateWithoutCustomersInput = {
 	loanRequests?: Prisma.LoanRequestUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationUncheckedUpdateWithoutCustomersInput = {
@@ -5093,6 +5439,7 @@ export type OrganizationUncheckedUpdateWithoutCustomersInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationCreateWithoutLoanRequestsInput = {
@@ -5152,6 +5499,7 @@ export type OrganizationCreateWithoutLoanRequestsInput = {
 	productionChecks?: Prisma.ProductionCheckCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationUncheckedCreateWithoutLoanRequestsInput = {
@@ -5211,6 +5559,7 @@ export type OrganizationUncheckedCreateWithoutLoanRequestsInput = {
 	productionChecks?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationCreateOrConnectWithoutLoanRequestsInput = {
@@ -5298,6 +5647,7 @@ export type OrganizationUpdateWithoutLoanRequestsInput = {
 	productionChecks?: Prisma.ProductionCheckUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationUncheckedUpdateWithoutLoanRequestsInput = {
@@ -5357,6 +5707,7 @@ export type OrganizationUncheckedUpdateWithoutLoanRequestsInput = {
 	productionChecks?: Prisma.ProductionCheckUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationCreateWithoutRentalTermsVersionsInput = {
@@ -5416,6 +5767,7 @@ export type OrganizationCreateWithoutRentalTermsVersionsInput = {
 	productionChecks?: Prisma.ProductionCheckCreateNestedManyWithoutOrganizationInput;
 	loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationUncheckedCreateWithoutRentalTermsVersionsInput = {
@@ -5475,6 +5827,7 @@ export type OrganizationUncheckedCreateWithoutRentalTermsVersionsInput = {
 	productionChecks?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutOrganizationInput;
 	loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationCreateOrConnectWithoutRentalTermsVersionsInput = {
@@ -5542,6 +5895,7 @@ export type OrganizationCreateWithoutRentalTermsVersionInput = {
 	loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationUncheckedCreateWithoutRentalTermsVersionInput = {
@@ -5601,6 +5955,7 @@ export type OrganizationUncheckedCreateWithoutRentalTermsVersionInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationCreateOrConnectWithoutRentalTermsVersionInput = {
@@ -5688,6 +6043,7 @@ export type OrganizationUpdateWithoutRentalTermsVersionsInput = {
 	productionChecks?: Prisma.ProductionCheckUpdateManyWithoutOrganizationNestedInput;
 	loanRequests?: Prisma.LoanRequestUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationUncheckedUpdateWithoutRentalTermsVersionsInput = {
@@ -5747,6 +6103,7 @@ export type OrganizationUncheckedUpdateWithoutRentalTermsVersionsInput = {
 	productionChecks?: Prisma.ProductionCheckUncheckedUpdateManyWithoutOrganizationNestedInput;
 	loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationUpsertWithoutRentalTermsVersionInput = {
@@ -5826,6 +6183,7 @@ export type OrganizationUpdateWithoutRentalTermsVersionInput = {
 	loanRequests?: Prisma.LoanRequestUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationUncheckedUpdateWithoutRentalTermsVersionInput = {
@@ -5885,6 +6243,7 @@ export type OrganizationUncheckedUpdateWithoutRentalTermsVersionInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationCreateWithoutRentalTermsAcceptancesInput = {
@@ -5944,6 +6303,7 @@ export type OrganizationCreateWithoutRentalTermsAcceptancesInput = {
 	productionChecks?: Prisma.ProductionCheckCreateNestedManyWithoutOrganizationInput;
 	loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationUncheckedCreateWithoutRentalTermsAcceptancesInput = {
@@ -6003,6 +6363,7 @@ export type OrganizationUncheckedCreateWithoutRentalTermsAcceptancesInput = {
 	productionChecks?: Prisma.ProductionCheckUncheckedCreateNestedManyWithoutOrganizationInput;
 	loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationCreateOrConnectWithoutRentalTermsAcceptancesInput = {
@@ -6090,6 +6451,7 @@ export type OrganizationUpdateWithoutRentalTermsAcceptancesInput = {
 	productionChecks?: Prisma.ProductionCheckUpdateManyWithoutOrganizationNestedInput;
 	loanRequests?: Prisma.LoanRequestUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationUncheckedUpdateWithoutRentalTermsAcceptancesInput = {
@@ -6149,6 +6511,7 @@ export type OrganizationUncheckedUpdateWithoutRentalTermsAcceptancesInput = {
 	productionChecks?: Prisma.ProductionCheckUncheckedUpdateManyWithoutOrganizationNestedInput;
 	loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationCreateWithoutProductionChecksInput = {
@@ -6208,6 +6571,7 @@ export type OrganizationCreateWithoutProductionChecksInput = {
 	loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationUncheckedCreateWithoutProductionChecksInput = {
@@ -6267,6 +6631,7 @@ export type OrganizationUncheckedCreateWithoutProductionChecksInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationCreateOrConnectWithoutProductionChecksInput = {
@@ -6354,6 +6719,7 @@ export type OrganizationUpdateWithoutProductionChecksInput = {
 	loanRequests?: Prisma.LoanRequestUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationUncheckedUpdateWithoutProductionChecksInput = {
@@ -6413,6 +6779,7 @@ export type OrganizationUncheckedUpdateWithoutProductionChecksInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationCreateWithoutInspectionIntervalsInput = {
@@ -6472,6 +6839,7 @@ export type OrganizationCreateWithoutInspectionIntervalsInput = {
 	loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationUncheckedCreateWithoutInspectionIntervalsInput = {
@@ -6531,6 +6899,7 @@ export type OrganizationUncheckedCreateWithoutInspectionIntervalsInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationCreateOrConnectWithoutInspectionIntervalsInput = {
@@ -6618,6 +6987,7 @@ export type OrganizationUpdateWithoutInspectionIntervalsInput = {
 	loanRequests?: Prisma.LoanRequestUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationUncheckedUpdateWithoutInspectionIntervalsInput = {
@@ -6677,6 +7047,7 @@ export type OrganizationUncheckedUpdateWithoutInspectionIntervalsInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationCreateWithoutProductInspectionIntervalsInput = {
@@ -6736,6 +7107,7 @@ export type OrganizationCreateWithoutProductInspectionIntervalsInput = {
 	loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationUncheckedCreateWithoutProductInspectionIntervalsInput = {
@@ -6795,6 +7167,7 @@ export type OrganizationUncheckedCreateWithoutProductInspectionIntervalsInput = 
 	loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationCreateOrConnectWithoutProductInspectionIntervalsInput = {
@@ -6882,6 +7255,7 @@ export type OrganizationUpdateWithoutProductInspectionIntervalsInput = {
 	loanRequests?: Prisma.LoanRequestUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationUncheckedUpdateWithoutProductInspectionIntervalsInput = {
@@ -6941,6 +7315,7 @@ export type OrganizationUncheckedUpdateWithoutProductInspectionIntervalsInput = 
 	loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationCreateWithoutCategoryRatesInput = {
@@ -7000,6 +7375,7 @@ export type OrganizationCreateWithoutCategoryRatesInput = {
 	loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationUncheckedCreateWithoutCategoryRatesInput = {
@@ -7059,6 +7435,7 @@ export type OrganizationUncheckedCreateWithoutCategoryRatesInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationCreateOrConnectWithoutCategoryRatesInput = {
@@ -7146,6 +7523,7 @@ export type OrganizationUpdateWithoutCategoryRatesInput = {
 	loanRequests?: Prisma.LoanRequestUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationUncheckedUpdateWithoutCategoryRatesInput = {
@@ -7205,6 +7583,7 @@ export type OrganizationUncheckedUpdateWithoutCategoryRatesInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationCreateWithoutServiceCategoriesInput = {
@@ -7264,6 +7643,7 @@ export type OrganizationCreateWithoutServiceCategoriesInput = {
 	loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationUncheckedCreateWithoutServiceCategoriesInput = {
@@ -7323,6 +7703,7 @@ export type OrganizationUncheckedCreateWithoutServiceCategoriesInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationCreateOrConnectWithoutServiceCategoriesInput = {
@@ -7410,6 +7791,7 @@ export type OrganizationUpdateWithoutServiceCategoriesInput = {
 	loanRequests?: Prisma.LoanRequestUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationUncheckedUpdateWithoutServiceCategoriesInput = {
@@ -7469,6 +7851,7 @@ export type OrganizationUncheckedUpdateWithoutServiceCategoriesInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationCreateWithoutServicesInput = {
@@ -7528,6 +7911,7 @@ export type OrganizationCreateWithoutServicesInput = {
 	loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationUncheckedCreateWithoutServicesInput = {
@@ -7587,6 +7971,7 @@ export type OrganizationUncheckedCreateWithoutServicesInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationCreateOrConnectWithoutServicesInput = {
@@ -7674,6 +8059,7 @@ export type OrganizationUpdateWithoutServicesInput = {
 	loanRequests?: Prisma.LoanRequestUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationUncheckedUpdateWithoutServicesInput = {
@@ -7733,6 +8119,7 @@ export type OrganizationUncheckedUpdateWithoutServicesInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationCreateWithoutOfferSequencesInput = {
@@ -7792,6 +8179,7 @@ export type OrganizationCreateWithoutOfferSequencesInput = {
 	loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationUncheckedCreateWithoutOfferSequencesInput = {
@@ -7851,6 +8239,7 @@ export type OrganizationUncheckedCreateWithoutOfferSequencesInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationCreateOrConnectWithoutOfferSequencesInput = {
@@ -7938,6 +8327,7 @@ export type OrganizationUpdateWithoutOfferSequencesInput = {
 	loanRequests?: Prisma.LoanRequestUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationUncheckedUpdateWithoutOfferSequencesInput = {
@@ -7997,6 +8387,7 @@ export type OrganizationUncheckedUpdateWithoutOfferSequencesInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationCreateWithoutOffersInput = {
@@ -8056,6 +8447,7 @@ export type OrganizationCreateWithoutOffersInput = {
 	loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationUncheckedCreateWithoutOffersInput = {
@@ -8115,6 +8507,7 @@ export type OrganizationUncheckedCreateWithoutOffersInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationCreateOrConnectWithoutOffersInput = {
@@ -8182,6 +8575,7 @@ export type OrganizationCreateWithoutOffersReceivedInput = {
 	loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationUncheckedCreateWithoutOffersReceivedInput = {
@@ -8241,6 +8635,7 @@ export type OrganizationUncheckedCreateWithoutOffersReceivedInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationCreateOrConnectWithoutOffersReceivedInput = {
@@ -8328,6 +8723,7 @@ export type OrganizationUpdateWithoutOffersInput = {
 	loanRequests?: Prisma.LoanRequestUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationUncheckedUpdateWithoutOffersInput = {
@@ -8387,6 +8783,7 @@ export type OrganizationUncheckedUpdateWithoutOffersInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationUpsertWithoutOffersReceivedInput = {
@@ -8466,6 +8863,7 @@ export type OrganizationUpdateWithoutOffersReceivedInput = {
 	loanRequests?: Prisma.LoanRequestUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationUncheckedUpdateWithoutOffersReceivedInput = {
@@ -8525,6 +8923,7 @@ export type OrganizationUncheckedUpdateWithoutOffersReceivedInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationCreateWithoutInvoicesInput = {
@@ -8584,6 +8983,7 @@ export type OrganizationCreateWithoutInvoicesInput = {
 	loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationUncheckedCreateWithoutInvoicesInput = {
@@ -8643,6 +9043,7 @@ export type OrganizationUncheckedCreateWithoutInvoicesInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationCreateOrConnectWithoutInvoicesInput = {
@@ -8710,6 +9111,7 @@ export type OrganizationCreateWithoutInvoicesReceivedInput = {
 	loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationUncheckedCreateWithoutInvoicesReceivedInput = {
@@ -8769,6 +9171,7 @@ export type OrganizationUncheckedCreateWithoutInvoicesReceivedInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationCreateOrConnectWithoutInvoicesReceivedInput = {
@@ -8856,6 +9259,7 @@ export type OrganizationUpdateWithoutInvoicesInput = {
 	loanRequests?: Prisma.LoanRequestUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationUncheckedUpdateWithoutInvoicesInput = {
@@ -8915,6 +9319,7 @@ export type OrganizationUncheckedUpdateWithoutInvoicesInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationUpsertWithoutInvoicesReceivedInput = {
@@ -8994,6 +9399,7 @@ export type OrganizationUpdateWithoutInvoicesReceivedInput = {
 	loanRequests?: Prisma.LoanRequestUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationUncheckedUpdateWithoutInvoicesReceivedInput = {
@@ -9053,6 +9459,7 @@ export type OrganizationUncheckedUpdateWithoutInvoicesReceivedInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationCreateWithoutStocktakesInput = {
@@ -9112,6 +9519,7 @@ export type OrganizationCreateWithoutStocktakesInput = {
 	loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationUncheckedCreateWithoutStocktakesInput = {
@@ -9171,6 +9579,7 @@ export type OrganizationUncheckedCreateWithoutStocktakesInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationCreateOrConnectWithoutStocktakesInput = {
@@ -9258,6 +9667,7 @@ export type OrganizationUpdateWithoutStocktakesInput = {
 	loanRequests?: Prisma.LoanRequestUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationUncheckedUpdateWithoutStocktakesInput = {
@@ -9317,6 +9727,7 @@ export type OrganizationUncheckedUpdateWithoutStocktakesInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationCreateWithoutBillingDismissalsInput = {
@@ -9376,6 +9787,7 @@ export type OrganizationCreateWithoutBillingDismissalsInput = {
 	loanRequests?: Prisma.LoanRequestCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationUncheckedCreateWithoutBillingDismissalsInput = {
@@ -9435,6 +9847,7 @@ export type OrganizationUncheckedCreateWithoutBillingDismissalsInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedCreateNestedManyWithoutOrganizationInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedCreateNestedManyWithoutOrganizationInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedCreateNestedManyWithoutOrganizationInput;
 };
 
 export type OrganizationCreateOrConnectWithoutBillingDismissalsInput = {
@@ -9522,6 +9935,7 @@ export type OrganizationUpdateWithoutBillingDismissalsInput = {
 	loanRequests?: Prisma.LoanRequestUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationUncheckedUpdateWithoutBillingDismissalsInput = {
@@ -9581,6 +9995,7 @@ export type OrganizationUncheckedUpdateWithoutBillingDismissalsInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationCreateManyAddressInput = {
@@ -9672,6 +10087,7 @@ export type OrganizationUpdateWithoutAddressInput = {
 	loanRequests?: Prisma.LoanRequestUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationUncheckedUpdateWithoutAddressInput = {
@@ -9731,6 +10147,7 @@ export type OrganizationUncheckedUpdateWithoutAddressInput = {
 	loanRequests?: Prisma.LoanRequestUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsVersions?: Prisma.RentalTermsVersionUncheckedUpdateManyWithoutOrganizationNestedInput;
 	rentalTermsAcceptances?: Prisma.RentalTermsAcceptanceUncheckedUpdateManyWithoutOrganizationNestedInput;
+	cableColorBands?: Prisma.CableColorBandUncheckedUpdateManyWithoutOrganizationNestedInput;
 };
 
 export type OrganizationUncheckedUpdateManyWithoutAddressInput = {
@@ -9797,6 +10214,7 @@ export type OrganizationCountOutputType = {
 	loanRequests: number;
 	rentalTermsVersions: number;
 	rentalTermsAcceptances: number;
+	cableColorBands: number;
 };
 
 export type OrganizationCountOutputTypeSelect<
@@ -9830,6 +10248,7 @@ export type OrganizationCountOutputTypeSelect<
 	loanRequests?: boolean | OrganizationCountOutputTypeCountLoanRequestsArgs;
 	rentalTermsVersions?: boolean | OrganizationCountOutputTypeCountRentalTermsVersionsArgs;
 	rentalTermsAcceptances?: boolean | OrganizationCountOutputTypeCountRentalTermsAcceptancesArgs;
+	cableColorBands?: boolean | OrganizationCountOutputTypeCountCableColorBandsArgs;
 };
 
 /**
@@ -10087,6 +10506,15 @@ export type OrganizationCountOutputTypeCountRentalTermsAcceptancesArgs<
 	where?: Prisma.RentalTermsAcceptanceWhereInput;
 };
 
+/**
+ * OrganizationCountOutputType without action
+ */
+export type OrganizationCountOutputTypeCountCableColorBandsArgs<
+	ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs
+> = {
+	where?: Prisma.CableColorBandWhereInput;
+};
+
 export type OrganizationSelect<
 	ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs
 > = runtime.Types.Extensions.GetSelect<
@@ -10151,6 +10579,7 @@ export type OrganizationSelect<
 		loanRequests?: boolean | Prisma.Organization$loanRequestsArgs<ExtArgs>;
 		rentalTermsVersions?: boolean | Prisma.Organization$rentalTermsVersionsArgs<ExtArgs>;
 		rentalTermsAcceptances?: boolean | Prisma.Organization$rentalTermsAcceptancesArgs<ExtArgs>;
+		cableColorBands?: boolean | Prisma.Organization$cableColorBandsArgs<ExtArgs>;
 		_count?: boolean | Prisma.OrganizationCountOutputTypeDefaultArgs<ExtArgs>;
 	},
 	ExtArgs['result']['organization']
@@ -10337,6 +10766,7 @@ export type OrganizationInclude<
 	loanRequests?: boolean | Prisma.Organization$loanRequestsArgs<ExtArgs>;
 	rentalTermsVersions?: boolean | Prisma.Organization$rentalTermsVersionsArgs<ExtArgs>;
 	rentalTermsAcceptances?: boolean | Prisma.Organization$rentalTermsAcceptancesArgs<ExtArgs>;
+	cableColorBands?: boolean | Prisma.Organization$cableColorBandsArgs<ExtArgs>;
 	_count?: boolean | Prisma.OrganizationCountOutputTypeDefaultArgs<ExtArgs>;
 };
 export type OrganizationIncludeCreateManyAndReturn<
@@ -10386,6 +10816,7 @@ export type $OrganizationPayload<
 		loanRequests: Prisma.$LoanRequestPayload<ExtArgs>[];
 		rentalTermsVersions: Prisma.$RentalTermsVersionPayload<ExtArgs>[];
 		rentalTermsAcceptances: Prisma.$RentalTermsAcceptancePayload<ExtArgs>[];
+		cableColorBands: Prisma.$CableColorBandPayload<ExtArgs>[];
 	};
 	scalars: runtime.Types.Extensions.GetPayloadResult<
 		{
@@ -11274,6 +11705,17 @@ export interface Prisma__OrganizationClient<
 	): Prisma.PrismaPromise<
 		| runtime.Types.Result.GetResult<
 				Prisma.$RentalTermsAcceptancePayload<ExtArgs>,
+				T,
+				'findMany',
+				GlobalOmitOptions
+		  >
+		| Null
+	>;
+	cableColorBands<T extends Prisma.Organization$cableColorBandsArgs<ExtArgs> = {}>(
+		args?: Prisma.Subset<T, Prisma.Organization$cableColorBandsArgs<ExtArgs>>
+	): Prisma.PrismaPromise<
+		| runtime.Types.Result.GetResult<
+				Prisma.$CableColorBandPayload<ExtArgs>,
 				T,
 				'findMany',
 				GlobalOmitOptions
@@ -12549,6 +12991,33 @@ export type Organization$rentalTermsAcceptancesArgs<
 	skip?: number;
 	distinct?:
 		Prisma.RentalTermsAcceptanceScalarFieldEnum | Prisma.RentalTermsAcceptanceScalarFieldEnum[];
+};
+
+/**
+ * Organization.cableColorBands
+ */
+export type Organization$cableColorBandsArgs<
+	ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs
+> = {
+	/**
+	 * Select specific fields to fetch from the CableColorBand
+	 */
+	select?: Prisma.CableColorBandSelect<ExtArgs> | null;
+	/**
+	 * Omit specific fields from the CableColorBand
+	 */
+	omit?: Prisma.CableColorBandOmit<ExtArgs> | null;
+	/**
+	 * Choose, which related nodes to fetch as well
+	 */
+	include?: Prisma.CableColorBandInclude<ExtArgs> | null;
+	where?: Prisma.CableColorBandWhereInput;
+	orderBy?:
+		Prisma.CableColorBandOrderByWithRelationInput | Prisma.CableColorBandOrderByWithRelationInput[];
+	cursor?: Prisma.CableColorBandWhereUniqueInput;
+	take?: number;
+	skip?: number;
+	distinct?: Prisma.CableColorBandScalarFieldEnum | Prisma.CableColorBandScalarFieldEnum[];
 };
 
 /**

@@ -131,6 +131,33 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/cable-colors": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * The cable colour codes the user's equipment is marked with
+         * @description One scheme per organization: the colour of tape that marks each cable
+         *     length. Every organization the user belongs to, plus every organization
+         *     that has a unit on one of their productions — a lent cable carries its
+         *     owner's colour. An organization without bands is left out.
+         *
+         *     A unit's colour is the band of its owner's scheme with the smallest
+         *     `maxLengthCm` that is at least the product's `cable.lengthCm`; a longer
+         *     cable, or a product without a length, has none.
+         */
+        get: operations["listCableColors"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/api/v1/locations": {
         parameters: {
             query?: never;
@@ -1655,6 +1682,31 @@ export interface components {
             color: string;
             avatarLabel: string;
         };
+        CableColorScheme: {
+            organizationId: string;
+            /** @description Shortest first. */
+            bands: components["schemas"]["CableColorBand"][];
+        };
+        CableColorBand: {
+            /**
+             * @description Upper bound, inclusive. The band covers every length above the
+             *     next shorter band's bound up to this one.
+             */
+            maxLengthCm: number;
+            /**
+             * @description One of the fixed tape colours — `red`, `blue`, `green`, `yellow`,
+             *     `white`, `black`, `orange`, `brown`, `grey`, `violet`, `pink`,
+             *     `turquoise` — which the client names in its own language. Null for
+             *     a colour of the organization's own. Not an enum, so a colour added
+             *     later does not break an older client; one it does not know it may
+             *     show as grey.
+             */
+            paletteKey: string | null;
+            /** @description The organization's own colour's name, when `paletteKey` is null. */
+            customName: string | null;
+            /** @description The organization's own colour as `#rrggbb`, when `paletteKey` is null. */
+            customHex: string | null;
+        };
         LegalLink: {
             /**
              * @description What the page is; the client names it in its own language.
@@ -2587,6 +2639,14 @@ export interface components {
             kitSwaps?: components["schemas"]["ScanKitSwap"][];
         };
         ScannedAsset: {
+            /**
+             * @description The organization the unit belongs to. With `lengthCm`, what the
+             *     cable colour is read off (see `GET /api/v1/cable-colors`). Not
+             *     required, so an older client keeps compiling.
+             */
+            ownerOrgId?: string;
+            /** @description The product's length in whole centimetres; null when it has none. */
+            lengthCm?: number | null;
             id: string;
             assetTag: string;
             productName: string;
@@ -2975,6 +3035,14 @@ export interface components {
             at: string;
         };
         ProductionCheckItem: {
+            /**
+             * @description The organization the unit belongs to. With `lengthCm`, what the
+             *     cable colour is read off (see `GET /api/v1/cable-colors`). Not
+             *     required, so an older client keeps compiling.
+             */
+            ownerOrgId?: string;
+            /** @description The product's length in whole centimetres; null when it has none. */
+            lengthCm?: number | null;
             assetId: string;
             assetTag: string | null;
             productName: string;
@@ -3106,6 +3174,14 @@ export interface components {
             count: number;
         };
         ProductionListLine: {
+            /**
+             * @description The organization the unit belongs to. With `lengthCm`, what the
+             *     cable colour is read off (see `GET /api/v1/cable-colors`). Not
+             *     required, so an older client keeps compiling.
+             */
+            ownerOrgId?: string;
+            /** @description The product's length in whole centimetres; null when it has none. */
+            lengthCm?: number | null;
             /** @description Identifies the line for a count; opaque to clients. */
             key: string;
             productName: string;
@@ -3144,6 +3220,14 @@ export interface components {
          */
         HandoutMode: "checkout" | "checkin";
         ProductionHandoutItem: {
+            /**
+             * @description The organization the unit belongs to. With `lengthCm`, what the
+             *     cable colour is read off (see `GET /api/v1/cable-colors`). Not
+             *     required, so an older client keeps compiling.
+             */
+            ownerOrgId?: string;
+            /** @description The product's length in whole centimetres; null when it has none. */
+            lengthCm?: number | null;
             assetId: string;
             assetTag: string | null;
             productName: string;
@@ -3285,6 +3369,12 @@ export interface components {
             name: string;
         };
         BundleUnit: {
+            /**
+             * @description The product's length in whole centimetres, null when it has none —
+             *     with the kit's organization, what the cable colour is read off (see
+             *     `GET /api/v1/cable-colors`). Not required, so an older client keeps compiling.
+             */
+            lengthCm?: number | null;
             id: string;
             assetTag: string | null;
             serialNumber: string | null;
@@ -3670,6 +3760,26 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["LegalLink"][];
+                };
+            };
+        };
+    };
+    listCableColors: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The schemes */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["CableColorScheme"][];
                 };
             };
         };

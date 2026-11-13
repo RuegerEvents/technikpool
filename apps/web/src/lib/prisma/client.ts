@@ -75,6 +75,13 @@ export type DeviceCode = Prisma.DeviceCodeModel;
  */
 export type Organization = Prisma.OrganizationModel;
 /**
+ * Model CableColorBand
+ * One band of an org's cable colour code: every cable of the org up to
+ * `maxLengthCm` (and longer than the next shorter band) carries this colour.
+ * See docs/plans/kabelfarben.md and #lib/cable-colors.svelte.ts.
+ */
+export type CableColorBand = Prisma.CableColorBandModel;
+/**
  * Model OrgMembership
  *
  */

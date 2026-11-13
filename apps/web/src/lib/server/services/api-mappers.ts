@@ -644,6 +644,8 @@ export function toProductionCheck(check: ProductionCheckView): Schemas['Producti
 			manufacturerName: i.manufacturerName,
 			productImageUrl: imageSrc(i.productImagePath),
 			lentBy: i.lentBy,
+			ownerOrgId: i.ownerOrgId,
+			lengthCm: i.lengthCm,
 			accessoryOf: i.accessoryOf,
 			group: { kind: i.group.kind, name: i.group.name },
 			kit: i.kit && { ...i.kit },
@@ -680,6 +682,8 @@ export function toListLine(line: ListLine): Schemas['ProductionListLine'] {
 		manufacturerName: line.manufacturerName,
 		productImageUrl: imageSrc(line.productImagePath),
 		lentBy: line.lentBy,
+		...(line.ownerOrgId ? { ownerOrgId: line.ownerOrgId } : {}),
+		lengthCm: line.lengthCm ?? null,
 		group: { kind: line.group.kind, name: line.group.name },
 		assetIds: line.assetIds,
 		total: line.total,
@@ -705,6 +709,8 @@ export function toProductionHandout(view: HandoutView): Schemas['ProductionHando
 			manufacturerName: i.manufacturerName,
 			productImageUrl: imageSrc(i.productImagePath),
 			lentBy: i.lentBy,
+			ownerOrgId: i.ownerOrgId,
+			lengthCm: i.lengthCm,
 			accessoryOf: i.accessoryOf,
 			group: { kind: i.group.kind, name: i.group.name },
 			kit: i.kit && { ...i.kit },
@@ -802,6 +808,7 @@ type BundleUnitRow = {
 		name: string;
 		caption: string | null;
 		imagePath: string | null;
+		lengthCm: number | null;
 		manufacturer: { name: string } | null;
 	};
 	location: { id: string; name: string };
@@ -821,6 +828,7 @@ function toBundleUnit(unit: BundleUnitRow): Schemas['BundleUnit'] {
 		productCaption: unit.product.caption,
 		manufacturerName: unit.product.manufacturer?.name ?? null,
 		productImageUrl: imageSrc(unit.product.imagePath),
+		lengthCm: unit.product.lengthCm,
 		location: { id: unit.location.id, name: unit.location.name },
 		checkedOutTo: unit.productionItems[0]?.production.name ?? null
 	};

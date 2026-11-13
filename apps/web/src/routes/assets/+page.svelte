@@ -1,5 +1,8 @@
 <script lang="ts">
 	import { searchMatcher } from '#lib/search.js';
+	import { CableColorDot } from '#lib/components/ui/cable-color/index.js';
+	import { cableColorTerms } from '#lib/cable-colors.svelte.js';
+	import { getCableColorSchemes } from '#lib/remote/cable-colors.remote.js';
 	import { rowLinkClick } from '#lib/row-link.js';
 	import { naturalCompare } from '#lib/sort.js';
 	import { withCaption } from '#lib/product-label.js';
@@ -444,6 +447,9 @@
 	let searchTrimmed = $derived(searchQuery.toLowerCase().trim());
 	// See `#lib/search.ts`: every word anywhere, in any order, a typo forgiven.
 	let matchSearch = $derived(searchMatcher(searchQuery));
+	// "rot" finds the cables taped red — by the owner's scheme, as the dot shows.
+	let colorSchemesQuery = $derived(getCableColorSchemes());
+	let colorSchemes = $derived(colorSchemesQuery.current);
 	// Per unit, so the flat list can use it as it is. A product group matches when
 	// any of its units does — everything a group row shows is taken from them.
 	function assetMatchesSearch(a: Asset) {
@@ -463,7 +469,8 @@
 			a.bundle?.template.name,
 			a.bundle?.template.caption,
 			orgLabel(a.organization),
-			a.organization.name
+			a.organization.name,
+			...cableColorTerms(colorSchemes, a.organization.id, a.product.lengthCm)
 		);
 	}
 
@@ -1003,8 +1010,11 @@
 		{/if}
 	{/snippet}
 
-	{#snippet cableChips(cable: (CableAttrs & WithWays) | null)}
+	{#snippet cableChips(cable: (CableAttrs & WithWays) | null, ownerIds: string[])}
 		{#if cable}
+			{#each ownerIds as ownerId (ownerId)}
+				<CableColorDot organizationId={ownerId} lengthCm={cable.lengthCm} />
+			{/each}
 			{@const ends = cable.ways.length ? loomSummary(cable.ways) : connectorLabel(cable)}
 			{#if ends}<span class="rounded bg-muted px-1.5 py-0.5 text-xs">{ends}</span>{/if}
 			{#if cable.lengthCm}
@@ -1115,7 +1125,9 @@
 										<div class="flex flex-wrap items-center gap-1.5">
 											<span class="font-medium">{asset.product.name}</span>
 											{@render captionChip(asset.product.caption)}
-											{@render cableChips(isCable(asset.product) ? asset.product : null)}
+											{@render cableChips(isCable(asset.product) ? asset.product : null, [
+												asset.organization.id
+											])}
 										</div>
 										{#if asset.parent}
 											<a
@@ -1300,7 +1312,9 @@
 							<span class="text-xs text-muted-foreground">{group.manufacturerName}</span>
 							{#if group.cable}
 								<div class="flex flex-wrap items-center gap-1">
-									{@render cableChips(group.cable)}
+									{@render cableChips(group.cable, [
+										...new Set(group.assets.map((a) => a.organization.id))
+									])}
 								</div>
 							{/if}
 							<div class="mt-auto flex flex-wrap items-center gap-2 pt-2">
@@ -1841,7 +1855,9 @@
 											class="font-medium underline-offset-2 hover:underline">{group.name}</a
 										>
 										{@render captionChip(group.caption)}
-										{@render cableChips(group.cable)}
+										{@render cableChips(group.cable, [
+											...new Set(group.assets.map((a) => a.organization.id))
+										])}
 									</div>
 								</td>
 								<td class="px-4 py-3 text-muted-foreground">{group.manufacturerName}</td>

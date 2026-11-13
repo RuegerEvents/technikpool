@@ -1,5 +1,8 @@
 <script lang="ts">
 	import { searchMatcher } from '#lib/search.js';
+	import { CableColorDot } from '#lib/components/ui/cable-color/index.js';
+	import { cableColorTerms } from '#lib/cable-colors.svelte.js';
+	import { getCableColorSchemes } from '#lib/remote/cable-colors.remote.js';
 	import { naturalCompare } from '#lib/sort.js';
 	import { withCaption } from '#lib/product-label.js';
 	import { CountStepper } from '#lib/components/ui/count-stepper/index.js';
@@ -199,8 +202,19 @@
 
 	// See `#lib/search.ts`: every word anywhere, in any order, a typo forgiven.
 	let matchSearch = $derived(searchMatcher(search));
+	// "rot" finds the cables taped red, by each owner's scheme.
+	let colorSchemesQuery = $derived(getCableColorSchemes());
+	let colorSchemes = $derived(colorSchemesQuery.current);
 	function matchesFiltersExceptCategory(g: Group): boolean {
-		if (!matchSearch(g.productName, g.productCaption, g.manufacturerName, g.cableEnds))
+		if (
+			!matchSearch(
+				g.productName,
+				g.productCaption,
+				g.manufacturerName,
+				g.cableEnds,
+				...cableColorTerms(colorSchemes, g.organizationId, g.lengthCm)
+			)
+		)
 			return false;
 		if (selectedOrgs.size > 0 && !selectedOrgs.has(g.organizationId)) return false;
 		if (locMode === 'locations') {
@@ -797,6 +811,7 @@
 										style="background-color: {g.categoryColor}"
 									></span>
 									{withCaption(g.productName, g.productCaption)}
+									<CableColorDot organizationId={g.organizationId} lengthCm={g.lengthCm} />
 								</p>
 								<p class="truncate text-xs text-muted-foreground">
 									{[g.manufacturerName, g.organizationName, g.locationName]
@@ -878,6 +893,7 @@
 									<div class="min-w-0 flex-1">
 										<p class="truncate text-sm font-medium">
 											{withCaption(g.productName, g.productCaption)}
+											<CableColorDot organizationId={g.organizationId} lengthCm={g.lengthCm} />
 										</p>
 										<p class="truncate text-xs text-muted-foreground">
 											{[g.manufacturerName, g.organizationName].filter(Boolean).join(' · ')}
