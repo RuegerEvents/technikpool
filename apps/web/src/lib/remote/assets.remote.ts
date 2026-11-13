@@ -71,7 +71,21 @@ import {
 import { PORT_REQUIREMENTS } from '#lib/ports.js';
 import { getConnectors, getConnectorUsage } from '#lib/remote/connectors.remote.js';
 import { getKnownAddresses } from '#lib/remote/addresses.remote.js';
-import { initialInspection, type InitialInspection } from '#lib/server/services/inspections.js';
+import { initialInspection } from '#lib/server/services/inspections.js';
+import {
+	ASSET_ORDER_BY,
+	COMMITTED_ITEM_STATUSES,
+	STOCK_UNIT_SELECT,
+	assetLabel,
+	attachStockUnit,
+	createAccessoryRecord,
+	createUnitsInTx,
+	kitForNewUnits,
+	stockPool,
+	type AccessoryParent,
+	type AssetTx,
+	type StockUnit
+} from '#lib/server/services/asset-create.js';
 import { appError } from '#lib/errors.js';
 import { productLabel } from '#lib/product-label.js';
 import {
@@ -79,6 +93,7 @@ import {
 	updateManufacturer as updateManufacturerRecord
 } from '#lib/server/services/manufacturers.js';
 import {
+	createProduct as createProductRecord,
 	deleteProduct as deleteProductRecord,
 	mergeProducts as mergeProductsRecord,
 	revertCatalogChange as revertCatalogChangeRecord,
@@ -111,19 +126,6 @@ const PARENT_SELECT = {
 		product: { select: { name: true, manufacturer: { select: { name: true } } } }
 	}
 } as const;
-
-// Every list of units, everywhere, comes out in this order. Product name alone
-// is not an order: a rack of twelve identical units ties on it, and Postgres
-// breaks a tie in whatever order it happened to read the rows — which changes
-// as soon as one of them is updated. The tag and then the id settle it, so a
-// list looks the same on the second visit as on the first.
-const ASSET_ORDER_BY: Prisma.AssetOrderByWithRelationInput[] = [
-	{ product: { name: 'asc' } },
-	// Untagged units sort after tagged ones rather than being scattered through
-	// them; Postgres would put NULLs last here anyway, but only by default.
-	{ assetTag: { sort: 'asc', nulls: 'last' } },
-	{ id: 'asc' }
-];
 
 // Which products a bundle type is built around. Loaded wherever a preview may
 // be drawn, because the answer is part of the picture — see bundle-image.ts.
@@ -996,12 +998,17 @@ async function resolveProductRef(
 	// particular — a Schuko lead, a generic laptop — is filed without one.
 	let manufacturerId = data.manufacturerId ?? null;
 	if (data.newManufacturerName && !manufacturerId) {
-		const m = await prisma.manufacturer.create({
-			data: {
-				name: data.newManufacturerName,
-				logoPath: data.newManufacturerLogoPath?.trim() || null
-			}
-		});
+		// "New" as typed, but a maker of that name in another spelling is the
+		// same maker — the scanner's product form and this one must not end up
+		// with "Neutrik" and "neutrik" side by side.
+		const name = data.newManufacturerName.trim();
+		const m =
+			(await prisma.manufacturer.findFirst({
+				where: { name: { equals: name, mode: 'insensitive' } }
+			})) ??
+			(await prisma.manufacturer.create({
+				data: { name, logoPath: data.newManufacturerLogoPath?.trim() || null }
+			}));
 		manufacturerId = m.id;
 		await getManufacturers().refresh();
 		await getProducts().refresh();
@@ -1041,30 +1048,15 @@ async function resolveProductRef(
 
 	if (data.newProductName && !productId) {
 		if (!data.categoryId) appError(400, 'category_required');
-		await prisma.category.findUniqueOrThrow({ where: { id: data.categoryId } });
-		// A loom's ends are ends like any other: they belong in the connector
-		// catalogue, where a picture and a department can be hung on them.
-		const connectors = await ensureConnectors([
-			cable?.connectorA,
-			cable?.connectorB,
-			...ways.flatMap((w) => [w.connectorA, w.connectorB])
-		]);
-		await assertProductNameFree(data.newProductName, manufacturerId);
-		const p = await prisma.product.create({
-			data: {
-				name: data.newProductName,
-				manufacturerId,
-				categoryId: data.categoryId,
-				imagePath: data.newProductImagePath?.trim() || null,
-				...(cable ? connectors.ends(cable) : {}),
-				// A cable is a physical thing; a product can't be both.
-				isLicense: !cable && !!data.newProductIsLicense,
-				createdById: userId,
-				ways:
-					ways.length > 0
-						? { create: ways.map((w, sortOrder) => ({ ...connectors.ends(w), sortOrder })) }
-						: undefined
-			}
+		// The rules every new product answers to — shared with `POST /api/v1/products`.
+		const { product: p, connectorsCreated } = await createProductRecord(userId, {
+			name: data.newProductName,
+			manufacturerId,
+			categoryId: data.categoryId,
+			imagePath: data.newProductImagePath,
+			isLicense: data.newProductIsLicense,
+			cable,
+			ways
 		});
 		// The price given alongside a brand-new product is the creating org's own
 		// — prices are per-org, so it binds nobody else.
@@ -1079,7 +1071,7 @@ async function resolveProductRef(
 		}
 		productId = p.id;
 		await getProducts(manufacturerId).refresh();
-		if (connectors.created.length > 0) await getConnectors().refresh();
+		if (connectorsCreated.length > 0) await getConnectors().refresh();
 		if (data.newProductCable) {
 			await getCableVocabulary().refresh();
 			await getConnectorUsage().refresh();
@@ -1088,201 +1080,6 @@ async function resolveProductRef(
 
 	if (!productId) appError(400, 'product_required');
 	return productId;
-}
-
-/** The subset of a Prisma client these helpers need — the real one or a `$transaction` handle. */
-type AssetTx = Pick<
-	typeof prisma,
-	| 'asset'
-	| 'organization'
-	| 'assetTransaction'
-	| 'product'
-	| 'inspectionType'
-	| 'orgInspectionInterval'
-	| 'orgProductInspectionInterval'
-	| '$queryRaw'
->;
-
-/** One unit as a caller asks for it — a tag it brought, one to allocate, or none. */
-type UnitSpec = {
-	productId: string;
-	serialNumber?: string | null;
-	assetTag?: string | null;
-	noAssetTag?: boolean;
-};
-
-type CreateUnitsArgs = {
-	userId: string;
-	organizationId: string;
-	/** Already resolved and checked against the org by the caller. */
-	locationId: string;
-	units: UnitSpec[];
-	parent?: (AccessoryParent & { productId: string }) | null;
-	bundleId?: string | null;
-	accessoryProfile?: ProductAccessoryProfile | null;
-	/**
-	 * Bolt loose units the pool already holds onto the new ones before
-	 * registering any. Off by default, and deliberately the opposite default to
-	 * the fan-out on the asset detail page: a unit being registered now is
-	 * usually a delivery, and a delivery arrives with its own cables. Bringing an
-	 * existing fleet into line is the other way round — see `addProductAccessories`.
-	 */
-	reuseAccessoryStock?: boolean;
-};
-
-/**
- * Creates units, in one transaction, with everything that has to happen at the
- * same moment: the org's inspection interval snapshotted onto each one, tags
- * drawn in row order from a single allocator, the CREATED (and, for an
- * accessory, ACCESSORY_ATTACHED) transactions, and the accessory fan-out.
- *
- * Extracted because the cable batch is the third caller. Two copies of tag
- * allocation is how one batch hands the same number to two units.
- */
-async function createUnitsInTx(tx: AssetTx, args: CreateUnitsArgs) {
-	const { assetIdPrefix: prefix } = await tx.organization.findUniqueOrThrow({
-		where: { id: args.organizationId },
-		select: { assetIdPrefix: true }
-	});
-	// The org's interval, for products that need DGUV inspections — see `initialInspection`.
-	const inspection = await initialInspection(tx, args.organizationId);
-
-	const tags = await tagAllocator(
-		tx,
-		args.organizationId,
-		args.units.map((unit) => unit.assetTag)
-	);
-	const parent = args.parent ?? null;
-
-	// The column is unique, but a violation would surface as a bare 500 — say
-	// which unit already carries a typed tag, the way `updateAsset` does.
-	const typedTags = args.units.flatMap((u) => (!u.noAssetTag && u.assetTag?.trim()) || []);
-	const repeated = typedTags.find((tag, i) => typedTags.indexOf(tag) !== i);
-	if (repeated) appError(409, 'asset_tag_in_use', [repeated, 'another row of this form']);
-	const holder = typedTags.length
-		? await tx.asset.findFirst({
-				where: { assetTag: { in: typedTags } },
-				select: { assetTag: true, serialNumber: true, product: { select: { name: true } } }
-			})
-		: null;
-	if (holder) {
-		const label = holder.serialNumber
-			? `${holder.product.name} (S/N ${holder.serialNumber})`
-			: holder.product.name;
-		appError(409, 'asset_tag_in_use', [holder.assetTag ?? '', label]);
-	}
-	const kitHolder = await kitHoldingTag(typedTags);
-	if (kitHolder) appError(409, 'asset_tag_in_use', [kitHolder.tag, kitHolder.name]);
-
-	const created = await Promise.all(
-		// `tags.next()` is called synchronously inside the map, before anything
-		// is awaited, so the tags land in row order rather than completion order.
-		// With the org's numbering off it refuses a unit that brought no tag.
-		args.units.map((unit) => {
-			let resolvedTag: string | null;
-			if (unit.noAssetTag) {
-				resolvedTag = null;
-			} else if (unit.assetTag?.trim()) {
-				const tag = unit.assetTag.trim();
-				if (!tag.startsWith(prefix)) appError(400, 'asset_tag_prefix_mismatch', [tag, prefix]);
-				resolvedTag = tag;
-			} else {
-				resolvedTag = tags.next();
-			}
-
-			return tx.asset.create({
-				data: {
-					organizationId: args.organizationId,
-					productId: unit.productId,
-					locationId: args.locationId,
-					serialNumber: unit.serialNumber || null,
-					assetTag: resolvedTag,
-					status: 'AVAILABLE',
-					parentAssetId: parent?.id ?? null,
-					bundleId: parent?.bundleId ?? args.bundleId ?? null,
-					// Snapshot of the org's intervals, not a live reference — see OrgInspectionInterval.
-					...inspection(unit.productId),
-					transactions: {
-						create: [
-							{ userId: args.userId, action: 'CREATED', data: { type: 'CREATED' } },
-							// Two entries rather than one: the unit was created, and it was
-							// attached. Detaching it later leaves the first one true.
-							...(parent
-								? [
-										{
-											userId: args.userId,
-											action: 'ACCESSORY_ATTACHED',
-											data: {
-												type: 'ACCESSORY_ATTACHED',
-												parentAssetId: parent.id,
-												parentLabel: assetLabel(parent)
-											}
-										}
-									]
-								: [])
-						]
-					}
-				},
-				include: {
-					product: {
-						include: { manufacturer: true, category: true, ...CABLE_ENDS }
-					},
-					location: true
-				}
-			});
-		})
-	);
-
-	// In the same transaction as the units themselves: a fixture that reaches
-	// the pool without the brackets every other one of its kind has is worse
-	// than one that was never created — nothing about it looks wrong later.
-	const reusedAccessoryIds: string[] = [];
-	if (args.accessoryProfile) {
-		const pool = args.reuseAccessoryStock
-			? await stockPool(tx, {
-					organizationId: args.organizationId,
-					productIds: args.accessoryProfile.accessories.map((acc) => acc.productId),
-					bundleId: parent?.bundleId ?? args.bundleId ?? null,
-					locationId: args.locationId,
-					bare: true
-				})
-			: new Map<string, StockUnit[]>();
-
-		for (const unit of created) {
-			for (const acc of args.accessoryProfile.accessories) {
-				for (let n = 0; n < acc.perUnit; n++) {
-					const parentRecord = {
-						id: unit.id,
-						locationId: unit.locationId,
-						bundleId: unit.bundleId,
-						assetTag: unit.assetTag,
-						product: unit.product
-					};
-					const taken = pool.get(acc.productId)?.shift();
-					if (taken && (await attachStockUnit(tx, args.userId, taken.id, parentRecord))) {
-						reusedAccessoryIds.push(taken.id);
-						continue;
-					}
-					await createAccessoryRecord(tx, {
-						userId: args.userId,
-						organizationId: args.organizationId,
-						productId: acc.productId,
-						// A tagged original begets a tagged copy — where the org numbers.
-						assetTag: acc.tagged && tags.enabled ? tags.next() : null,
-						inspection: inspection(acc.productId),
-						parent: parentRecord
-					});
-				}
-			}
-		}
-	}
-
-	await tags.done();
-
-	// The units themselves, and separately whatever was taken off the shelf to
-	// dress them — the caller decides what to invalidate, the same way
-	// `performScan` reports what it touched.
-	return { created, reusedAccessoryIds };
 }
 
 /** What a listing shows once an org has gained units of some products. */
@@ -1378,32 +1175,14 @@ export const createAssets = command(createAssetsSchema, async (data) => {
 
 	// A kit's own location wins over the caller's for the same reason a parent's
 	// does — `addAssetToBundle` applies it to anything joining an existing
-	// bundle. A bundle with no location of its own leaves the choice open.
+	// bundle. The kit's checks are shared with `/api/v1/assets` (`kitForNewUnits`).
 	const bundle = data.bundleId
-		? await prisma.assetBundle.findUniqueOrThrow({
-				where: { id: data.bundleId },
-				select: {
-					id: true,
-					locationId: true,
-					templateId: true,
-					template: { select: { organizationId: true } }
-				}
+		? await kitForNewUnits({
+				bundleId: data.bundleId,
+				organizationId: data.organizationId,
+				productIds: data.items.map(() => productId)
 			})
 		: null;
-	if (bundle && bundle.template.organizationId !== data.organizationId) {
-		appError(409, 'bundle_org_mismatch');
-	}
-	// Registering a unit straight into a kit is how a kit is completed, so it
-	// answers to what the type holds like any other way in. No override here:
-	// this modal exists to fill a gap, and a new product belongs to the type
-	// before it belongs to a case of it.
-	if (bundle) {
-		await assertAdditionsFitType({
-			templateId: bundle.templateId,
-			bundleId: bundle.id,
-			productIds: data.items.map(() => productId)
-		});
-	}
 
 	const locationId = parent?.locationId ?? bundle?.locationId ?? data.locationId;
 	const location = await prisma.location.findUniqueOrThrow({ where: { id: locationId } });
@@ -3927,14 +3706,6 @@ async function refreshAccessoryPair(
 	]);
 }
 
-function assetLabel(asset: {
-	assetTag: string | null;
-	product: { name: string; manufacturer: { name: string } | null };
-}) {
-	const name = productLabel(asset.product);
-	return asset.assetTag ? `${name} (${asset.assetTag})` : name;
-}
-
 /**
  * What the org's units of one product carry, as a single answer for the product
  * rather than for any one unit. There is no table for this: an accessory hangs
@@ -4069,60 +3840,6 @@ export const getProductAccessoryProfile = query(
 	}
 );
 
-/** What `createAccessoryRecord` needs to know about the unit it is attaching to. */
-type AccessoryParent = {
-	id: string;
-	locationId: string;
-	bundleId: string | null;
-	assetTag: string | null;
-	product: { name: string; manufacturer: { name: string } | null };
-};
-
-/**
- * One accessory, created already attached — the shape both fan-out paths need.
- * It inherits its parent's location and kit for the same reason `attachAccessory`
- * writes them: those two columns are the parent's to decide.
- */
-function createAccessoryRecord(
-	tx: AssetTx,
-	args: {
-		userId: string;
-		organizationId: string;
-		productId: string;
-		assetTag: string | null;
-		inspection: InitialInspection;
-		parent: AccessoryParent;
-	}
-) {
-	return tx.asset.create({
-		data: {
-			organizationId: args.organizationId,
-			productId: args.productId,
-			locationId: args.parent.locationId,
-			assetTag: args.assetTag,
-			status: 'AVAILABLE',
-			parentAssetId: args.parent.id,
-			bundleId: args.parent.bundleId,
-			...args.inspection,
-			transactions: {
-				create: [
-					{ userId: args.userId, action: 'CREATED', data: { type: 'CREATED' } },
-					{
-						userId: args.userId,
-						action: 'ACCESSORY_ATTACHED',
-						data: {
-							type: 'ACCESSORY_ATTACHED',
-							parentAssetId: args.parent.id,
-							parentLabel: assetLabel(args.parent)
-						}
-					}
-				]
-			}
-		},
-		select: { id: true }
-	});
-}
-
 // ── Giving every unit of a product the same accessory ────────────────────────
 // Adding a power cable to each of twenty fixtures one unit at a time is forty
 // clicks and a list to keep in your head of which ones you have done. The
@@ -4137,117 +3854,6 @@ function createAccessoryRecord(
 // bolted onto the fixtures, not with forty brackets on the books. Which of the
 // two it is, is the user's call — `reuseExisting` — because only they know
 // whether the shelf stock is the same physical thing they are describing.
-
-/** A production still has a claim on the unit; a returned line is done with it. */
-const COMMITTED_ITEM_STATUSES = ['PENDING', 'APPROVED', 'CHECKED_OUT'];
-
-/** What a unit has to say about itself to be attached, or attached to. */
-const STOCK_UNIT_SELECT = {
-	id: true,
-	productId: true,
-	locationId: true,
-	bundleId: true,
-	assetTag: true,
-	product: { select: { name: true, manufacturer: { select: { name: true } } } },
-	// What it already carries, so a unit that comes off the shelf dressed is
-	// only topped up to what is wanted rather than dressed twice.
-	accessories: { where: ACTIVE_ASSET_WHERE, select: { productId: true } }
-} satisfies Prisma.AssetSelect;
-
-type StockUnit = Prisma.AssetGetPayload<{ select: typeof STOCK_UNIT_SELECT }>;
-
-/**
- * Loose stock of these products, grouped by product and ordered the way it
- * should be spent. Same shelf first: taking a unit relocates it, which is right
- * for a cable on the same shelf and merely optimistic for one in another
- * warehouse.
- *
- * Not limited to what is needed, because the premise of taking stock at all is
- * that there is a modest pile of it — and a limit would have to be applied per
- * product, in SQL, before the ordering this does in memory.
- */
-async function stockPool(
-	client: Pick<typeof prisma, 'asset'>,
-	args: {
-		organizationId: string;
-		productIds: string[];
-		/** Where the units are headed, for the same-shelf preference. */
-		locationId: string;
-		/** The kit they are joining, if any: a candidate already in it is fine. */
-		bundleId?: string | null;
-		/** Candidates must carry nothing of their own — an accessory has none. */
-		bare?: boolean;
-		/** Promised to something else earlier in this same run. */
-		excludeIds?: string[];
-	}
-): Promise<Map<string, StockUnit[]>> {
-	const byProduct = new Map<string, StockUnit[]>();
-	if (args.productIds.length === 0) return byProduct;
-
-	const units = await client.asset.findMany({
-		where: {
-			productId: { in: args.productIds },
-			organizationId: args.organizationId,
-			parentAssetId: null,
-			productionItems: { none: { status: { in: COMMITTED_ITEM_STATUSES } } },
-			// Loose, or already in the kit it would be joining — anything else
-			// would have to be pulled out of somebody else's case.
-			OR: [{ bundleId: null }, ...(args.bundleId ? [{ bundleId: args.bundleId }] : [])],
-			...(args.bare ? { accessories: { none: {} } } : {}),
-			...(args.excludeIds?.length ? { id: { notIn: args.excludeIds } } : {}),
-			...BOOKABLE_ASSET_WHERE
-		},
-		select: STOCK_UNIT_SELECT,
-		orderBy: ASSET_ORDER_BY
-	});
-
-	for (const unit of units) {
-		const list = byProduct.get(unit.productId);
-		if (list) list.push(unit);
-		else byProduct.set(unit.productId, [unit]);
-	}
-	for (const list of byProduct.values()) {
-		list.sort(
-			(a, b) => Number(b.locationId === args.locationId) - Number(a.locationId === args.locationId)
-		);
-	}
-	return byProduct;
-}
-
-/**
- * Bolt a unit that already exists onto a parent, reporting whether it worked.
- *
- * The pool it came from was read before the write, so `parentAssetId` is in the
- * where clause rather than trusted: somebody attaching the same cable by hand
- * in the meantime must win, and the caller makes a new one instead of quietly
- * undoing their work.
- */
-async function attachStockUnit(
-	tx: AssetTx,
-	userId: string,
-	unitId: string,
-	parent: AccessoryParent
-): Promise<boolean> {
-	const { count } = await tx.asset.updateMany({
-		where: { id: unitId, parentAssetId: null },
-		data: { parentAssetId: parent.id, locationId: parent.locationId, bundleId: parent.bundleId }
-	});
-	if (count !== 1) return false;
-
-	await tx.assetTransaction.create({
-		data: {
-			assetId: unitId,
-			userId,
-			action: 'ACCESSORY_ATTACHED',
-			data: {
-				type: 'ACCESSORY_ATTACHED',
-				parentAssetId: parent.id,
-				parentLabel: assetLabel(parent)
-			}
-		}
-	});
-	return true;
-}
 
 /**
  * What one run of the fan-out would do, worked out before anything is written:

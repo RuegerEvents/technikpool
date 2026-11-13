@@ -134,8 +134,9 @@ export const POST: RequestHandler = ({ locals, request }) =>
 				)
 			);
 		}
+		const bundleId = field('bundleId') || null;
 		try {
-			const asset = await registerTaggedUnit(user.id, input);
+			const asset = await registerTaggedUnit(user.id, { ...input, bundleId });
 			return Response.json(toAsset(asset) satisfies Schemas['Asset'], { status: 201 });
 		} catch (err) {
 			if (err instanceof AssetTagError) {

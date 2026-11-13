@@ -8,6 +8,7 @@ import { isSystemAdmin, orgRole, userOrgIds } from './access';
 import { syncAccessories } from './accessories';
 import { resolveScannedCode } from './asset-lookup';
 import { assertAdditionsFitType, assertNewInstanceMatchesType } from './bundle-spec';
+import { bundleImageForRead } from './bundle-image';
 
 // Everything that changes what a kit holds, for the web's remote functions and
 // for /api/v1 alike, so the scanner fills a case under exactly the rules the
@@ -452,24 +453,37 @@ export async function listBundles(userId: string, organizationId?: string, text?
 			id: true,
 			tag: true,
 			imagePath: true,
+			imageFingerprint: true,
 			location: { select: { id: true, name: true } },
 			template: {
 				select: {
 					name: true,
 					caption: true,
 					organizationId: true,
-					category: { select: { name: true, nameDe: true } }
+					category: { select: { name: true, nameDe: true } },
+					featuredProducts: { select: { id: true } }
 				}
 			},
+			// Accessories too: the picture is drawn over everything in the case.
 			assets: {
-				where: { parentAssetId: null },
 				select: {
 					assetTag: true,
-					product: { select: { name: true, manufacturer: { select: { name: true } } } }
+					parentAssetId: true,
+					product: {
+						select: {
+							id: true,
+							imagePath: true,
+							name: true,
+							manufacturer: { select: { name: true } }
+						}
+					}
 				}
 			}
 		}
 	});
+	// The scanner reads kits only through here, so a stale picture is redrawn
+	// on its reads as on the web's.
+	for (const bundle of bundles) bundleImageForRead(bundle);
 	const matchSearch = searchMatcher(text ?? '');
 	return bundles
 		.filter(
@@ -482,7 +496,7 @@ export async function listBundles(userId: string, organizationId?: string, text?
 				)
 		)
 		.sort((a, b) => naturalCompare(a.template.name, b.template.name))
-		.map((b) => ({ ...b, unitCount: b.assets.length }));
+		.map((b) => ({ ...b, unitCount: b.assets.filter((a) => !a.parentAssetId).length }));
 }
 
 /** One kit with its units and their accessories, and whether this user may change it. */
@@ -493,13 +507,15 @@ export async function bundleDetail(userId: string, bundleId: string) {
 			id: true,
 			tag: true,
 			imagePath: true,
+			imageFingerprint: true,
 			location: { select: { id: true, name: true } },
 			template: {
 				select: {
 					name: true,
 					caption: true,
 					organizationId: true,
-					category: { select: { name: true, nameDe: true } }
+					category: { select: { name: true, nameDe: true } },
+					featuredProducts: { select: { id: true } }
 				}
 			},
 			assets: { select: BUNDLE_UNIT_SELECT }
@@ -510,5 +526,6 @@ export async function bundleDetail(userId: string, bundleId: string) {
 	if (!admin && !orgIds.includes(bundle.template.organizationId)) appError(404, 'record_not_found');
 	const role = await orgRole(userId, bundle.template.organizationId);
 	const canEdit = admin || (!!role && roleAtLeast(role, ROLE_FOR.inventory));
+	bundleImageForRead(bundle);
 	return { ...bundle, canEdit };
 }

@@ -12,6 +12,7 @@ AssetCreateRequest _$AssetCreateRequestFromJson(Map<String, dynamic> json) =>
       organizationId: json['organizationId'] as String,
       locationId: json['locationId'] as String,
       assetTag: json['assetTag'] as String,
+      bundleId: json['bundleId'] as String?,
     );
 
 Map<String, dynamic> _$AssetCreateRequestToJson(AssetCreateRequest instance) =>
@@ -20,4 +21,5 @@ Map<String, dynamic> _$AssetCreateRequestToJson(AssetCreateRequest instance) =>
       'organizationId': instance.organizationId,
       'locationId': instance.locationId,
       'assetTag': instance.assetTag,
+      'bundleId': ?instance.bundleId,
     };

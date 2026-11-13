@@ -1,7 +1,14 @@
 import type { RequestHandler } from './$types';
 import { prisma } from '#lib/server/auth.js';
-import { apiError, ApiResponse, apiJson, handleApi, requireApiUser } from '#lib/server/api.js';
-import { isSystemAdmin, userOrgIds } from '#lib/server/services/access.js';
+import {
+	apiError,
+	ApiResponse,
+	apiJson,
+	handleApi,
+	requireApiUser,
+	type Schemas
+} from '#lib/server/api.js';
+import { isSystemAdmin, managedOrgIds, userOrgIds } from '#lib/server/services/access.js';
 import {
 	inspectionNotRequiredWhere,
 	inspectionRequiredWhere,
@@ -9,8 +16,15 @@ import {
 	mainsConnectorsByProduct
 } from '#lib/server/services/inspections.js';
 import { DEFAULT_INSPECTION_TYPE_ID } from '#lib/inspection-due.js';
-import { CATALOG_PRODUCT_INCLUDE, catalogUnitCounts } from '#lib/server/services/products.js';
-import { toCatalogProduct } from '#lib/server/services/api-mappers.js';
+import {
+	CATALOG_PRODUCT_INCLUDE,
+	catalogUnitCounts,
+	createProduct
+} from '#lib/server/services/products.js';
+import { findOrCreateManufacturer } from '#lib/server/services/manufacturers.js';
+import { toCatalogProduct, toProduct } from '#lib/server/services/api-mappers.js';
+import { jsonBody, requireString } from '#lib/server/stocktake-api.js';
+import { appError } from '#lib/errors.js';
 import { ACTIVE_ASSET_WHERE } from '#lib/asset-status.js';
 import type { Prisma } from '#lib/prisma/client.js';
 
@@ -113,4 +127,43 @@ export const GET: RequestHandler = ({ locals, url }) =>
 			),
 			nextCursor: rows.length > limit ? (items.at(-1)?.id ?? null) : null
 		});
+	});
+
+// ProductCreateRequest in openapi.yaml. The same rules as a new product on the
+// web's asset form (`createProduct`); the right to add one is ADMIN of the org
+// the units are for, as `createAssets` asks for it there.
+export const POST: RequestHandler = ({ locals, request }) =>
+	handleApi(async () => {
+		const user = requireApiUser(locals);
+		const body = await jsonBody(request);
+		const organizationId = requireString(body, 'organizationId').trim();
+		const name = requireString(body, 'name').trim();
+		const categoryId = requireString(body, 'categoryId').trim();
+		const optional = (key: string) => {
+			const value = body[key];
+			if (value === undefined || value === null) return null;
+			if (typeof value !== 'string') {
+				throw new ApiResponse(apiError(400, 'invalid_request', `${key} must be a string.`));
+			}
+			return value.trim() || null;
+		};
+		const manufacturerName = optional('manufacturerName');
+		const caption = optional('caption');
+
+		if (
+			!(await isSystemAdmin(user.id)) &&
+			!(await managedOrgIds(user.id)).includes(organizationId)
+		) {
+			appError(403, 'asset_create_forbidden');
+		}
+		const manufacturerId = manufacturerName
+			? (await findOrCreateManufacturer(user.id, manufacturerName)).manufacturer.id
+			: null;
+		const { product } = await createProduct(user.id, {
+			name,
+			manufacturerId,
+			categoryId,
+			caption
+		});
+		return Response.json(toProduct(product) satisfies Schemas['Product'], { status: 201 });
 	});

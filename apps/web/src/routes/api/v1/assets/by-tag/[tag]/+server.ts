@@ -1,28 +1,8 @@
 import type { RequestHandler } from './$types';
-import { prisma } from '#lib/server/auth.js';
-import { CABLE_ENDS } from '#lib/server/services/cable-ends.js';
-import { apiError, apiJson, handleApi, requireApiUser, type Schemas } from '#lib/server/api.js';
+import { apiError, apiJson, handleApi, requireApiUser } from '#lib/server/api.js';
 import { ApiResponse } from '#lib/server/api.js';
-import {
-	isSystemAdmin,
-	productionVisibility,
-	userOrgIds,
-	visibleProductionName
-} from '#lib/server/services/access.js';
-import {
-	toAsset,
-	toAssetTransaction,
-	toInspection,
-	toProductDocument,
-	toProduction
-} from '#lib/server/services/api-mappers.js';
-import { productDocuments } from '#lib/server/services/product-documents.js';
 import { resolveScannedCode } from '#lib/server/services/asset-lookup.js';
-import { KIT_SELECT, kitOf } from '#lib/server/services/production-list.js';
-import { DEFAULT_INSPECTION_TYPE_ID } from '#lib/inspection-due.js';
-
-const HISTORY_LIMIT = 20;
-const INSPECTION_LIMIT = 10;
+import { assetDetail } from '#lib/server/asset-detail-api.js';
 
 export const GET: RequestHandler = ({ locals, params }) =>
 	handleApi(async () => {
@@ -45,83 +25,5 @@ export const GET: RequestHandler = ({ locals, params }) =>
 			throw new ApiResponse(apiError(404, 'asset_not_found', `Tag "${params.tag}" not found`));
 		}
 
-		const asset = await prisma.asset.findUniqueOrThrow({
-			where: { id: match.assetId },
-			include: {
-				product: {
-					include: { manufacturer: true, category: true, ...CABLE_ENDS }
-				},
-				location: { include: { address: true, organization: true } },
-				organization: true,
-				bundle: { select: KIT_SELECT },
-				inspections: {
-					orderBy: [{ performedAt: 'desc' }, { createdAt: 'desc' }],
-					take: INSPECTION_LIMIT
-				},
-				inspectionSchedules: { orderBy: { type: { sortOrder: 'asc' } } }
-			}
-		});
-		const electrical = asset.inspectionSchedules.find(
-			(s) => s.typeId === DEFAULT_INSPECTION_TYPE_ID
-		);
-
-		const admin = await isSystemAdmin(user.id);
-		const orgIds = await userOrgIds(user.id);
-		if (!admin && !orgIds.includes(asset.organizationId)) {
-			throw new ApiResponse(apiError(403, 'forbidden', 'No access to this asset'));
-		}
-
-		const [openItem, history] = await Promise.all([
-			prisma.productionItem.findFirst({
-				where: { assetId: asset.id, status: 'CHECKED_OUT' },
-				include: { production: { include: { organization: true } } },
-				orderBy: { id: 'desc' }
-			}),
-			prisma.assetTransaction.findMany({
-				where: { assetId: asset.id },
-				include: {
-					user: { select: { name: true, email: true } },
-					production: {
-						select: {
-							id: true,
-							name: true,
-							organizationId: true,
-							organization: { select: { name: true, shortName: true } }
-						}
-					}
-				},
-				orderBy: { createdAt: 'desc' },
-				take: HISTORY_LIMIT
-			})
-		]);
-
-		// Someone else's production still holds the unit, so it is reported — under
-		// its org's name, as openapi.yaml promises. Same rule as the web's history.
-		const canSee = await productionVisibility(user.id);
-		const body: Schemas['AssetDetail'] = {
-			...toAsset(asset),
-			documents: (await productDocuments(asset.productId)).map(toProductDocument),
-			kit: kitOf(asset.bundle),
-			inspectionIntervalMonths: electrical?.intervalMonths ?? null,
-			nextInspectionDue: asset.nextInspectionDue?.toISOString() ?? null,
-			inspectionSchedules: asset.inspectionSchedules.map((s) => ({
-				typeId: s.typeId,
-				intervalMonths: s.intervalMonths,
-				nextDue: s.nextDue.toISOString()
-			})),
-			inspections: asset.inspections.map(toInspection),
-			currentProduction: openItem
-				? toProduction({
-						...openItem.production,
-						name: visibleProductionName(openItem.production, canSee)
-					})
-				: null,
-			history: history.map((tx) =>
-				toAssetTransaction({
-					...tx,
-					production: tx.production && { name: visibleProductionName(tx.production, canSee) }
-				})
-			)
-		};
-		return apiJson('AssetDetail', body);
+		return apiJson('AssetDetail', await assetDetail(user.id, match.assetId));
 	});

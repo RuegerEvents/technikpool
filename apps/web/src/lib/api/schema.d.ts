@@ -270,7 +270,18 @@ export interface paths {
          */
         get: operations["listProducts"];
         put?: never;
-        post?: never;
+        /**
+         * Add a product to the catalog
+         * @description For registering units of something the catalog does not know yet. One
+         *     product per name and manufacturer, ignoring case and blanks — a name
+         *     that is taken is `409` with the existing product's name in the
+         *     message. The manufacturer is found by name or made. Takes ADMIN or
+         *     above of `organizationId`, the org the units are for; the product
+         *     itself is shared by every org, like all of the catalog, and answers
+         *     to its creator until someone holds units of it. Pictures and cable
+         *     ends are edited on the web.
+         */
+        post: operations["createProduct"];
         delete?: never;
         options?: never;
         head?: never;
@@ -498,6 +509,50 @@ export interface paths {
          *     and not be on another unit already (`asset_tag_in_use`).
          */
         post: operations["createAsset"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/assets/untagged": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Register a number of units that carry no tag
+         * @description For what nobody puts a sticker on — a drawer of cables. `count` units
+         *     of one product, without tags. With `bundleId` they go straight into
+         *     that kit, as on `createAsset`. ADMIN or above of the organization.
+         */
+        post: operations["createUntaggedAssets"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/v1/assets/{assetId}": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * One unit by its id, with recent history
+         * @description The same answer as `GET /assets/by-tag/{tag}`, for a unit picked from
+         *     a list — an untagged one has no tag to look it up by. Only units of
+         *     the caller's organizations (any for a system admin).
+         */
+        get: operations["getAsset"];
+        put?: never;
+        post?: never;
         delete?: never;
         options?: never;
         head?: never;
@@ -1364,6 +1419,33 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/api/v1/inventory/products": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        /**
+         * What the caller's organizations hold, per product
+         * @description One row per product and organization, with how many active units it
+         *     holds — counted on the server, so a list of every product the
+         *     warehouse has needs no walk through every unit. Only products with at
+         *     least one unit after the filters. `looseOnly` leaves out units in a
+         *     kit, for a list that shows the kits as rows of their own (the web's
+         *     Bundle View). `q` matches by the same rules as every search box
+         *     (product name, caption, manufacturer, cable ends). Sorted by product
+         *     name.
+         */
+        get: operations["listInventoryProducts"];
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
@@ -2160,6 +2242,12 @@ export interface components {
             /** @description One of the organization's locations. */
             locationId: string;
             assetTag: string;
+            /**
+             * @description A kit of the same organization to put the unit straight into. Its
+             *     own location wins over `locationId`, and the unit has to fit its
+             *     bundle type. Not required, so an older client keeps compiling.
+             */
+            bundleId?: string;
         };
         AssetTagRequest: {
             assetTag: string;
@@ -2856,6 +2944,37 @@ export interface components {
             count: number;
             bundle: components["schemas"]["BundleDetail"];
         };
+        ProductCreateRequest: {
+            /** @description The org the units will be for; the right to add is checked there. */
+            organizationId: string;
+            name: string;
+            /** @description Found by name, or made. Absent or blank - no manufacturer. */
+            manufacturerName?: string;
+            categoryId: string;
+            caption?: string;
+        };
+        UntaggedAssetsRequest: {
+            organizationId: string;
+            locationId: string;
+            productId: string;
+            count: number;
+            bundleId?: string;
+        };
+        AssetCreateResult: {
+            assets: components["schemas"]["Asset"][];
+        };
+        InventoryProduct: {
+            product: components["schemas"]["Product"];
+            organizationId: string;
+            /** @description The org's short name, else its name. */
+            organizationName: string;
+            /** @description Active units after the filters. */
+            count: number;
+            /** @description Of those, how many are AVAILABLE. */
+            available: number;
+            /** @description Of those, how many carry no tag. */
+            untagged: number;
+        };
     };
     responses: {
         /** @description The request was malformed. */
@@ -3294,6 +3413,34 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
         };
     };
+    createProduct: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["ProductCreateRequest"];
+            };
+        };
+        responses: {
+            /** @description The new product */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["Product"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            409: components["responses"]["Conflict"];
+        };
+    };
     getProduct: {
         parameters: {
             query?: never;
@@ -3667,6 +3814,60 @@ export interface operations {
             403: components["responses"]["Forbidden"];
             404: components["responses"]["NotFound"];
             409: components["responses"]["Conflict"];
+        };
+    };
+    createUntaggedAssets: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["UntaggedAssetsRequest"];
+            };
+        };
+        responses: {
+            /** @description The new units */
+            201: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssetCreateResult"];
+                };
+            };
+            400: components["responses"]["BadRequest"];
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
+            409: components["responses"]["Conflict"];
+        };
+    };
+    getAsset: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path: {
+                assetId: string;
+            };
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description The asset, with recent history */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["AssetDetail"];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
+            404: components["responses"]["NotFound"];
         };
     };
     setAssetTag: {
@@ -4873,6 +5074,34 @@ export interface operations {
             401: components["responses"]["Unauthorized"];
             403: components["responses"]["Forbidden"];
             409: components["responses"]["Conflict"];
+        };
+    };
+    listInventoryProducts: {
+        parameters: {
+            query?: {
+                q?: string;
+                organizationId?: string;
+                locationId?: string;
+                categoryId?: string;
+                looseOnly?: boolean;
+            };
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody?: never;
+        responses: {
+            /** @description Rows by product name */
+            200: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/json": components["schemas"]["InventoryProduct"][];
+                };
+            };
+            401: components["responses"]["Unauthorized"];
+            403: components["responses"]["Forbidden"];
         };
     };
 }

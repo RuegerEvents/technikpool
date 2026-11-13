@@ -18,6 +18,7 @@ import {
 	normalizeCable,
 	normalizeWays,
 	sameWays,
+	type CableInput,
 	type CableWayAttrs
 } from '#lib/cable.js';
 import { ACTIVE_ASSET_WHERE } from '#lib/asset-status.js';
@@ -42,6 +43,71 @@ export type CableAttrsInput = {
 	lengthCm?: number | null;
 	ways?: Partial<CableWayAttrs>[];
 };
+
+export type ProductCreateInput = {
+	name: string;
+	/** `null` files it without one — a product nobody makes in particular. */
+	manufacturerId: string | null;
+	categoryId: string;
+	caption?: string | null;
+	imagePath?: string | null;
+	/** Ignored on a cable: a cable is a physical thing, a product can't be both. */
+	isLicense?: boolean;
+	/** Already normalized (`normalizeCable`); null for anything that isn't a cable. */
+	cable?: CableInput | null;
+	/** A loom's ways, normalized (`normalizeWays`). */
+	ways?: CableWayAttrs[];
+};
+
+/**
+ * A new catalogue row, by the rules every way of making one shares: the
+ * category has to exist, the name has to be free for its maker
+ * (`assertProductNameFree`), the ends become connector rows, and the product
+ * answers to whoever made it (`createdById`) until somebody holds units of it.
+ *
+ * Who may make one is the caller's to check — the web and `/api/v1` both ask
+ * for ADMIN of the org the units are for. So is any price, which is per-org.
+ * Nothing is logged: the catalog log records changes to a product, and its
+ * category's inspection defaults apply to a product with no overrides of its own.
+ */
+export async function createProduct(userId: string, input: ProductCreateInput) {
+	const name = input.name.trim();
+	if (!name) appError(400, 'product_required');
+	const category = await prisma.category.findUnique({
+		where: { id: input.categoryId },
+		select: { id: true }
+	});
+	if (!category) appError(404, 'record_not_found');
+
+	const cable = input.cable ?? null;
+	const ways = input.ways ?? [];
+	// A loom's ends are ends like any other: they belong in the connector
+	// catalogue, where a picture and a department can be hung on them.
+	const connectors = await ensureConnectors([
+		cable?.connectorA,
+		cable?.connectorB,
+		...ways.flatMap((w) => [w.connectorA, w.connectorB])
+	]);
+	await assertProductNameFree(name, input.manufacturerId);
+	const product = await prisma.product.create({
+		data: {
+			name,
+			manufacturerId: input.manufacturerId,
+			categoryId: category.id,
+			caption: input.caption?.trim() || null,
+			imagePath: input.imagePath?.trim() || null,
+			...(cable ? connectors.ends(cable) : {}),
+			isLicense: !cable && !!input.isLicense,
+			createdById: userId,
+			ways:
+				ways.length > 0
+					? { create: ways.map((w, sortOrder) => ({ ...connectors.ends(w), sortOrder })) }
+					: undefined
+		},
+		include: { manufacturer: true, category: true, ...CABLE_ENDS }
+	});
+	return { product, connectorsCreated: connectors.created };
+}
 
 export type ProductUpdateInput = {
 	productId: string;

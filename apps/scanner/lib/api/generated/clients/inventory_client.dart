@@ -7,12 +7,15 @@ import 'package:retrofit/retrofit.dart';
 
 import '../models/asset.dart';
 import '../models/asset_create_request.dart';
+import '../models/asset_create_result.dart';
 import '../models/asset_detail.dart';
 import '../models/asset_page.dart';
 import '../models/asset_tag_request.dart';
 import '../models/category.dart';
+import '../models/inventory_product.dart';
 import '../models/location.dart';
 import '../models/production.dart';
+import '../models/untagged_assets_request.dart';
 
 part 'inventory_client.g.dart';
 
@@ -86,6 +89,26 @@ abstract class InventoryClient {
     @Body() required AssetCreateRequest body,
   });
 
+  /// Register a number of units that carry no tag.
+  ///
+  /// For what nobody puts a sticker on — a drawer of cables. `count` units.
+  /// of one product, without tags. With `bundleId` they go straight into.
+  /// that kit, as on `createAsset`. ADMIN or above of the organization.
+  @POST('/api/v1/assets/untagged')
+  Future<AssetCreateResult> createUntaggedAssets({
+    @Body() required UntaggedAssetsRequest body,
+  });
+
+  /// One unit by its id, with recent history.
+  ///
+  /// The same answer as `GET /assets/by-tag/{tag}`, for a unit picked from.
+  /// a list — an untagged one has no tag to look it up by. Only units of.
+  /// the caller's organizations (any for a system admin).
+  @GET('/api/v1/assets/{assetId}')
+  Future<AssetDetail> getAsset({
+    @Path('assetId') required String assetId,
+  });
+
   /// Give an untagged unit the tag just scanned.
   ///
   /// Takes ADMIN of the unit's organization. Only for a unit without a tag:.
@@ -112,5 +135,24 @@ abstract class InventoryClient {
   @GET('/api/v1/assets/by-tag/{tag}')
   Future<AssetDetail> getAssetByTag({
     @Path('tag') required String tag,
+  });
+
+  /// What the caller's organizations hold, per product.
+  ///
+  /// One row per product and organization, with how many active units it.
+  /// holds — counted on the server, so a list of every product the.
+  /// warehouse has needs no walk through every unit. Only products with at.
+  /// least one unit after the filters. `looseOnly` leaves out units in a.
+  /// kit, for a list that shows the kits as rows of their own (the web's.
+  /// Bundle View). `q` matches by the same rules as every search box.
+  /// (product name, caption, manufacturer, cable ends). Sorted by product.
+  /// name.
+  @GET('/api/v1/inventory/products')
+  Future<List<InventoryProduct>> listInventoryProducts({
+    @Query('q') String? q,
+    @Query('organizationId') String? organizationId,
+    @Query('locationId') String? locationId,
+    @Query('categoryId') String? categoryId,
+    @Query('looseOnly') bool? looseOnly,
   });
 }

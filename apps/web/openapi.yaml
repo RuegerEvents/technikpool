@@ -505,6 +505,41 @@ paths:
         '401':
           $ref: '#/components/responses/Unauthorized'
 
+    post:
+      operationId: createProduct
+      tags: [catalog]
+      summary: Add a product to the catalog
+      description: |
+        For registering units of something the catalog does not know yet. One
+        product per name and manufacturer, ignoring case and blanks — a name
+        that is taken is `409` with the existing product's name in the
+        message. The manufacturer is found by name or made. Takes ADMIN or
+        above of `organizationId`, the org the units are for; the product
+        itself is shared by every org, like all of the catalog, and answers
+        to its creator until someone holds units of it. Pictures and cable
+        ends are edited on the web.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ProductCreateRequest'
+      responses:
+        '201':
+          description: The new product
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Product'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
   /api/v1/products/{productId}:
     get:
       operationId: getProduct
@@ -975,6 +1010,68 @@ paths:
           $ref: '#/components/responses/NotFound'
         '409':
           $ref: '#/components/responses/Conflict'
+
+  /api/v1/assets/untagged:
+    post:
+      operationId: createUntaggedAssets
+      tags: [inventory]
+      summary: Register a number of units that carry no tag
+      description: |
+        For what nobody puts a sticker on — a drawer of cables. `count` units
+        of one product, without tags. With `bundleId` they go straight into
+        that kit, as on `createAsset`. ADMIN or above of the organization.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UntaggedAssetsRequest'
+      responses:
+        '201':
+          description: The new units
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssetCreateResult'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+
+  /api/v1/assets/{assetId}:
+    get:
+      operationId: getAsset
+      tags: [inventory]
+      summary: One unit by its id, with recent history
+      description: |
+        The same answer as `GET /assets/by-tag/{tag}`, for a unit picked from
+        a list — an untagged one has no tag to look it up by. Only units of
+        the caller's organizations (any for a system admin).
+      parameters:
+        - name: assetId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The asset, with recent history
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AssetDetail'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
 
   /api/v1/assets/{assetId}/tag:
     put:
@@ -2313,6 +2410,60 @@ paths:
           $ref: '#/components/responses/Forbidden'
         '409':
           $ref: '#/components/responses/Conflict'
+
+  /api/v1/inventory/products:
+    get:
+      operationId: listInventoryProducts
+      tags: [inventory]
+      summary: What the caller's organizations hold, per product
+      description: |
+        One row per product and organization, with how many active units it
+        holds — counted on the server, so a list of every product the
+        warehouse has needs no walk through every unit. Only products with at
+        least one unit after the filters. `looseOnly` leaves out units in a
+        kit, for a list that shows the kits as rows of their own (the web's
+        Bundle View). `q` matches by the same rules as every search box
+        (product name, caption, manufacturer, cable ends). Sorted by product
+        name.
+      parameters:
+        - name: q
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: organizationId
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: locationId
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: categoryId
+          in: query
+          required: false
+          schema:
+            type: string
+        - name: looseOnly
+          in: query
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Rows by product name
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/InventoryProduct'
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
 
 components:
   securitySchemes:
@@ -3750,6 +3901,12 @@ components:
           description: One of the organization's locations.
         assetTag:
           type: string
+        bundleId:
+          type: string
+          description: |
+            A kit of the same organization to put the unit straight into. Its
+            own location wins over `locationId`, and the unit has to fit its
+            bundle type. Not required, so an older client keeps compiling.
 
     AssetTagRequest:
       type: object
@@ -5127,3 +5284,68 @@ components:
           type: integer
         bundle:
           $ref: '#/components/schemas/BundleDetail'
+
+    ProductCreateRequest:
+      type: object
+      required: [organizationId, name, categoryId]
+      properties:
+        organizationId:
+          type: string
+          description: The org the units will be for; the right to add is checked there.
+        name:
+          type: string
+          minLength: 1
+        manufacturerName:
+          type: string
+          description: Found by name, or made. Absent or blank - no manufacturer.
+        categoryId:
+          type: string
+        caption:
+          type: string
+
+    UntaggedAssetsRequest:
+      type: object
+      required: [organizationId, locationId, productId, count]
+      properties:
+        organizationId:
+          type: string
+        locationId:
+          type: string
+        productId:
+          type: string
+        count:
+          type: integer
+          minimum: 1
+          maximum: 200
+        bundleId:
+          type: string
+
+    AssetCreateResult:
+      type: object
+      required: [assets]
+      properties:
+        assets:
+          type: array
+          items:
+            $ref: '#/components/schemas/Asset'
+
+    InventoryProduct:
+      type: object
+      required: [product, organizationId, organizationName, count, available, untagged]
+      properties:
+        product:
+          $ref: '#/components/schemas/Product'
+        organizationId:
+          type: string
+        organizationName:
+          type: string
+          description: The org's short name, else its name.
+        count:
+          type: integer
+          description: Active units after the filters.
+        available:
+          type: integer
+          description: Of those, how many are AVAILABLE.
+        untagged:
+          type: integer
+          description: Of those, how many carry no tag.

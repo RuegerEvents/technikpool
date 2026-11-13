@@ -19,6 +19,8 @@ import '../models/manufacturer_created.dart';
 import '../models/manufacturer_merge_request.dart';
 import '../models/manufacturer_merged.dart';
 import '../models/manufacturer_update_request.dart';
+import '../models/product.dart';
+import '../models/product_create_request.dart';
 import '../models/product_deleted.dart';
 import '../models/product_merge_request.dart';
 import '../models/product_merged.dart';
@@ -94,6 +96,21 @@ abstract class CatalogClient {
     @Query('tracked') bool? tracked,
     @Query('overdue') bool? overdue,
     @Query('cursor') String? cursor,
+  });
+
+  /// Add a product to the catalog.
+  ///
+  /// For registering units of something the catalog does not know yet. One.
+  /// product per name and manufacturer, ignoring case and blanks — a name.
+  /// that is taken is `409` with the existing product's name in the.
+  /// message. The manufacturer is found by name or made. Takes ADMIN or.
+  /// above of `organizationId`, the org the units are for; the product.
+  /// itself is shared by every org, like all of the catalog, and answers.
+  /// to its creator until someone holds units of it. Pictures and cable.
+  /// ends are edited on the web.
+  @POST('/api/v1/products')
+  Future<Product> createProduct({
+    @Body() required ProductCreateRequest body,
   });
 
   /// One product of the catalog

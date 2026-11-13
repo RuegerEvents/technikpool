@@ -11,28 +11,36 @@ import { appError } from '#lib/errors.js';
 
 type Db = Pick<Prisma.TransactionClient, 'product'>;
 
-export async function productNameTaken(
+/** The product already holding this name for this maker, if any. */
+export async function productNameHolder(
 	name: string,
 	manufacturerId: string | null,
 	{ exceptId, db = prisma }: { exceptId?: string; db?: Db } = {}
 ) {
-	const clash = await db.product.findFirst({
+	return db.product.findFirst({
 		where: {
 			manufacturerId,
 			name: { equals: name.trim(), mode: 'insensitive' },
 			...(exceptId ? { id: { not: exceptId } } : {})
 		},
-		select: { id: true }
+		select: { id: true, name: true }
 	});
-	return clash !== null;
 }
 
+export async function productNameTaken(
+	name: string,
+	manufacturerId: string | null,
+	options: { exceptId?: string; db?: Db } = {}
+) {
+	return (await productNameHolder(name, manufacturerId, options)) !== null;
+}
+
+/** Refuses a taken name, naming the product as it is spelt in the catalogue. */
 export async function assertProductNameFree(
 	name: string,
 	manufacturerId: string | null,
 	options: { exceptId?: string; db?: Db } = {}
 ) {
-	if (await productNameTaken(name, manufacturerId, options)) {
-		appError(409, 'product_exists', [name.trim()]);
-	}
+	const holder = await productNameHolder(name, manufacturerId, options);
+	if (holder) appError(409, 'product_exists', [holder.name]);
 }

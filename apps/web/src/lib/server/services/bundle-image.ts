@@ -50,7 +50,7 @@ function fingerprint(assets: ImageContents, featured: FeaturedProducts) {
 		])
 		.sort((a, b) => String(a).localeCompare(String(b)));
 	return createHash('sha256')
-		.update(JSON.stringify(['thumbnail-v11', contents]))
+		.update(JSON.stringify(['thumbnail-v12', contents]))
 		.digest('hex')
 		.slice(0, 20);
 }
@@ -72,7 +72,8 @@ function fingerprint(assets: ImageContents, featured: FeaturedProducts) {
 const DEVICE_PIXELS_PER_UNIT = 2;
 
 /**
- * The photo, scaled to the tile it is drawn into and re-encoded as WebP.
+ * The photo, scaled to the tile it is drawn into and re-encoded as WebP, with
+ * its own width and height so the caller can draw it at its aspect ratio.
  *
  * `box` is that tile in viewBox units. sharp's `fit: 'inside'` is the same rule
  * as the `preserveAspectRatio="xMidYMid meet"` the `<image>` is drawn with, so
@@ -80,14 +81,17 @@ const DEVICE_PIXELS_PER_UNIT = 2;
  * wide strip is sized by the strip's height, not its width. `withoutEnlargement`
  * keeps a photo that is already small from being upscaled into the payload.
  */
-async function embeddedImage(path: string | null, box: { width: number; height: number }) {
+async function embeddedImage(
+	path: string | null,
+	box: { width: number; height: number }
+): Promise<{ href: string; width: number; height: number } | null> {
 	if (!path || /^(https?:)?\/\//i.test(path) || path.startsWith('data:')) return null;
 	try {
 		const object = await getObject(path);
 		if (!object.contentType.startsWith('image/') || object.contentType === 'image/svg+xml')
 			return null;
 		try {
-			const thumbnail = await sharp(Buffer.from(object.bytes))
+			const { data, info } = await sharp(Buffer.from(object.bytes))
 				.resize({
 					width: Math.ceil(box.width * DEVICE_PIXELS_PER_UNIT),
 					height: Math.ceil(box.height * DEVICE_PIXELS_PER_UNIT),
@@ -95,18 +99,41 @@ async function embeddedImage(path: string | null, box: { width: number; height: 
 					withoutEnlargement: true
 				})
 				.webp({ quality: 82 })
-				.toBuffer();
-			return `data:image/webp;base64,${thumbnail.toString('base64')}`;
+				.toBuffer({ resolveWithObject: true });
+			return {
+				href: `data:image/webp;base64,${data.toString('base64')}`,
+				width: info.width,
+				height: info.height
+			};
 		} catch (cause) {
 			// A photo sharp cannot decode is still worth more at full size than
 			// replaced by the "no image" placeholder the caller falls back to.
 			console.warn(`Could not downscale product image "${path}"; embedding it as-is:`, cause);
-			return `data:${object.contentType};base64,${Buffer.from(object.bytes).toString('base64')}`;
+			// Its shape unknown, it fills the tile and leaves the fit to the viewer.
+			return {
+				href: `data:${object.contentType};base64,${Buffer.from(object.bytes).toString('base64')}`,
+				width: box.width,
+				height: box.height
+			};
 		}
 	} catch (error) {
 		console.warn(`Could not include product image "${path}" in bundle preview:`, error);
 		return null;
 	}
+}
+
+/** `size` scaled to the largest box of its own shape that fits in `box`. */
+function fitInside(
+	size: { width: number; height: number },
+	box: { width: number; height: number }
+) {
+	if (size.width <= 0 || size.height <= 0) return box;
+	const scale = Math.min(box.width / size.width, box.height / size.height);
+	return { width: size.width * scale, height: size.height * scale };
+}
+
+function round(value: number) {
+	return Math.round(value * 100) / 100;
 }
 
 /** How many tiles the bottom strip holds before the rest are summed into one. */
@@ -220,9 +247,16 @@ async function render(assets: ImageContents, featured: FeaturedProducts) {
 	const tiles = products
 		.map((product, index) => {
 			const { x, y, width, height } = rects[index];
-			const artwork = images[index]
-				? `<image href="${images[index]}" x="${x}" y="${y}" width="${width}" height="${height}" preserveAspectRatio="xMidYMid meet"/>`
-				: `<path d="M${x + width / 2 - 22} ${y + height / 2}h44m-22-22v44" stroke="#9ca3af" stroke-width="6" stroke-linecap="round"/>`;
+			const image = images[index];
+			// Drawn already fitted — its own aspect ratio, centred in the tile —
+			// rather than stretched to the tile and left to `preserveAspectRatio`,
+			// which some renderers ignore (the scanner's flutter_svg does, and
+			// squashed every photo into its strip).
+			const fit = image ? fitInside(image, { width, height }) : null;
+			const artwork =
+				image && fit
+					? `<image href="${image.href}" x="${round(x + (width - fit.width) / 2)}" y="${round(y + (height - fit.height) / 2)}" width="${round(fit.width)}" height="${round(fit.height)}" preserveAspectRatio="xMidYMid meet"/>`
+					: `<path d="M${x + width / 2 - 22} ${y + height / 2}h44m-22-22v44" stroke="#9ca3af" stroke-width="6" stroke-linecap="round"/>`;
 			const small = height < 100;
 			const badgeHeight = small ? 36 : 58;
 			const fontSize = small ? 22 : 36;
