@@ -2335,6 +2335,72 @@ abstract class S {
   /// **'Small · 80×55 mm'**
   String get caseLabelSmall;
 
+  /// No description provided for @caseLabelLayoutList.
+  ///
+  /// In en, this message translates to:
+  /// **'List'**
+  String get caseLabelLayoutList;
+
+  /// No description provided for @caseLabelLayoutGrid.
+  ///
+  /// In en, this message translates to:
+  /// **'Tiles with pictures'**
+  String get caseLabelLayoutGrid;
+
+  /// No description provided for @caseLabelContentsAuto.
+  ///
+  /// In en, this message translates to:
+  /// **'Contents if they fit'**
+  String get caseLabelContentsAuto;
+
+  /// No description provided for @caseLabelContentsShow.
+  ///
+  /// In en, this message translates to:
+  /// **'With contents'**
+  String get caseLabelContentsShow;
+
+  /// No description provided for @caseLabelContentsHide.
+  ///
+  /// In en, this message translates to:
+  /// **'Name only'**
+  String get caseLabelContentsHide;
+
+  /// No description provided for @caseLabelContentsDidNotFit.
+  ///
+  /// In en, this message translates to:
+  /// **'The contents do not fit on the small label, so it carries the name only.'**
+  String get caseLabelContentsDidNotFit;
+
+  /// No description provided for @caseLabelIncludeCase.
+  ///
+  /// In en, this message translates to:
+  /// **'List the case itself'**
+  String get caseLabelIncludeCase;
+
+  /// No description provided for @caseLabelIncludeCaseHint.
+  ///
+  /// In en, this message translates to:
+  /// **'The label sits on this case, so it is left out of the contents by default.'**
+  String get caseLabelIncludeCaseHint;
+
+  /// No description provided for @caseLabelPictures.
+  ///
+  /// In en, this message translates to:
+  /// **'Product pictures'**
+  String get caseLabelPictures;
+
+  /// No description provided for @caseLabelPicturesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Without them each tile shows its count large, and more fit on a label.'**
+  String get caseLabelPicturesHint;
+
+  /// No description provided for @caseLabelPreviewHintServer.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview rendered by your Technikpool server. The printer may draw fonts slightly differently.'**
+  String get caseLabelPreviewHintServer;
+
   /// No description provided for @caseLabelPrint.
   ///
   /// In en, this message translates to:

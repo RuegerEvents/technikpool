@@ -15,7 +15,7 @@ import { bundleByCode, bundleCaseOf, kitByTag, resolveScannedCode } from './asse
 import { bundleNumber } from '#lib/bundle-case.js';
 import { bundleTypeSpec } from './bundle-spec';
 import type { CaseCheckedData } from '#lib/types/asset-transaction.js';
-import { caseLabelLines, type CaseLabelData } from '#lib/server/case-label-zpl.js';
+import { caseLabelLines, kitLabelTitle, type CaseLabelData } from '#lib/server/case-label-zpl.js';
 import { kitAssetsWhere } from '#lib/bundle-nesting.js';
 import { applySwap, loadSwapRows, swapCheck, type SwapNotice } from './unit-swap';
 
@@ -164,7 +164,14 @@ const ITEM_SELECT = {
 	productId: true,
 	organizationId: true,
 	bundleId: true,
-	bundle: { select: { id: true, tag: true, template: { select: { name: true, caption: true } } } },
+	bundle: {
+		select: {
+			id: true,
+			tag: true,
+			imagePath: true,
+			template: { select: { name: true, caption: true } }
+		}
+	},
 	product: {
 		select: {
 			name: true,
@@ -210,8 +217,10 @@ async function loadCaseRows(ref: CaseRef) {
 		});
 		// Its number: its own tag, else its case's (#lib/bundle-case.ts), which
 		// the label prints as its code.
-		const number = bundleNumber(bundle, await bundleCaseOf(bundle.id));
+		const caseUnit = await bundleCaseOf(bundle.id);
+		const number = bundleNumber(bundle, caseUnit);
 		return {
+			caseUnitId: caseUnit?.id ?? null,
 			ref,
 			tag: number.code,
 			name: bundleLabel({ ...bundle, tag: number.code }),
@@ -237,6 +246,7 @@ async function loadCaseRows(ref: CaseRef) {
 	const label = makerAndName(head.product.manufacturer?.name, head.product.name);
 	return {
 		ref,
+		caseUnitId: null,
 		tag: null,
 		name: head.assetTag ? `${label} (${head.assetTag})` : label,
 		title: label,
@@ -535,22 +545,45 @@ export async function describeCode(userId: string, code: string): Promise<string
  * it (see `caseLabelLines`). Anyone
  * who sees the equipment may print one, as anyone may check the case.
  */
+/**
+ * What a case's label shows. A kit's own case (its container, see
+ * #lib/bundle-case.ts) is where the label is stuck, so it and whatever hangs
+ * off it are left off the contents unless `includeCase` — as on the kit's
+ * inventory list. `hasCase` says whether there is one to leave off.
+ */
 export async function caseLabelData(
 	userId: string,
-	ref: CaseRef
-): Promise<CaseLabelData & { logoPath: string | null }> {
+	ref: CaseRef,
+	{ includeCase = false }: { includeCase?: boolean } = {}
+): Promise<CaseLabelData & { logoPath: string | null; hasCase: boolean }> {
 	const { loaded, items } = await readCase(userId, ref);
 	const org = await prisma.organization.findUniqueOrThrow({
 		where: { id: loaded.organizationId },
 		select: { name: true, shortName: true, logoPath: true }
 	});
 
+	const caseUnitId = loaded.caseUnitId;
+	const kitImages = new Map(
+		loaded.rows.flatMap((row) => (row.bundle ? [[row.bundle.id, row.bundle.imagePath]] : []))
+	);
+	const listed = items
+		.filter(
+			(item) => includeCase || (item.assetId !== caseUnitId && item.accessoryOf !== caseUnitId)
+		)
+		.map((item) => ({
+			...item,
+			innerKit: item.innerKit
+				? { ...item.innerKit, imagePath: kitImages.get(item.innerKit.id) ?? null }
+				: null
+		}));
+
 	return {
-		title: loaded.title,
+		title: ref.kind === 'bundle' ? kitLabelTitle(loaded.title) : loaded.title,
 		caption: loaded.caption,
 		code: loaded.code,
 		orgName: org.shortName ?? org.name,
 		logoPath: org.logoPath,
-		lines: caseLabelLines(items)
+		hasCase: caseUnitId !== null,
+		lines: caseLabelLines(listed)
 	};
 }

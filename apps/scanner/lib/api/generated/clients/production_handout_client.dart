@@ -6,6 +6,8 @@ import 'package:dio/dio.dart';
 import 'package:retrofit/retrofit.dart';
 
 import '../models/case_label.dart';
+import '../models/case_label_contents.dart';
+import '../models/case_label_layout.dart';
 import '../models/case_label_size.dart';
 import '../models/count_result.dart';
 import '../models/handout_addition.dart';
@@ -113,11 +115,28 @@ abstract class ProductionHandoutClient {
   /// under it, a DataMatrix of the case's tag, and — on the large label —.
   /// what is in it now, a case or kit inside as one line. German, like the.
   /// PDFs.
+  ///
+  /// [layout] - The large label's contents as a `list` (in larger type when short), or.
+  /// as a `grid` of tiles, each with the product's picture dithered to.
+  /// black and white, its count and name. Ignored on the small label.
+  ///
+  ///
+  /// [contents] - Whether the small label carries the contents: `auto` where they fit at.
+  /// a size still read up close, `always` (cut short with a line for the.
+  /// rest), `never`. The large label always does.
+  /// `CaseLabel.contentsShown` says what came out.
+  ///
+  ///
+  /// [pictures] - Draw each tile's product picture (`layout=grid`). Without them a tile.
+  /// shows its count large over the name, and the tiles take less room.
   @GET('/api/v1/productions/{productionId}/packing/{caseAssetId}/label')
   Future<CaseLabel> getPackCaseLabel({
     @Path('productionId') required String productionId,
     @Path('caseAssetId') required String caseAssetId,
+    @Query('pictures') bool? pictures = true,
     @Query('size') CaseLabelSize? size,
+    @Query('layout') CaseLabelLayout? layout,
+    @Query('contents') CaseLabelContents? contents,
   });
 
   /// Find units the hand-out list does not have, by name.

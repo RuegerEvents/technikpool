@@ -16,6 +16,11 @@ export const variables = defineEnvVars({
 		description: 'Absolute address the object store is reachable at from a browser',
 		schema: v.optional(v.string(), '')
 	},
+	LABEL_RENDER_URL: {
+		description:
+			'A zebrash-api (deinticketshop/zebrash-api) that draws case label previews, e.g. http://zebrash:3009. Unset: the scanner asks labelary.com',
+		schema: v.optional(v.string())
+	},
 	CREDENTIALS_ENCRYPTION_KEY: {
 		description:
 			'Seals license credentials. Changing or losing it makes every stored key unreadable',

@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:dio/dio.dart';
@@ -21,7 +22,15 @@ class CaseLabelScreen extends ConsumerStatefulWidget {
     required CaseKind kind,
     required String id,
     required this.name,
-  }) : load = ((api, size) => api.caseCheck.getCaseLabel(kind: kind, id: id, size: size));
+  }) : load = ((api, size, options) => api.caseCheck.getCaseLabel(
+         kind: kind,
+         id: id,
+         size: size,
+         layout: options.layout,
+         contents: options.contents,
+         includeCase: options.includeCase,
+         pictures: options.pictures,
+       ));
 
   /// A pack case's label for one production: the production, the case's
   /// number and what is in it now — see `getPackCaseLabel`.
@@ -30,14 +39,22 @@ class CaseLabelScreen extends ConsumerStatefulWidget {
     required String productionId,
     required String caseAssetId,
     required this.name,
-  }) : load = ((api, size) => api.productionHandout.getPackCaseLabel(
+  }) : load = ((api, size, options) => api.productionHandout.getPackCaseLabel(
          productionId: productionId,
          caseAssetId: caseAssetId,
          size: size,
+         layout: options.layout,
+         contents: options.contents,
+         pictures: options.pictures,
        ));
 
-  /// Fetches the label of a size from the server.
-  final Future<CaseLabel> Function(ApiClient api, CaseLabelSize size) load;
+  /// Fetches the label of a size, laid out as [LabelOptions] say, from the server.
+  final Future<CaseLabel> Function(
+    ApiClient api,
+    CaseLabelSize size,
+    LabelOptions options,
+  )
+  load;
   final String name;
 
   @override
@@ -51,6 +68,11 @@ typedef _Preview = ({CaseLabel label, List<Uint8List>? pages, Object? error});
 
 class _CaseLabelScreenState extends ConsumerState<CaseLabelScreen> {
   CaseLabelSize? _size;
+  LabelOptions? _options;
+
+  /// Whether the kit has a case of its own to list or leave off. Kept from the
+  /// last answer, so the switch does not blink out while the next one loads.
+  bool _hasCase = false;
 
   /// The label of the size picked, once the server sent it — what is printed.
   CaseLabel? _label;
@@ -69,24 +91,31 @@ class _CaseLabelScreenState extends ConsumerState<CaseLabelScreen> {
   @override
   void initState() {
     super.initState();
-    ref.read(labelSizeProvider.future).then((size) {
-      if (mounted && _size == null) _load(size);
+    Future.wait([
+      ref.read(labelSizeProvider.future),
+      ref.read(labelOptionsProvider.future),
+    ]).then((loaded) {
+      if (!mounted || _size != null) return;
+      _size = loaded[0] as CaseLabelSize;
+      _options = loaded[1] as LabelOptions;
+      _load();
     });
   }
 
-  Future<void> _load(CaseLabelSize size) async {
+  Future<void> _load() async {
     final api = ref.read(apiClientProvider);
-    if (api == null) return;
+    final size = _size;
+    final options = _options;
+    if (api == null || size == null || options == null) return;
     final seq = ++_seq;
     setState(() {
-      _size = size;
       _label = null;
       _labelError = null;
       _rendering = true;
     });
     final CaseLabel label;
     try {
-      label = await widget.load(api, size);
+      label = await widget.load(api, size, options);
     } catch (error) {
       if (mounted && seq == _seq) {
         setState(() {
@@ -97,7 +126,10 @@ class _CaseLabelScreenState extends ConsumerState<CaseLabelScreen> {
       return;
     }
     if (!mounted || seq != _seq) return;
-    setState(() => _label = label);
+    setState(() {
+      _label = label;
+      _hasCase = label.hasCase;
+    });
 
     List<Uint8List>? pages;
     Object? previewError;
@@ -113,15 +145,29 @@ class _CaseLabelScreenState extends ConsumerState<CaseLabelScreen> {
     });
   }
 
-  /// One after the other: Labelary allows three requests a second.
-  static Future<List<Uint8List>> _renderAll(CaseLabel label) async => [
-    for (var i = 0; i < label.labelCount; i++) await labelaryPreview(label, index: i),
-  ];
+  /// The server's own pictures when it has a renderer (`LABEL_RENDER_URL`),
+  /// else Labelary's — one after the other, which allows three a second.
+  static Future<List<Uint8List>> _renderAll(CaseLabel label) async {
+    if (label.previews case final previews?) {
+      return [for (final p in previews) base64Decode(p)];
+    }
+    return [
+      for (var i = 0; i < label.labelCount; i++) await labelaryPreview(label, index: i),
+    ];
+  }
 
   void _pick(CaseLabelSize size) {
     if (size == _size) return;
     ref.read(labelSizeProvider.notifier).save(size);
-    _load(size);
+    _size = size;
+    _load();
+  }
+
+  void _setOptions(LabelOptions options) {
+    if (options == _options) return;
+    ref.read(labelOptionsProvider.notifier).save(options);
+    _options = options;
+    _load();
   }
 
   Future<void> _print(LabelPrinterConfig printer) async {
@@ -168,6 +214,10 @@ class _CaseLabelScreenState extends ConsumerState<CaseLabelScreen> {
               if (picked.isNotEmpty) _pick(picked.first);
             },
           ),
+          if (_options case final options?) ...[
+            const SizedBox(height: 8),
+            ..._optionControls(l10n, options, label, muted),
+          ],
           const SizedBox(height: 16),
           if (_labelError case final error?)
             Text(
@@ -177,7 +227,12 @@ class _CaseLabelScreenState extends ConsumerState<CaseLabelScreen> {
           else ...[
             _PreviewFrame(shown: _shown, loading: _rendering),
             const SizedBox(height: 6),
-            Text(l10n.caseLabelPreviewHint, style: TextStyle(color: muted, fontSize: 12)),
+            Text(
+              label?.previews != null || _shown?.label.previews != null
+                  ? l10n.caseLabelPreviewHintServer
+                  : l10n.caseLabelPreviewHint,
+              style: TextStyle(color: muted, fontSize: 12),
+            ),
             const SizedBox(height: 16),
             if (printer == null)
               FilledButton.icon(
@@ -209,6 +264,101 @@ class _CaseLabelScreenState extends ConsumerState<CaseLabelScreen> {
       ),
     );
   }
+}
+
+extension on _CaseLabelScreenState {
+  /// What else there is to choose for the size picked: list or tiles on the
+  /// large label, whether the small one carries the contents, and — for a kit
+  /// with a case of its own — whether that case is listed.
+  List<Widget> _optionControls(
+    S l10n,
+    LabelOptions options,
+    CaseLabel? label,
+    Color muted,
+  ) => [
+    if (_size == CaseLabelSize.large)
+      SegmentedButton<CaseLabelLayout>(
+        segments: [
+          ButtonSegment(
+            value: CaseLabelLayout.list,
+            label: Text(l10n.caseLabelLayoutList),
+          ),
+          ButtonSegment(
+            value: CaseLabelLayout.grid,
+            label: Text(l10n.caseLabelLayoutGrid),
+          ),
+        ],
+        selected: {options.layout},
+        onSelectionChanged: (picked) => _setOptions((
+          layout: picked.first,
+          contents: options.contents,
+          includeCase: options.includeCase,
+          pictures: options.pictures,
+        )),
+      )
+    else ...[
+      SegmentedButton<CaseLabelContents>(
+        showSelectedIcon: false,
+        segments: [
+          ButtonSegment(
+            value: CaseLabelContents.auto,
+            label: Text(l10n.caseLabelContentsAuto),
+          ),
+          ButtonSegment(
+            value: CaseLabelContents.always,
+            label: Text(l10n.caseLabelContentsShow),
+          ),
+          ButtonSegment(
+            value: CaseLabelContents.never,
+            label: Text(l10n.caseLabelContentsHide),
+          ),
+        ],
+        selected: {options.contents},
+        onSelectionChanged: (picked) => _setOptions((
+          layout: options.layout,
+          contents: picked.first,
+          includeCase: options.includeCase,
+          pictures: options.pictures,
+        )),
+      ),
+      if (options.contents == CaseLabelContents.auto &&
+          label != null &&
+          !label.contentsShown)
+        Padding(
+          padding: const EdgeInsets.only(top: 6),
+          child: Text(
+            l10n.caseLabelContentsDidNotFit,
+            style: TextStyle(color: muted, fontSize: 12),
+          ),
+        ),
+    ],
+    if (_size == CaseLabelSize.large && options.layout == CaseLabelLayout.grid)
+      SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        title: Text(l10n.caseLabelPictures),
+        subtitle: Text(l10n.caseLabelPicturesHint),
+        value: options.pictures,
+        onChanged: (value) => _setOptions((
+          layout: options.layout,
+          contents: options.contents,
+          includeCase: options.includeCase,
+          pictures: value,
+        )),
+      ),
+    if (_hasCase)
+      SwitchListTile(
+        contentPadding: EdgeInsets.zero,
+        title: Text(l10n.caseLabelIncludeCase),
+        subtitle: Text(l10n.caseLabelIncludeCaseHint),
+        value: options.includeCase,
+        onChanged: (value) => _setOptions((
+          layout: options.layout,
+          contents: options.contents,
+          includeCase: value,
+          pictures: options.pictures,
+        )),
+      ),
+  ];
 }
 
 /// Short enough for the frame: Labelary's status, or what kept it from answering.

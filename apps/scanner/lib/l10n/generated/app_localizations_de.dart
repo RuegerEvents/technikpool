@@ -1367,6 +1367,43 @@ class SDe extends S {
   String get caseLabelSmall => 'Klein · 80×55 mm';
 
   @override
+  String get caseLabelLayoutList => 'Liste';
+
+  @override
+  String get caseLabelLayoutGrid => 'Kacheln mit Bildern';
+
+  @override
+  String get caseLabelContentsAuto => 'Inhalt, wenn er passt';
+
+  @override
+  String get caseLabelContentsShow => 'Mit Inhalt';
+
+  @override
+  String get caseLabelContentsHide => 'Nur Name';
+
+  @override
+  String get caseLabelContentsDidNotFit =>
+      'Der Inhalt passt nicht aufs kleine Etikett, darum steht nur der Name darauf.';
+
+  @override
+  String get caseLabelIncludeCase => 'Behälter mit aufführen';
+
+  @override
+  String get caseLabelIncludeCaseHint =>
+      'Das Etikett klebt auf diesem Behälter, darum fehlt er standardmäßig im Inhalt.';
+
+  @override
+  String get caseLabelPictures => 'Produktbilder';
+
+  @override
+  String get caseLabelPicturesHint =>
+      'Ohne Bilder zeigt jede Kachel groß die Anzahl, und es passen mehr auf ein Etikett.';
+
+  @override
+  String get caseLabelPreviewHintServer =>
+      'Vorschau von deinem Technikpool-Server gerendert. Der Drucker zeichnet Schriften womöglich etwas anders.';
+
+  @override
   String get caseLabelPrint => 'Drucken';
 
   @override

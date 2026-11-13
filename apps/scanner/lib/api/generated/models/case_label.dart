@@ -11,6 +11,8 @@ part 'case_label.g.dart';
 @JsonSerializable()
 class CaseLabel {
   const CaseLabel({
+    required this.contentsShown,
+    required this.hasCase,
     required this.size,
     required this.zpl,
     required this.labelCount,
@@ -18,10 +20,27 @@ class CaseLabel {
     required this.heightMm,
     required this.dpmm,
     required this.previewUrl,
+    this.previews,
   });
   
   factory CaseLabel.fromJson(Map<String, Object?> json) => _$CaseLabelFromJson(json);
   
+  /// Whether the contents are on the label. Always on a large one with.
+  /// contents; on a small one with `contents=auto` only where they fit.
+  ///
+  final bool contentsShown;
+
+  /// One PNG per label (base64), drawn by the server's own renderer.
+  /// (`LABEL_RENDER_URL`, a zebrash-api). Absent when it has none or it.
+  /// failed; the client then renders `zpl` with Labelary as before.
+  ///
+  final List<String>? previews;
+
+  /// The kit has a case of its own (a container unit) that `includeCase`.
+  /// lists or leaves off. False for a unit with accessories and for a.
+  /// pack case's label.
+  ///
+  final bool hasCase;
   final CaseLabelSize size;
 
   /// One `^XA` … `^XZ` per label, UTF-8 (`^CI28`). A contents list too.

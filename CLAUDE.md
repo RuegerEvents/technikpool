@@ -440,9 +440,19 @@ checked out (even unbooked — the ordinary `performScan` path books own-side un
 ## Case labels (Kistenetikett)
 
 A kit, or a unit with its accessories (the same "case" as Kiste checken), gets a label for its
-outside: the name centred on top as large as it fits (`fitTitle`, two lines broken evenly), the contents
-on the large label, and a footer with the logo (else the org name) left, centred on the band, and
-the DataMatrix right with its tag turned upright beside it. Identical units are one line;
+outside: the name centred on top as large as it fits (`fitTitle`: two lines, a long word broken
+by German syllables — `hyphenate.ts`, the `hyphen` package — where that sets it clearly larger
+or evens the lines), the contents, and a footer with the logo (else the org name) left, centred
+on the band, and the DataMatrix right with its tag turned upright beside it. A kit's own case
+(its container) is left off the contents unless `includeCase`, as on the inventory list. The
+large label sets a short list in larger type (`largestList`, never at the cost of a cut name),
+or with `layout=grid` draws tiles with each product's picture, dithered to 1 bit in
+`case-label-logo.ts` (`labelPictures`, through the PDFs' thumbnail cache) at the size
+`gridPictureBox` says. The small label carries the contents only where they fit
+(`contents=auto`; `always` cuts them short with a "weitere Positionen" line, `never` prints the
+name alone), and `CaseLabel.contentsShown` tells the scanner which it got. Graphics go out in
+ZPL's ASCII compression, which keeps a photo's ZPL small enough for the Labelary URL. The
+scanner keeps the options per device (`labelOptionsProvider`). Identical units are one line;
 accessories under them read "je 1× … insg. 4×" where every unit carries the same
 (`caseLabelLines`). A list too long for one label continues on the next (one `^XA…^XZ` each,
 `labelCount` in the response): the title only on the first, the footer only on the last, and
@@ -458,7 +468,12 @@ reached. `GET /api/v1/case-checks/{kind}/{id}/label` hands over the ZPL, and the
 to the printer's raw port 9100 (`lib/print/label_printer.dart`, printer address under
 Settings, per device). The preview is Labelary: the app posts the ZPL to `api.labelary.com`
 for a PNG, and `previewUrl` opens `labelary.com/viewer.html` with the ZPL in the query string.
-Both send the label's text to Labelary, which is why the screen says so. Text widths are
+Both send the label's text to Labelary, which is why the screen says so — unless the server
+has **`LABEL_RENDER_URL`** (a zebrash-api, `deinticketshop/zebrash-api`, internal network only):
+then `CaseLabel.previews` carries one PNG per label from it and the app shows those instead
+(`renderPreviews` in `case-label-request.ts`). Its third path segment is dots per millimetre,
+not dpi, and the image needs `user: root`. `pictures=false` draws tiles with their counts
+instead of pictures. Text widths are
 estimated from per-glyph widths measured off Labelary's ^A0 (`GLYPH`, plus 8% `SLACK`), since
 nothing on the printer reports them; long contents names wrap to a second row rather than being cut. Label text is German, like
 the PDFs.

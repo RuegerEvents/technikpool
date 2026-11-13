@@ -27,6 +27,10 @@ const _kScanTones = 'scan_tones';
 const _kInspectorName = 'inspector_name';
 const _kLabelPrinter = 'label_printer';
 const _kLabelSize = 'label_size';
+const _kLabelLayout = 'label_layout';
+const _kLabelContents = 'label_contents';
+const _kLabelIncludeCase = 'label_include_case';
+const _kLabelPictures = 'label_pictures';
 const _kInventoryGrouping = 'inventory_grouping';
 
 final storageProvider = Provider((_) => const FlutterSecureStorage());
@@ -296,6 +300,52 @@ class LabelSizeNotifier extends AsyncNotifier<CaseLabelSize> {
 
 final labelSizeProvider = AsyncNotifierProvider<LabelSizeNotifier, CaseLabelSize>(
   LabelSizeNotifier.new,
+);
+
+/// How this device prints a case's label besides its size: the large label's
+/// contents as a list or tiles, whether the small one carries them, and
+/// whether a kit's own case is listed. Per device, like the roll that is in
+/// its printer.
+typedef LabelOptions = ({
+  CaseLabelLayout layout,
+  CaseLabelContents contents,
+  bool includeCase,
+  bool pictures,
+});
+
+class LabelOptionsNotifier extends AsyncNotifier<LabelOptions> {
+  FlutterSecureStorage get _storage => ref.read(storageProvider);
+
+  @override
+  Future<LabelOptions> build() async {
+    final layout = CaseLabelLayout.fromJson(
+      await _storage.read(key: _kLabelLayout) ?? '',
+    );
+    final contents = CaseLabelContents.fromJson(
+      await _storage.read(key: _kLabelContents) ?? '',
+    );
+    return (
+      layout: layout == CaseLabelLayout.$unknown ? CaseLabelLayout.list : layout,
+      contents: contents == CaseLabelContents.$unknown
+          ? CaseLabelContents.auto
+          : contents,
+      includeCase: await _storage.read(key: _kLabelIncludeCase) == 'true',
+      pictures: await _storage.read(key: _kLabelPictures) != 'false',
+    );
+  }
+
+  Future<void> save(LabelOptions options) async {
+    if (state.value == options) return;
+    state = AsyncData(options);
+    await _storage.write(key: _kLabelLayout, value: options.layout.toJson());
+    await _storage.write(key: _kLabelContents, value: options.contents.toJson());
+    await _storage.write(key: _kLabelIncludeCase, value: '${options.includeCase}');
+    await _storage.write(key: _kLabelPictures, value: '${options.pictures}');
+  }
+}
+
+final labelOptionsProvider = AsyncNotifierProvider<LabelOptionsNotifier, LabelOptions>(
+  LabelOptionsNotifier.new,
 );
 
 /// The language the app is pinned to, or null to follow the device.

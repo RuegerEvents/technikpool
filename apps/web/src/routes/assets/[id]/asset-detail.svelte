@@ -326,6 +326,8 @@
 		nextInspectionDue: Date | null;
 	};
 	let accessoryGroups = $derived.by(() => {
+		// Built afresh on every run and never mutated afterwards: nothing to make reactive.
+		// eslint-disable-next-line svelte/prefer-svelte-reactivity
 		const groups = new Map<
 			string,
 			{ productId: string; lines: AccessoryLine[]; members: typeof asset.accessories }

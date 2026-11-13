@@ -12,6 +12,8 @@ import '../models/case_check_scan_request.dart';
 import '../models/case_check_scan_result.dart';
 import '../models/case_kind.dart';
 import '../models/case_label.dart';
+import '../models/case_label_contents.dart';
+import '../models/case_label_layout.dart';
 import '../models/case_label_size.dart';
 
 part 'case_check_client.g.dart';
@@ -70,15 +72,41 @@ abstract class CaseCheckClient {
   /// client sends `zpl` unchanged to the printer's raw port, usually 9100;.
   /// the server never talks to a printer.
   ///
-  /// `large` is a 4×6″ shipping label, `small` an 80×55 mm one with no.
-  /// contents list. A kit's code is its own tag, else the tag of its case.
-  /// (the container unit in it, `BundleDetail.caseUnitId`); a case with.
-  /// neither prints without a code. Anyone who.
-  /// sees the equipment may print one.
+  /// `large` is a 4×6″ shipping label, `small` an 80×55 mm one that carries.
+  /// the contents only where they fit (`contents`). A short list on the.
+  /// large label is set in larger type; `layout=grid` draws it as tiles with.
+  /// each product's picture instead. A kit's own case (its container unit).
+  /// is left off the contents unless `includeCase`. A kit's code is its own.
+  /// tag, else the tag of its case (the container unit in it,.
+  /// `BundleDetail.caseUnitId`); a case with neither prints without a code.
+  /// Anyone who sees the equipment may print one.
+  ///
+  /// [layout] - The large label's contents as a `list` (in larger type when short), or.
+  /// as a `grid` of tiles, each with the product's picture dithered to.
+  /// black and white, its count and name. Ignored on the small label.
+  ///
+  ///
+  /// [contents] - Whether the small label carries the contents: `auto` where they fit at.
+  /// a size still read up close, `always` (cut short with a line for the.
+  /// rest), `never`. The large label always does.
+  /// `CaseLabel.contentsShown` says what came out.
+  ///
+  ///
+  /// [pictures] - Draw each tile's product picture (`layout=grid`). Without them a tile.
+  /// shows its count large over the name, and the tiles take less room.
+  ///
+  ///
+  /// [includeCase] - List a kit's own case (its container unit) and what hangs off it.
+  /// among the contents. Off by default: the label is stuck on that case.
+  /// Ignored where there is none (`CaseLabel.hasCase`).
   @GET('/api/v1/case-checks/{kind}/{id}/label')
   Future<CaseLabel> getCaseLabel({
     @Path('kind') required CaseKind kind,
     @Path('id') required String id,
+    @Query('pictures') bool? pictures = true,
+    @Query('includeCase') bool? includeCase = false,
     @Query('size') CaseLabelSize? size,
+    @Query('layout') CaseLabelLayout? layout,
+    @Query('contents') CaseLabelContents? contents,
   });
 }

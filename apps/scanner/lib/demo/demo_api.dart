@@ -1668,6 +1668,10 @@ class DemoBackend {
         widthMm: width,
         heightMm: height,
         dpmm: 8,
+        // The demo's label is a sketch: contents on the large one only, and
+        // no kit of its has a case of its own to leave off.
+        contentsShown: !small,
+        hasCase: false,
         previewUrl: Uri.https('labelary.com', '/viewer.html', {
           'density': '8',
           'width': '$width',
@@ -1809,6 +1813,10 @@ class DemoBackend {
         widthMm: width,
         heightMm: height,
         dpmm: 8,
+        // The demo's label is a sketch: contents on the large one only, and
+        // no kit of its has a case of its own to leave off.
+        contentsShown: !small,
+        hasCase: false,
         previewUrl: Uri.https('labelary.com', '/viewer.html', {
           'density': '8',
           'width': '$width',

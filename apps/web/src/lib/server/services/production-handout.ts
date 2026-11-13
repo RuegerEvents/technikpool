@@ -870,14 +870,24 @@ export async function packCaseLabelData(
 							select: {
 								id: true,
 								parentBundleId: true,
+								imagePath: true,
 								template: { select: { name: true, caption: true } },
 								parentBundle: {
-									select: { id: true, template: { select: { name: true, caption: true } } }
+									select: {
+										id: true,
+										imagePath: true,
+										template: { select: { name: true, caption: true } }
+									}
 								}
 							}
 						},
 						product: {
-							select: { name: true, isContainer: true, manufacturer: { select: { name: true } } }
+							select: {
+								name: true,
+								isContainer: true,
+								imagePath: true,
+								manufacturer: { select: { name: true } }
+							}
 						}
 					}
 				}
@@ -897,12 +907,17 @@ export async function packCaseLabelData(
 			return {
 				assetId: c.assetId,
 				name: makerAndName(c.asset.product.manufacturer?.name, c.asset.product.name),
+				imagePath: c.asset.product.imagePath,
 				accessoryOf:
 					c.asset.parentAssetId && inside.has(c.asset.parentAssetId) ? c.asset.parentAssetId : null,
 				innerKit: inner?.isPackCase
 					? { id: c.assetId, name: `Kiste ${caseTitle(inner.ref)}` }
 					: kit
-						? { id: kit.id, name: withCaption(kit.template.name, kit.template.caption) }
+						? {
+								id: kit.id,
+								name: withCaption(kit.template.name, kit.template.caption),
+								imagePath: kit.imagePath
+							}
 						: null
 			};
 		})

@@ -1362,6 +1362,43 @@ class SEn extends S {
   String get caseLabelSmall => 'Small · 80×55 mm';
 
   @override
+  String get caseLabelLayoutList => 'List';
+
+  @override
+  String get caseLabelLayoutGrid => 'Tiles with pictures';
+
+  @override
+  String get caseLabelContentsAuto => 'Contents if they fit';
+
+  @override
+  String get caseLabelContentsShow => 'With contents';
+
+  @override
+  String get caseLabelContentsHide => 'Name only';
+
+  @override
+  String get caseLabelContentsDidNotFit =>
+      'The contents do not fit on the small label, so it carries the name only.';
+
+  @override
+  String get caseLabelIncludeCase => 'List the case itself';
+
+  @override
+  String get caseLabelIncludeCaseHint =>
+      'The label sits on this case, so it is left out of the contents by default.';
+
+  @override
+  String get caseLabelPictures => 'Product pictures';
+
+  @override
+  String get caseLabelPicturesHint =>
+      'Without them each tile shows its count large, and more fit on a label.';
+
+  @override
+  String get caseLabelPreviewHintServer =>
+      'Preview rendered by your Technikpool server. The printer may draw fonts slightly differently.';
+
+  @override
   String get caseLabelPrint => 'Print';
 
   @override
