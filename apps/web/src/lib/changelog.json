@@ -1,5 +1,33 @@
 [
 	{
+		"version": "0.37.0",
+		"date": "2026-11-13",
+		"en": [
+			"Inspection types: besides electrical testing (DGUV V3) there are lifting equipment, visual checks and calibration, each with its own interval per category, product, organization or unit. Qualifications in the member list decide who may record one; an outside firm can be entered too. Taking a unit back counts as a visual check, and a defect can be reported right there.",
+			"Kits inside kits: a bundle can sit inside another, e.g. the PowerCon set in the FOH case. It is booked with the case but can still be lent on its own. Delivery note, packing list and the case check list it expanded.",
+			"Containers: a case product can be marked as a container. When the case sits in a bundle, its asset tag is the kit's number, and scanning it means the whole kit everywhere.",
+			"Packing into pack cases: on the hand-out list, scan a case, then everything that goes in, cases inside cases and cables by count included. Delivery note and packing list group by case, and on take-back scanning a case opens a checklist of its contents.",
+			"Swapping when handing out: scanning a unit of the same product instead of the booked one (another DMX ring's adapter, another node's power supply) makes the two swap places. Another kit's sticker of the same type takes over the whole booking. Products can be marked as not interchangeable.",
+			"Inventory list as a PDF for the case lid: landscape on A4 or A5, as a grid of big pictures or a list, with accessories and inner kits on tiles of their own.",
+			"New page “By location”: every location a column with its kits and units, moved by dragging, to other organizations' locations as well.",
+			"Search forgives more everywhere: words in any order, “1m” as “1 m”, “0,5” as “0.5”, small typos, and the connectors after the arrow count.",
+			"Bundles: the add dialog shows accessories and finds units by their accessories' tags, lists your own organization first and can take units over from other kits. “Create bundle” offers the catalogue like editing does, and new cables can go straight into a bundle, a new one too.",
+			"Lending: a lender can pack more of their own units while packing, without a request and by name. A lender on the crew plans their own units on the production themselves."
+		],
+		"de": [
+			"Prüfarten: Neben der Elektroprüfung (DGUV V3) gibt es Lastaufnahme, Sichtprüfung und Kalibrierung, jede mit eigenem Intervall pro Kategorie, Produkt, Organisation oder Gerät. Wer eine Prüfung eintragen darf, regeln Befähigungen in der Mitgliederliste; eine externe Firma lässt sich ebenso eintragen. Bei der Rücknahme gilt ein Gerät als sichtgeprüft, ein Defekt lässt sich direkt melden.",
+			"Kits in Kits: Ein Bundle kann in einem anderen stecken, z. B. das PowerCon-Set im FOH Case. Es wird mit dem Case gebucht, lässt sich aber auch allein verleihen. Lieferschein, Packliste und Kiste checken zeigen es aufgeklappt.",
+			"Behälter: Ein Kistenprodukt lässt sich als „Behälter“ markieren. Steckt die Kiste in einem Bundle, ist ihre Inventarnummer die Nummer des Kits – ihr Scan meint überall das ganze Kit.",
+			"Packen in Pack-Kisten: Auf der Ausgabe-Liste eine Kiste scannen, dann alles, was hineinkommt – auch Kisten in Kisten und Kabel per Anzahl. Lieferschein und Packliste gruppieren nach Kiste, bei der Rücknahme öffnet der Scan der Kiste eine Checkliste ihres Inhalts.",
+			"Austauschen beim Ausgeben: Wird statt des gebuchten Geräts ein gleiches gescannt (der Adapter eines anderen DMX-Rings, das Netzteil eines anderen Nodes), tauschen die beiden ihren Platz. Das Etikett eines anderen Kits desselben Typs übernimmt die ganze Buchung. Produkte lassen sich als „nicht austauschbar“ markieren.",
+			"Inventarliste als PDF für den Kistendeckel: Querformat in A4 oder A5, als Raster mit großen Bildern oder als Liste, Zubehör und innere Kits mit eigenen Karten.",
+			"Neue Seite „Nach Lagerort“: jeder Lagerort eine Spalte mit seinen Kits und Geräten, per Ziehen umlagern – auch an Lagerorte anderer Organisationen.",
+			"Die Suche ist überall nachsichtiger: Wörter in beliebiger Reihenfolge, „1m“ wie „1 m“, „0,5“ wie „0.5“, kleine Tippfehler und die Stecker hinter dem Pfeil zählen mit.",
+			"Bundles: Der Hinzufügen-Dialog zeigt Zubehör und findet Geräte über die Nummer ihres Zubehörs, zeigt zuerst die eigene Organisation und kann Geräte aus anderen Kits herüberholen. „Bundle erstellen“ bietet den Katalog wie das Bearbeiten, und neue Kabel landen auf Wunsch direkt in einem (auch neuen) Bundle.",
+			"Verleihen: Wer verleiht, kann beim Packen eigene Geräte dazupacken, auch ohne Anfrage und per Namenssuche. Wer als Verleiher in der Crew steht, plant die eigenen Geräte der Produktion selbst."
+		]
+	},
+	{
 		"version": "0.36.0",
 		"date": "2026-11-10",
 		"en": [

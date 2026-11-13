@@ -1,5 +1,23 @@
 [
   {
+    "version": "1.11.0",
+    "date": "2026-11-13",
+    "en": [
+      "Print case labels: for a kit or a unit with accessories, a label with name, contents, logo and a scannable code on a ZPL label printer (e.g. Honeywell PC42E-T) on the warehouse network. Printer address under Settings.",
+      "Kits in the app: view them in Inventory and edit with the pencil – scan units in (whole kits too), take them out, add loose cables by count. New kits and new devices (with a new product as well, with or without a label) from “+”.",
+      "Inventory like the web: Bundle View, All Products, All Devices, with a forgiving search. Lookup now lives in Inventory: a scan or a typed number opens the unit or kit.",
+      "Hand-out list: hand out by name and count, pack into pack cases and print per-production case labels. When a scanned unit or kit swaps places with the booked one, the scan says so.",
+      "Safe from slips: what you look at opens to look at – changes go through the pencil or the ⋮ menu."
+    ],
+    "de": [
+      "Kistenetiketten drucken: Für ein Kit oder ein Gerät mit Zubehör ein Etikett mit Name, Inhalt, Logo und scannbarem Code auf einen ZPL-Etikettendrucker (z. B. Honeywell PC42E-T) im Lagernetz. Druckeradresse unter Einstellungen.",
+      "Bundles in der App: Im Bestand ansehen und über den Stift bearbeiten – Geräte hineinscannen (auch ganze Kits), herausnehmen, lose Kabel per Anzahl hinzufügen. Neue Bundles und neue Geräte (auch mit neuem Produkt, mit oder ohne Etikett) über „+“.",
+      "Bestand wie im Web: Bundle-Ansicht, Alle Produkte, Alle Geräte, mit nachsichtiger Suche. „Nachschlagen“ steckt jetzt im Bestand: ein Scan oder eine eingetippte Nummer öffnet das Gerät oder Kit.",
+      "Ausgabe-Liste: Geräte per Name und Anzahl ausgeben, in Pack-Kisten packen und Kisten-Etiketten pro Produktion drucken. Tauscht ein gescanntes Gerät oder Kit den Platz mit dem gebuchten, sagt es der Scan.",
+      "Geschützt vor Versehen: Was man ansieht, öffnet nur zum Ansehen – Ändern geht über den Stift oder das ⋮-Menü."
+    ]
+  },
+  {
     "version": "1.10.0",
     "date": "2026-10-17",
     "en": [
