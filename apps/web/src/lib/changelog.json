@@ -1,5 +1,23 @@
 [
 	{
+		"version": "0.40.0",
+		"date": "2026-11-15",
+		"en": [
+			"Case labels print at the right size on a 300 dpi printer: the scanner app now has a resolution setting next to the printer's address (203 or 300 dpi), and the server draws the label for it. Older app versions still get 203 dpi.",
+			"The label rolls match what is actually loaded: the large label is 100×150 mm (was 4×6″) and the small one 76×50 mm (was 80×55 mm).",
+			"Typed arrows in product names (\"Schuko -> PowerCon\") print as \"auf\" on labels, like the arrow character already did.",
+			"Inventory lists, case labels and pack case labels list their contents by category — all the lighting, then the power, then the rigging — with each unit's accessories still right under it.",
+			"By location: a kit's card has a button that opens the kit, besides expanding it."
+		],
+		"de": [
+			"Kistenetiketten kommen auf einem 300-dpi-Drucker in der richtigen Größe: Die Scanner-App hat neben der Druckeradresse jetzt eine Auflösung (203 oder 300 dpi), und der Server zeichnet das Etikett dafür. Ältere App-Versionen bekommen weiter 203 dpi.",
+			"Die Etikettenrollen stimmen mit dem überein, was eingelegt ist: Das große Etikett ist 100×150 mm (bisher 4×6″), das kleine 76×50 mm (bisher 80×55 mm).",
+			"Getippte Pfeile in Produktnamen („Schuko -> PowerCon“) werden auf Etiketten als „auf“ gedruckt, wie es das Pfeilzeichen schon wurde.",
+			"Inventarliste, Kistenetiketten und Pack-Kisten-Etiketten führen den Inhalt nach Kategorie — erst alles Licht, dann Strom, dann Rigging — und das Zubehör eines Geräts steht weiter direkt darunter.",
+			"Nach Lagerort: Die Karte eines Bundles hat einen Knopf, der das Bundle öffnet, statt es nur aufzuklappen."
+		]
+	},
+	{
 		"version": "0.39.0",
 		"date": "2026-11-13",
 		"en": [
