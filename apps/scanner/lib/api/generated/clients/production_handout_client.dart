@@ -125,10 +125,17 @@ abstract class ProductionHandoutClient {
   /// a size still read up close, `always` (cut short with a line for the.
   /// rest), `never`. The large label always does.
   /// `CaseLabel.contentsShown` says what came out.
+  ///
+  ///
+  /// [dpmm] - The printer's resolution in dots per millimetre: `8` (203 dpi, the.
+  /// default, which is what clients that do not send it get) or `12`.
+  /// (300 dpi). The label is the same either way, drawn with that many.
+  /// dots; the logo and pictures are rastered for it.
   @GET('/api/v1/productions/{productionId}/packing/{caseAssetId}/label')
   Future<CaseLabel> getPackCaseLabel({
     @Path('productionId') required String productionId,
     @Path('caseAssetId') required String caseAssetId,
+    @Query('dpmm') int? dpmm = 8,
     @Query('size') CaseLabelSize? size,
     @Query('layout') CaseLabelLayout? layout,
     @Query('contents') CaseLabelContents? contents,

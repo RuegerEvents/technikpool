@@ -521,8 +521,8 @@ void main() {
         size: CaseLabelSize.small,
       );
       expect(small.size, CaseLabelSize.small);
-      expect(small.widthMm, 80);
-      expect(small.zpl, contains('^PW640'));
+      expect(small.widthMm, 76);
+      expect(small.zpl, contains('^PW608'));
     });
   });
 

@@ -1361,10 +1361,10 @@ class SDe extends S {
   String get caseLabel => 'Etikett drucken';
 
   @override
-  String get caseLabelLarge => 'Groß · 4×6″';
+  String get caseLabelLarge => 'Groß · 100×150 mm';
 
   @override
-  String get caseLabelSmall => 'Klein · 80×55 mm';
+  String get caseLabelSmall => 'Klein · 76×50 mm';
 
   @override
   String get caseLabelLayoutList => 'Liste';
@@ -1431,6 +1431,20 @@ class SDe extends S {
 
   @override
   String get labelPrinterInvalid => 'Keine gültige Adresse';
+
+  @override
+  String get labelPrinterResolution => 'Auflösung';
+
+  @override
+  String get labelPrinterCalibrate => 'Rolle einmessen';
+
+  @override
+  String get labelPrinterCalibrateHint =>
+      'Nach dem Wechsel auf eine Rolle anderer Größe: Der Drucker misst die Etiketten aus und schiebt dabei ein paar leere vor. Sonst laufen nach jedem Druck leere Etiketten mit durch.';
+
+  @override
+  String get labelPrinterCalibrating =>
+      'Rolle wird eingemessen – ein paar leere Etiketten laufen durch';
 
   @override
   String get labelPrinterTest => 'Testdruck';

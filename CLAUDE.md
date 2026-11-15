@@ -457,9 +457,12 @@ accessories under them read "je 1× … insg. 4×" where every unit carries the 
 (`caseLabelLines`). A list too long for one label continues on the next (one `^XA…^XZ` each,
 `labelCount` in the response): the title only on the first, the footer only on the last, and
 never tearing a unit from its accessories
-when the block fits on a label of its own. Rendered as **ZPL** for a 203 dpi printer (a Honeywell PC42E-T in
-its ZPL emulation, ZSim) by `src/lib/server/case-label-zpl.ts`; the logo becomes a 1-bit `^GFA`
-in `case-label-logo.ts`. Two rolls: `large` 4×6″ and `small` 80×55 mm (`LABEL_SIZES`). A kit's code is its own tag, else its case's
+when the block fits on a label of its own. Rendered as **ZPL** (a Honeywell PC42E-T in its ZPL emulation, ZSim — ours has a 300 dpi
+head) by `src/lib/server/case-label-zpl.ts`. The layout is worked out in 203 dpi dots and every
+number is scaled as the ZPL is written (`scaled`), so `?dpmm=12` draws the same label for 300 dpi;
+logo and pictures are rastered at the printer's dots (`printerBox`). The scanner keeps the
+resolution with the printer's address (Settings, default 300 dpi); the logo becomes a 1-bit `^GFA`
+in `case-label-logo.ts`. Two rolls: `large` 100×150 mm and `small` 76×50 mm (`LABEL_SIZES`). A kit's code is its own tag, else its case's
 (the container in it, `bundleNumber`); a pack case's per-production label goes through the same
 renderer (see "Containers and pack cases").
 

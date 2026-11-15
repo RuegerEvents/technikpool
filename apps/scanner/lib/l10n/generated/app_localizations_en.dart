@@ -1356,10 +1356,10 @@ class SEn extends S {
   String get caseLabel => 'Print label';
 
   @override
-  String get caseLabelLarge => 'Large · 4×6″';
+  String get caseLabelLarge => 'Large · 100×150 mm';
 
   @override
-  String get caseLabelSmall => 'Small · 80×55 mm';
+  String get caseLabelSmall => 'Small · 76×50 mm';
 
   @override
   String get caseLabelLayoutList => 'List';
@@ -1426,6 +1426,20 @@ class SEn extends S {
 
   @override
   String get labelPrinterInvalid => 'Not a valid address';
+
+  @override
+  String get labelPrinterResolution => 'Resolution';
+
+  @override
+  String get labelPrinterCalibrate => 'Calibrate roll';
+
+  @override
+  String get labelPrinterCalibrateHint =>
+      'After changing to a roll of another size: the printer measures the labels and feeds a few blank ones doing it. Otherwise it runs blank labels out after every print.';
+
+  @override
+  String get labelPrinterCalibrating =>
+      'Calibrating — the printer feeds a few blank labels';
 
   @override
   String get labelPrinterTest => 'Test print';

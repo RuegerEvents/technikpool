@@ -2326,13 +2326,13 @@ abstract class S {
   /// No description provided for @caseLabelLarge.
   ///
   /// In en, this message translates to:
-  /// **'Large · 4×6″'**
+  /// **'Large · 100×150 mm'**
   String get caseLabelLarge;
 
   /// No description provided for @caseLabelSmall.
   ///
   /// In en, this message translates to:
-  /// **'Small · 80×55 mm'**
+  /// **'Small · 76×50 mm'**
   String get caseLabelSmall;
 
   /// No description provided for @caseLabelLayoutList.
@@ -2448,6 +2448,30 @@ abstract class S {
   /// In en, this message translates to:
   /// **'Not a valid address'**
   String get labelPrinterInvalid;
+
+  /// No description provided for @labelPrinterResolution.
+  ///
+  /// In en, this message translates to:
+  /// **'Resolution'**
+  String get labelPrinterResolution;
+
+  /// No description provided for @labelPrinterCalibrate.
+  ///
+  /// In en, this message translates to:
+  /// **'Calibrate roll'**
+  String get labelPrinterCalibrate;
+
+  /// No description provided for @labelPrinterCalibrateHint.
+  ///
+  /// In en, this message translates to:
+  /// **'After changing to a roll of another size: the printer measures the labels and feeds a few blank ones doing it. Otherwise it runs blank labels out after every print.'**
+  String get labelPrinterCalibrateHint;
+
+  /// No description provided for @labelPrinterCalibrating.
+  ///
+  /// In en, this message translates to:
+  /// **'Calibrating — the printer feeds a few blank labels'**
+  String get labelPrinterCalibrating;
 
   /// No description provided for @labelPrinterTest.
   ///

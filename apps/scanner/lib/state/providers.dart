@@ -26,6 +26,7 @@ const _kSeenVersion = 'seen_version';
 const _kScanTones = 'scan_tones';
 const _kInspectorName = 'inspector_name';
 const _kLabelPrinter = 'label_printer';
+const _kLabelPrinterDpmm = 'label_printer_dpmm';
 const _kLabelSize = 'label_size';
 const _kLabelLayout = 'label_layout';
 const _kLabelContents = 'label_contents';
@@ -261,15 +262,22 @@ class LabelPrinterNotifier extends AsyncNotifier<LabelPrinterConfig?> {
   FlutterSecureStorage get _storage => ref.read(storageProvider);
 
   @override
-  Future<LabelPrinterConfig?> build() async =>
-      LabelPrinterConfig.parse(await _storage.read(key: _kLabelPrinter) ?? '');
+  Future<LabelPrinterConfig?> build() async {
+    final printer = LabelPrinterConfig.parse(
+      await _storage.read(key: _kLabelPrinter) ?? '',
+    );
+    final dpmm = int.tryParse(await _storage.read(key: _kLabelPrinterDpmm) ?? '');
+    return dpmm == null || printer == null ? printer : printer.withDpmm(dpmm);
+  }
 
   Future<void> save(LabelPrinterConfig? printer) async {
     state = AsyncData(printer);
     if (printer == null) {
       await _storage.delete(key: _kLabelPrinter);
+      await _storage.delete(key: _kLabelPrinterDpmm);
     } else {
       await _storage.write(key: _kLabelPrinter, value: printer.toString());
+      await _storage.write(key: _kLabelPrinterDpmm, value: '${printer.dpmm}');
     }
   }
 }

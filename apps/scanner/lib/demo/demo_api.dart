@@ -1636,7 +1636,7 @@ class DemoBackend {
   Response<dynamic> _packLabel(RequestOptions options, Production p, Asset c) {
     final small = options.queryParameters['size'] == 'small';
     String field(String text) => text.replaceAll(RegExp(r'[\^~]'), ' ');
-    final (width, height) = small ? (80.0, 55.0) : (101.6, 152.4);
+    final (width, height) = small ? (76.0, 50.0) : (100.0, 150.0);
     final number = c.assetTag ?? '#${c.orgIndex ?? 0}';
     final inside = [
       for (final MapEntry(:key, :value) in (_packedIn[p.id] ?? const {}).entries)
@@ -1790,7 +1790,7 @@ class DemoBackend {
     final check = _case(kind, id, null);
     final tag = check.tag ?? check.items.firstOrNull?.assetTag;
     String field(String text) => text.replaceAll(RegExp(r'[\^~]'), ' ');
-    final (width, height) = small ? (80.0, 55.0) : (101.6, 152.4);
+    final (width, height) = small ? (76.0, 50.0) : (100.0, 150.0);
     final zpl = StringBuffer('^XA^CI28^PW${(width * 8).round()}^LL${(height * 8).round()}^LH0,0')
       ..write('^FO32,32^A0N,36,36^FDTechnikpool Demo^FS')
       ..write('^FO32,90^A0N,52,52^FD${field(check.name)}^FS');

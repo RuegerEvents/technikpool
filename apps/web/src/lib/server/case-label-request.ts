@@ -1,12 +1,14 @@
 import { LABEL_RENDER_URL } from '$app/env/private';
 import { labelLogo, labelPictures } from '#lib/server/case-label-logo.js';
 import {
-	LABEL_DPMM,
 	LABEL_SIZES,
 	LOGO_BOX,
+	PRINTER_DPMM,
 	gridPictureBox,
 	labelaryViewerUrl,
+	printerBox,
 	renderCaseLabel,
+	type PrinterDpmm,
 	type CaseLabelContents,
 	type CaseLabelData,
 	type CaseLabelLayout,
@@ -26,6 +28,7 @@ export type CaseLabelQuery = {
 	size: CaseLabelSize;
 	layout: CaseLabelLayout;
 	contents: CaseLabelContents;
+	dpmm: PrinterDpmm;
 };
 
 /** The query's options, or the message for a 400 naming the one that is wrong. */
@@ -40,7 +43,9 @@ export function caseLabelQuery(url: URL): CaseLabelQuery | string {
 	if (!layout) return 'layout must be list or grid';
 	const contents = pick('contents', CONTENTS, 'auto');
 	if (!contents) return 'contents must be auto, always or never';
-	return { size, layout, contents };
+	const dpmm = PRINTER_DPMM.find((d) => String(d) === (url.searchParams.get('dpmm') ?? '8'));
+	if (!dpmm) return 'dpmm must be 8 or 12';
+	return { size, layout, contents, dpmm };
 }
 
 /** Long enough for a label full of pictures, short enough that a hung renderer only costs the preview. */
@@ -53,11 +58,15 @@ const RENDER_TIMEOUT_MS = 8000;
  * segment is dots per millimetre, whatever its README calls it: 203 there
  * draws a label sixteen thousand dots wide.
  */
-async function renderPreviews(zpl: string, size: CaseLabelSize): Promise<string[] | null> {
+async function renderPreviews(
+	zpl: string,
+	size: CaseLabelSize,
+	dpmm: PrinterDpmm
+): Promise<string[] | null> {
 	const base = LABEL_RENDER_URL?.replace(/\/+$/, '');
 	if (!base) return null;
 	const { widthMm, heightMm } = LABEL_SIZES[size];
-	const url = `${base}/render/${Math.round(widthMm)}/${Math.round(heightMm)}/${LABEL_DPMM}`;
+	const url = `${base}/render/${Math.round(widthMm)}/${Math.round(heightMm)}/${dpmm}`;
 	const labels = zpl
 		.split('^XZ')
 		.map((part) => part.trim())
@@ -87,31 +96,32 @@ export async function caseLabelResponse(
 	query: CaseLabelQuery,
 	hasCase: boolean
 ) {
-	const { size, layout, contents } = query;
+	const { size, layout, contents, dpmm } = query;
 	const grid = size === 'large' && layout === 'grid';
 	const [logo, images] = await Promise.all([
-		labelLogo(logoPath, LOGO_BOX[size]),
+		labelLogo(logoPath, printerBox(LOGO_BOX[size], dpmm)),
 		grid
 			? labelPictures(
 					data.lines.map((line) => line.imagePath),
-					gridPictureBox(data)
+					printerBox(gridPictureBox(data), dpmm)
 				)
 			: undefined
 	]);
 	const { zpl, labels, contentsShown } = renderCaseLabel(data, size, logo, {
 		layout,
 		contents,
-		images
+		images,
+		dpmm
 	});
-	const previews = await renderPreviews(zpl, size);
+	const previews = await renderPreviews(zpl, size, dpmm);
 	return {
 		size,
 		zpl,
 		labelCount: labels,
 		widthMm: LABEL_SIZES[size].widthMm,
 		heightMm: LABEL_SIZES[size].heightMm,
-		dpmm: LABEL_DPMM,
-		previewUrl: labelaryViewerUrl(zpl, size),
+		dpmm,
+		previewUrl: labelaryViewerUrl(zpl, size, dpmm),
 		contentsShown,
 		hasCase,
 		...(previews ? { previews } : {})

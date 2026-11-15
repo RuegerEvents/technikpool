@@ -22,13 +22,14 @@ class CaseLabelScreen extends ConsumerStatefulWidget {
     required CaseKind kind,
     required String id,
     required this.name,
-  }) : load = ((api, size, options) => api.caseCheck.getCaseLabel(
+  }) : load = ((api, size, options, dpmm) => api.caseCheck.getCaseLabel(
          kind: kind,
          id: id,
          size: size,
          layout: options.layout,
          contents: options.contents,
          includeCase: options.includeCase,
+         dpmm: dpmm,
        ));
 
   /// A pack case's label for one production: the production, the case's
@@ -38,19 +39,22 @@ class CaseLabelScreen extends ConsumerStatefulWidget {
     required String productionId,
     required String caseAssetId,
     required this.name,
-  }) : load = ((api, size, options) => api.productionHandout.getPackCaseLabel(
+  }) : load = ((api, size, options, dpmm) => api.productionHandout.getPackCaseLabel(
          productionId: productionId,
          caseAssetId: caseAssetId,
          size: size,
          layout: options.layout,
          contents: options.contents,
+         dpmm: dpmm,
        ));
 
-  /// Fetches the label of a size, laid out as [LabelOptions] say, from the server.
+  /// Fetches the label of a size, laid out as [LabelOptions] say, from the
+  /// server, drawn for a print head of `dpmm` dots per millimetre.
   final Future<CaseLabel> Function(
     ApiClient api,
     CaseLabelSize size,
     LabelOptions options,
+    int dpmm,
   )
   load;
   final String name;
@@ -113,7 +117,15 @@ class _CaseLabelScreenState extends ConsumerState<CaseLabelScreen> {
     });
     final CaseLabel label;
     try {
-      label = await widget.load(api, size, options);
+      // The printer this device prints on decides the resolution; with none
+      // set up yet, the one a new printer starts out with.
+      final printer = await ref.read(labelPrinterProvider.future);
+      label = await widget.load(
+        api,
+        size,
+        options,
+        printer?.dpmm ?? LabelPrinterConfig.defaultDpmm,
+      );
     } catch (error) {
       if (mounted && seq == _seq) {
         setState(() {
@@ -171,12 +183,20 @@ class _CaseLabelScreenState extends ConsumerState<CaseLabelScreen> {
   Future<void> _print(LabelPrinterConfig printer) async {
     final label = _label;
     if (label == null) return;
+    await _send(printer, label.zpl, S.of(context).caseLabelSent('$printer'));
+  }
+
+  /// After putting in a roll of another size, before the first label on it.
+  Future<void> _calibrate(LabelPrinterConfig printer) =>
+      _send(printer, calibrateZpl, S.of(context).labelPrinterCalibrating);
+
+  Future<void> _send(LabelPrinterConfig printer, String zpl, String done) async {
     final l10n = S.of(context);
     final messenger = ScaffoldMessenger.of(context);
     setState(() => _printing = true);
     try {
-      await sendToPrinter(printer, label.zpl);
-      messenger.showSnackBar(SnackBar(content: Text(l10n.caseLabelSent('$printer'))));
+      await sendToPrinter(printer, zpl);
+      messenger.showSnackBar(SnackBar(content: Text(done)));
     } catch (error) {
       final text = error is LabelPrintException
           ? describePrintError(l10n, printer, error)
@@ -191,8 +211,15 @@ class _CaseLabelScreenState extends ConsumerState<CaseLabelScreen> {
   Widget build(BuildContext context) {
     final l10n = S.of(context);
     final printer = ref.watch(labelPrinterProvider).value;
+    // A printer set up or switched to another resolution from here: the label
+    // on screen was drawn for the old one and would print at the wrong size.
+    ref.listen(labelPrinterProvider, (previous, next) {
+      int dpmm(LabelPrinterConfig? p) => p?.dpmm ?? LabelPrinterConfig.defaultDpmm;
+      if (dpmm(previous?.value) != dpmm(next.value) && _size != null) _load();
+    });
     final muted = Theme.of(context).colorScheme.onSurfaceVariant;
     final label = _label;
+    final serverRendered = label?.previews != null || _shown?.label.previews != null;
 
     return Scaffold(
       appBar: AppBar(title: Text(l10n.caseLabel)),
@@ -226,7 +253,7 @@ class _CaseLabelScreenState extends ConsumerState<CaseLabelScreen> {
             _PreviewFrame(shown: _shown, loading: _rendering),
             const SizedBox(height: 6),
             Text(
-              label?.previews != null || _shown?.label.previews != null
+              serverRendered
                   ? l10n.caseLabelPreviewHintServer
                   : l10n.caseLabelPreviewHint,
               style: TextStyle(color: muted, fontSize: 12),
@@ -249,14 +276,27 @@ class _CaseLabelScreenState extends ConsumerState<CaseLabelScreen> {
                     : const Icon(Icons.print),
                 label: Text('${l10n.caseLabelPrint} · $printer'),
               ),
-            const SizedBox(height: 8),
-            OutlinedButton.icon(
-              onPressed: label == null
-                  ? null
-                  : () => openExternal(context, Uri.parse(label.previewUrl)),
-              icon: const Icon(Icons.open_in_new),
-              label: Text(l10n.caseLabelOpenLabelary),
-            ),
+            if (printer != null) ...[
+              const SizedBox(height: 8),
+              TextButton.icon(
+                onPressed: _printing ? null : () => _calibrate(printer),
+                icon: const Icon(Icons.straighten),
+                label: Text(l10n.labelPrinterCalibrate),
+              ),
+            ],
+            // The server renders its own previews (LABEL_RENDER_URL): then
+            // nothing needs to go to labelary.com, and the button would be
+            // the one way the label's text still did.
+            if (!serverRendered) ...[
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                onPressed: label == null
+                    ? null
+                    : () => openExternal(context, Uri.parse(label.previewUrl)),
+                icon: const Icon(Icons.open_in_new),
+                label: Text(l10n.caseLabelOpenLabelary),
+              ),
+            ],
           ],
         ],
       ),

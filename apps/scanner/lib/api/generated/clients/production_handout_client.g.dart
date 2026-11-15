@@ -184,12 +184,14 @@ class _ProductionHandoutClient implements ProductionHandoutClient {
   Future<CaseLabel> getPackCaseLabel({
     required String productionId,
     required String caseAssetId,
+    int? dpmm = 8,
     CaseLabelSize? size,
     CaseLabelLayout? layout,
     CaseLabelContents? contents,
   }) async {
     final _extra = <String, dynamic>{};
     final queryParameters = <String, dynamic>{
+      r'dpmm': dpmm,
       r'size': size?.toJson(),
       r'layout': layout?.toJson(),
       r'contents': contents?.toJson(),

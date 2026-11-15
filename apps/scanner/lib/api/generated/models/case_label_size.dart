@@ -4,7 +4,7 @@
 
 import 'package:json_annotation/json_annotation.dart';
 
-/// `large` is 4×6″ (101.6 × 152.4 mm), `small` 80 × 55 mm.
+/// `large` is 100 × 150 mm, `small` 76 × 50 mm.
 @JsonEnum()
 enum CaseLabelSize {
   @JsonValue('large')

@@ -68,11 +68,12 @@ abstract class CaseCheckClient {
   /// name, the case's name, a DataMatrix of its tag, and — on the large.
   /// label — what it holds, identical units as one line, continued on.
   /// further labels when it is long. Rendered for a.
-  /// 203 dpi printer speaking ZPL (a Honeywell PC42E-T in ZSim mode). The.
+  /// 203 or 300 dpi printer (`dpmm`) speaking ZPL (a Honeywell PC42E-T in.
+  /// ZSim mode). The.
   /// client sends `zpl` unchanged to the printer's raw port, usually 9100;.
   /// the server never talks to a printer.
   ///
-  /// `large` is a 4×6″ shipping label, `small` an 80×55 mm one that carries.
+  /// `large` is a 100×150 mm shipping label, `small` a 76×50 mm one that carries.
   /// the contents only where they fit (`contents`). A short list on the.
   /// large label is set in larger type; `layout=grid` draws it as tiles with.
   /// each product's picture instead. A kit's own case (its container unit).
@@ -92,6 +93,12 @@ abstract class CaseCheckClient {
   /// `CaseLabel.contentsShown` says what came out.
   ///
   ///
+  /// [dpmm] - The printer's resolution in dots per millimetre: `8` (203 dpi, the.
+  /// default, which is what clients that do not send it get) or `12`.
+  /// (300 dpi). The label is the same either way, drawn with that many.
+  /// dots; the logo and pictures are rastered for it.
+  ///
+  ///
   /// [includeCase] - List a kit's own case (its container unit) and what hangs off it.
   /// among the contents. Off by default: the label is stuck on that case.
   /// Ignored where there is none (`CaseLabel.hasCase`).
@@ -99,6 +106,7 @@ abstract class CaseCheckClient {
   Future<CaseLabel> getCaseLabel({
     @Path('kind') required CaseKind kind,
     @Path('id') required String id,
+    @Query('dpmm') int? dpmm = 8,
     @Query('includeCase') bool? includeCase = false,
     @Query('size') CaseLabelSize? size,
     @Query('layout') CaseLabelLayout? layout,

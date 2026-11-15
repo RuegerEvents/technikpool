@@ -16,12 +16,26 @@ import '../api/generated/export.dart';
 /// somewhere the warehouse network cannot be reached from, while this device
 /// is on that network.
 class LabelPrinterConfig {
-  const LabelPrinterConfig({required this.host, this.port = defaultPort});
+  const LabelPrinterConfig({
+    required this.host,
+    this.port = defaultPort,
+    this.dpmm = defaultDpmm,
+  });
 
   static const defaultPort = 9100;
 
+  /// The print head's dots per millimetre: 8 (203 dpi) or 12 (300 dpi). The
+  /// server draws the label for it. 300 dpi unless set, since that is the
+  /// PC42E-T in use.
+  static const defaultDpmm = 12;
+  static const resolutions = [8, 12];
+
   final String host;
   final int port;
+  final int dpmm;
+
+  LabelPrinterConfig withDpmm(int dpmm) =>
+      LabelPrinterConfig(host: host, port: port, dpmm: dpmm);
 
   /// `host` or `host:port`, as typed into Settings. Null when there is no host.
   static LabelPrinterConfig? parse(String input) {
@@ -82,15 +96,25 @@ Future<void> sendToPrinter(
 }
 
 /// A label that proves the connection and shows the printer's alignment: a
-/// frame along the edges of a 4×6″ label and a line of text. Not localised —
-/// it is read once by whoever set the printer up.
-const testLabelZpl =
-    '^XA^CI28^PW813^LL1219^LH0,0'
-    '^FO16,16^GB781,1187,4^FS'
-    '^FO60,80^A0N,60,60^FDTechnikpool^FS'
-    '^FO60,160^A0N,36,36^FDTestdruck / Test print^FS'
-    '^FO60,220^BXN,12,200^FDTECHNIKPOOL-TEST^FS'
-    '^XZ';
+/// frame along the edges of a 100×150 mm label and a line of text, in the
+/// printer's dots ([dpmm] per millimetre). Not localised — it is read once by
+/// whoever set the printer up.
+String testLabelZpl(int dpmm) {
+  int d(num layoutDots) => (layoutDots * dpmm / 8).round();
+  return '^XA^CI28^PW${d(800)}^LL${d(1200)}^LH0,0'
+      '^FO${d(16)},${d(16)}^GB${d(768)},${d(1168)},${d(4)}^FS'
+      '^FO${d(60)},${d(80)}^A0N,${d(60)},${d(60)}^FDTechnikpool^FS'
+      '^FO${d(60)},${d(160)}^A0N,${d(36)},${d(36)}^FDTestdruck / Test print^FS'
+      '^FO${d(60)},${d(220)}^BXN,${d(12)},200^FDTECHNIKPOOL-TEST^FS'
+      '^XZ';
+}
+
+/// Has the printer measure the roll that is in it: it feeds a few labels
+/// and learns where each one ends from the gaps between them. Needed after
+/// changing to a roll of another size — until then it advances by the old
+/// label's length and runs blank labels out after every print. `~JC` is
+/// ZPL's auto-calibrate, which ZSim honours.
+const calibrateZpl = '~JC';
 
 /// One label of [label] (a long one prints on several) rendered by Labelary's
 /// online service, as the printer would print it. Sends the label's text to api.labelary.com, which is what the

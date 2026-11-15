@@ -41,8 +41,13 @@ export type CaseLabelContents = 'auto' | 'always' | 'never';
 export type CaseLabelOptions = {
 	layout?: CaseLabelLayout;
 	contents?: CaseLabelContents;
-	/** The tiles' pictures by `imagePath`, already fitted into `gridPictureBox`. */
+	/**
+	 * The tiles' pictures by `imagePath`, already fitted into `gridPictureBox`
+	 * as `printerBox` gives it for `dpmm` — rastered in printer dots, like the logo.
+	 */
 	images?: Map<string, LabelBitmap>;
+	/** The printer's dots per millimetre. 8 (203 dpi) unless said. */
+	dpmm?: PrinterDpmm;
 };
 
 export type CaseLabelData = {
@@ -57,16 +62,41 @@ export type CaseLabelData = {
 /** A monochrome bitmap, one bit per dot, rows padded to whole bytes, 1 = black. */
 export type LabelBitmap = { width: number; height: number; bytes: Uint8Array };
 
-/** The PC42E-T prints at 203 dpi, i.e. 8 dots per millimetre. */
+/**
+ * The resolution the layout is worked out in: 203 dpi, 8 dots per
+ * millimetre. Every size and position below is in these dots. A printer with
+ * a finer head (the PC42E-T comes in 300 dpi, 12 dots/mm) gets the same label
+ * with every number scaled as the ZPL is written — see `scaled`.
+ */
 export const LABEL_DPMM = 8;
 
+/** The resolutions a label can be drawn for: 203 and 300 dpi. */
+export const PRINTER_DPMM = [8, 12] as const;
+export type PrinterDpmm = (typeof PRINTER_DPMM)[number];
+
 /**
- * The two rolls in use: the standard 4×6″ shipping label, and a small one for
+ * Printer dots per layout dot while a label is being written. Set by
+ * `renderCaseLabel` for the length of one synchronous render and read only
+ * by the functions that write ZPL, so the layout never has to know.
+ */
+let scale = 1;
+const scaled = (n: number) => Math.round(n * scale);
+
+/** A box of layout dots in printer dots, for rastering a logo or picture to fit it. */
+export function printerBox(box: { width: number; height: number }, dpmm: PrinterDpmm) {
+	return {
+		width: Math.round((box.width * dpmm) / LABEL_DPMM),
+		height: Math.round((box.height * dpmm) / LABEL_DPMM)
+	};
+}
+
+/**
+ * The two rolls in use: a 100×150 mm shipping label, and a small one for
  * boxes too small to carry a list. Width is across the print head.
  */
 export const LABEL_SIZES: Record<CaseLabelSize, { widthMm: number; heightMm: number }> = {
-	large: { widthMm: 101.6, heightMm: 152.4 },
-	small: { widthMm: 80, heightMm: 55 }
+	large: { widthMm: 100, heightMm: 150 },
+	small: { widthMm: 76, heightMm: 50 }
 };
 
 /** The box the logo is fitted into, in dots: the footer, beside the code. */
@@ -229,11 +259,13 @@ function escape(text: string) {
 }
 
 function text(x: number, y: number, height: number, value: string) {
-	return `^FO${x},${y}^A0N,${height},${height}^FH^FD${escape(value)}^FS`;
+	const h = scaled(height);
+	return `^FO${scaled(x)},${scaled(y)}^A0N,${h},${h}^FH^FD${escape(value)}^FS`;
 }
 
 function rule(x: number, y: number, width: number, thickness = 3) {
-	return `^FO${x},${y}^GB${width},${thickness},${thickness}^FS`;
+	const t = scaled(thickness);
+	return `^FO${scaled(x)},${scaled(y)}^GB${scaled(width)},${t},${t}^FS`;
 }
 
 /**
@@ -275,14 +307,20 @@ export function dataMatrixModules(code: string) {
 	return (DATAMATRIX_SIZES.find(([, cw]) => cw >= needed) ?? DATAMATRIX_SIZES.at(-1)!)[0];
 }
 
-/** The DataMatrix at `x,y`, as large as fits in `box` dots. Returns the commands and its edge length. */
+/**
+ * The DataMatrix at `x,y`, as large as fits in `box` dots. Returns the
+ * commands and its edge length. A module is a whole number of printer dots,
+ * so it is worked out in those, and the symbol centred in the box there.
+ */
 function dataMatrix(x: number, y: number, box: number, code: string) {
 	const modules = dataMatrixModules(code);
-	const module = Math.max(2, Math.floor(box / modules));
+	const printerBox = scaled(box);
+	const module = Math.max(2, Math.floor(printerBox / modules));
 	const size = module * modules;
+	const offset = Math.floor((printerBox - size) / 2);
 	return {
-		size,
-		zpl: `^FO${x + Math.floor((box - size) / 2)},${y + Math.floor((box - size) / 2)}^BXN,${module},200^FH^FD${escape(code)}^FS`
+		size: Math.round(size / scale),
+		zpl: `^FO${scaled(x) + offset},${scaled(y) + offset}^BXN,${module},200^FH^FD${escape(code)}^FS`
 	};
 }
 
@@ -322,7 +360,23 @@ function compressRow(row: string, previous: string | null) {
 	return trimmed.length < row.length ? `${out},` : out;
 }
 
-function graphic(x: number, y: number, bitmap: LabelBitmap) {
+/**
+ * A bitmap rastered at the printer's resolution, as the layout sees it: its
+ * size in layout dots, with the printer's dots kept to be written as they are.
+ */
+type LaidBitmap = LabelBitmap & { printed: LabelBitmap };
+
+function laidOut(bitmap: LabelBitmap): LaidBitmap {
+	return {
+		width: Math.round(bitmap.width / scale),
+		height: Math.round(bitmap.height / scale),
+		bytes: bitmap.bytes,
+		printed: bitmap
+	};
+}
+
+function graphic(x: number, y: number, laid: LabelBitmap) {
+	const bitmap = 'printed' in laid ? (laid as LaidBitmap).printed : laid;
 	const rowBytes = Math.ceil(bitmap.width / 8);
 	const total = rowBytes * bitmap.height;
 	const hex = Buffer.from(bitmap.bytes.subarray(0, total)).toString('hex').toUpperCase();
@@ -333,18 +387,19 @@ function graphic(x: number, y: number, bitmap: LabelBitmap) {
 		data += compressRow(row, previous);
 		previous = row;
 	}
-	return `^FO${x},${y}^GFA,${total},${total},${rowBytes},${data}^FS`;
+	return `^FO${scaled(x)},${scaled(y)}^GFA,${total},${total},${rowBytes},${data}^FS`;
 }
 
 function header(width: number, height: number) {
 	// ^PW/^LL set the label size for this job, so a roll calibrated for the
 	// other format prints the right layout rather than a cropped one.
-	return ['^XA', '^CI28', `^PW${width}`, `^LL${height}`, '^LH0,0'];
+	return ['^XA', '^CI28', `^PW${scaled(width)}`, `^LL${scaled(height)}`, '^LH0,0'];
 }
 
 /** Right-aligned in the `width` dots ending at `x + width`. Only for text known to fit. */
 function textRight(x: number, y: number, width: number, height: number, value: string) {
-	return `^FO${x},${y}^A0N,${height},${height}^FB${width},1,0,R^FH^FD${escape(value)}^FS`;
+	const h = scaled(height);
+	return `^FO${scaled(x)},${scaled(y)}^A0N,${h},${h}^FB${scaled(width)},1,0,R^FH^FD${escape(value)}^FS`;
 }
 
 /**
@@ -458,12 +513,14 @@ export function fitTitle(
 
 /** Centred across the `width` dots from `x`. Only for text known to fit. */
 function textCentered(x: number, y: number, width: number, height: number, value: string) {
-	return `^FO${x},${y}^A0N,${height},${height}^FB${width},1,0,C^FH^FD${escape(value)}^FS`;
+	const h = scaled(height);
+	return `^FO${scaled(x)},${scaled(y)}^A0N,${h},${h}^FB${scaled(width)},1,0,C^FH^FD${escape(value)}^FS`;
 }
 
 /** Turned to read bottom to top, centred along `length` dots from the bottom edge up. */
 function textUpward(x: number, y: number, length: number, height: number, value: string) {
-	return `^FO${x},${y}^A0B,${height},${height}^FB${length},1,0,C^FH^FD${escape(value)}^FS`;
+	const h = scaled(height);
+	return `^FO${scaled(x)},${scaled(y)}^A0B,${h},${h}^FB${scaled(length)},1,0,C^FH^FD${escape(value)}^FS`;
 }
 
 /**
@@ -1033,10 +1090,11 @@ function renderSmall(data: CaseLabelData, logo: LabelBitmap | null, contents: Ca
 
 /**
  * Text as the printer's ^A0 can draw it: it has no arrows, and an adapter
- * named "Schuko → powerCON" reads as German writes it anyway.
+ * named "Schuko → powerCON" reads as German writes it anyway. Typed arrows
+ * ("Schuko -> PowerCon", "=>") too, which would otherwise print as they are.
  */
 export function printable(text: string) {
-	return text.replace(/\s*[→⇒➔➜⟶]\s*/g, ' auf ');
+	return text.replace(/\s*(?:[→⇒➔➜⟶]|-+>|=+>)\s*/g, ' auf ');
 }
 
 /**
@@ -1067,12 +1125,20 @@ export function renderCaseLabel(
 		caption: input.caption === null ? null : printable(input.caption),
 		lines: input.lines.map((line) => ({ ...line, name: printable(line.name) }))
 	};
-	if (size === 'small') return renderSmall(data, logo, options.contents ?? 'auto');
-	const drawn =
-		options.layout === 'grid' && data.lines.length > 0
-			? renderLargeGrid(data, logo, options.images)
-			: renderLargeList(data, logo);
-	return { ...drawn, contentsShown: data.lines.length > 0 };
+	scale = (options.dpmm ?? LABEL_DPMM) / LABEL_DPMM;
+	try {
+		const laidLogo = logo && laidOut(logo);
+		const images =
+			options.images && new Map([...options.images].map(([path, image]) => [path, laidOut(image)]));
+		if (size === 'small') return renderSmall(data, laidLogo, options.contents ?? 'auto');
+		const drawn =
+			options.layout === 'grid' && data.lines.length > 0
+				? renderLargeGrid(data, laidLogo, images)
+				: renderLargeList(data, laidLogo);
+		return { ...drawn, contentsShown: data.lines.length > 0 };
+	} finally {
+		scale = 1;
+	}
 }
 
 /**
@@ -1158,10 +1224,14 @@ export function caseLabelLines(
  * The ZPL goes in the query string, which is how the viewer's own permalinks
  * work, so whoever opens it sends the label's text to labelary.com.
  */
-export function labelaryViewerUrl(zpl: string, size: CaseLabelSize) {
+export function labelaryViewerUrl(
+	zpl: string,
+	size: CaseLabelSize,
+	dpmm: PrinterDpmm = LABEL_DPMM
+) {
 	const { widthMm, heightMm } = LABEL_SIZES[size];
 	const params = new URLSearchParams({
-		density: String(LABEL_DPMM),
+		density: String(dpmm),
 		quality: 'bitonal',
 		width: String(widthMm),
 		height: String(heightMm),

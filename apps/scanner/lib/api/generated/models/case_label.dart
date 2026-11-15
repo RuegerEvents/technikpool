@@ -56,7 +56,7 @@ class CaseLabel {
   final num widthMm;
   final num heightMm;
 
-  /// Dots per millimetre the label was laid out for (8 = 203 dpi).
+  /// Dots per millimetre the label was drawn for (8 = 203 dpi, 12 = 300 dpi), as asked for with `dpmm`.
   final int dpmm;
 
   /// The same label in Labelary's online viewer. The ZPL is in the URL,.

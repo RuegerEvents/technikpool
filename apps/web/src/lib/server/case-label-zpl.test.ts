@@ -25,9 +25,27 @@ const kit: CaseLabelData = {
 };
 
 describe('renderCaseLabel', () => {
+	it('draws the same label in finer dots for a 300 dpi printer', () => {
+		const coarse = renderCaseLabel(kit, 'small', null).zpl;
+		const fine = renderCaseLabel(kit, 'small', null, { dpmm: 12 }).zpl;
+		expect(fine.startsWith('^XA\n^CI28\n^PW912\n^LL600')).toBe(true);
+		// Every font is half as large again, the label's contents unchanged.
+		const fonts = (zpl: string) => [...zpl.matchAll(/\^A0[NB],(\d+)/g)].map((m) => Number(m[1]));
+		expect(fonts(fine)).toEqual(fonts(coarse).map((h) => Math.round(h * 1.5)));
+		expect(fine.match(/\^FD/g)).toHaveLength(coarse.match(/\^FD/g)!.length);
+		// And the next render is back at 203 dpi.
+		expect(renderCaseLabel(kit, 'small', null).zpl).toBe(coarse);
+	});
+
+	it('writes a bitmap rastered for 300 dpi as it is, placed in layout dots', () => {
+		const logo = { width: 30, height: 15, bytes: new Uint8Array(4 * 15).fill(0xff) };
+		const zpl = renderCaseLabel(kit, 'large', logo, { dpmm: 12 }).zpl;
+		expect(zpl).toContain('^GFA,60,60,4,');
+	});
+
 	it('is one UTF-8 label sized for the roll', () => {
 		const zpl = renderCaseLabel(kit, 'large', null).zpl;
-		expect(zpl.startsWith('^XA\n^CI28\n^PW813\n^LL1219')).toBe(true);
+		expect(zpl.startsWith('^XA\n^CI28\n^PW800\n^LL1200')).toBe(true);
 		expect(zpl.endsWith('^XZ')).toBe(true);
 		expect(zpl.match(/\^XA/g)).toHaveLength(1);
 	});
@@ -117,8 +135,8 @@ describe('renderCaseLabel', () => {
 	it('prints without a code when the case has no tag', () => {
 		const zpl = renderCaseLabel({ ...kit, code: null }, 'small', null).zpl;
 		expect(zpl).not.toContain('^BX');
-		expect(zpl).toContain('^PW640');
-		expect(zpl).toContain('^LL440');
+		expect(zpl).toContain('^PW608');
+		expect(zpl).toContain('^LL400');
 	});
 
 	it('embeds the logo as a graphic field', () => {
@@ -232,6 +250,9 @@ describe('label text', () => {
 
 	it('writes arrows the printer cannot draw as words', () => {
 		expect(printable('Schuko → powerCON Kabel')).toBe('Schuko auf powerCON Kabel');
+		expect(printable('Schuko -> PowerCon Zuleitung')).toBe('Schuko auf PowerCon Zuleitung');
+		expect(printable('XLR=>Klinke')).toBe('XLR auf Klinke');
+		expect(printable('Kabel 5-pol')).toBe('Kabel 5-pol');
 	});
 
 	it('puts every name of a list in one column, whatever its count', () => {
@@ -387,7 +408,7 @@ describe('labelaryViewerUrl', () => {
 		const url = new URL(labelaryViewerUrl('^XA^XZ', 'small'));
 		expect(url.origin).toBe('https://labelary.com');
 		expect(url.searchParams.get('zpl')).toBe('^XA^XZ');
-		expect(url.searchParams.get('width')).toBe('80');
+		expect(url.searchParams.get('width')).toBe('76');
 		expect(url.searchParams.get('units')).toBe('mm');
 		expect(url.searchParams.get('density')).toBe('8');
 	});

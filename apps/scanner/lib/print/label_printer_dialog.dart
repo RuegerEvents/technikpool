@@ -32,15 +32,17 @@ class _LabelPrinterDialog extends ConsumerStatefulWidget {
 
 class _LabelPrinterDialogState extends ConsumerState<_LabelPrinterDialog> {
   late final TextEditingController _address;
+  late int _dpmm;
   String? _error;
   bool _testing = false;
+  bool _calibrating = false;
 
   @override
   void initState() {
     super.initState();
-    _address = TextEditingController(
-      text: ref.read(labelPrinterProvider).value?.toString() ?? '',
-    );
+    final printer = ref.read(labelPrinterProvider).value;
+    _address = TextEditingController(text: printer?.toString() ?? '');
+    _dpmm = printer?.dpmm ?? LabelPrinterConfig.defaultDpmm;
   }
 
   @override
@@ -50,7 +52,7 @@ class _LabelPrinterDialogState extends ConsumerState<_LabelPrinterDialog> {
   }
 
   LabelPrinterConfig? _parsed(S l10n) {
-    final printer = LabelPrinterConfig.parse(_address.text);
+    final printer = LabelPrinterConfig.parse(_address.text)?.withDpmm(_dpmm);
     setState(() => _error = printer == null ? l10n.labelPrinterInvalid : null);
     return printer;
   }
@@ -75,12 +77,28 @@ class _LabelPrinterDialogState extends ConsumerState<_LabelPrinterDialog> {
     if (printer == null) return;
     setState(() => _testing = true);
     try {
-      await sendToPrinter(printer, testLabelZpl);
+      await sendToPrinter(printer, testLabelZpl(printer.dpmm));
       messenger.showSnackBar(SnackBar(content: Text(l10n.caseLabelSent('$printer'))));
     } catch (error) {
       if (mounted) setState(() => _error = describePrintError(l10n, printer, error));
     } finally {
       if (mounted) setState(() => _testing = false);
+    }
+  }
+
+  Future<void> _calibrate() async {
+    final l10n = S.of(context);
+    final messenger = ScaffoldMessenger.of(context);
+    final printer = _parsed(l10n);
+    if (printer == null) return;
+    setState(() => _calibrating = true);
+    try {
+      await sendToPrinter(printer, calibrateZpl);
+      messenger.showSnackBar(SnackBar(content: Text(l10n.labelPrinterCalibrating)));
+    } catch (error) {
+      if (mounted) setState(() => _error = describePrintError(l10n, printer, error));
+    } finally {
+      if (mounted) setState(() => _calibrating = false);
     }
   }
 
@@ -109,15 +127,46 @@ class _LabelPrinterDialogState extends ConsumerState<_LabelPrinterDialog> {
             ),
             onSubmitted: (_) => _save(),
           ),
+          const SizedBox(height: 16),
+          Text(
+            l10n.labelPrinterResolution,
+            style: Theme.of(context).textTheme.labelLarge,
+          ),
           const SizedBox(height: 8),
-          if (_testing)
+          SegmentedButton<int>(
+            segments: [
+              for (final dpmm in LabelPrinterConfig.resolutions)
+                ButtonSegment(value: dpmm, label: Text('${dpmm == 8 ? 203 : 300} dpi')),
+            ],
+            selected: {_dpmm},
+            onSelectionChanged: (picked) => setState(() => _dpmm = picked.first),
+          ),
+          const SizedBox(height: 8),
+          if (_testing || _calibrating)
             const LinearProgressIndicator()
           else
-            TextButton.icon(
-              onPressed: _test,
-              icon: const Icon(Icons.print_outlined),
-              label: Text(l10n.labelPrinterTest),
+            Wrap(
+              spacing: 8,
+              children: [
+                TextButton.icon(
+                  onPressed: _test,
+                  icon: const Icon(Icons.print_outlined),
+                  label: Text(l10n.labelPrinterTest),
+                ),
+                TextButton.icon(
+                  onPressed: _calibrate,
+                  icon: const Icon(Icons.straighten),
+                  label: Text(l10n.labelPrinterCalibrate),
+                ),
+              ],
             ),
+          Text(
+            l10n.labelPrinterCalibrateHint,
+            style: TextStyle(
+              color: Theme.of(context).colorScheme.onSurfaceVariant,
+              fontSize: 12,
+            ),
+          ),
         ],
       ),
       actions: [
