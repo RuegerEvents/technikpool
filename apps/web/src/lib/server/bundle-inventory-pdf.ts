@@ -1,5 +1,5 @@
 import { PDFDocument, rgb, type PDFFont, type PDFImage, type PDFPage } from 'pdf-lib';
-import { naturalCompare } from '#lib/sort.js';
+import { categoryCompare, naturalCompare, type CategoryRank } from '#lib/sort.js';
 import { embedInter } from './fonts';
 import { fmtDate, safe, wrap } from './pdf-text.ts';
 import { embedLogo } from './pdf-logo.ts';
@@ -38,6 +38,11 @@ export type InventoryTile = {
 	 * ("Zubehör zu Auro Spot Z 300") so it reads as part of that one.
 	 */
 	accessoryOf: string | null;
+	/**
+	 * What the sheet is grouped by: all the lighting, then all the power …
+	 * An accessory's tile carries its unit's, so it stays right after it.
+	 */
+	category?: CategoryRank | null;
 };
 
 export type InventorySheet = {
@@ -59,10 +64,11 @@ export type InventoryUnit = {
 	name: string;
 	maker: string | null;
 	imagePath: string | null;
+	category?: CategoryRank | null;
 };
 
 /**
- * The tiles of a case: its units one tile per product and accessory set, and
+ * The tiles of a case, by category: its units one tile per product and accessory set, and
  * right after each, one tile per accessory it carries — with its own picture
  * and the total, because in a case lid the brackets and safeties are as much
  * what belongs in it as the fixtures. Identical units whose accessories differ
@@ -126,7 +132,8 @@ export function inventoryTiles(units: InventoryUnit[]): InventoryTile[] {
 				maker: unit.maker,
 				imagePath: unit.imagePath,
 				details: [],
-				accessoryOf: null
+				accessoryOf: null,
+				category: unit.category ?? null
 			}
 		});
 	}
@@ -135,6 +142,7 @@ export function inventoryTiles(units: InventoryUnit[]): InventoryTile[] {
 	return [...groups.values()]
 		.sort(
 			(a, b) =>
+				categoryCompare(a.tile.category, b.tile.category) ||
 				naturalCompare(a.tile.maker ?? '', b.tile.maker ?? '') ||
 				naturalCompare(a.tile.name, b.tile.name) ||
 				a.signature.localeCompare(b.signature)
@@ -149,9 +157,19 @@ export function inventoryTiles(units: InventoryUnit[]): InventoryTile[] {
 				maker: accessory.maker,
 				imagePath: accessory.imagePath,
 				details: [],
-				accessoryOf: tile.name
+				accessoryOf: tile.name,
+				category: tile.category
 			}))
 		]);
+}
+
+/**
+ * Tiles from several sources (the case's units, the kits packed in it) in
+ * category order. Stable, so each source's order within a category stands and
+ * an accessory's tile stays right after its unit's.
+ */
+export function byCategory(tiles: InventoryTile[]): InventoryTile[] {
+	return [...tiles].sort((a, b) => categoryCompare(a.category, b.category));
 }
 
 // Landscape both ways. A5 is A4 at 0.74: the same sheet, smaller, so the two

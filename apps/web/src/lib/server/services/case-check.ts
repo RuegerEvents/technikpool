@@ -2,7 +2,7 @@ import { prisma } from '#lib/server/auth.js';
 import { ACTIVE_ASSET_WHERE } from '#lib/asset-status.js';
 import { countProducts, specShortfall } from '#lib/bundle-spec.js';
 import { bundleLabel, makerAndName, withCaption } from '#lib/product-label.js';
-import { naturalCompare } from '#lib/sort.js';
+import { categoryCompare, naturalCompare } from '#lib/sort.js';
 import { userLabel } from '#lib/user-label.svelte.js';
 import {
 	isSystemAdmin,
@@ -177,7 +177,8 @@ const ITEM_SELECT = {
 			name: true,
 			caption: true,
 			imagePath: true,
-			manufacturer: { select: { name: true } }
+			manufacturer: { select: { name: true } },
+			category: { select: { sortOrder: true, name: true } }
 		}
 	},
 	productionItems: {
@@ -341,6 +342,26 @@ function ordered(items: CaseCheckItem[]) {
 		top,
 		...items.filter((i) => i.accessoryOf === top.assetId).sort(byName)
 	]);
+}
+
+/**
+ * `items` (tops each followed by their accessories) with the tops stably
+ * sorted by category, the units of kits inside the case after the rest as before.
+ */
+function byCategoryOfTop<
+	T extends { assetId: string; accessoryOf: string | null; innerKit: unknown }
+>(
+	items: T[],
+	categoryOf: (assetId: string) => { sortOrder: number; name: string } | null | undefined
+): T[] {
+	const tops = items
+		.filter((i) => !i.accessoryOf)
+		.sort(
+			(a, b) =>
+				Number(a.innerKit !== null) - Number(b.innerKit !== null) ||
+				categoryCompare(categoryOf(a.assetId), categoryOf(b.assetId))
+		);
+	return tops.flatMap((top) => [top, ...items.filter((i) => i.accessoryOf === top.assetId)]);
 }
 
 export async function getCaseCheck(userId: string, ref: CaseRef): Promise<CaseCheck> {
@@ -566,7 +587,10 @@ export async function caseLabelData(
 	const kitImages = new Map(
 		loaded.rows.flatMap((row) => (row.bundle ? [[row.bundle.id, row.bundle.imagePath]] : []))
 	);
-	const listed = items
+	// The label lists by category — the lighting, then the power, then the
+	// rigging — with each unit's accessories still right under it.
+	const categoryOf = new Map(loaded.rows.map((row) => [row.id, row.product.category]));
+	const listed = byCategoryOfTop(items, (assetId) => categoryOf.get(assetId))
 		.filter(
 			(item) => includeCase || (item.assetId !== caseUnitId && item.accessoryOf !== caseUnitId)
 		)

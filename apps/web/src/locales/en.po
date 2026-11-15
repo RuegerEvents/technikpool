@@ -14869,3 +14869,8 @@ msgstr "This code has expired. Start pairing on the device again for a new one."
 #: src/lib/error-messages.svelte.ts
 msgid "This code has already been used. Start pairing on the device again for a new one."
 msgstr "This code has already been used. Start pairing on the device again for a new one."
+
+#: src/routes/assets/by-location/+page.svelte
+#: src/routes/assets/by-location/+page.svelte
+msgid "Open bundle"
+msgstr "Open bundle"

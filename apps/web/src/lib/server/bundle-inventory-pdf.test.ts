@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { inventoryTiles, type InventoryUnit } from './bundle-inventory-pdf';
+import { byCategory, inventoryTiles, type InventoryUnit } from './bundle-inventory-pdf';
 
 const unit = (
 	id: string,
@@ -12,6 +12,36 @@ const shape = (tiles: ReturnType<typeof inventoryTiles>) =>
 	tiles.map((t) => [t.count, t.name, t.accessoryOf]);
 
 describe('inventoryTiles', () => {
+	it('groups by category in its set order, accessories staying with their unit', () => {
+		const licht = { sortOrder: 1, name: 'Licht' };
+		const strom = { sortOrder: 2, name: 'Strom' };
+		const tiles = byCategory([
+			...inventoryTiles([
+				{ ...unit('k1', 'cable', 'Ash Cable'), category: strom },
+				{ ...unit('s1', 'spot', 'Spot'), category: licht },
+				{ ...unit('b1', 'bracket', 'Bracket', 's1'), category: null },
+				{ ...unit('x1', 'misc', 'Zip ties'), category: null }
+			]),
+			{
+				kind: 'kit',
+				count: 1,
+				name: 'DMX-Ring',
+				maker: null,
+				imagePath: null,
+				details: [],
+				accessoryOf: null,
+				category: licht
+			}
+		]);
+		expect(shape(tiles)).toEqual([
+			[1, 'Spot', null],
+			[1, 'Bracket', 'Spot'],
+			[1, 'DMX-Ring', null],
+			[1, 'Ash Cable', null],
+			[1, 'Zip ties', null]
+		]);
+	});
+
 	it('gives each accessory a tile of its own, with the total, right after its unit', () => {
 		const tiles = inventoryTiles([
 			unit('s1', 'spot', 'Spot'),

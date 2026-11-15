@@ -5,3 +5,18 @@
 const collator = new Intl.Collator('de', { numeric: true });
 
 export const naturalCompare = (a: string, b: string): number => collator.compare(a, b);
+
+/** A category as lists are grouped by it: Licht, Strom, Rigging … in the order the admins set. */
+export type CategoryRank = { sortOrder: number; name: string };
+
+/**
+ * Categories in their set order, then by name; no category last. For printed
+ * lists that put all the lighting first, then all the power, then the rigging.
+ */
+export const categoryCompare = (
+	a: CategoryRank | null | undefined,
+	b: CategoryRank | null | undefined
+): number => {
+	if (!a || !b) return Number(!a) - Number(!b);
+	return a.sortOrder - b.sortOrder || naturalCompare(a.name, b.name);
+};

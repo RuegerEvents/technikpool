@@ -2,7 +2,7 @@ import { prisma } from '#lib/server/auth.js';
 import { BOOKABLE_ASSET_WHERE } from '#lib/asset-status.js';
 import type { Prisma } from '#lib/prisma/client.js';
 import { searchMatcher } from '#lib/search.js';
-import { naturalCompare } from '#lib/sort.js';
+import { categoryCompare, naturalCompare } from '#lib/sort.js';
 import {
 	isSystemAdmin,
 	productionVisibility,
@@ -886,7 +886,8 @@ export async function packCaseLabelData(
 								name: true,
 								isContainer: true,
 								imagePath: true,
-								manufacturer: { select: { name: true } }
+								manufacturer: { select: { name: true } },
+								category: { select: { sortOrder: true, name: true } }
 							}
 						}
 					}
@@ -908,6 +909,7 @@ export async function packCaseLabelData(
 				assetId: c.assetId,
 				name: makerAndName(c.asset.product.manufacturer?.name, c.asset.product.name),
 				imagePath: c.asset.product.imagePath,
+				category: c.asset.product.category,
 				accessoryOf:
 					c.asset.parentAssetId && inside.has(c.asset.parentAssetId) ? c.asset.parentAssetId : null,
 				innerKit: inner?.isPackCase
@@ -921,8 +923,9 @@ export async function packCaseLabelData(
 						: null
 			};
 		})
-		// Units by name, each followed by its accessories.
-		.sort((a, b) => naturalCompare(a.name, b.name));
+		// Units by category, then name — the lighting, then the power … —
+		// each followed by its accessories.
+		.sort((a, b) => categoryCompare(a.category, b.category) || naturalCompare(a.name, b.name));
 	const ordered = [...items.filter((i) => !i.accessoryOf), ...items.filter((i) => i.accessoryOf)];
 	const org = owner.organization;
 	return {

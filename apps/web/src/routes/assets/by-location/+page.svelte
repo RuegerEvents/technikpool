@@ -8,6 +8,7 @@
 	// to, greyed at the bottom: that is where it goes back to, and moving it from
 	// here would book it back without anyone having seen it.
 	import { SvelteSet } from 'svelte/reactivity';
+	import { ArrowUpRight } from '@lucide/svelte';
 	import { toast } from 'svelte-sonner';
 	import { resolve } from '$app/paths';
 	import { goto } from '$app/navigation';
@@ -91,6 +92,8 @@
 	type Card = {
 		key: string;
 		kind: 'bundle' | 'product';
+		/** The kit's own page, for a bundle card. */
+		bundleId: string | null;
 		title: string;
 		caption: string | null;
 		subtitle: string | null;
@@ -186,6 +189,7 @@
 				card = {
 					key,
 					kind,
+					bundleId: a.bundle?.id ?? null,
 					title: a.bundle ? a.bundle.template.name : a.product.name,
 					caption: a.bundle ? a.bundle.template.caption : a.product.caption,
 					subtitle: a.bundle ? null : (a.product.manufacturer?.name ?? null),
@@ -477,6 +481,17 @@
 												{/if}
 											</span>
 										</button>
+										{#if card.bundleId}
+											<a
+												href={resolve(`assets/bundles/${card.bundleId}`)}
+												class="shrink-0 rounded p-1 text-muted-foreground hover:bg-muted hover:text-foreground"
+												title="Open bundle"
+												aria-label="Open bundle"
+												draggable="false"
+											>
+												<ArrowUpRight class="size-4" />
+											</a>
+										{/if}
 									</div>
 									{#if open}
 										<ul class="border-t px-2 py-1">

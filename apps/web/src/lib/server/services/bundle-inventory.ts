@@ -1,10 +1,11 @@
 import { error } from '@sveltejs/kit';
 import { prisma } from '#lib/server/auth.js';
 import { ACTIVE_ASSET_WHERE } from '#lib/asset-status.js';
-import { naturalCompare } from '#lib/sort.js';
+import { categoryCompare, naturalCompare } from '#lib/sort.js';
 import { bundleCaseUnit } from '#lib/bundle-case.js';
 import { isSystemAdmin, userOrgIds } from './access';
 import {
+	byCategory,
 	generateBundleInventoryPdf,
 	inventoryTiles,
 	type InventoryTile,
@@ -26,7 +27,7 @@ function kitTiles(
 	kits: {
 		templateId: string;
 		imagePath: string | null;
-		template: { name: string };
+		template: { name: string; category: { sortOrder: number; name: string } | null };
 		assets: { productId: string; product: { name: string } }[];
 	}[]
 ): InventoryTile[] {
@@ -52,11 +53,12 @@ function kitTiles(
 			details: [...contents.values()]
 				.sort((a, b) => naturalCompare(a.name, b.name))
 				.map(({ name, count }) => ({ count, each: false, name })),
-			accessoryOf: null
+			accessoryOf: null,
+			category: kit.template.category
 		});
 	}
 	return [...byType.values()]
-		.sort((a, b) => naturalCompare(a.name, b.name))
+		.sort((a, b) => categoryCompare(a.category, b.category) || naturalCompare(a.name, b.name))
 		.map((tile) => ({
 			...tile,
 			details: tile.details.map((detail) => ({ ...detail, each: tile.count > 1 }))
@@ -96,7 +98,8 @@ export async function renderBundleInventory(
 							name: true,
 							imagePath: true,
 							isContainer: true,
-							manufacturer: { select: { name: true } }
+							manufacturer: { select: { name: true } },
+							category: { select: { sortOrder: true, name: true } }
 						}
 					}
 				}
@@ -108,7 +111,9 @@ export async function renderBundleInventory(
 					id: true,
 					templateId: true,
 					imagePath: true,
-					template: { select: { name: true } },
+					template: {
+						select: { name: true, category: { select: { sortOrder: true, name: true } } }
+					},
 					assets: {
 						where: ACTIVE_ASSET_WHERE,
 						select: { productId: true, product: { select: { name: true } } }
@@ -144,7 +149,7 @@ export async function renderBundleInventory(
 		organization: { name: org.shortName ?? org.name, logoPath: org.logoPath },
 		unitCount:
 			contents.length + bundle.childBundles.reduce((sum, kit) => sum + kit.assets.length, 0),
-		tiles: [
+		tiles: byCategory([
 			...inventoryTiles(
 				contents.map((asset) => ({
 					id: asset.id,
@@ -152,11 +157,12 @@ export async function renderBundleInventory(
 					productId: asset.productId,
 					name: asset.product.name,
 					maker: asset.product.manufacturer?.name ?? null,
-					imagePath: asset.product.imagePath
+					imagePath: asset.product.imagePath,
+					category: asset.product.category
 				}))
 			),
 			...kitTiles(bundle.childBundles)
-		]
+		])
 	};
 
 	const name = bundle.tag ? `${bundle.template.name} ${bundle.tag}` : bundle.template.name;
