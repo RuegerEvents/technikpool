@@ -16,6 +16,93 @@ export type BackgroundRemovalMessage =
 
 const ctx = self as unknown as DedicatedWorkerGlobalScope;
 
+// imgly fetches every chunk of the model at once (a Promise.all over ~42 of
+// them), so on a 10 Mbit/s line they share it evenly and none is finished
+// until all are, two and a half minutes in. Any interruption before that, a
+// closed dialog or a saved form, threw away everything, and the 42 streams
+// held up every other request on the connection: a 66-byte upload answer took
+// 33 s to arrive. imgly calls the global fetch, and in this worker that is
+// ours, so chunks go through here instead: a few at a time, each one kept in
+// Cache Storage once complete. An interrupted download then costs only the
+// chunks in flight, and the next attempt picks up where it stopped. The names
+// are the chunks' SHA-256, so a stored one can never be stale.
+const CHUNK_PATH = /^\/imgly\/[0-9a-f]{64}\.bin$/;
+const CHUNK_CACHE = 'imgly-chunks';
+const MAX_PARALLEL = 4;
+
+const networkFetch = ctx.fetch.bind(ctx);
+let running = 0;
+const waiting: (() => void)[] = [];
+
+async function slot(): Promise<() => void> {
+	if (running >= MAX_PARALLEL) await new Promise<void>((go) => waiting.push(go));
+	running++;
+	return () => {
+		running--;
+		waiting.shift()?.();
+	};
+}
+
+// Cache Storage exists only in a secure context, so a dev server opened over
+// plain http on the LAN has none; chunks are then only throttled.
+async function chunkCache(): Promise<Cache | null> {
+	try {
+		return 'caches' in ctx ? await ctx.caches.open(CHUNK_CACHE) : null;
+	} catch {
+		return null;
+	}
+}
+
+async function fetchChunk(url: string, init?: RequestInit): Promise<Response> {
+	const cache = await chunkCache();
+	const stored = await cache?.match(url).catch(() => undefined);
+	if (stored) return stored;
+
+	const release = await slot();
+	try {
+		const response = await networkFetch(url, init);
+		if (!response.ok || !cache) return response;
+		const body = await response.blob();
+		// A full quota only loses the resume, not the download.
+		await cache
+			.put(url, new Response(body, { headers: { 'content-type': 'application/octet-stream' } }))
+			.catch(() => {});
+		return new Response(body, { status: response.status, headers: response.headers });
+	} finally {
+		release();
+	}
+}
+
+/** Drop chunks of models that are no longer served, once the manifest says which are. */
+async function pruneChunks(manifest: Response) {
+	const cache = await chunkCache();
+	if (!cache) return;
+	const resources = (await manifest.json()) as Record<string, { chunks: { name: string }[] }>;
+	const current = new Set(
+		Object.values(resources).flatMap((entry) => entry.chunks.map((chunk) => chunk.name))
+	);
+	for (const request of await cache.keys()) {
+		const name = new URL(request.url).pathname.split('/').pop() ?? '';
+		if (!current.has(name)) await cache.delete(request);
+	}
+}
+
+ctx.fetch = async (input: RequestInfo | URL, init?: RequestInit) => {
+	const url = new URL(input instanceof Request ? input.url : input.toString(), ctx.location.href);
+	if (url.origin === ctx.location.origin && CHUNK_PATH.test(url.pathname)) {
+		return fetchChunk(url.href, init);
+	}
+	const response = await networkFetch(input, init);
+	if (
+		url.origin === ctx.location.origin &&
+		url.pathname === '/imgly/resources.json' &&
+		response.ok
+	) {
+		pruneChunks(response.clone()).catch(() => {});
+	}
+	return response;
+};
+
 function reply(message: BackgroundRemovalMessage) {
 	ctx.postMessage(message);
 }
@@ -46,7 +133,9 @@ ctx.onmessage = async (event: MessageEvent<BackgroundRemovalRequest>) => {
 			// ETag built from the file's mtime, which every image build resets — so
 			// without this each release, and every heuristic expiry in between, sent
 			// the browser back for 176 MB it already had. Only the chunks go through
-			// fetchArgs; resources.json is fetched plainly and stays current.
+			// fetchArgs; resources.json is fetched plainly and stays current. Cache
+			// Storage (above) is the copy that counts; this covers a browser
+			// without it and chunks fetched before it existed.
 			fetchArgs: { cache: 'force-cache' },
 			progress: (stage, current, total) => reply({ kind: 'progress', stage, current, total })
 		});

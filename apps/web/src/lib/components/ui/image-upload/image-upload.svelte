@@ -338,7 +338,7 @@
 		runBackgroundRemoval();
 	}
 
-	// The model is ~40 MB and is fetched from img.ly's CDN the first time anyone
+	// The model is ~176 MB, served from /imgly/ and fetched the first time anyone
 	// on this browser removes a background, which is most of the wait — hence a
 	// progress bar rather than a spinner. The inference runs in a worker (see
 	// background-removal.worker.ts) so the page stays usable throughout.
@@ -430,6 +430,15 @@
 		const source = useRemoved ? removedBlob : await canvasBlob(croppedCanvas);
 		const blob = source && (await toStoredSize(source));
 		if (!blob) return;
+		// Keeping the photo as it is: a model still downloading would only take the
+		// line from the upload (it held a 66-byte answer up for 33 s). The chunks
+		// already fetched stay cached, so the next removal resumes from there.
+		const stoppedRemoval = !useRemoved && bgRemoving;
+		if (stoppedRemoval) {
+			worker?.terminate();
+			worker = null;
+			bgRemoving = false;
+		}
 		uploading = true;
 		try {
 			const form = new FormData();
@@ -448,6 +457,7 @@
 			// Stay where the user was, so a failed upload can be retried without
 			// re-cropping. Skipping the choice step leaves nowhere to go back to.
 			if (step !== 'bg') step = 'crop';
+			else if (stoppedRemoval) runBackgroundRemoval();
 		} finally {
 			uploading = false;
 		}
