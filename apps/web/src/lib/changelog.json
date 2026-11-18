@@ -1,5 +1,17 @@
 [
 	{
+		"version": "0.40.1",
+		"date": "2026-11-18",
+		"en": [
+			"Background removal loads its model more reliably on a slow connection: a few parts at a time, and what has arrived is kept, so an interrupted download carries on where it stopped instead of starting over.",
+			"Keeping a photo with its background no longer waits behind the model download: the upload goes straight through."
+		],
+		"de": [
+			"Die Hintergrundentfernung lädt ihr Modell auf einer langsamen Leitung zuverlässiger: in wenigen Teilen gleichzeitig, und was schon da ist, bleibt erhalten. Ein abgebrochener Download macht dort weiter, wo er aufgehört hat, statt von vorn anzufangen.",
+			"Wer ein Foto mit Hintergrund behält, wartet nicht mehr auf den Modell-Download: Das Hochladen geht sofort durch."
+		]
+	},
+	{
 		"version": "0.40.0",
 		"date": "2026-11-15",
 		"en": [
