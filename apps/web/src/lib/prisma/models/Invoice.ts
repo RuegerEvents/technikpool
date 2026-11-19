@@ -67,6 +67,7 @@ export type InvoiceMinAggregateOutputType = {
 	dayCount: number | null;
 	discountType: string | null;
 	discountValue: runtime.Decimal | null;
+	hideZeroLines: boolean | null;
 	assetScope: string | null;
 	recipientOrganizationId: string | null;
 	sentAt: Date | null;
@@ -121,6 +122,7 @@ export type InvoiceMaxAggregateOutputType = {
 	dayCount: number | null;
 	discountType: string | null;
 	discountValue: runtime.Decimal | null;
+	hideZeroLines: boolean | null;
 	assetScope: string | null;
 	recipientOrganizationId: string | null;
 	sentAt: Date | null;
@@ -175,6 +177,8 @@ export type InvoiceCountAggregateOutputType = {
 	dayCount: number;
 	discountType: number;
 	discountValue: number;
+	lineGroups: number;
+	hideZeroLines: number;
 	assetScope: number;
 	recipientOrganizationId: number;
 	sentAt: number;
@@ -244,6 +248,7 @@ export type InvoiceMinAggregateInputType = {
 	dayCount?: true;
 	discountType?: true;
 	discountValue?: true;
+	hideZeroLines?: true;
 	assetScope?: true;
 	recipientOrganizationId?: true;
 	sentAt?: true;
@@ -298,6 +303,7 @@ export type InvoiceMaxAggregateInputType = {
 	dayCount?: true;
 	discountType?: true;
 	discountValue?: true;
+	hideZeroLines?: true;
 	assetScope?: true;
 	recipientOrganizationId?: true;
 	sentAt?: true;
@@ -352,6 +358,8 @@ export type InvoiceCountAggregateInputType = {
 	dayCount?: true;
 	discountType?: true;
 	discountValue?: true;
+	lineGroups?: true;
+	hideZeroLines?: true;
 	assetScope?: true;
 	recipientOrganizationId?: true;
 	sentAt?: true;
@@ -494,6 +502,8 @@ export type InvoiceGroupByOutputType = {
 	dayCount: number;
 	discountType: string | null;
 	discountValue: runtime.Decimal | null;
+	lineGroups: runtime.JsonValue;
+	hideZeroLines: boolean;
 	assetScope: string;
 	recipientOrganizationId: string | null;
 	sentAt: Date | null;
@@ -574,6 +584,8 @@ export type InvoiceWhereInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonFilter<'Invoice'>;
+	hideZeroLines?: Prisma.BoolFilter<'Invoice'> | boolean;
 	assetScope?: Prisma.StringFilter<'Invoice'> | string;
 	recipientOrganizationId?: Prisma.StringNullableFilter<'Invoice'> | string | null;
 	sentAt?: Prisma.DateTimeNullableFilter<'Invoice'> | Date | string | null;
@@ -644,6 +656,8 @@ export type InvoiceOrderByWithRelationInput = {
 	dayCount?: Prisma.SortOrder;
 	discountType?: Prisma.SortOrderInput | Prisma.SortOrder;
 	discountValue?: Prisma.SortOrderInput | Prisma.SortOrder;
+	lineGroups?: Prisma.SortOrder;
+	hideZeroLines?: Prisma.SortOrder;
 	assetScope?: Prisma.SortOrder;
 	recipientOrganizationId?: Prisma.SortOrderInput | Prisma.SortOrder;
 	sentAt?: Prisma.SortOrderInput | Prisma.SortOrder;
@@ -715,6 +729,8 @@ export type InvoiceWhereUniqueInput = Prisma.AtLeast<
 			| number
 			| string
 			| null;
+		lineGroups?: Prisma.JsonFilter<'Invoice'>;
+		hideZeroLines?: Prisma.BoolFilter<'Invoice'> | boolean;
 		assetScope?: Prisma.StringFilter<'Invoice'> | string;
 		recipientOrganizationId?: Prisma.StringNullableFilter<'Invoice'> | string | null;
 		sentAt?: Prisma.DateTimeNullableFilter<'Invoice'> | Date | string | null;
@@ -790,6 +806,8 @@ export type InvoiceOrderByWithAggregationInput = {
 	dayCount?: Prisma.SortOrder;
 	discountType?: Prisma.SortOrderInput | Prisma.SortOrder;
 	discountValue?: Prisma.SortOrderInput | Prisma.SortOrder;
+	lineGroups?: Prisma.SortOrder;
+	hideZeroLines?: Prisma.SortOrder;
 	assetScope?: Prisma.SortOrder;
 	recipientOrganizationId?: Prisma.SortOrderInput | Prisma.SortOrder;
 	sentAt?: Prisma.SortOrderInput | Prisma.SortOrder;
@@ -860,6 +878,8 @@ export type InvoiceScalarWhereWithAggregatesInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonWithAggregatesFilter<'Invoice'>;
+	hideZeroLines?: Prisma.BoolWithAggregatesFilter<'Invoice'> | boolean;
 	assetScope?: Prisma.StringWithAggregatesFilter<'Invoice'> | string;
 	recipientOrganizationId?: Prisma.StringNullableWithAggregatesFilter<'Invoice'> | string | null;
 	sentAt?: Prisma.DateTimeNullableWithAggregatesFilter<'Invoice'> | Date | string | null;
@@ -916,6 +936,8 @@ export type InvoiceCreateInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	sentAt?: Date | string | null;
 	pdfPath?: string | null;
@@ -974,6 +996,8 @@ export type InvoiceUncheckedCreateInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	recipientOrganizationId?: string | null;
 	sentAt?: Date | string | null;
@@ -1032,6 +1056,8 @@ export type InvoiceUpdateInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
 	pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
@@ -1101,6 +1127,8 @@ export type InvoiceUncheckedUpdateInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	recipientOrganizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
@@ -1161,6 +1189,8 @@ export type InvoiceCreateManyInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	recipientOrganizationId?: string | null;
 	sentAt?: Date | string | null;
@@ -1218,6 +1248,8 @@ export type InvoiceUpdateManyMutationInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
 	pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
@@ -1281,6 +1313,8 @@ export type InvoiceUncheckedUpdateManyInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	recipientOrganizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
@@ -1355,6 +1389,8 @@ export type InvoiceCountOrderByAggregateInput = {
 	dayCount?: Prisma.SortOrder;
 	discountType?: Prisma.SortOrder;
 	discountValue?: Prisma.SortOrder;
+	lineGroups?: Prisma.SortOrder;
+	hideZeroLines?: Prisma.SortOrder;
 	assetScope?: Prisma.SortOrder;
 	recipientOrganizationId?: Prisma.SortOrder;
 	sentAt?: Prisma.SortOrder;
@@ -1416,6 +1452,7 @@ export type InvoiceMaxOrderByAggregateInput = {
 	dayCount?: Prisma.SortOrder;
 	discountType?: Prisma.SortOrder;
 	discountValue?: Prisma.SortOrder;
+	hideZeroLines?: Prisma.SortOrder;
 	assetScope?: Prisma.SortOrder;
 	recipientOrganizationId?: Prisma.SortOrder;
 	sentAt?: Prisma.SortOrder;
@@ -1470,6 +1507,7 @@ export type InvoiceMinOrderByAggregateInput = {
 	dayCount?: Prisma.SortOrder;
 	discountType?: Prisma.SortOrder;
 	discountValue?: Prisma.SortOrder;
+	hideZeroLines?: Prisma.SortOrder;
 	assetScope?: Prisma.SortOrder;
 	recipientOrganizationId?: Prisma.SortOrder;
 	sentAt?: Prisma.SortOrder;
@@ -1989,6 +2027,8 @@ export type InvoiceCreateWithoutOrganizationInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	sentAt?: Date | string | null;
 	pdfPath?: string | null;
@@ -2045,6 +2085,8 @@ export type InvoiceUncheckedCreateWithoutOrganizationInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	recipientOrganizationId?: string | null;
 	sentAt?: Date | string | null;
@@ -2110,6 +2152,8 @@ export type InvoiceCreateWithoutRecipientOrganizationInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	sentAt?: Date | string | null;
 	pdfPath?: string | null;
@@ -2167,6 +2211,8 @@ export type InvoiceUncheckedCreateWithoutRecipientOrganizationInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	sentAt?: Date | string | null;
 	pdfPath?: string | null;
@@ -2273,6 +2319,8 @@ export type InvoiceScalarWhereInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonFilter<'Invoice'>;
+	hideZeroLines?: Prisma.BoolFilter<'Invoice'> | boolean;
 	assetScope?: Prisma.StringFilter<'Invoice'> | string;
 	recipientOrganizationId?: Prisma.StringNullableFilter<'Invoice'> | string | null;
 	sentAt?: Prisma.DateTimeNullableFilter<'Invoice'> | Date | string | null;
@@ -2353,6 +2401,8 @@ export type InvoiceCreateWithoutProductionInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	sentAt?: Date | string | null;
 	pdfPath?: string | null;
@@ -2409,6 +2459,8 @@ export type InvoiceUncheckedCreateWithoutProductionInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	recipientOrganizationId?: string | null;
 	sentAt?: Date | string | null;
@@ -2502,6 +2554,8 @@ export type InvoiceCreateWithoutRentalTermsVersionInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	sentAt?: Date | string | null;
 	pdfPath?: string | null;
@@ -2559,6 +2613,8 @@ export type InvoiceUncheckedCreateWithoutRentalTermsVersionInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	recipientOrganizationId?: string | null;
 	sentAt?: Date | string | null;
@@ -2653,6 +2709,8 @@ export type InvoiceCreateWithoutOfferInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	sentAt?: Date | string | null;
 	pdfPath?: string | null;
@@ -2709,6 +2767,8 @@ export type InvoiceUncheckedCreateWithoutOfferInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	recipientOrganizationId?: string | null;
 	sentAt?: Date | string | null;
@@ -2802,6 +2862,8 @@ export type InvoiceCreateWithoutItemsInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	sentAt?: Date | string | null;
 	pdfPath?: string | null;
@@ -2859,6 +2921,8 @@ export type InvoiceUncheckedCreateWithoutItemsInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	recipientOrganizationId?: string | null;
 	sentAt?: Date | string | null;
@@ -2944,6 +3008,8 @@ export type InvoiceUpdateWithoutItemsInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
 	pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
@@ -3012,6 +3078,8 @@ export type InvoiceUncheckedUpdateWithoutItemsInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	recipientOrganizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
@@ -3070,6 +3138,8 @@ export type InvoiceCreateManyOrganizationInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	recipientOrganizationId?: string | null;
 	sentAt?: Date | string | null;
@@ -3124,6 +3194,8 @@ export type InvoiceCreateManyRecipientOrganizationInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	sentAt?: Date | string | null;
 	pdfPath?: string | null;
@@ -3180,6 +3252,8 @@ export type InvoiceUpdateWithoutOrganizationInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
 	pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
@@ -3247,6 +3321,8 @@ export type InvoiceUncheckedUpdateWithoutOrganizationInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	recipientOrganizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
@@ -3312,6 +3388,8 @@ export type InvoiceUncheckedUpdateManyWithoutOrganizationInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	recipientOrganizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
@@ -3374,6 +3452,8 @@ export type InvoiceUpdateWithoutRecipientOrganizationInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
 	pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
@@ -3442,6 +3522,8 @@ export type InvoiceUncheckedUpdateWithoutRecipientOrganizationInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
 	pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
@@ -3507,6 +3589,8 @@ export type InvoiceUncheckedUpdateManyWithoutRecipientOrganizationInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
 	pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
@@ -3564,6 +3648,8 @@ export type InvoiceCreateManyProductionInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	recipientOrganizationId?: string | null;
 	sentAt?: Date | string | null;
@@ -3621,6 +3707,8 @@ export type InvoiceUpdateWithoutProductionInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
 	pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
@@ -3688,6 +3776,8 @@ export type InvoiceUncheckedUpdateWithoutProductionInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	recipientOrganizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
@@ -3753,6 +3843,8 @@ export type InvoiceUncheckedUpdateManyWithoutProductionInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	recipientOrganizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
@@ -3812,6 +3904,8 @@ export type InvoiceCreateManyRentalTermsVersionInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	recipientOrganizationId?: string | null;
 	sentAt?: Date | string | null;
@@ -3868,6 +3962,8 @@ export type InvoiceUpdateWithoutRentalTermsVersionInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
 	pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
@@ -3936,6 +4032,8 @@ export type InvoiceUncheckedUpdateWithoutRentalTermsVersionInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	recipientOrganizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
@@ -4001,6 +4099,8 @@ export type InvoiceUncheckedUpdateManyWithoutRentalTermsVersionInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	recipientOrganizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
@@ -4058,6 +4158,8 @@ export type InvoiceCreateManyOfferInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	recipientOrganizationId?: string | null;
 	sentAt?: Date | string | null;
@@ -4115,6 +4217,8 @@ export type InvoiceUpdateWithoutOfferInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
 	pdfPath?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
@@ -4182,6 +4286,8 @@ export type InvoiceUncheckedUpdateWithoutOfferInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	recipientOrganizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
@@ -4247,6 +4353,8 @@ export type InvoiceUncheckedUpdateManyWithoutOfferInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	recipientOrganizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	sentAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null;
@@ -4344,6 +4452,8 @@ export type InvoiceSelect<
 		dayCount?: boolean;
 		discountType?: boolean;
 		discountValue?: boolean;
+		lineGroups?: boolean;
+		hideZeroLines?: boolean;
 		assetScope?: boolean;
 		recipientOrganizationId?: boolean;
 		sentAt?: boolean;
@@ -4410,6 +4520,8 @@ export type InvoiceSelectCreateManyAndReturn<
 		dayCount?: boolean;
 		discountType?: boolean;
 		discountValue?: boolean;
+		lineGroups?: boolean;
+		hideZeroLines?: boolean;
 		assetScope?: boolean;
 		recipientOrganizationId?: boolean;
 		sentAt?: boolean;
@@ -4474,6 +4586,8 @@ export type InvoiceSelectUpdateManyAndReturn<
 		dayCount?: boolean;
 		discountType?: boolean;
 		discountValue?: boolean;
+		lineGroups?: boolean;
+		hideZeroLines?: boolean;
 		assetScope?: boolean;
 		recipientOrganizationId?: boolean;
 		sentAt?: boolean;
@@ -4535,6 +4649,8 @@ export type InvoiceSelectScalar = {
 	dayCount?: boolean;
 	discountType?: boolean;
 	discountValue?: boolean;
+	lineGroups?: boolean;
+	hideZeroLines?: boolean;
 	assetScope?: boolean;
 	recipientOrganizationId?: boolean;
 	sentAt?: boolean;
@@ -4591,6 +4707,8 @@ export type InvoiceOmit<
 	| 'dayCount'
 	| 'discountType'
 	| 'discountValue'
+	| 'lineGroups'
+	| 'hideZeroLines'
 	| 'assetScope'
 	| 'recipientOrganizationId'
 	| 'sentAt'
@@ -4688,6 +4806,8 @@ export type $InvoicePayload<
 			dayCount: number;
 			discountType: string | null;
 			discountValue: runtime.Decimal | null;
+			lineGroups: runtime.JsonValue;
+			hideZeroLines: boolean;
 			assetScope: string;
 			recipientOrganizationId: string | null;
 			sentAt: Date | null;
@@ -5362,6 +5482,8 @@ export interface InvoiceFieldRefs {
 	readonly dayCount: Prisma.FieldRef<'Invoice', 'Int'>;
 	readonly discountType: Prisma.FieldRef<'Invoice', 'String'>;
 	readonly discountValue: Prisma.FieldRef<'Invoice', 'Decimal'>;
+	readonly lineGroups: Prisma.FieldRef<'Invoice', 'Json'>;
+	readonly hideZeroLines: Prisma.FieldRef<'Invoice', 'Boolean'>;
 	readonly assetScope: Prisma.FieldRef<'Invoice', 'String'>;
 	readonly recipientOrganizationId: Prisma.FieldRef<'Invoice', 'String'>;
 	readonly sentAt: Prisma.FieldRef<'Invoice', 'DateTime'>;

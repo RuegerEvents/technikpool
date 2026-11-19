@@ -65,6 +65,7 @@ export type OfferMinAggregateOutputType = {
 	dayCount: number | null;
 	discountType: string | null;
 	discountValue: runtime.Decimal | null;
+	hideZeroLines: boolean | null;
 	assetScope: string | null;
 	recipientOrganizationId: string | null;
 	vatRatePercent: runtime.Decimal | null;
@@ -113,6 +114,7 @@ export type OfferMaxAggregateOutputType = {
 	dayCount: number | null;
 	discountType: string | null;
 	discountValue: runtime.Decimal | null;
+	hideZeroLines: boolean | null;
 	assetScope: string | null;
 	recipientOrganizationId: string | null;
 	vatRatePercent: runtime.Decimal | null;
@@ -161,6 +163,8 @@ export type OfferCountAggregateOutputType = {
 	dayCount: number;
 	discountType: number;
 	discountValue: number;
+	lineGroups: number;
+	hideZeroLines: number;
 	assetScope: number;
 	recipientOrganizationId: number;
 	vatRatePercent: number;
@@ -226,6 +230,7 @@ export type OfferMinAggregateInputType = {
 	dayCount?: true;
 	discountType?: true;
 	discountValue?: true;
+	hideZeroLines?: true;
 	assetScope?: true;
 	recipientOrganizationId?: true;
 	vatRatePercent?: true;
@@ -274,6 +279,7 @@ export type OfferMaxAggregateInputType = {
 	dayCount?: true;
 	discountType?: true;
 	discountValue?: true;
+	hideZeroLines?: true;
 	assetScope?: true;
 	recipientOrganizationId?: true;
 	vatRatePercent?: true;
@@ -322,6 +328,8 @@ export type OfferCountAggregateInputType = {
 	dayCount?: true;
 	discountType?: true;
 	discountValue?: true;
+	lineGroups?: true;
+	hideZeroLines?: true;
 	assetScope?: true;
 	recipientOrganizationId?: true;
 	vatRatePercent?: true;
@@ -458,6 +466,8 @@ export type OfferGroupByOutputType = {
 	dayCount: number;
 	discountType: string | null;
 	discountValue: runtime.Decimal | null;
+	lineGroups: runtime.JsonValue;
+	hideZeroLines: boolean;
 	assetScope: string;
 	recipientOrganizationId: string | null;
 	vatRatePercent: runtime.Decimal;
@@ -532,6 +542,8 @@ export type OfferWhereInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonFilter<'Offer'>;
+	hideZeroLines?: Prisma.BoolFilter<'Offer'> | boolean;
 	assetScope?: Prisma.StringFilter<'Offer'> | string;
 	recipientOrganizationId?: Prisma.StringNullableFilter<'Offer'> | string | null;
 	vatRatePercent?:
@@ -601,6 +613,8 @@ export type OfferOrderByWithRelationInput = {
 	dayCount?: Prisma.SortOrder;
 	discountType?: Prisma.SortOrderInput | Prisma.SortOrder;
 	discountValue?: Prisma.SortOrderInput | Prisma.SortOrder;
+	lineGroups?: Prisma.SortOrder;
+	hideZeroLines?: Prisma.SortOrder;
 	assetScope?: Prisma.SortOrder;
 	recipientOrganizationId?: Prisma.SortOrderInput | Prisma.SortOrder;
 	vatRatePercent?: Prisma.SortOrder;
@@ -669,6 +683,8 @@ export type OfferWhereUniqueInput = Prisma.AtLeast<
 			| number
 			| string
 			| null;
+		lineGroups?: Prisma.JsonFilter<'Offer'>;
+		hideZeroLines?: Prisma.BoolFilter<'Offer'> | boolean;
 		assetScope?: Prisma.StringFilter<'Offer'> | string;
 		recipientOrganizationId?: Prisma.StringNullableFilter<'Offer'> | string | null;
 		vatRatePercent?:
@@ -743,6 +759,8 @@ export type OfferOrderByWithAggregationInput = {
 	dayCount?: Prisma.SortOrder;
 	discountType?: Prisma.SortOrderInput | Prisma.SortOrder;
 	discountValue?: Prisma.SortOrderInput | Prisma.SortOrder;
+	lineGroups?: Prisma.SortOrder;
+	hideZeroLines?: Prisma.SortOrder;
 	assetScope?: Prisma.SortOrder;
 	recipientOrganizationId?: Prisma.SortOrderInput | Prisma.SortOrder;
 	vatRatePercent?: Prisma.SortOrder;
@@ -805,6 +823,8 @@ export type OfferScalarWhereWithAggregatesInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonWithAggregatesFilter<'Offer'>;
+	hideZeroLines?: Prisma.BoolWithAggregatesFilter<'Offer'> | boolean;
 	assetScope?: Prisma.StringWithAggregatesFilter<'Offer'> | string;
 	recipientOrganizationId?: Prisma.StringNullableWithAggregatesFilter<'Offer'> | string | null;
 	vatRatePercent?:
@@ -855,6 +875,8 @@ export type OfferCreateInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string;
 	isKleinunternehmerSnapshot?: boolean;
@@ -909,6 +931,8 @@ export type OfferUncheckedCreateInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	recipientOrganizationId?: string | null;
 	vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string;
@@ -963,6 +987,8 @@ export type OfferUpdateInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	vatRatePercent?:
 		| Prisma.DecimalFieldUpdateOperationsInput
@@ -1028,6 +1054,8 @@ export type OfferUncheckedUpdateInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	recipientOrganizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	vatRatePercent?:
@@ -1084,6 +1112,8 @@ export type OfferCreateManyInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	recipientOrganizationId?: string | null;
 	vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string;
@@ -1135,6 +1165,8 @@ export type OfferUpdateManyMutationInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	vatRatePercent?:
 		| Prisma.DecimalFieldUpdateOperationsInput
@@ -1192,6 +1224,8 @@ export type OfferUncheckedUpdateManyInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	recipientOrganizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	vatRatePercent?:
@@ -1270,6 +1304,8 @@ export type OfferCountOrderByAggregateInput = {
 	dayCount?: Prisma.SortOrder;
 	discountType?: Prisma.SortOrder;
 	discountValue?: Prisma.SortOrder;
+	lineGroups?: Prisma.SortOrder;
+	hideZeroLines?: Prisma.SortOrder;
 	assetScope?: Prisma.SortOrder;
 	recipientOrganizationId?: Prisma.SortOrder;
 	vatRatePercent?: Prisma.SortOrder;
@@ -1326,6 +1362,7 @@ export type OfferMaxOrderByAggregateInput = {
 	dayCount?: Prisma.SortOrder;
 	discountType?: Prisma.SortOrder;
 	discountValue?: Prisma.SortOrder;
+	hideZeroLines?: Prisma.SortOrder;
 	assetScope?: Prisma.SortOrder;
 	recipientOrganizationId?: Prisma.SortOrder;
 	vatRatePercent?: Prisma.SortOrder;
@@ -1374,6 +1411,7 @@ export type OfferMinOrderByAggregateInput = {
 	dayCount?: Prisma.SortOrder;
 	discountType?: Prisma.SortOrder;
 	discountValue?: Prisma.SortOrder;
+	hideZeroLines?: Prisma.SortOrder;
 	assetScope?: Prisma.SortOrder;
 	recipientOrganizationId?: Prisma.SortOrder;
 	vatRatePercent?: Prisma.SortOrder;
@@ -1944,6 +1982,8 @@ export type OfferCreateWithoutOrganizationInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string;
 	isKleinunternehmerSnapshot?: boolean;
@@ -1996,6 +2036,8 @@ export type OfferUncheckedCreateWithoutOrganizationInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	recipientOrganizationId?: string | null;
 	vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string;
@@ -2057,6 +2099,8 @@ export type OfferCreateWithoutRecipientOrganizationInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string;
 	isKleinunternehmerSnapshot?: boolean;
@@ -2110,6 +2154,8 @@ export type OfferUncheckedCreateWithoutRecipientOrganizationInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string;
 	isKleinunternehmerSnapshot?: boolean;
@@ -2212,6 +2258,8 @@ export type OfferScalarWhereInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonFilter<'Offer'>;
+	hideZeroLines?: Prisma.BoolFilter<'Offer'> | boolean;
 	assetScope?: Prisma.StringFilter<'Offer'> | string;
 	recipientOrganizationId?: Prisma.StringNullableFilter<'Offer'> | string | null;
 	vatRatePercent?:
@@ -2286,6 +2334,8 @@ export type OfferCreateWithoutProductionInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string;
 	isKleinunternehmerSnapshot?: boolean;
@@ -2338,6 +2388,8 @@ export type OfferUncheckedCreateWithoutProductionInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	recipientOrganizationId?: string | null;
 	vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string;
@@ -2427,6 +2479,8 @@ export type OfferCreateWithoutRentalTermsVersionInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string;
 	isKleinunternehmerSnapshot?: boolean;
@@ -2479,6 +2533,8 @@ export type OfferUncheckedCreateWithoutRentalTermsVersionInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	recipientOrganizationId?: string | null;
 	vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string;
@@ -2569,6 +2625,8 @@ export type OfferCreateWithoutRevisionsInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string;
 	isKleinunternehmerSnapshot?: boolean;
@@ -2622,6 +2680,8 @@ export type OfferUncheckedCreateWithoutRevisionsInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	recipientOrganizationId?: string | null;
 	vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string;
@@ -2677,6 +2737,8 @@ export type OfferCreateWithoutOriginalOfferInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string;
 	isKleinunternehmerSnapshot?: boolean;
@@ -2730,6 +2792,8 @@ export type OfferUncheckedCreateWithoutOriginalOfferInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	recipientOrganizationId?: string | null;
 	vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string;
@@ -2816,6 +2880,8 @@ export type OfferUpdateWithoutRevisionsInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	vatRatePercent?:
 		| Prisma.DecimalFieldUpdateOperationsInput
@@ -2880,6 +2946,8 @@ export type OfferUncheckedUpdateWithoutRevisionsInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	recipientOrganizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	vatRatePercent?:
@@ -2960,6 +3028,8 @@ export type OfferCreateWithoutItemsInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string;
 	isKleinunternehmerSnapshot?: boolean;
@@ -3013,6 +3083,8 @@ export type OfferUncheckedCreateWithoutItemsInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	recipientOrganizationId?: string | null;
 	vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string;
@@ -3094,6 +3166,8 @@ export type OfferUpdateWithoutItemsInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	vatRatePercent?:
 		| Prisma.DecimalFieldUpdateOperationsInput
@@ -3158,6 +3232,8 @@ export type OfferUncheckedUpdateWithoutItemsInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	recipientOrganizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	vatRatePercent?:
@@ -3210,6 +3286,8 @@ export type OfferCreateWithoutInvoicesInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string;
 	isKleinunternehmerSnapshot?: boolean;
@@ -3263,6 +3341,8 @@ export type OfferUncheckedCreateWithoutInvoicesInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	recipientOrganizationId?: string | null;
 	vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string;
@@ -3344,6 +3424,8 @@ export type OfferUpdateWithoutInvoicesInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	vatRatePercent?:
 		| Prisma.DecimalFieldUpdateOperationsInput
@@ -3408,6 +3490,8 @@ export type OfferUncheckedUpdateWithoutInvoicesInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	recipientOrganizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	vatRatePercent?:
@@ -3462,6 +3546,8 @@ export type OfferCreateManyOrganizationInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	recipientOrganizationId?: string | null;
 	vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string;
@@ -3510,6 +3596,8 @@ export type OfferCreateManyRecipientOrganizationInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string;
 	isKleinunternehmerSnapshot?: boolean;
@@ -3560,6 +3648,8 @@ export type OfferUpdateWithoutOrganizationInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	vatRatePercent?:
 		| Prisma.DecimalFieldUpdateOperationsInput
@@ -3623,6 +3713,8 @@ export type OfferUncheckedUpdateWithoutOrganizationInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	recipientOrganizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	vatRatePercent?:
@@ -3684,6 +3776,8 @@ export type OfferUncheckedUpdateManyWithoutOrganizationInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	recipientOrganizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	vatRatePercent?:
@@ -3740,6 +3834,8 @@ export type OfferUpdateWithoutRecipientOrganizationInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	vatRatePercent?:
 		| Prisma.DecimalFieldUpdateOperationsInput
@@ -3804,6 +3900,8 @@ export type OfferUncheckedUpdateWithoutRecipientOrganizationInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	vatRatePercent?:
 		| Prisma.DecimalFieldUpdateOperationsInput
@@ -3865,6 +3963,8 @@ export type OfferUncheckedUpdateManyWithoutRecipientOrganizationInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	vatRatePercent?:
 		| Prisma.DecimalFieldUpdateOperationsInput
@@ -3916,6 +4016,8 @@ export type OfferCreateManyProductionInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	recipientOrganizationId?: string | null;
 	vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string;
@@ -3967,6 +4069,8 @@ export type OfferUpdateWithoutProductionInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	vatRatePercent?:
 		| Prisma.DecimalFieldUpdateOperationsInput
@@ -4030,6 +4134,8 @@ export type OfferUncheckedUpdateWithoutProductionInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	recipientOrganizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	vatRatePercent?:
@@ -4091,6 +4197,8 @@ export type OfferUncheckedUpdateManyWithoutProductionInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	recipientOrganizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	vatRatePercent?:
@@ -4143,6 +4251,8 @@ export type OfferCreateManyRentalTermsVersionInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	recipientOrganizationId?: string | null;
 	vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string;
@@ -4194,6 +4304,8 @@ export type OfferUpdateWithoutRentalTermsVersionInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	vatRatePercent?:
 		| Prisma.DecimalFieldUpdateOperationsInput
@@ -4257,6 +4369,8 @@ export type OfferUncheckedUpdateWithoutRentalTermsVersionInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	recipientOrganizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	vatRatePercent?:
@@ -4318,6 +4432,8 @@ export type OfferUncheckedUpdateManyWithoutRentalTermsVersionInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	recipientOrganizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	vatRatePercent?:
@@ -4371,6 +4487,8 @@ export type OfferCreateManyOriginalOfferInput = {
 	dayCount: number;
 	discountType?: string | null;
 	discountValue?: runtime.Decimal | runtime.DecimalJsLike | number | string | null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: boolean;
 	assetScope?: string;
 	recipientOrganizationId?: string | null;
 	vatRatePercent?: runtime.Decimal | runtime.DecimalJsLike | number | string;
@@ -4421,6 +4539,8 @@ export type OfferUpdateWithoutOriginalOfferInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	vatRatePercent?:
 		| Prisma.DecimalFieldUpdateOperationsInput
@@ -4485,6 +4605,8 @@ export type OfferUncheckedUpdateWithoutOriginalOfferInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	recipientOrganizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	vatRatePercent?:
@@ -4546,6 +4668,8 @@ export type OfferUncheckedUpdateManyWithoutOriginalOfferInput = {
 		| number
 		| string
 		| null;
+	lineGroups?: Prisma.JsonNullValueInput | runtime.InputJsonValue;
+	hideZeroLines?: Prisma.BoolFieldUpdateOperationsInput | boolean;
 	assetScope?: Prisma.StringFieldUpdateOperationsInput | string;
 	recipientOrganizationId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null;
 	vatRatePercent?:
@@ -4658,6 +4782,8 @@ export type OfferSelect<
 		dayCount?: boolean;
 		discountType?: boolean;
 		discountValue?: boolean;
+		lineGroups?: boolean;
+		hideZeroLines?: boolean;
 		assetScope?: boolean;
 		recipientOrganizationId?: boolean;
 		vatRatePercent?: boolean;
@@ -4720,6 +4846,8 @@ export type OfferSelectCreateManyAndReturn<
 		dayCount?: boolean;
 		discountType?: boolean;
 		discountValue?: boolean;
+		lineGroups?: boolean;
+		hideZeroLines?: boolean;
 		assetScope?: boolean;
 		recipientOrganizationId?: boolean;
 		vatRatePercent?: boolean;
@@ -4778,6 +4906,8 @@ export type OfferSelectUpdateManyAndReturn<
 		dayCount?: boolean;
 		discountType?: boolean;
 		discountValue?: boolean;
+		lineGroups?: boolean;
+		hideZeroLines?: boolean;
 		assetScope?: boolean;
 		recipientOrganizationId?: boolean;
 		vatRatePercent?: boolean;
@@ -4833,6 +4963,8 @@ export type OfferSelectScalar = {
 	dayCount?: boolean;
 	discountType?: boolean;
 	discountValue?: boolean;
+	lineGroups?: boolean;
+	hideZeroLines?: boolean;
 	assetScope?: boolean;
 	recipientOrganizationId?: boolean;
 	vatRatePercent?: boolean;
@@ -4883,6 +5015,8 @@ export type OfferOmit<
 	| 'dayCount'
 	| 'discountType'
 	| 'discountValue'
+	| 'lineGroups'
+	| 'hideZeroLines'
 	| 'assetScope'
 	| 'recipientOrganizationId'
 	| 'vatRatePercent'
@@ -4978,6 +5112,8 @@ export type $OfferPayload<
 			dayCount: number;
 			discountType: string | null;
 			discountValue: runtime.Decimal | null;
+			lineGroups: runtime.JsonValue;
+			hideZeroLines: boolean;
 			assetScope: string;
 			recipientOrganizationId: string | null;
 			vatRatePercent: runtime.Decimal;
@@ -5663,6 +5799,8 @@ export interface OfferFieldRefs {
 	readonly dayCount: Prisma.FieldRef<'Offer', 'Int'>;
 	readonly discountType: Prisma.FieldRef<'Offer', 'String'>;
 	readonly discountValue: Prisma.FieldRef<'Offer', 'Decimal'>;
+	readonly lineGroups: Prisma.FieldRef<'Offer', 'Json'>;
+	readonly hideZeroLines: Prisma.FieldRef<'Offer', 'Boolean'>;
 	readonly assetScope: Prisma.FieldRef<'Offer', 'String'>;
 	readonly recipientOrganizationId: Prisma.FieldRef<'Offer', 'String'>;
 	readonly vatRatePercent: Prisma.FieldRef<'Offer', 'Decimal'>;

@@ -5,12 +5,21 @@
 	import { Input } from '#lib/components/ui/input/index.js';
 	import { getErrorMessage, plural } from '#lib/utils.js';
 	import { toast } from 'svelte-sonner';
-	import { groupBillingItems, type LineGroup } from '#lib/billing-lines.js';
+	import { groupBillingItems, parseLineGroups, type LineGroup } from '#lib/billing-lines.js';
+	import { SvelteSet } from 'svelte/reactivity';
+	import { localizedName } from '#lib/category.js';
 	import { formatQuantity, serviceUnitShort } from '#lib/service-lines.svelte.js';
-	import { deleteServiceLine, moveServiceLine } from '#lib/remote/offers.remote.js';
+	import {
+		deleteServiceLine,
+		moveServiceLine,
+		setHideZeroLines,
+		ungroupBillingLines,
+		updateBillingLineGroup
+	} from '#lib/remote/offers.remote.js';
 	import { ChevronDown, ChevronUp } from '@lucide/svelte';
 	import { ProductThumb } from '#lib/components/ui/product-thumb/index.js';
 	import ServiceLineModal from './service-line-modal.svelte';
+	import LineGroupModal from './line-group-modal.svelte';
 	import type { BillingItem, DurationInfo, EditedServiceLine, ServiceLineTarget } from './types';
 	import { billingTotals, type DiscountType } from '#lib/billing-totals.js';
 	import { loanMargins, type LoanCostEntry, type LoanLine } from '#lib/loan-margins.js';
@@ -33,8 +42,14 @@
 		serviceTarget,
 		afterItems,
 		asideTop,
-		loanCosts = null
+		loanCosts = null,
+		lineGroups = [],
+		hideZeroLines = false
 	}: {
+		/** The document's collective lines, its `lineGroups` column (billing-lines.ts). */
+		lineGroups?: unknown;
+		/** Whether 0,00 € lines are left off the PDF. */
+		hideZeroLines?: boolean;
 		/**
 		 * What the lenders charge for the borrowed equipment on this document
 		 * (`getLoanCosts`); each such line then shows what passing it on earns.
@@ -79,7 +94,15 @@
 	}
 
 	// Units of one product show as a single quantity line — see $lib/billing-lines.
-	let groups = $derived(groupBillingItems(items));
+	let groups = $derived(
+		groupBillingItems(
+			items,
+			(item) =>
+				localizedName(item.categoryName, item.categoryNameDe) ||
+				(item.kind === 'SERVICE' ? 'Other' : 'Uncategorized'),
+			{ lineGroups, hideZeroLines }
+		)
+	);
 
 	let totals = $derived(billingTotals({ items, discountType, discountValue, vatRatePercent }));
 	let subtotal = $derived(totals.subtotal);
@@ -306,6 +329,84 @@
 		return serviceAction(lineId, () => moveServiceLine({ kind, lineId, direction }));
 	}
 
+	// ── Collective lines ──
+	// Lines are picked by their product (or kit), which is what a group keeps.
+	let canGroup = $derived(editable && !!serviceTarget);
+	let existingGroups = $derived(parseLineGroups(lineGroups));
+	const selectedKeys = new SvelteSet<string>();
+	const expandedGroups = new SvelteSet<string>();
+	let groupModalOpen = $state(false);
+	let renamedGroup = $state<{ id: string; label: string } | null>(null);
+	let busyGroup = $state<string | null>(null);
+	let savingZeroLines = $state(false);
+	let hasZeroLines = $derived(
+		items.some((item) => item.kind !== 'SERVICE' && Math.round(Number(item.lineTotal) * 100) === 0)
+	);
+
+	function toggleSelected(key: string) {
+		if (selectedKeys.has(key)) selectedKeys.delete(key);
+		else selectedKeys.add(key);
+	}
+
+	function toggleExpanded(id: string) {
+		if (expandedGroups.has(id)) expandedGroups.delete(id);
+		else expandedGroups.add(id);
+	}
+
+	function openGroupSelected() {
+		renamedGroup = null;
+		groupModalOpen = true;
+	}
+
+	function openRenameGroup(id: string, label: string) {
+		renamedGroup = { id, label };
+		groupModalOpen = true;
+	}
+
+	async function groupAction(groupId: string, action: () => Promise<void>) {
+		busyGroup = groupId;
+		try {
+			await action();
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			busyGroup = null;
+		}
+	}
+
+	function ungroup(groupId: string) {
+		if (!serviceTarget) return;
+		const { kind, documentId } = serviceTarget;
+		return groupAction(groupId, async () => {
+			await ungroupBillingLines({ kind, documentId, groupId });
+			toast.success('Collective line split');
+		});
+	}
+
+	function takeOut(groupId: string, key: string) {
+		if (!serviceTarget) return;
+		const { kind, documentId } = serviceTarget;
+		return groupAction(groupId, () =>
+			updateBillingLineGroup({ kind, documentId, groupId, removeKeys: [key] })
+		);
+	}
+
+	async function toggleZeroLines(hide: boolean) {
+		if (!serviceTarget) return;
+		savingZeroLines = true;
+		try {
+			await setHideZeroLines({
+				kind: serviceTarget.kind,
+				documentId: serviceTarget.documentId,
+				hide
+			});
+		} catch (err) {
+			toast.error(getErrorMessage(err));
+		} finally {
+			savingZeroLines = false;
+		}
+	}
+
 	async function applyCategoryRate(categoryId: string, itemIds: string[], ratePercent: number) {
 		savingCategory = categoryId;
 		try {
@@ -441,74 +542,69 @@
 											>{fmtEUR(line.lineTotal)}</td
 										>
 									</tr>
-								{:else}
-									{@const loan = lineMargin(line)}
-									<tr class="border-b transition-colors last:border-0 hover:bg-muted/30">
+								{:else if line.collective}
+									{@const collective = line.collective}
+									{@const open = expandedGroups.has(collective.id)}
+									<tr
+										class="border-b transition-colors last:border-0 hover:bg-muted/30 {line.hidden
+											? 'opacity-60'
+											: ''}"
+									>
 										<td class="px-4 py-3">
-											<div class="flex items-center gap-2">
-												<ProductThumb path={line.items[0].imagePath} alt={line.label} />
-												<div class="min-w-0">
-													<span>{line.label}</span>
-													{#if loan}
-														<p class="text-xs text-muted-foreground">
-															{#if loan.free}
-																Borrowed free of charge from {loan.lenderName}
-															{:else if loan.cost === null}
-																Borrowed from {loan.lenderName} · cost not known yet
-															{:else}
-																Borrowed from {loan.lenderName} · costs {fmtEUR(loan.cost)}
-															{/if}
-															{#if loan.margin !== null}
-																<span
-																	class="font-medium {loan.margin > 0
-																		? 'text-emerald-600 dark:text-emerald-400'
-																		: 'text-red-600 dark:text-red-400'}"
-																	>· {signedEUR(loan.margin)}</span
-																>
-															{/if}
-														</p>
-													{/if}
+											<div class="flex items-start justify-between gap-2">
+												<div class="flex min-w-0 items-start gap-2">
+													<Button
+														size="icon-xs"
+														variant="ghost"
+														title={open ? 'Hide lines' : 'Show lines'}
+														aria-expanded={open}
+														onclick={() => toggleExpanded(collective.id)}
+														>{#if open}<ChevronUp />{:else}<ChevronDown />{/if}</Button
+													>
+													<div class="min-w-0">
+														<p class="font-medium">{line.label}</p>
+														{#if collective.contents}
+															<p class="text-xs text-muted-foreground">{collective.contents}</p>
+														{/if}
+													</div>
 												</div>
+												{#if canGroup}
+													<div class="flex shrink-0 items-center">
+														<Button
+															size="icon-xs"
+															variant="ghost"
+															icon="edit"
+															title="Rename collective line"
+															disabled={busyGroup === collective.id}
+															onclick={() => openRenameGroup(collective.id, line.label)}
+														/>
+														<Button
+															size="icon-xs"
+															variant="ghost"
+															icon="delete"
+															title="Split into its lines"
+															disabled={busyGroup === collective.id}
+															onclick={() => ungroup(collective.id)}
+														/>
+													</div>
+												{/if}
 											</div>
 										</td>
-										<td class="px-4 py-3 text-right tabular-nums">{line.quantity}×</td>
-										<td class="px-4 py-3 text-right tabular-nums"
-											>{fmtEUR(line.netPurchasePrice)}</td
-										>
-										<td class="px-4 py-3 text-right">
-											{#if editable}
-												<div class="flex items-center justify-end gap-1">
-													<Input
-														type="number"
-														min="0"
-														step="0.01"
-														value={rateEdits[line.key] ?? String(line.ratePercent)}
-														oninput={(e) => {
-															rateEdits[line.key] = (e.target as HTMLInputElement).value;
-														}}
-														class="w-20 text-right"
-													/>
-													{#if rateEdits[line.key] !== undefined}
-														<Button
-															size="sm"
-															variant="outline"
-															onclick={() =>
-																saveRate(
-																	line.key,
-																	line.items.map((i) => i.id)
-																)}>Save</Button
-														>
-													{/if}
-												</div>
-											{:else}
-												{line.ratePercent}%
-											{/if}
+										<td class="px-4 py-3 text-right whitespace-nowrap tabular-nums">1 flat</td>
+										<td colspan="3" class="px-4 py-3 text-right text-muted-foreground">
+											{plural(collective.members.length, ['# line', '# lines'])}
 										</td>
-										<td class="px-4 py-3 text-right tabular-nums">{fmtEUR(line.dailyRate)}</td>
 										<td class="px-4 py-3 text-right font-medium tabular-nums"
 											>{fmtEUR(line.lineTotal)}</td
 										>
 									</tr>
+									{#if open}
+										{#each collective.members as member (member.key)}
+											{@render equipmentRow(member, collective.id)}
+										{/each}
+									{/if}
+								{:else}
+									{@render equipmentRow(line, null)}
 								{/if}
 							{/each}
 							<tr class="border-b bg-muted/10 last:border-0">
@@ -525,8 +621,26 @@
 			</div>
 		{/if}
 		{#if editable && serviceTarget}
-			<div class="mt-3">
-				<Button icon="add" variant="outline" size="sm" onclick={openAddService}>Add service</Button>
+			<!-- Sticky, so the selection can be grouped from wherever the list was scrolled to. -->
+			<div class="sticky bottom-0 mt-3 flex flex-wrap items-center gap-2 bg-background py-2">
+				<Button icon="add" variant="outline" size="sm" onclick={openAddService}>Add line</Button>
+				{#if selectedKeys.size > 0}
+					<Button size="sm" onclick={openGroupSelected}>
+						{plural(selectedKeys.size, ['Combine # line…', 'Combine # lines…'])}
+					</Button>
+					<Button size="sm" variant="ghost" onclick={() => selectedKeys.clear()}>Clear</Button>
+				{/if}
+				{#if hasZeroLines || !hideZeroLines}
+					<label class="ml-auto flex items-center gap-2 text-sm text-muted-foreground">
+						<input
+							type="checkbox"
+							checked={hideZeroLines}
+							disabled={savingZeroLines}
+							onchange={(e) => toggleZeroLines((e.target as HTMLInputElement).checked)}
+						/>
+						<span>Leave 0,00 € lines off the PDF</span>
+					</label>
+				{/if}
 			</div>
 		{/if}
 		{#if afterItems}
@@ -768,4 +882,105 @@
 		{dayCount}
 		line={editedService}
 	/>
+	<LineGroupModal
+		bind:open={groupModalOpen}
+		target={serviceTarget}
+		keys={[...selectedKeys]}
+		groups={existingGroups}
+		renamed={renamedGroup}
+		onDone={() => selectedKeys.clear()}
+	/>
 {/if}
+
+<!-- Last in the file: a snippet ends wuchale's extraction of plain text after it. -->
+{#snippet equipmentRow(line: LineGroup<BillingItem>, memberOf: string | null)}
+	{@const loan = lineMargin(line)}
+	<tr
+		class="border-b transition-colors last:border-0 hover:bg-muted/30 {memberOf
+			? 'bg-muted/10'
+			: ''} {line.hidden ? 'opacity-60' : ''}"
+	>
+		<td class="px-4 py-3 {memberOf ? 'pl-10' : ''}">
+			<div class="flex items-center gap-2">
+				{#if canGroup && line.groupKey && !memberOf}
+					<input
+						type="checkbox"
+						class="shrink-0"
+						aria-label="Select for a collective line"
+						checked={selectedKeys.has(line.groupKey)}
+						onchange={() => toggleSelected(line.groupKey!)}
+					/>
+				{/if}
+				<ProductThumb path={line.items[0].imagePath} alt={line.label} />
+				<div class="min-w-0">
+					<span>{line.label}</span>
+					{#if line.hidden}
+						<p class="text-xs text-muted-foreground">Not printed: 0,00 €</p>
+					{/if}
+					{#if loan}
+						<p class="text-xs text-muted-foreground">
+							{#if loan.free}
+								Borrowed free of charge from {loan.lenderName}
+							{:else if loan.cost === null}
+								Borrowed from {loan.lenderName} · cost not known yet
+							{:else}
+								Borrowed from {loan.lenderName} · costs {fmtEUR(loan.cost)}
+							{/if}
+							{#if loan.margin !== null}
+								<span
+									class="font-medium {loan.margin > 0
+										? 'text-emerald-600 dark:text-emerald-400'
+										: 'text-red-600 dark:text-red-400'}">· {signedEUR(loan.margin)}</span
+								>
+							{/if}
+						</p>
+					{/if}
+				</div>
+				{#if memberOf && canGroup && line.groupKey}
+					<Button
+						size="icon-xs"
+						variant="ghost"
+						icon="close"
+						class="ml-auto shrink-0"
+						title="Take out of the collective line"
+						disabled={busyGroup === memberOf}
+						onclick={() => takeOut(memberOf, line.groupKey!)}
+					/>
+				{/if}
+			</div>
+		</td>
+		<td class="px-4 py-3 text-right tabular-nums">{line.quantity}×</td>
+		<td class="px-4 py-3 text-right tabular-nums">{fmtEUR(line.netPurchasePrice)}</td>
+		<td class="px-4 py-3 text-right">
+			{#if editable}
+				<div class="flex items-center justify-end gap-1">
+					<Input
+						type="number"
+						min="0"
+						step="0.01"
+						value={rateEdits[line.key] ?? String(line.ratePercent)}
+						oninput={(e) => {
+							rateEdits[line.key] = (e.target as HTMLInputElement).value;
+						}}
+						class="w-20 text-right"
+					/>
+					{#if rateEdits[line.key] !== undefined}
+						<Button
+							size="sm"
+							variant="outline"
+							onclick={() =>
+								saveRate(
+									line.key,
+									line.items.map((i) => i.id)
+								)}>Save</Button
+						>
+					{/if}
+				</div>
+			{:else}
+				{line.ratePercent}%
+			{/if}
+		</td>
+		<td class="px-4 py-3 text-right tabular-nums">{fmtEUR(line.dailyRate)}</td>
+		<td class="px-4 py-3 text-right font-medium tabular-nums">{fmtEUR(line.lineTotal)}</td>
+	</tr>
+{/snippet}

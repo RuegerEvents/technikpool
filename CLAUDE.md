@@ -515,6 +515,24 @@ change. Its `category*` columns snapshot a per-org `ServiceCategory`, not a `Cat
 after the equipment and never merges two service lines. Every copy of a document (revision,
 copy to customer, invoice) goes through `copyItem`, so a new item column has to be added there.
 
+A service line may go without a section (`categoryId` null): it prints under "Sonstiges", after
+every section. Its price may be negative — a deduction ("Abzug defektes Gerät −5 €"); the
+e-invoice writes that as a negative quantity at a positive price, since EN 16931 forbids a
+negative price (BR-27), and `billingDocumentIssues` refuses a document whose lines sum below zero
+(that would be a credit note).
+
+**Collective lines and 0,00 € lines.** `Offer`/`Invoice.lineGroups` (JSON,
+`BillingLineGroup[]`: id, label, keys) folds every equipment line whose `groupKey`
+(`product:<id>` / `bundle:<id>`) is in `keys` into one line "1 pauschal" with the contents in small
+print — kept by key, not by item, so "update from production" leaves it be and a further unit
+joins it. `hideZeroLines` leaves 0,00 € lines off (default on; documents issued before the column
+keep them). Both are applied inside `groupBillingItems` (its `layout` argument), so the web view,
+the PDF and the XML agree; the PDF and the XML read `printedSections()`, the web view shows hidden
+lines dimmed. A collective line sits in its first member's section, and section subtotals follow.
+Edited on a draft by selecting lines (`groupBillingLines`, `updateBillingLineGroup`,
+`ungroupBillingLines`, `setHideZeroLines`); every copy of a document carries both columns
+(`layoutColumns`).
+
 **Offer to sign.** `/api/billing-documents/offers/[id]?signature=1` ("PDF to sign" on the offer
 page) renders the offer with a line for the customer to sign the order on
 (`acceptanceSignature` in `generateBillingPdf`). It is never archived: a finalized offer is

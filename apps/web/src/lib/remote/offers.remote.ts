@@ -48,7 +48,7 @@ function textsAsSent(
 }
 import { putObject } from '#lib/server/storage.js';
 import { organizationFromSnapshot, orgSnapshotColumns } from '#lib/org-snapshot.js';
-import { summarizeContents } from '#lib/billing-lines.js';
+import { parseLineGroups, summarizeContents, type BillingLineGroup } from '#lib/billing-lines.js';
 import { productLabel } from '#lib/product-label.js';
 import { appError, type AppErrorCode, type ErrorParams } from '#lib/errors.js';
 import type { Prisma } from '#lib/prisma/client.js';
@@ -1470,6 +1470,7 @@ export const copyOfferToNewCustomer = command(copyOfferSchema, async ({ offerId,
 				discountValue: source.discountValue,
 				assetScope: source.assetScope,
 				vatRatePercent: source.vatRatePercent,
+				...layoutColumns(source),
 				items: { create: source.items.map(copyItem) }
 			}
 		});
@@ -1601,6 +1602,7 @@ export const createOfferRevision = command(v.string(), async (offerId: string) =
 			discountValue: source.discountValue,
 			assetScope: source.assetScope,
 			recipientOrganizationId: source.recipientOrganizationId,
+			...layoutColumns(source),
 			items: { create: items }
 		},
 		select: { id: true, number: true }
@@ -1707,6 +1709,7 @@ export const convertOfferToInvoice = command(convertOfferSchema, async ({ offerI
 				discountType: offer.discountType,
 				discountValue: offer.discountValue,
 				assetScope: offer.assetScope,
+				...layoutColumns(offer),
 				recipientOrganizationId: offer.recipientOrganizationId,
 				isKleinunternehmerSnapshot: offer.organization.isKleinunternehmer,
 				vatRatePercent: offer.organization.isKleinunternehmer ? 0 : 19,
@@ -2256,11 +2259,15 @@ const serviceLineFields = {
 	serviceId: v.optional(v.string()),
 	name: v.pipe(v.string(), v.trim(), v.minLength(1)),
 	note: v.optional(v.string()),
-	/** A ServiceCategory of the document's org: the section it prints in. */
-	categoryId: v.string(),
+	/**
+	 * A ServiceCategory of the document's org: the section it prints in. None
+	 * puts the line under "Other", after every section.
+	 */
+	categoryId: v.nullish(v.pipe(v.string(), v.minLength(1))),
 	quantity: v.pipe(v.number(), v.minValue(0.01)),
 	unit: v.picklist(SERVICE_UNITS),
-	unitPrice: v.pipe(v.number(), v.minValue(0)),
+	/** Below zero for a deduction ("broken unit −5 €"). */
+	unitPrice: v.number(),
 	perDay: v.boolean(),
 	/** Also keep a line typed in by hand as a service in the org's price list. */
 	saveToCatalog: v.optional(v.boolean())
@@ -2272,7 +2279,12 @@ async function requireDraftDocument(kind: DocumentKind, id: string) {
 	if (kind === 'offer') {
 		const offer = await prisma.offer.findUniqueOrThrow({
 			where: { id },
-			select: { organizationId: true, dayCount: true, finalizedAt: true }
+			select: {
+				organizationId: true,
+				dayCount: true,
+				finalizedAt: true,
+				lineGroups: true
+			}
 		});
 		await requireOrgBilling(offer.organizationId);
 		if (offer.finalizedAt) appError(409, 'offer_immutable');
@@ -2280,7 +2292,7 @@ async function requireDraftDocument(kind: DocumentKind, id: string) {
 	}
 	const invoice = await prisma.invoice.findUniqueOrThrow({
 		where: { id },
-		select: { organizationId: true, dayCount: true, sentAt: true }
+		select: { organizationId: true, dayCount: true, sentAt: true, lineGroups: true }
 	});
 	await requireOrgBilling(invoice.organizationId);
 	if (invoice.sentAt) appError(409, 'invoice_immutable');
@@ -2322,10 +2334,11 @@ async function serviceLineColumns(
 	input: ServiceLineInput,
 	existing?: { categoryId: string | null }
 ) {
-	const category = await prisma.serviceCategory.findFirst({
-		where: { id: input.categoryId, organizationId }
-	});
-	if (!category && existing?.categoryId !== input.categoryId) {
+	const categoryId = input.categoryId ?? null;
+	const category = categoryId
+		? await prisma.serviceCategory.findFirst({ where: { id: categoryId, organizationId } })
+		: null;
+	if (categoryId && !category && existing?.categoryId !== categoryId) {
 		appError(404, 'service_category_not_found');
 	}
 	const quantity = toCents(input.quantity);
@@ -2357,18 +2370,30 @@ async function serviceLineColumns(
 		unitPrice,
 		perDay: input.perDay,
 		lineTotal: serviceLineTotal(quantity, unitPrice, input.perDay, dayCount),
-		...(category && {
-			categoryId: category.id,
-			categoryName: category.name,
-			categoryNameDe: null,
-			categoryColor: category.color,
-			categorySortOrder: category.sortOrder
-		})
+		...(category
+			? {
+					categoryId: category.id,
+					categoryName: category.name,
+					categoryNameDe: null,
+					categoryColor: category.color,
+					categorySortOrder: category.sortOrder
+				}
+			: !categoryId && {
+					categoryId: null,
+					categoryName: null,
+					categoryNameDe: null,
+					categoryColor: null,
+					categorySortOrder: null
+				})
 	};
 }
 
 /** One past the last service line in that section, so a new line lands at its end. */
-async function nextServicePosition(kind: DocumentKind, documentId: string, categoryId: string) {
+async function nextServicePosition(
+	kind: DocumentKind,
+	documentId: string,
+	categoryId: string | null
+) {
 	const where = { kind: SERVICE, categoryId };
 	const last =
 		kind === 'offer'
@@ -2393,7 +2418,7 @@ export const addServiceLine = command(addServiceLineSchema, async (data) => {
 	const { kind, documentId, ...input } = data;
 	const document = await requireDraftDocument(kind, documentId);
 	const columns = await serviceLineColumns(document.organizationId, document.dayCount, input);
-	const position = await nextServicePosition(kind, documentId, input.categoryId);
+	const position = await nextServicePosition(kind, documentId, input.categoryId ?? null);
 	if (kind === 'offer') {
 		await prisma.offerItem.create({ data: { ...columns, position, offerId: documentId } });
 	} else {
@@ -2415,9 +2440,9 @@ export const updateServiceLine = command(updateServiceLineSchema, async (data) =
 	const columns = await serviceLineColumns(document.organizationId, document.dayCount, input, line);
 	// Moved to another section: it joins that one at the end.
 	const position =
-		line.categoryId === input.categoryId
+		line.categoryId === (input.categoryId ?? null)
 			? line.position
-			: await nextServicePosition(kind, line.documentId, input.categoryId);
+			: await nextServicePosition(kind, line.documentId, input.categoryId ?? null);
 	if (kind === 'offer') {
 		await prisma.offerItem.update({ where: { id: lineId }, data: { ...columns, position } });
 	} else {
@@ -2635,5 +2660,107 @@ export const getLoanCosts = query(
 				document
 			}))
 		};
+	}
+);
+
+// ── Collective lines and hidden 0,00 € lines ──────────────────────────────
+// How a draft's equipment prints: lines folded into one ("Kabel & Strom,
+// pauschal"), and whether 0,00 € lines are left off. Kept on the document as
+// keys (`product:…`, `bundle:…`), see billing-lines.ts, so "update from
+// production" leaves them be.
+
+/** Copied with the document: a revision, a copy, the invoice from an offer. */
+function layoutColumns(source: { lineGroups: Prisma.JsonValue; hideZeroLines: boolean }) {
+	return {
+		lineGroups: parseLineGroups(source.lineGroups) as Prisma.InputJsonValue,
+		hideZeroLines: source.hideZeroLines
+	};
+}
+
+async function writeLineGroups(kind: DocumentKind, id: string, groups: BillingLineGroup[]) {
+	// A group left with no keys has nothing to fold.
+	const lineGroups = groups.filter((group) => group.keys.length > 0) as Prisma.InputJsonValue;
+	if (kind === 'offer') await prisma.offer.update({ where: { id }, data: { lineGroups } });
+	else await prisma.invoice.update({ where: { id }, data: { lineGroups } });
+	await refreshDocument(kind, id);
+}
+
+const groupKeys = v.pipe(
+	v.array(v.pipe(v.string(), v.regex(/^(product|bundle):.+$/))),
+	v.minLength(1)
+);
+const groupLabel = v.pipe(v.string(), v.trim(), v.minLength(1), v.maxLength(200));
+
+/**
+ * Folds the lines with these keys into a collective line: a new one named
+ * `label`, or the existing `groupId`. A key belongs to one group, so it leaves
+ * any other it was in.
+ */
+export const groupBillingLines = command(
+	v.object({
+		kind: documentKind,
+		documentId: v.string(),
+		keys: groupKeys,
+		label: v.optional(groupLabel),
+		groupId: v.optional(v.string())
+	}),
+	async ({ kind, documentId, keys, label, groupId }) => {
+		const document = await requireDraftDocument(kind, documentId);
+		const moving = new Set(keys);
+		const groups = parseLineGroups(document.lineGroups).map((group) => ({
+			...group,
+			keys: group.keys.filter((key) => !moving.has(key))
+		}));
+		if (groupId) {
+			const group = groups.find((g) => g.id === groupId);
+			if (!group) appError(404, 'line_group_not_found');
+			group.keys.push(...keys);
+			if (label) group.label = label;
+		} else {
+			if (!label) appError(400, 'line_group_label_missing');
+			groups.push({ id: crypto.randomUUID(), label, keys });
+		}
+		await writeLineGroups(kind, documentId, groups);
+	}
+);
+
+/** Renames a collective line, or takes lines back out of it (`removeKeys`). */
+export const updateBillingLineGroup = command(
+	v.object({
+		kind: documentKind,
+		documentId: v.string(),
+		groupId: v.string(),
+		label: v.optional(groupLabel),
+		removeKeys: v.optional(v.array(v.string()))
+	}),
+	async ({ kind, documentId, groupId, label, removeKeys }) => {
+		const document = await requireDraftDocument(kind, documentId);
+		const groups = parseLineGroups(document.lineGroups);
+		const group = groups.find((g) => g.id === groupId);
+		if (!group) appError(404, 'line_group_not_found');
+		if (label) group.label = label;
+		if (removeKeys) group.keys = group.keys.filter((key) => !removeKeys.includes(key));
+		await writeLineGroups(kind, documentId, groups);
+	}
+);
+
+/** Splits a collective line back into its lines. */
+export const ungroupBillingLines = command(
+	v.object({ kind: documentKind, documentId: v.string(), groupId: v.string() }),
+	async ({ kind, documentId, groupId }) => {
+		const document = await requireDraftDocument(kind, documentId);
+		const groups = parseLineGroups(document.lineGroups).filter((g) => g.id !== groupId);
+		await writeLineGroups(kind, documentId, groups);
+	}
+);
+
+export const setHideZeroLines = command(
+	v.object({ kind: documentKind, documentId: v.string(), hide: v.boolean() }),
+	async ({ kind, documentId, hide }) => {
+		await requireDraftDocument(kind, documentId);
+		const data = { hideZeroLines: hide };
+		if (kind === 'offer') await prisma.offer.update({ where: { id: documentId }, data });
+		else await prisma.invoice.update({ where: { id: documentId }, data });
+		await refreshDocument(kind, documentId);
 	}
 );

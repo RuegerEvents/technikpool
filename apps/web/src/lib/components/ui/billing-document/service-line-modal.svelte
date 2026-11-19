@@ -70,11 +70,6 @@
 		saveToCatalog = false;
 	});
 
-	// A new line lands in the first section until one is chosen.
-	$effect(() => {
-		if (open && !categoryId && catalog.length > 0) categoryId = catalog[0].id;
-	});
-
 	/** Picking a catalog entry copies it in; every field stays editable. */
 	function pick(id: string) {
 		serviceId = id;
@@ -94,12 +89,12 @@
 			: null
 	);
 
+	// A price below zero is a deduction; '' is "Other", no section.
 	let valid = $derived(
 		name.trim() !== '' &&
-			categoryId !== '' &&
 			Number(quantity) > 0 &&
 			String(unitPrice).trim() !== '' &&
-			Number(unitPrice) >= 0
+			Number.isFinite(Number(unitPrice))
 	);
 	let total = $derived(
 		valid ? serviceLineTotal(Number(quantity), Number(unitPrice), perDay, dayCount) : null
@@ -117,17 +112,17 @@
 			serviceId: fromCatalog ? serviceId : undefined,
 			name: name.trim(),
 			note: note.trim() || undefined,
-			categoryId,
+			categoryId: categoryId || null,
 			quantity: Number(quantity),
 			unit,
 			unitPrice: Number(unitPrice),
 			perDay,
-			saveToCatalog: !fromCatalog && saveToCatalog
+			saveToCatalog: !fromCatalog && categoryId !== '' && saveToCatalog
 		};
 		try {
 			if (line) await updateServiceLine({ kind: target.kind, lineId: line.id, ...input });
 			else await addServiceLine({ kind: target.kind, documentId: target.documentId, ...input });
-			toast.success(line ? 'Service updated' : 'Service added');
+			toast.success(line ? 'Line updated' : 'Line added');
 			open = false;
 		} catch (err) {
 			toast.error(getErrorMessage(err));
@@ -140,127 +135,120 @@
 		'h-9 w-full rounded-md border border-input bg-background px-3 text-sm focus:ring-2 focus:ring-ring focus:outline-none';
 </script>
 
-<Modal bind:open title={line ? 'Edit service' : 'Add service'} size="lg" dismissible={!saving}>
+<Modal bind:open title={line ? 'Edit line' : 'Add line'} size="lg" dismissible={!saving}>
 	{#snippet children()}
 		{#if catalogQuery.ready && catalog.length === 0}
-			<p class="text-sm text-muted-foreground">
-				A service goes into one of your organization's service categories, such as Personal or
-				Transport. Set them up under
+			<p class="mb-4 text-sm text-muted-foreground">
+				Without a section a line prints under "Other". Sections such as Personal or Transport, and a
+				price list to pick from, are set up under
 				<a
 					href={resolve(`orgs/${target.organizationId}/rates`)}
 					class="underline underline-offset-2 hover:text-foreground">Rates & services</a
-				>
-				first.
+				>.
 			</p>
-		{:else}
-			<form id="service-line-form" class="space-y-4" onsubmit={save}>
-				{#if services.length > 0}
-					<div class="space-y-2">
-						<Label for="service-pick">From the price list</Label>
-						<select
-							id="service-pick"
-							class={selectClass}
-							value={fromCatalog ? serviceId : ''}
-							onchange={(e) => pick((e.target as HTMLSelectElement).value)}
-						>
-							<option value="">Custom</option>
-							{#each catalog as category (category.id)}
-								{#if category.services.length > 0}
-									<optgroup label={category.name}>
-										{#each category.services as service (service.id)}
-											<option value={service.id}>{service.name}</option>
-										{/each}
-									</optgroup>
-								{/if}
-							{/each}
-						</select>
-					</div>
-				{/if}
-				<div class="grid gap-4 sm:grid-cols-2">
-					<div class="space-y-2">
-						<Label for="service-name">Name</Label>
-						<Input id="service-name" bind:value={name} required />
-					</div>
-					<div class="space-y-2">
-						<Label for="service-category">Section</Label>
-						<select id="service-category" class={selectClass} bind:value={categoryId}>
-							{#if orphanedCategory}
-								<option value={orphanedCategory}>(deleted section)</option>
+		{/if}
+		<form id="service-line-form" class="space-y-4" onsubmit={save}>
+			{#if services.length > 0}
+				<div class="space-y-2">
+					<Label for="service-pick">From the price list</Label>
+					<select
+						id="service-pick"
+						class={selectClass}
+						value={fromCatalog ? serviceId : ''}
+						onchange={(e) => pick((e.target as HTMLSelectElement).value)}
+					>
+						<option value="">Custom</option>
+						{#each catalog as category (category.id)}
+							{#if category.services.length > 0}
+								<optgroup label={category.name}>
+									{#each category.services as service (service.id)}
+										<option value={service.id}>{service.name}</option>
+									{/each}
+								</optgroup>
 							{/if}
-							{#each catalog as category (category.id)}
-								<option value={category.id}>{category.name}</option>
-							{/each}
-						</select>
-					</div>
+						{/each}
+					</select>
+				</div>
+			{/if}
+			<div class="grid gap-4 sm:grid-cols-2">
+				<div class="space-y-2">
+					<Label for="service-name">Name</Label>
+					<Input id="service-name" bind:value={name} required />
 				</div>
 				<div class="space-y-2">
-					<Label for="service-note">Note</Label>
-					<textarea
-						id="service-note"
-						bind:value={note}
-						rows="2"
-						placeholder="Optional, printed under the name"
-						class="w-full rounded-md border bg-background px-3 py-2 text-sm"></textarea>
+					<Label for="service-category">Section</Label>
+					<select id="service-category" class={selectClass} bind:value={categoryId}>
+						{#if orphanedCategory}
+							<option value={orphanedCategory}>(deleted section)</option>
+						{/if}
+						{#each catalog as category (category.id)}
+							<option value={category.id}>{category.name}</option>
+						{/each}
+						<option value="">Other (no section)</option>
+					</select>
 				</div>
-				<div class="grid gap-4 sm:grid-cols-3">
-					<div class="space-y-2">
-						<Label for="service-quantity">Quantity</Label>
-						<Input
-							id="service-quantity"
-							type="number"
-							min="0.01"
-							step="0.01"
-							bind:value={quantity}
-							required
-						/>
-					</div>
-					<div class="space-y-2">
-						<Label for="service-unit">Unit</Label>
-						<select id="service-unit" class={selectClass} bind:value={unit}>
-							{#each SERVICE_UNITS as option (option)}
-								<option value={option}>{serviceUnitLabel(option)}</option>
-							{/each}
-						</select>
-					</div>
-					<div class="space-y-2">
-						<Label for="service-price">Unit price (€, net)</Label>
-						<Input
-							id="service-price"
-							type="number"
-							min="0"
-							step="0.01"
-							bind:value={unitPrice}
-							required
-						/>
-					</div>
+			</div>
+			<div class="space-y-2">
+				<Label for="service-note">Note</Label>
+				<textarea
+					id="service-note"
+					bind:value={note}
+					rows="2"
+					placeholder="Optional, printed under the name"
+					class="w-full rounded-md border bg-background px-3 py-2 text-sm"></textarea>
+			</div>
+			<div class="grid gap-4 sm:grid-cols-3">
+				<div class="space-y-2">
+					<Label for="service-quantity">Quantity</Label>
+					<Input
+						id="service-quantity"
+						type="number"
+						min="0.01"
+						step="0.01"
+						bind:value={quantity}
+						required
+					/>
 				</div>
+				<div class="space-y-2">
+					<Label for="service-unit">Unit</Label>
+					<select id="service-unit" class={selectClass} bind:value={unit}>
+						{#each SERVICE_UNITS as option (option)}
+							<option value={option}>{serviceUnitLabel(option)}</option>
+						{/each}
+					</select>
+				</div>
+				<div class="space-y-2">
+					<Label for="service-price">Unit price (€, net)</Label>
+					<Input id="service-price" type="number" step="0.01" bind:value={unitPrice} required />
+					<p class="text-xs text-muted-foreground">Negative for a deduction</p>
+				</div>
+			</div>
+			<label class="flex items-start gap-2 text-sm">
+				<input type="checkbox" bind:checked={perDay} class="mt-0.5" />
+				<span>
+					Per day
+					<span class="block text-xs text-muted-foreground"
+						>Multiplied by the document's day count ({dayCount}) as well, and follows it when it
+						changes.</span
+					>
+				</span>
+			</label>
+			{#if !fromCatalog && categoryId !== ''}
 				<label class="flex items-start gap-2 text-sm">
-					<input type="checkbox" bind:checked={perDay} class="mt-0.5" />
+					<input type="checkbox" bind:checked={saveToCatalog} class="mt-0.5" />
 					<span>
-						Per day
+						Save to price list
 						<span class="block text-xs text-muted-foreground"
-							>Multiplied by the document's day count ({dayCount}) as well, and follows it when it
-							changes.</span
+							>Keeps name, section, unit and price as a service to pick next time. The quantity and
+							note stay on this line only.</span
 						>
 					</span>
 				</label>
-				{#if !fromCatalog}
-					<label class="flex items-start gap-2 text-sm">
-						<input type="checkbox" bind:checked={saveToCatalog} class="mt-0.5" />
-						<span>
-							Save to price list
-							<span class="block text-xs text-muted-foreground"
-								>Keeps name, section, unit and price as a service to pick next time. The quantity
-								and note stay on this line only.</span
-							>
-						</span>
-					</label>
-				{/if}
-				{#if total !== null}
-					<p class="text-sm">Line total: <span class="font-semibold">{fmtEUR(total)}</span></p>
-				{/if}
-			</form>
-		{/if}
+			{/if}
+			{#if total !== null}
+				<p class="text-sm">Line total: <span class="font-semibold">{fmtEUR(total)}</span></p>
+			{/if}
+		</form>
 	{/snippet}
 
 	{#snippet footer()}

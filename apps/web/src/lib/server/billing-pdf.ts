@@ -1,5 +1,11 @@
 import { PDFDocument, degrees, rgb, type PDFFont, type PDFPage } from 'pdf-lib';
-import { groupBillingItems, lineSubtitle, type GroupableItem } from '../billing-lines.ts';
+import {
+	groupBillingItems,
+	lineSubtitle,
+	printedSections,
+	type BillingLayout,
+	type GroupableItem
+} from '../billing-lines.ts';
 import { appError } from '#lib/errors.js';
 import { billingDocumentIssues } from '../billing-document-check.svelte.ts';
 import type { SnapshotOrganization } from '../org-snapshot.ts';
@@ -36,6 +42,9 @@ type PdfDocumentData = {
 	vatRatePercent: unknown;
 	organization: PdfOrganization;
 	items: GroupableItem[];
+	/** How the lines print: collective lines and hidden 0,00 € lines (billing-lines.ts). */
+	lineGroups?: BillingLayout['lineGroups'];
+	hideZeroLines?: boolean;
 	/**
 	 * The issuer's rental terms: filled into the texts' {rentalTermsDate} and
 	 * {rentalTermsUrl}, and on an offer also attached in full, since the offer is
@@ -105,9 +114,15 @@ export async function generateBillingPdf(
 	const pdf = await PDFDocument.create();
 	const { regular, bold } = await embedInter(pdf);
 	const logo = await embedLogo(pdf, data.organization.logoPath);
-	const groups = groupBillingItems(
-		data.items,
-		(item) => item.categoryNameDe || item.categoryName || 'Ohne Kategorie'
+	const groups = printedSections(
+		groupBillingItems(
+			data.items,
+			(item) =>
+				item.categoryNameDe ||
+				item.categoryName ||
+				(item.kind === 'SERVICE' ? 'Sonstiges' : 'Ohne Kategorie'),
+			data
+		)
 	);
 	const title =
 		kind === 'invoice'
@@ -269,8 +284,9 @@ export async function generateBillingPdf(
 						.filter(Boolean)
 						.join('\n')
 				: lineSubtitle(line);
-			// A service's quantity carries its unit and needs the room.
-			const labelWidth = service ? 235 : 270;
+			// A service's quantity carries its unit and needs the room, as does
+			// a collective line's "1 pauschal".
+			const labelWidth = service || line.collective ? 235 : 270;
 			const labelLines = wrap(line.label, bold, 9, labelWidth);
 			const subtitleLines = subtitle ? wrap(subtitle, regular, 7.5, labelWidth) : [];
 			// Offsets below the row's first baseline.
@@ -292,7 +308,9 @@ export async function generateBillingPdf(
 			right(
 				service
 					? `${formatQuantity(line.quantity)} ${unitLabel(service.unit, line.quantity)}`
-					: String(line.quantity),
+					: line.collective
+						? `1 ${unitLabel('flat', 1)}`
+						: String(line.quantity),
 				400,
 				baseline,
 				8.5

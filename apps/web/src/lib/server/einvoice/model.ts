@@ -10,7 +10,13 @@
 // what a validator's message refers to.
 
 import { billingTotals } from '../../billing-totals.ts';
-import { groupBillingItems, lineSubtitle, type GroupableItem } from '../../billing-lines.ts';
+import {
+	groupBillingItems,
+	lineSubtitle,
+	printedSections,
+	type BillingLayout,
+	type GroupableItem
+} from '../../billing-lines.ts';
 import type { SnapshotOrganization } from '../../org-snapshot.ts';
 import { rentalTermsNote, type RentalTermsCitation } from '../../rental-terms-text.ts';
 
@@ -36,6 +42,8 @@ export type EInvoiceSource = {
 	isKleinunternehmerSnapshot: boolean;
 	organization: SnapshotOrganization;
 	items: GroupableItem[];
+	lineGroups?: BillingLayout['lineGroups'];
+	hideZeroLines?: boolean;
 	/** The issuer's rental terms, cited in a note as on the PDF. */
 	rentalTerms?: RentalTermsCitation | null;
 };
@@ -171,9 +179,15 @@ export function buildEInvoice(source: EInvoiceSource): EInvoice {
 
 	const totals = billingTotals(source);
 	const exempt = source.isKleinunternehmerSnapshot;
-	const groups = groupBillingItems(
-		source.items,
-		(item) => item.categoryNameDe || item.categoryName || 'Ohne Kategorie'
+	const groups = printedSections(
+		groupBillingItems(
+			source.items,
+			(item) =>
+				item.categoryNameDe ||
+				item.categoryName ||
+				(item.kind === 'SERVICE' ? 'Sonstiges' : 'Ohne Kategorie'),
+			source
+		)
 	);
 
 	let position = 0;
@@ -187,6 +201,9 @@ export function buildEInvoice(source: EInvoiceSource): EInvoice {
 			const service = line.service;
 			const subtitle = lineSubtitle(line);
 			if (service) {
+				// A deduction ("Abzug defektes Gerät −5,00 €"): EN 16931 forbids a
+				// negative price (BR-27), so the quantity carries the sign instead.
+				const sign = netAmount < 0 ? -1 : 1;
 				const quantity = Number(line.quantity) * (service.perDay ? source.dayCount : 1);
 				lines.push({
 					id: String(position),
@@ -195,9 +212,21 @@ export function buildEInvoice(source: EInvoiceSource): EInvoice {
 						[subtitle, service.perDay ? `je Tag, ${days(source.dayCount)}` : '']
 							.filter(Boolean)
 							.join('\n') || null,
-					quantity,
+					quantity: sign * quantity,
 					unitCode: SERVICE_UNIT_CODES[service.unit ?? ''] ?? 'C62',
-					...priced(quantity, netAmount),
+					...priced(quantity, sign * netAmount),
+					netAmount
+				});
+			} else if (line.collective) {
+				// A collective line ("Kabel & Strom, pauschal") is one flat item, as
+				// on the PDF; what is in it goes into the description.
+				lines.push({
+					id: String(position),
+					name: line.label,
+					description: [`Miete für ${days(source.dayCount)}`, subtitle].filter(Boolean).join('\n'),
+					quantity: 1,
+					unitCode: 'LS',
+					...priced(1, netAmount),
 					netAmount
 				});
 			} else {

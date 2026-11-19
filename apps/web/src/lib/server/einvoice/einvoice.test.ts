@@ -178,6 +178,59 @@ describe('buildEInvoice', () => {
 		);
 	});
 
+	it('writes a deduction as a negative quantity at a positive price', () => {
+		const base = invoice();
+		const deduction = item('6', {
+			kind: 'SERVICE',
+			categoryId: null,
+			categoryName: null,
+			categoryNameDe: null,
+			productId: null,
+			productLabel: null,
+			description: 'Abzug defektes Gerät',
+			netPurchasePrice: null,
+			ratePercent: null,
+			dailyRate: null,
+			quantity: 1,
+			unit: 'flat',
+			unitPrice: -5,
+			perDay: false,
+			lineTotal: -5
+		});
+		const result = buildEInvoice(invoice({ items: [...base.items, deduction] }));
+		const line = result.lines.at(-1)!;
+		expect(line).toMatchObject({
+			name: 'Abzug defektes Gerät',
+			quantity: -1,
+			netPrice: 5,
+			priceBaseQuantity: 1,
+			netAmount: -5
+		});
+		const cents = (value: number) => Math.round(value * 100);
+		expect(result.lines.reduce((sum, l) => sum + cents(l.netAmount), 0)).toBe(
+			cents(result.totals.lineTotal)
+		);
+	});
+
+	it('writes a collective line as one flat item, with what is in it, and hides 0,00 € lines', () => {
+		const base = invoice();
+		const empty = item('7', { productId: 'prod-case', productLabel: 'Case', lineTotal: 0 });
+		const result = buildEInvoice(
+			invoice({
+				items: [...base.items, empty],
+				hideZeroLines: true,
+				lineGroups: [{ id: 'g', label: 'Kabel', keys: ['product:prod-cable'] }]
+			})
+		);
+		expect(result.lines.map((line) => line.name)).not.toContain('Case');
+		expect(result.lines.find((line) => line.name === 'Kabel')).toMatchObject({
+			quantity: 1,
+			unitCode: 'LS',
+			netAmount: 5.54,
+			description: 'Miete für 3 Tage\nSchuko 5m'
+		});
+	});
+
 	it('marks a Kleinunternehmer invoice exempt', () => {
 		const result = buildEInvoice(
 			invoice({ isKleinunternehmerSnapshot: true, vatRatePercent: 0, discountType: null })
@@ -234,6 +287,44 @@ describe.skipIf(!MUSTANG_JAR)('ZUGFeRD PDF, validated by Mustang', () => {
 						perDay: false,
 						lineTotal: 100
 					})
+				]
+			}
+		],
+		[
+			'a deduction without a section',
+			{
+				items: [
+					...invoice().items,
+					item('9', {
+						kind: 'SERVICE',
+						categoryId: null,
+						categoryName: null,
+						categoryNameDe: null,
+						productId: null,
+						productLabel: null,
+						description: 'Abzug defektes Gerät',
+						netPurchasePrice: null,
+						ratePercent: null,
+						dailyRate: null,
+						quantity: 1,
+						unit: 'flat',
+						unitPrice: -5,
+						perDay: false,
+						lineTotal: -5
+					})
+				]
+			}
+		],
+		[
+			'a collective line, 0,00 € lines hidden',
+			{
+				items: [
+					...invoice().items,
+					item('8', { productId: 'prod-case', productLabel: 'Case', lineTotal: 0 })
+				],
+				hideZeroLines: true,
+				lineGroups: [
+					{ id: 'g', label: 'Kabel & Strom', keys: ['product:prod-cable', 'product:prod-par'] }
 				]
 			}
 		],

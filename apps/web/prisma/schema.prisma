@@ -1460,6 +1460,14 @@ model Offer {
   discountType  String? // "PERCENT" | "AMOUNT"
   discountValue Decimal? @db.Decimal(10, 2)
 
+  // How the lines print (billing-lines.ts). `lineGroups` is a list of
+  // { id, label, keys }: equipment lines whose product (or kit) is in `keys`
+  // print as one collective line ("Kabel & Strom, pauschal") with what is in it
+  // underneath. Kept by key, not by item, so it survives "update from
+  // production". Lines at 0,00 € are left off the PDF while `hideZeroLines`.
+  lineGroups    Json    @default("[]")
+  hideZeroLines Boolean @default(true)
+
   // Which of the production's booked assets were billed — "ALL",
   // "OWN_ORG_ONLY" (excludes assets loaned in from partner orgs), or "LENT":
   // a lender billing the production's org for its own units on that
@@ -1623,6 +1631,14 @@ model Invoice {
 
   discountType  String?
   discountValue Decimal? @db.Decimal(10, 2)
+
+  // How the lines print (billing-lines.ts). `lineGroups` is a list of
+  // { id, label, keys }: equipment lines whose product (or kit) is in `keys`
+  // print as one collective line ("Kabel & Strom, pauschal") with what is in it
+  // underneath. Kept by key, not by item, so it survives "update from
+  // production". Lines at 0,00 € are left off the PDF while `hideZeroLines`.
+  lineGroups    Json    @default("[]")
+  hideZeroLines Boolean @default(true)
 
   // Same purpose as Offer.assetScope — lets a pre-send invoice re-sync its
   // items from the production using the original billing scope.

@@ -50,7 +50,8 @@ export function serviceUnitShort(unit: string | null | undefined): string {
 	}
 }
 
-const toCents = (value: number) => Math.round(value * 100) / 100;
+// Rounded away from zero both ways, so a deduction is the mirror of its charge.
+const toCents = (value: number) => (Math.sign(value) * Math.round(Math.abs(value) * 100)) / 100;
 
 /** A service line's total, rounded the way `lineTotal` stores it. */
 export function serviceLineTotal(

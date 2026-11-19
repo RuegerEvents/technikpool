@@ -398,6 +398,10 @@ export function messageForErrorCode(code: AppErrorCode, params: ErrorParams = []
 			return `The PDF cannot be generated. Missing billing data: ${p0}`;
 		case 'service_line_not_found':
 			return 'That service line no longer exists.';
+		case 'line_group_not_found':
+			return 'That collective line no longer exists.';
+		case 'line_group_label_missing':
+			return 'A collective line needs a name.';
 		case 'service_category_not_found':
 			return 'That service category no longer exists.';
 		case 'service_not_found':

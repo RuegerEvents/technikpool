@@ -411,6 +411,8 @@
 	<BillingDocument
 		{loanCosts}
 		items={invoice.items}
+		lineGroups={invoice.lineGroups}
+		hideZeroLines={invoice.hideZeroLines}
 		emptyMessage="No items on this invoice yet."
 		editable={!invoice.sentAt}
 		serviceTarget={{

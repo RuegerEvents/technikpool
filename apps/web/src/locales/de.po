@@ -176,6 +176,7 @@ msgstr "Crew"
 #: src/lib/components/asset-form/asset-form.svelte
 #: src/lib/components/asset-form/asset-form.svelte
 #: src/lib/components/ui/address-input/address-input.svelte
+#: src/lib/components/ui/billing-document/line-group-modal.svelte
 #: src/lib/components/ui/billing-document/service-line-modal.svelte
 #: src/lib/components/ui/bulk-actions-bar.svelte
 #: src/lib/components/ui/calendar-feed/calendar-feed-button.svelte
@@ -289,6 +290,7 @@ msgstr "Hinzufügen"
 msgid "No crew members added yet."
 msgstr "Noch keine Crewmitglieder hinzugefügt."
 
+#: src/lib/components/ui/billing-document/line-group-modal.svelte
 #: src/lib/components/ui/billing-document/service-line-modal.svelte
 #: src/lib/components/ui/org-snapshot-banner/org-snapshot-banner.svelte
 #: src/routes/admin/connectors/+page.svelte
@@ -744,6 +746,7 @@ msgid "<0/> Create another after saving"
 msgstr "<0/> Nach dem Speichern weiteres erstellen"
 
 #: src/lib/components/production-list/tick-list.svelte
+#: src/lib/components/ui/billing-document/line-group-modal.svelte
 #: src/lib/components/ui/billing-document/service-line-modal.svelte
 #: src/lib/components/ui/connector-form-modal/connector-form-modal.svelte
 #: src/lib/components/ui/customer-form-modal/customer-form-modal.svelte
@@ -1364,6 +1367,7 @@ msgstr "Standort"
 #: src/lib/components/ui/billing-document/billing-document.svelte
 #: src/lib/components/ui/billing-document/billing-document.svelte
 #: src/lib/components/ui/billing-document/billing-document.svelte
+#: src/lib/components/ui/billing-document/line-group-modal.svelte
 #: src/lib/components/ui/billing-document/service-line-modal.svelte
 #: src/lib/components/ui/connector-form-modal/connector-form-modal.svelte
 #: src/lib/components/ui/inspection-dialog/interval-dialog.svelte
@@ -1892,6 +1896,7 @@ msgstr "Versuche einen anderen Suchbegriff oder Filter."
 msgid "{0} asset{1} selected"
 msgstr "{0} Gerät(e) ausgewählt"
 
+#: src/lib/components/ui/billing-document/billing-document.svelte
 #: src/lib/components/ui/bulk-actions-bar.svelte
 #: src/routes/products/dguv-quick.svelte
 msgid "Clear"
@@ -3824,6 +3829,7 @@ msgstr "Kunde bearbeiten"
 #~ msgid "Existing customer"
 #~ msgstr "Bestehender Kunde"
 
+#: src/lib/components/ui/billing-document/billing-document.svelte
 #: src/lib/components/ui/staleness-banner/staleness-banner.svelte
 msgid "Uncategorized"
 msgstr "Ohne Kategorie"
@@ -9276,7 +9282,6 @@ msgid "Move down"
 msgstr "Nach unten"
 
 #: src/lib/components/ui/billing-document/billing-document.svelte
-#: src/lib/components/ui/billing-document/service-line-modal.svelte
 #: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
 #: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
 msgid "Edit service"
@@ -9291,25 +9296,20 @@ msgstr "Leistung entfernen"
 msgid "× {0} d"
 msgstr "× {0} T"
 
-#: src/lib/components/ui/billing-document/billing-document.svelte
-#: src/lib/components/ui/billing-document/service-line-modal.svelte
 #: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
 msgid "Add service"
 msgstr "Leistung hinzufügen"
 
-#: src/lib/components/ui/billing-document/service-line-modal.svelte
 #: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
 msgid "Service updated"
 msgstr "Leistung aktualisiert"
 
-#: src/lib/components/ui/billing-document/service-line-modal.svelte
 #: src/routes/orgs/[id]/billing/rates/service-catalog.svelte
 msgid "Service added"
 msgstr "Leistung hinzugefügt"
 
-#: src/lib/components/ui/billing-document/service-line-modal.svelte
-msgid "A service goes into one of your organization's service categories, such as Personal or Transport. Set them up under <0>Rates & services</0> first."
-msgstr "Eine Leistung gehört in eine der Leistungskategorien deiner Organisation, etwa Personal oder Transport. Lege sie zuerst unter <0>Preise & Leistungen</0> an."
+#~ msgid "A service goes into one of your organization's service categories, such as Personal or Transport. Set them up under <0>Rates & services</0> first."
+#~ msgstr "Eine Leistung gehört in eine der Leistungskategorien deiner Organisation, etwa Personal oder Transport. Lege sie zuerst unter <0>Preise & Leistungen</0> an."
 
 #: src/lib/components/ui/billing-document/service-line-modal.svelte
 msgid "Custom"
@@ -10736,6 +10736,7 @@ msgstr "Handbuch"
 msgid "Datasheet"
 msgstr "Datenblatt"
 
+#: src/lib/components/ui/billing-document/billing-document.svelte
 #: src/lib/components/ui/product-documents/product-documents.svelte
 #: src/lib/components/ui/product-documents/product-documents.svelte
 #: src/lib/components/ui/product-documents/product-documents.svelte
@@ -14874,3 +14875,125 @@ msgstr "Dieser Code wurde schon verwendet. Starte das Verbinden auf dem Gerät n
 #: src/routes/assets/by-location/+page.svelte
 msgid "Open bundle"
 msgstr "Bundle öffnen"
+
+#: src/lib/billing-document-check.svelte.ts
+msgid "A total that is not negative"
+msgstr "Eine Summe, die nicht negativ ist"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+#: src/lib/components/ui/billing-document/service-line-modal.svelte
+msgid "Add line"
+msgstr "Position hinzufügen"
+
+#: src/lib/components/ui/billing-document/service-line-modal.svelte
+msgid "Line updated"
+msgstr "Position aktualisiert"
+
+#: src/lib/components/ui/billing-document/service-line-modal.svelte
+msgid "Line added"
+msgstr "Position hinzugefügt"
+
+#: src/lib/components/ui/billing-document/service-line-modal.svelte
+msgid "Edit line"
+msgstr "Position bearbeiten"
+
+#: src/lib/components/ui/billing-document/service-line-modal.svelte
+msgid "Without a section a line prints under \"Other\". Sections such as Personal or Transport, and a price list to pick from, are set up under <0>Rates & services</0>."
+msgstr "Ohne Abschnitt steht eine Position unter „Sonstiges“. Abschnitte wie Personal oder Transport und eine Preisliste zum Auswählen werden unter <0>Preise & Leistungen</0> eingerichtet."
+
+#: src/lib/components/ui/billing-document/service-line-modal.svelte
+msgid "Other (no section)"
+msgstr "Sonstiges (kein Abschnitt)"
+
+#: src/lib/components/ui/billing-document/service-line-modal.svelte
+msgid "Negative for a deduction"
+msgstr "Negativ für einen Abzug"
+
+#: src/lib/error-messages.svelte.ts
+msgid "That collective line no longer exists."
+msgstr "Diese Sammelposition gibt es nicht mehr."
+
+#: src/lib/error-messages.svelte.ts
+msgid "A collective line needs a name."
+msgstr "Eine Sammelposition braucht einen Namen."
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Collective line split"
+msgstr "Sammelposition aufgelöst"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Hide lines"
+msgstr "Positionen ausblenden"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Show lines"
+msgstr "Positionen anzeigen"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+#: src/lib/components/ui/billing-document/line-group-modal.svelte
+msgid "Rename collective line"
+msgstr "Sammelposition umbenennen"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Split into its lines"
+msgstr "In Einzelpositionen auflösen"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "# line"
+msgid_plural "# lines"
+msgstr[0] "# Position"
+msgstr[1] "# Positionen"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "1 flat"
+msgstr "1 pauschal"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Combine # line…"
+msgid_plural "Combine # lines…"
+msgstr[0] "# Position zusammenfassen…"
+msgstr[1] "# Positionen zusammenfassen…"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Leave 0,00 € lines off the PDF"
+msgstr "Positionen mit 0,00 € nicht ins PDF"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Select for a collective line"
+msgstr "Für eine Sammelposition auswählen"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Not printed: 0,00 €"
+msgstr "Nicht gedruckt: 0,00 €"
+
+#: src/lib/components/ui/billing-document/billing-document.svelte
+msgid "Take out of the collective line"
+msgstr "Aus der Sammelposition nehmen"
+
+#: src/lib/components/ui/billing-document/line-group-modal.svelte
+msgid "Collective line renamed"
+msgstr "Sammelposition umbenannt"
+
+#: src/lib/components/ui/billing-document/line-group-modal.svelte
+msgid "Lines combined"
+msgstr "Positionen zusammengefasst"
+
+#: src/lib/components/ui/billing-document/line-group-modal.svelte
+msgid "Combine lines"
+msgstr "Positionen zusammenfassen"
+
+#: src/lib/components/ui/billing-document/line-group-modal.svelte
+msgid "A new collective line"
+msgstr "Eine neue Sammelposition"
+
+#: src/lib/components/ui/billing-document/line-group-modal.svelte
+msgid "Combine into"
+msgstr "Zusammenfassen in"
+
+#: src/lib/components/ui/billing-document/line-group-modal.svelte
+msgid "The PDF and the e-invoice show one line with the sum, and what is in it in small print underneath. Further units of these products join it when the document is updated from the production."
+msgstr "PDF und E-Rechnung zeigen eine Position mit der Summe, den Inhalt klein darunter. Weitere Einheiten dieser Produkte kommen beim Aktualisieren aus der Produktion automatisch dazu."
+
+#: src/lib/components/ui/billing-document/line-group-modal.svelte
+msgid "Cables and power distribution, for example"
+msgstr "z. B. Kabel & Stromverteilung"

@@ -29,6 +29,7 @@ export type BillingDocumentCheckInput = {
 		categoryName: string | null;
 		categoryNameDe?: string | null;
 		lineTotal: unknown;
+		kind?: string;
 	}[];
 };
 
@@ -96,10 +97,18 @@ export function billingDocumentIssues(
 		const line = index + 1;
 		if (!item.description.trim())
 			issues.push({ area: 'lines', label: `Description for line ${line}` });
-		if (!item.categoryName && !item.categoryNameDe)
+		// A service line may go without a section: it prints under "Sonstiges".
+		if (item.kind !== 'SERVICE' && !item.categoryName && !item.categoryNameDe)
 			issues.push({ area: 'lines', label: `Category for line ${line}` });
 		if (!Number.isFinite(Number(item.lineTotal)))
 			issues.push({ area: 'lines', label: `Valid total for line ${line}` });
 	});
+	// A deduction may take a line below zero, never the document: an invoice
+	// that pays the customer is a credit note, which the app does not issue.
+	const sum = data.items.reduce(
+		(total, item) => total + Math.round(Number(item.lineTotal) * 100),
+		0
+	);
+	if (sum < 0) issues.push({ area: 'lines', label: 'A total that is not negative' });
 	return issues;
 }

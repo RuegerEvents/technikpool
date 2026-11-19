@@ -497,6 +497,8 @@
 	<BillingDocument
 		{loanCosts}
 		items={offer.items}
+		lineGroups={offer.lineGroups}
+		hideZeroLines={offer.hideZeroLines}
 		emptyMessage="No items on this offer yet."
 		editable={!offer.finalizedAt}
 		serviceTarget={{ kind: 'offer', documentId: offerId, organizationId: offer.organizationId }}

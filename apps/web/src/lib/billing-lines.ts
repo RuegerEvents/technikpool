@@ -52,6 +52,19 @@ export type LineGroup<T extends GroupableItem> = {
 	dailyRate: number;
 	lineTotal: number;
 	items: T[];
+	/**
+	 * The product or kit an equipment line stands for (`product:…`,
+	 * `bundle:…`): what a collective line is kept by. Null on a service line
+	 * and on rows too old to have a product snapshot.
+	 */
+	groupKey: string | null;
+	/** A 0,00 € line the document leaves off its printout (`hideZeroLines`). */
+	hidden: boolean;
+	/**
+	 * Set on a collective line ("Kabel & Strom, pauschal"): the lines folded
+	 * into it, and what they read as underneath ("19× DMX 2 m, 8× …").
+	 */
+	collective: { id: string; members: LineGroup<T>[]; contents: string } | null;
 	/** Set on a service line, which is priced by unit rather than by rate. */
 	service: {
 		unit: string | null;
@@ -77,6 +90,39 @@ export type CategoryGroup<T extends GroupableItem> = {
 // same product, same purchase price, same rate. A unit priced differently keeps
 // its own line rather than disappearing into an average.
 // A service line is never merged: two "Techniker" lines were typed in as two.
+/**
+ * A document's collective lines, as stored in its `lineGroups` column: each
+ * one folds every equipment line whose `groupKey` is in `keys`. By key rather
+ * than by item, so a group survives "update from production" and picks up a
+ * further unit of a product already in it.
+ */
+export type BillingLineGroup = { id: string; label: string; keys: string[] };
+
+/** The stored JSON, read leniently: anything malformed is dropped, never thrown. */
+export function parseLineGroups(value: unknown): BillingLineGroup[] {
+	if (!Array.isArray(value)) return [];
+	return value.flatMap((entry) => {
+		if (!entry || typeof entry !== 'object') return [];
+		const { id, label, keys } = entry as Record<string, unknown>;
+		if (typeof id !== 'string' || typeof label !== 'string' || !Array.isArray(keys)) return [];
+		return [{ id, label, keys: keys.filter((key): key is string => typeof key === 'string') }];
+	});
+}
+
+export type BillingLayout = {
+	lineGroups?: unknown;
+	hideZeroLines?: boolean;
+};
+
+function groupKeyOf(item: GroupableItem): string | null {
+	if (isServiceItem(item)) return null;
+	if (item.productId) return `product:${item.productId}`;
+	if (item.bundleId) return `bundle:${item.bundleId}`;
+	return null;
+}
+
+const centsOf = (value: number) => Math.round(value * 100);
+
 function lineKey(item: GroupableItem): string {
 	if (isServiceItem(item)) return `service:${item.id}`;
 	const identity = item.productId ?? (item.bundleId ? `bundle:${item.bundleId}` : item.description);
@@ -86,7 +132,8 @@ function lineKey(item: GroupableItem): string {
 export function groupBillingItems<T extends GroupableItem>(
 	items: T[],
 	categoryLabel: (item: T) => string = (item) =>
-		localizedName(item.categoryName, item.categoryNameDe) || 'Uncategorized'
+		localizedName(item.categoryName, item.categoryNameDe) || 'Uncategorized',
+	layout: BillingLayout = {}
 ): CategoryGroup<T>[] {
 	const categories = new Map<string, CategoryGroup<T>>();
 	const lines = new Map<string, LineGroup<T>>();
@@ -105,7 +152,10 @@ export function groupBillingItems<T extends GroupableItem>(
 				lines: [],
 				subtotal: 0,
 				isService: service,
-				sortOrder: item.categorySortOrder ?? 0
+				// A service line typed in without a section ("Sonstiges": a deduction
+				// for a broken unit, a one-off charge) prints after every section.
+				sortOrder:
+					service && !item.categoryId ? Number.MAX_SAFE_INTEGER : (item.categorySortOrder ?? 0)
 			};
 			categories.set(catKey, category);
 		}
@@ -126,6 +176,9 @@ export function groupBillingItems<T extends GroupableItem>(
 				dailyRate: Number(item.dailyRate),
 				lineTotal: 0,
 				items: [],
+				groupKey: groupKeyOf(item),
+				hidden: false,
+				collective: null,
 				service: service
 					? {
 							unit: item.unit ?? null,
@@ -147,7 +200,7 @@ export function groupBillingItems<T extends GroupableItem>(
 	// Equipment reads alphabetically; services in the order they were arranged —
 	// sections by the catalog's order, lines by hand. Array sort is stable, so
 	// lines sharing a position stay in the order they were added.
-	return [...categories.values()]
+	const sections = [...categories.values()]
 		.map((category) => ({
 			...category,
 			lines: category.isService
@@ -167,6 +220,80 @@ export function groupBillingItems<T extends GroupableItem>(
 				naturalCompare(a.name, b.name) ||
 				naturalCompare(a.key, b.key)
 		);
+	return applyLayout(sections, layout);
+}
+
+/**
+ * Hides the 0,00 € lines and folds the collective ones. A collective line
+ * takes the place of its first member, in that member's section, and each
+ * section's subtotal is what it then shows; a section left with no lines goes.
+ */
+function applyLayout<T extends GroupableItem>(
+	sections: CategoryGroup<T>[],
+	layout: BillingLayout
+): CategoryGroup<T>[] {
+	const groups = parseLineGroups(layout.lineGroups);
+	if (layout.hideZeroLines)
+		for (const section of sections)
+			for (const line of section.lines)
+				if (!line.service && centsOf(line.lineTotal) === 0) line.hidden = true;
+	if (groups.length === 0) return sections;
+
+	const claimed = new Set<string>();
+	for (const group of groups) {
+		const keys = new Set(group.keys.filter((key) => !claimed.has(key)));
+		for (const key of keys) claimed.add(key);
+		const members = sections.flatMap((section) =>
+			section.lines.filter((line) => line.groupKey !== null && keys.has(line.groupKey))
+		);
+		if (members.length === 0) continue;
+		const host = sections.find((section) => section.lines.includes(members[0]))!;
+		const at = host.lines.indexOf(members[0]);
+		const lineTotal = members.reduce((sum, line) => sum + centsOf(line.lineTotal), 0) / 100;
+		const collective: LineGroup<T> = {
+			key: `group:${group.id}`,
+			label: group.label,
+			quantity: 1,
+			netPurchasePrice: 0,
+			ratePercent: 0,
+			dailyRate: 0,
+			lineTotal,
+			items: members.flatMap((line) => line.items),
+			groupKey: null,
+			hidden: !!layout.hideZeroLines && centsOf(lineTotal) === 0,
+			collective: {
+				id: group.id,
+				members,
+				contents: members
+					.filter((line) => !line.hidden)
+					.map((line) => {
+						const label = line.label.split('\n')[0];
+						return line.quantity > 1 ? `${line.quantity}× ${label}` : label;
+					})
+					.join(', ')
+			},
+			service: null
+		};
+		const folded = new Set(members);
+		for (const section of sections)
+			section.lines = section.lines.filter((line) => !folded.has(line));
+		host.lines.splice(at, 0, collective);
+	}
+	return sections
+		.filter((section) => section.lines.length > 0)
+		.map((section) => ({
+			...section,
+			subtotal: section.lines.reduce((sum, line) => sum + centsOf(line.lineTotal), 0) / 100
+		}));
+}
+
+/** What goes on paper and into the e-invoice XML: no hidden line, no empty section. */
+export function printedSections<T extends GroupableItem>(
+	sections: CategoryGroup<T>[]
+): CategoryGroup<T>[] {
+	return sections
+		.map((section) => ({ ...section, lines: section.lines.filter((line) => !line.hidden) }))
+		.filter((section) => section.lines.length > 0);
 }
 
 /** The tags behind a collapsed line, for the views that show what's in it. */
@@ -180,6 +307,7 @@ export function lineUnitLabels<T extends GroupableItem>(line: LineGroup<T>): str
  */
 export function lineSubtitle<T extends GroupableItem>(line: LineGroup<T>): string {
 	if (line.service) return line.service.note?.trim() ?? '';
+	if (line.collective) return line.collective.contents;
 	return [
 		...new Set(
 			line.items
