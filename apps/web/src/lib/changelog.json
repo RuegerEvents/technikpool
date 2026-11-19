@@ -1,5 +1,19 @@
 [
 	{
+		"version": "0.41.0",
+		"date": "2026-11-19",
+		"en": [
+			"Offers and invoices can combine lines into one collective line: tick the lines, choose \"Combine\", give it a name. The PDF and the e-invoice show one line with the sum and what is in it in small print. Further units of the same products join it when the document is updated from the production.",
+			"Lines of your own, with or without a section, and with a negative price for a deduction, for example \"Broken unit −5,00 €\".",
+			"Lines at 0,00 € are left off the PDF. A switch under the lines brings them back."
+		],
+		"de": [
+			"Angebote und Rechnungen können Positionen zu einer Sammelposition zusammenfassen: Positionen anhaken, „Zusammenfassen“, Namen vergeben. PDF und E-Rechnung zeigen eine Zeile mit der Summe, den Inhalt klein darunter. Weitere Einheiten derselben Produkte kommen beim Aktualisieren aus der Produktion automatisch dazu.",
+			"Eigene Positionen, mit oder ohne Abschnitt, auch mit negativem Preis für einen Abzug, zum Beispiel „Defektes Gerät −5,00 €“.",
+			"Positionen mit 0,00 € stehen nicht mehr im PDF. Ein Schalter unter den Positionen holt sie zurück."
+		]
+	},
+	{
 		"version": "0.40.1",
 		"date": "2026-11-18",
 		"en": [
